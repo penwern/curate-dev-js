@@ -3,6 +3,26 @@ import { repeat } from "lit/directives/repeat.js";
 import { when } from "lit/directives/when.js";
 import Chart from "chart.js/auto";
 
+// Import all the SVG icons from your local file
+import {
+  tuneIcon,
+  dbImportIcon,
+  historyIcon,
+  chartLineIcon,
+  helpCircleIcon,
+  deleteIcon,
+  plusIcon,
+  powerPlugIcon,
+  restartIcon,
+  saveIcon,
+  textboxIcon,
+  searchIcon,
+  playIcon,
+  checkCircleIcon,
+  alertCircleIcon,
+  chevronRightIcon,
+} from "./icons.js";
+
 // All necessary Material Web Components
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
@@ -208,14 +228,19 @@ class CalmHarvestInterface extends LitElement {
 
   static get styles() {
     return css`
-      /* Import the platform's specific MDI font stylesheet. */
-      @import url("https://www.curate.penwern.co.uk/plug/gui.ajax/res/dist/pydio.material.min.css?v=965e74ba5b13cbcfe2719abdda6b6a1a");
+      /* A simple rule to make icons in buttons align nicely. */
+      md-filled-button span,
+      md-outlined-button span,
+      md-text-button span,
+      md-filled-tonal-button span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-      /* Basic style for MDI icons to inherit color and size correctly. */
-      .mdi {
-        font-size: inherit;
-        color: inherit;
-        line-height: 1; /* Prevents layout shifts */
+      /* A simple rule to vertically align icons inside tabs. */
+      md-primary-tab svg {
+        margin-right: 8px;
       }
 
       :host {
@@ -407,19 +432,10 @@ class CalmHarvestInterface extends LitElement {
             @change=${this.handleTabChange}
             .activeTabIndex=${this.activeTab}
           >
-            <md-primary-tab>
-              <span class="mdi mdi-tune" slot="icon"></span>Configuration
-            </md-primary-tab>
-            <md-primary-tab>
-              <span class="mdi mdi-database-import" slot="icon"></span>Manual
-              Harvest
-            </md-primary-tab>
-            <md-primary-tab>
-              <span class="mdi mdi-history" slot="icon"></span>History
-            </md-primary-tab>
-            <md-primary-tab>
-              <span class="mdi mdi-chart-line" slot="icon"></span>Analytics
-            </md-primary-tab>
+            <md-primary-tab>${tuneIcon} Configuration</md-primary-tab>
+            <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
+            <md-primary-tab>${historyIcon} History</md-primary-tab>
+            <md-primary-tab>${chartLineIcon} Analytics</md-primary-tab>
           </md-tabs>
           <div class="tab-content">
             ${when(this.activeTab === 0, () => this.renderConfiguration())}
@@ -437,9 +453,9 @@ class CalmHarvestInterface extends LitElement {
         <div slot="headline">Success</div>
         <div slot="content">${this.successDialogMessage}</div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showSuccessDialog = false)}>
-            Close
-          </md-text-button>
+          <md-text-button @click=${() => (this.showSuccessDialog = false)}
+            >Close</md-text-button
+          >
         </div>
       </md-dialog>
 
@@ -465,9 +481,9 @@ class CalmHarvestInterface extends LitElement {
           </dl>
         </div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showVariablesDialog = false)}>
-            Got it
-          </md-text-button>
+          <md-text-button @click=${() => (this.showVariablesDialog = false)}
+            >Got it</md-text-button
+          >
         </div>
       </md-dialog>
     `;
@@ -482,7 +498,7 @@ class CalmHarvestInterface extends LitElement {
             @click=${() => (this.showVariablesDialog = true)}
             title="View available variables"
           >
-            <span class="mdi mdi-help-circle-outline"></span>
+            ${helpCircleIcon}
           </md-icon-button>
         </h3>
         <p>
@@ -493,59 +509,54 @@ class CalmHarvestInterface extends LitElement {
           ${repeat(
             this.queryFilters,
             (f, i) => i,
-            (filter, index) => html`
-              <div class="filter-row">
-                <md-outlined-select
-                  label="Field"
-                  .value=${filter.field}
-                  @change=${(e) => this.updateFilter(e, index, "field")}
+            (filter, index) => html` <div class="filter-row">
+              <md-outlined-select
+                label="Field"
+                .value=${filter.field}
+                @change=${(e) => this.updateFilter(e, index, "field")}
+              >
+                <md-select-option value="modified_date" selected
+                  ><div slot="headline">Modified Date</div></md-select-option
                 >
-                  <md-select-option value="modified_date" selected>
-                    <div slot="headline">Modified Date</div>
-                  </md-select-option>
-                  <md-select-option value="created_date">
-                    <div slot="headline">Created Date</div>
-                  </md-select-option>
-                  <md-select-option value="title">
-                    <div slot="headline">Title</div>
-                  </md-select-option>
-                </md-outlined-select>
-                <md-outlined-select
-                  label="Condition"
-                  .value=${filter.condition}
-                  @change=${(e) => this.updateFilter(e, index, "condition")}
+                <md-select-option value="created_date"
+                  ><div slot="headline">Created Date</div></md-select-option
                 >
-                  <md-select-option value="since" selected>
-                    <div slot="headline">Is After</div>
-                  </md-select-option>
-                  <md-select-option value="contains">
-                    <div slot="headline">Contains</div>
-                  </md-select-option>
-                </md-outlined-select>
-                <md-outlined-text-field
-                  label="Value"
-                  .value=${filter.value}
-                  @input=${(e) => this.updateFilter(e, index, "value")}
-                ></md-outlined-text-field>
-                <md-icon-button
-                  @click=${() => this.removeFilter(index)}
-                  title="Remove filter"
+                <md-select-option value="title"
+                  ><div slot="headline">Title</div></md-select-option
                 >
-                  <span class="mdi mdi-delete"></span>
-                </md-icon-button>
-              </div>
-            `
+              </md-outlined-select>
+              <md-outlined-select
+                label="Condition"
+                .value=${filter.condition}
+                @change=${(e) => this.updateFilter(e, index, "condition")}
+              >
+                <md-select-option value="since" selected
+                  ><div slot="headline">Is After</div></md-select-option
+                >
+                <md-select-option value="contains"
+                  ><div slot="headline">Contains</div></md-select-option
+                >
+              </md-outlined-select>
+              <md-outlined-text-field
+                label="Value"
+                .value=${filter.value}
+                @input=${(e) => this.updateFilter(e, index, "value")}
+              ></md-outlined-text-field>
+              <md-icon-button
+                @click=${() => this.removeFilter(index)}
+                title="Remove filter"
+              >
+                ${deleteIcon}
+              </md-icon-button>
+            </div>`
           )}
           <md-text-button @click=${this.addFilter}>
-            <span class="mdi mdi-plus" slot="icon"></span> Add Criteria
+            <span>${plusIcon} Add Criteria</span>
           </md-text-button>
         </div>
       </div>
       <div class="form-section">
-        <h3>
-          <span class="mdi mdi-power-plug-outline"></span>Automated Harvest
-          Status
-        </h3>
+        <h3><span>${powerPlugIcon}</span>Automated Harvest Status</h3>
         <div
           style="display: flex; align-items: center; gap: 12px; padding: 8px 0;"
         >
@@ -553,19 +564,18 @@ class CalmHarvestInterface extends LitElement {
             ?selected=${this.isEnabled}
             @change=${(e) => (this.isEnabled = e.target.selected)}
           ></md-switch>
-          <span>
-            Automated harvesting is currently
-            <strong>${this.isEnabled ? "enabled" : "disabled"}</strong>.
-          </span>
+          <span
+            >Automated harvesting is currently
+            <strong>${this.isEnabled ? "enabled" : "disabled"}</strong>.</span
+          >
         </div>
       </div>
       <div class="button-group">
         <md-outlined-button @click=${this.resetForm}>
-          <span class="mdi mdi-restart" slot="icon"></span>Reset
+          <span>${restartIcon} Reset</span>
         </md-outlined-button>
         <md-filled-button @click=${this.saveConfiguration}>
-          <span class="mdi mdi-content-save" slot="icon"></span>Save
-          Configuration
+          <span>${saveIcon} Save Configuration</span>
         </md-filled-button>
       </div>
     `;
@@ -578,14 +588,13 @@ class CalmHarvestInterface extends LitElement {
           @click=${() => (this.manualHarvestMode = "ids")}
           ?disabled=${this.manualHarvestMode === "ids"}
         >
-          <span class="mdi mdi-form-textbox" slot="icon"></span> Enter IDs
-          Directly
+          <span>${textboxIcon} Enter IDs Directly</span>
         </md-filled-tonal-button>
         <md-filled-tonal-button
           @click=${() => (this.manualHarvestMode = "search")}
           ?disabled=${this.manualHarvestMode === "search"}
         >
-          <span class="mdi mdi-magnify" slot="icon"></span> Search & Select
+          <span>${searchIcon} Search & Select</span>
         </md-filled-tonal-button>
       </div>
       ${when(
@@ -599,7 +608,7 @@ class CalmHarvestInterface extends LitElement {
   renderManualHarvestByIds() {
     return html`
       <div class="form-section">
-        <h3><span class="mdi mdi-form-textbox"></span>Harvest by Identifier</h3>
+        <h3><span>${textboxIcon}</span>Harvest by Identifier</h3>
         <p>
           Fetch specific records by pasting their unique CALM identifiers below,
           one per line.
@@ -618,8 +627,10 @@ class CalmHarvestInterface extends LitElement {
           @click=${this.runHarvestForEnteredIds}
           ?disabled=${!this.manualHarvestIds.trim() || this.isManualHarvesting}
         >
-          <span class="mdi mdi-play" slot="icon"></span>
-          ${this.isManualHarvesting ? "Harvesting..." : "Start Harvest"}
+          <span
+            >${playIcon}
+            ${this.isManualHarvesting ? "Harvesting..." : "Start Harvest"}</span
+          >
         </md-filled-button>
       </div>
     `;
@@ -629,7 +640,7 @@ class CalmHarvestInterface extends LitElement {
     const selectedCount = this.selectedManualRecords.length;
     return html`
       <div class="form-section">
-        <h3><span class="mdi mdi-magnify"></span>Find and Select Records</h3>
+        <h3><span>${searchIcon}</span>Find and Select Records</h3>
         <p>
           Search for records using a keyword and then select the ones you wish
           to harvest.
@@ -645,8 +656,10 @@ class CalmHarvestInterface extends LitElement {
             @click=${this.runManualSearch}
             ?disabled=${!this.manualSearchTerm.trim() || this.isManualSearching}
           >
-            <span class="mdi mdi-magnify" slot="icon"></span>
-            ${this.isManualSearching ? "Searching..." : "Search"}
+            <span
+              >${searchIcon}
+              ${this.isManualSearching ? "Searching..." : "Search"}</span
+            >
           </md-filled-button>
         </div>
       </div>
@@ -656,48 +669,46 @@ class CalmHarvestInterface extends LitElement {
       )}
       ${when(
         this.manualSearchResults.length > 0 && !this.isManualSearching,
-        () => html`
-          <div class="search-results-container">
-            <h4>Search Results</h4>
-            <div class="search-results-list">
-              <md-list>
-                ${repeat(
-                  this.manualSearchResults,
-                  (r) => r.id,
-                  (record, index) => html`
-                    <md-list-item
-                      class="search-result-item"
-                      type="button"
-                      @click=${() => this.toggleRecordSelection(index)}
-                    >
-                      <md-checkbox
-                        slot="start"
-                        ?checked=${record.selected}
-                      ></md-checkbox>
-                      <div slot="headline">${record.title}</div>
-                      <div slot="supporting-text">
-                        ID: ${record.id} | Modified: ${record.modified}
-                      </div>
-                    </md-list-item>
-                  `
-                )}
-              </md-list>
-            </div>
-            <div class="button-group">
-              <md-filled-button
-                @click=${this.runHarvestForSelectedRecords}
-                ?disabled=${selectedCount === 0 || this.isManualHarvesting}
-              >
-                <span class="mdi mdi-play" slot="icon"></span>
+        () => html` <div class="search-results-container">
+          <h4>Search Results</h4>
+          <div class="search-results-list">
+            <md-list>
+              ${repeat(
+                this.manualSearchResults,
+                (r) => r.id,
+                (record, index) => html` <md-list-item
+                  class="search-result-item"
+                  type="button"
+                  @click=${() => this.toggleRecordSelection(index)}
+                >
+                  <md-checkbox
+                    slot="start"
+                    ?checked=${record.selected}
+                  ></md-checkbox>
+                  <div slot="headline">${record.title}</div>
+                  <div slot="supporting-text">
+                    ID: ${record.id} | Modified: ${record.modified}
+                  </div>
+                </md-list-item>`
+              )}
+            </md-list>
+          </div>
+          <div class="button-group">
+            <md-filled-button
+              @click=${this.runHarvestForSelectedRecords}
+              ?disabled=${selectedCount === 0 || this.isManualHarvesting}
+            >
+              <span
+                >${playIcon}
                 ${this.isManualHarvesting
                   ? "Harvesting..."
                   : `Harvest ${selectedCount} Selected Record${
                       selectedCount === 1 ? "" : "s"
-                    }`}
-              </md-filled-button>
-            </div>
+                    }`}</span
+              >
+            </md-filled-button>
           </div>
-        `
+        </div>`
       )}
     `;
   }
@@ -709,31 +720,23 @@ class CalmHarvestInterface extends LitElement {
         ${repeat(
           this.recentHarvests,
           (h) => h.id,
-          (harvest) => html`
-            <div class="harvest-item">
-              <div class="harvest-status ${harvest.status}">
-                <span
-                  class="mdi ${harvest.success
-                    ? "mdi-check-circle-outline"
-                    : "mdi-alert-circle-outline"}"
-                ></span>
-              </div>
-              <div class="harvest-details">
-                <h4>${harvest.date}</h4>
-                <div class="harvest-meta">
-                  <span>
-                    ${harvest.success
-                      ? `${harvest.records} records`
-                      : `Error: ${harvest.error}`}
-                  </span>
-                  <span>Duration: ${harvest.duration}</span>
-                </div>
-              </div>
-              <md-icon-button
-                ><span class="mdi mdi-chevron-right"></span
-              ></md-icon-button>
+          (harvest) => html` <div class="harvest-item">
+            <div class="harvest-status ${harvest.status}">
+              ${harvest.success ? checkCircleIcon : alertCircleIcon}
             </div>
-          `
+            <div class="harvest-details">
+              <h4>${harvest.date}</h4>
+              <div class="harvest-meta">
+                <span
+                  >${harvest.success
+                    ? `${harvest.records} records`
+                    : `Error: ${harvest.error}`}</span
+                >
+                <span>Duration: ${harvest.duration}</span>
+              </div>
+            </div>
+            <md-icon-button>${chevronRightIcon}</md-icon-button>
+          </div>`
         )}
       </div>
     `;
@@ -746,93 +749,81 @@ class CalmHarvestInterface extends LitElement {
     `;
   }
 
+  // All other component logic...
   handleTabChange(e) {
     this.activeTab = e.target.activeTabIndex;
   }
-
   addFilter() {
     this.queryFilters = [
       ...this.queryFilters,
       { field: "title", condition: "contains", value: "" },
     ];
   }
-
   removeFilter(index) {
     this.queryFilters = this.queryFilters.filter((_, i) => i !== index);
   }
-
   updateFilter(e, index, property) {
     const newValue = e.target.value;
     this.queryFilters = this.queryFilters.map((filter, i) =>
       i === index ? { ...filter, [property]: newValue } : filter
     );
   }
-
   async runManualSearch() {
-    this.isManualSearching = true;
+    this.isManualSearching = !0;
     this.manualSearchResults = [];
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1e3));
     const searchTerm = this.manualSearchTerm.toLowerCase();
     this.manualSearchResults = DUMMY_CALM_RECORDS.filter(
       (record) =>
         record.title.toLowerCase().includes(searchTerm) ||
         record.id.toLowerCase().includes(searchTerm)
     );
-    this.isManualSearching = false;
+    this.isManualSearching = !1;
   }
-
   toggleRecordSelection(index) {
     this.manualSearchResults = this.manualSearchResults.map((r, i) =>
       i === index ? { ...r, selected: !r.selected } : r
     );
   }
-
   async runHarvest(ids, source) {
-    this.isManualHarvesting = true;
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    this.isManualHarvesting = !0;
+    await new Promise((resolve) => setTimeout(resolve, 2e3));
     const newHarvest = {
       id: Date.now(),
       date: new Date().toLocaleString("en-GB"),
       status: "completed",
       records: ids.length,
       duration: `${Math.floor(Math.random() * 30) + 5}s`,
-      success: true,
+      success: !0,
     };
     this.recentHarvests = [newHarvest, ...this.recentHarvests];
     this.successDialogMessage = `Successfully harvested ${ids.length} record(s) from your ${source}.`;
-    this.showSuccessDialog = true;
-    this.isManualHarvesting = false;
+    this.showSuccessDialog = !0;
+    this.isManualHarvesting = !1;
     this.activeTab = 2;
   }
-
   runHarvestForEnteredIds() {
     const ids = this.manualHarvestIds.split("\n").filter((id) => id.trim());
-    if (ids.length > 0) {
-      this.runHarvest(ids, "manual input");
-      this.manualHarvestIds = "";
-    }
+    ids.length > 0 &&
+      (this.runHarvest(ids, "manual input"), (this.manualHarvestIds = ""));
   }
-
   runHarvestForSelectedRecords() {
     const ids = this.selectedManualRecords.map((r) => r.id);
-    if (ids.length > 0) {
-      this.runHarvest(ids, "search selection");
-      this.manualSearchResults = [];
-      this.manualSearchTerm = "";
-    }
+    ids.length > 0 &&
+      (this.runHarvest(ids, "search selection"),
+      (this.manualSearchResults = []),
+      (this.manualSearchTerm = ""));
   }
-
   saveConfiguration() {
     this.successDialogMessage =
       "Your automated harvest configuration has been saved.";
-    this.showSuccessDialog = true;
+    this.showSuccessDialog = !0;
   }
-
   resetForm() {
     this.queryFilters = [
       { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
     ];
-    this.isEnabled = true;
+    this.isEnabled = !0;
   }
 }
 

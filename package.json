@@ -8,6 +8,7 @@
   "dependencies": {
     "@iconify/iconify": "^3.1.1",
     "@material/web": "^2.3.0",
+    "@mdi/js": "^7.4.47",
     "chart.js": "^3.7.0",
     "fs-extra": "^11.2.0",
     "he": "^1.2.0",
