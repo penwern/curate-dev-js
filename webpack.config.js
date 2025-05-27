@@ -96,20 +96,6 @@ module.exports = {
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin()],
-    splitChunks: {
-      chunks: "all", // Split all chunks (vendor, async, etc.)
-      maxSize: 200000, // Split chunks larger than 200KB
-      cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          name: "vendors",
-          chunks: "all",
-        },
-        default: {
-          minChunks: 2,
-          reuseExistingChunk: true,
-        },
-      },
-    },
+    // The splitChunks block is now gone
   },
 };
