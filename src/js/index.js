@@ -15,7 +15,6 @@ import "../js/web-components/atom-connector.js";
 import "../js/web-components/dip-slug-resolver.js";
 import "../js/web-components/contextual-help.js";
 import "../js/web-components/oai-harvest-updates.js";
-import "./web-components/calm-harvest-interface.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
 import "../js/external/ExternalScripts.js";
