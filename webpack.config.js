@@ -73,13 +73,9 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        include: [
-          path.resolve(__dirname, "src/js/core"),
-          path.resolve(__dirname, "src/js/external"),
-          path.resolve(__dirname, "src/js/workers"),
-          path.resolve(__dirname, "src/js/templates"),
-          path.resolve(__dirname, "src/js/web-components"),
-        ],
+        // We exclude all node_modules, except for 'lit' and '@material/web'
+        // because they use modern JS that needs to be transpiled by Babel.
+        exclude: /node_modules\/(?!(@material\/web|lit)\/).*/,
         use: "babel-loader",
       },
       {
