@@ -526,7 +526,7 @@ class CalmHarvestInterface extends LitElement {
         font-size: 14px;
       }
       .table-header md-checkbox {
-        margin-left: -10px;
+        margin-left: 0;
       }
       .table-row {
         cursor: pointer;
@@ -540,7 +540,7 @@ class CalmHarvestInterface extends LitElement {
         background-color: var(--md-sys-color-surface-container-hover);
       }
       .table-row md-checkbox {
-        margin-left: -10px;
+        margin-left: 0;
       }
       .record-title {
         font-weight: 500;

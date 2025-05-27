@@ -16,6 +16,7 @@ import {
   mdiCheckCircleOutline,
   mdiAlertCircleOutline,
   mdiChevronRight,
+  mdiChevronDown,
 } from "@mdi/js";
 
 // A helper to wrap the SVG path data in an <svg> tag
@@ -42,3 +43,4 @@ export const playIcon = icon(mdiPlay, "icon");
 export const checkCircleIcon = icon(mdiCheckCircleOutline);
 export const alertCircleIcon = icon(mdiAlertCircleOutline);
 export const chevronRightIcon = icon(mdiChevronRight);
+export const chevronDownIcon = icon(mdiChevronDown);
