@@ -131,6 +131,7 @@ class CalmHarvestInterface extends LitElement {
         id: 1,
         date: "2025-05-22 02:00",
         status: "completed",
+        source: "Automated",
         records: 1247,
         duration: "12m 34s",
         success: true,
@@ -139,6 +140,7 @@ class CalmHarvestInterface extends LitElement {
         id: 2,
         date: "2025-05-21 02:00",
         status: "completed",
+        source: "Automated",
         records: 1189,
         duration: "11m 48s",
         success: true,
@@ -147,13 +149,15 @@ class CalmHarvestInterface extends LitElement {
         id: 3,
         date: "2025-05-20 02:00",
         status: "failed",
+        source: "Automated",
         records: 0,
         duration: "2m 15s",
         success: false,
         error: "Connection timeout",
       },
     ];
-    this.chart = null;
+    // Manages all active chart instances.
+    this.charts = {};
   }
 
   get selectedManualRecords() {
@@ -162,73 +166,190 @@ class CalmHarvestInterface extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.chart) {
-      this.chart.destroy();
-    }
+    this.destroyCharts();
+  }
+
+  destroyCharts() {
+    Object.values(this.charts).forEach((chart) => {
+      if (chart) {
+        chart.destroy();
+      }
+    });
+    this.charts = {};
   }
 
   updated(changedProperties) {
-    if (changedProperties.has("activeTab") && this.activeTab === 3) {
-      this.initChart();
-    } else if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
+    if (changedProperties.has("activeTab")) {
+      // Destroy charts when leaving the analytics tab.
+      if (this.activeTab !== 3) {
+        this.destroyCharts();
+      } else {
+        // Initialise charts when entering the analytics tab.
+        this.initCharts();
+      }
     }
   }
 
-  initChart() {
+  initCharts() {
+    // Use requestAnimationFrame to ensure the canvas elements are rendered.
     requestAnimationFrame(() => {
-      const canvas = this.shadowRoot.querySelector("#analyticsChart");
-      if (!canvas || this.chart) return;
-      const ctx = canvas.getContext("2d");
-      const labels = this.recentHarvests
-        .map((h) => h.date.split(" ")[0])
-        .reverse();
-      const data = this.recentHarvests.map((h) => h.records).reverse();
-      this.chart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Records Harvested",
-              data,
-              fill: true,
-              borderColor: "var(--md-sys-color-primary)",
-              backgroundColor: "var(--md-sys-color-primary-container)",
-              tension: 0.4,
-            },
-          ],
+      this.initLineChart();
+      this.initBarChart();
+      this.initDoughnutChart();
+    });
+  }
+
+  initLineChart() {
+    const canvas = this.shadowRoot.querySelector("#analyticsChart");
+    if (!canvas || this.charts.line) return;
+    const ctx = canvas.getContext("2d");
+    const labels = this.recentHarvests
+      .map((h) => h.date.split(" ")[0])
+      .reverse();
+    const data = this.recentHarvests.map((h) => h.records).reverse();
+
+    this.charts.line = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Records Harvested",
+            data,
+            fill: true,
+            // Set explicit blue colors for the line and fill.
+            borderColor: "rgba(59, 130, 246, 1)",
+            backgroundColor: "rgba(59, 130, 246, 0.2)",
+            tension: 0.4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "var(--md-sys-color-on-surface-variant)" },
+            grid: { color: "var(--md-sys-color-outline-variant)" },
+          },
+          x: {
+            ticks: { color: "var(--md-sys-color-on-surface-variant)" },
+            grid: { display: false },
+          },
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { color: "var(--md-sys-color-on-surface)" },
-              grid: { color: "var(--md-sys-color-outline-variant)" },
-            },
-            x: {
-              ticks: { color: "var(--md-sys-color-on-surface)" },
-              grid: { color: "var(--md-sys-color-outline-variant)" },
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "var(--md-sys-color-on-surface)",
             },
           },
-          plugins: {
-            legend: {
-              labels: {
-                color: "var(--md-sys-color-on-surface)",
-              },
+        },
+      },
+    });
+  }
+
+  initBarChart() {
+    const canvas = this.shadowRoot.querySelector("#statusChart");
+    if (!canvas || this.charts.bar) return;
+    const ctx = canvas.getContext("2d");
+    const successCount = this.recentHarvests.filter((h) => h.success).length;
+    const failCount = this.recentHarvests.length - successCount;
+
+    this.charts.bar = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Completed", "Failed"],
+        datasets: [
+          {
+            label: "Harvest Status",
+            data: [successCount, failCount],
+            backgroundColor: [
+              "rgba(52, 211, 153, 0.5)",
+              "rgba(248, 113, 113, 0.5)",
+            ],
+            borderColor: ["rgba(52, 211, 153, 1)", "rgba(248, 113, 113, 1)"],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "var(--md-sys-color-on-surface-variant)",
+              stepSize: 1,
+            },
+            grid: { color: "var(--md-sys-color-outline-variant)" },
+          },
+          y: {
+            ticks: { color: "var(--md-sys-color-on-surface-variant)" },
+            grid: { display: false },
+          },
+        },
+      },
+    });
+  }
+
+  initDoughnutChart() {
+    const canvas = this.shadowRoot.querySelector("#sourceChart");
+    if (!canvas || this.charts.doughnut) return;
+    const ctx = canvas.getContext("2d");
+    const sourceCounts = this.recentHarvests.reduce((acc, h) => {
+      const sourceName = h.source || "Unknown";
+      acc[sourceName] = (acc[sourceName] || 0) + 1;
+      return acc;
+    }, {});
+
+    this.charts.doughnut = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(sourceCounts),
+        datasets: [
+          {
+            label: "Harvest Source",
+            data: Object.values(sourceCounts),
+            backgroundColor: [
+              "rgba(59, 130, 246, 0.7)",
+              "rgba(234, 179, 8, 0.7)",
+              "rgba(139, 92, 246, 0.7)",
+            ],
+            borderColor: "var(--md-sys-color-surface-2)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "var(--md-sys-color-on-surface)",
             },
           },
         },
-      });
+      },
     });
   }
 
   static get styles() {
     return css`
-      /* A simple rule to make icons in buttons align nicely. */
+      :host {
+        display: block;
+        color: var(--md-sys-color-on-background);
+        font-family: "Roboto", sans-serif;
+      }
+      /* Helpers to align icons in buttons and tabs */
       md-filled-button span,
       md-outlined-button span,
       md-text-button span,
@@ -237,55 +358,20 @@ class CalmHarvestInterface extends LitElement {
         align-items: center;
         gap: 8px;
       }
-
-      /* A simple rule to vertically align icons inside tabs. */
       md-primary-tab svg {
         margin-right: 8px;
       }
 
-      :host {
-        display: block;
-        background: var(--md-sys-color-background);
-        color: var(--md-sys-color-on-background);
-        min-height: 100vh;
-        font-family: "Roboto", sans-serif;
-      }
-      .header {
-        background: var(--md-sys-color-primary-container);
-        color: var(--md-sys-color-on-primary-container);
-        padding: 24px 24px 80px;
-        position: relative;
-        overflow: hidden;
-      }
-      .header-content {
-        position: relative;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .header h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-        font-weight: 300;
-      }
-      .header p {
-        margin: 0;
-        opacity: 0.9;
-        font-size: 16px;
-      }
-      .container {
-        max-width: 1200px;
-        margin: -60px auto 0;
-        padding: 0 24px 24px;
-        position: relative;
-      }
-      .card {
+      /* Main content wrapper, sets a min-width to avoid resizing */
+      .content-wrapper {
         background: var(--md-sys-color-surface-2);
         color: var(--md-sys-color-on-surface);
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         overflow: hidden;
-        margin-bottom: 24px;
+        min-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
+
       md-tabs {
         --md-primary-tab-container-color: var(--md-sys-color-surface-2);
       }
@@ -308,6 +394,7 @@ class CalmHarvestInterface extends LitElement {
       .form-section p {
         margin: 0 0 16px;
         color: var(--md-sys-color-on-surface-variant);
+        max-width: 65ch; /* Improve readability */
       }
       .harvest-list {
         display: flex;
@@ -394,12 +481,26 @@ class CalmHarvestInterface extends LitElement {
       .search-result-item md-checkbox {
         margin-right: 8px;
       }
+      /* New styles for the analytics tab */
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
       .chart-container {
         position: relative;
         height: 350px;
         background: var(--md-sys-color-surface-1);
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 16px;
+      }
+      .chart-container.full-width {
+        grid-column: 1 / -1;
+      }
+      .chart-title {
+        font-weight: 500;
+        margin-bottom: 12px;
+        color: var(--md-sys-color-on-surface-variant);
       }
       .variables-dialog-content {
         display: flex;
@@ -420,29 +521,21 @@ class CalmHarvestInterface extends LitElement {
 
   render() {
     return html`
-      <div class="header">
-        <div class="header-content">
-          <h1>Harvest Scheduler</h1>
-          <p>Configure and monitor your CALM to Curate harvest operations</p>
-        </div>
-      </div>
-      <div class="container">
-        <div class="card">
-          <md-tabs
-            @change=${this.handleTabChange}
-            .activeTabIndex=${this.activeTab}
-          >
-            <md-primary-tab>${tuneIcon} Configuration</md-primary-tab>
-            <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
-            <md-primary-tab>${historyIcon} History</md-primary-tab>
-            <md-primary-tab>${chartLineIcon} Analytics</md-primary-tab>
-          </md-tabs>
-          <div class="tab-content">
-            ${when(this.activeTab === 0, () => this.renderConfiguration())}
-            ${when(this.activeTab === 1, () => this.renderManualHarvest())}
-            ${when(this.activeTab === 2, () => this.renderHistory())}
-            ${when(this.activeTab === 3, () => this.renderAnalytics())}
-          </div>
+      <div class="content-wrapper">
+        <md-tabs
+          @change=${this.handleTabChange}
+          .activeTabIndex=${this.activeTab}
+        >
+          <md-primary-tab>${tuneIcon} Configuration</md-primary-tab>
+          <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
+          <md-primary-tab>${historyIcon} History</md-primary-tab>
+          <md-primary-tab>${chartLineIcon} Analytics</md-primary-tab>
+        </md-tabs>
+        <div class="tab-content">
+          ${when(this.activeTab === 0, () => this.renderConfiguration())}
+          ${when(this.activeTab === 1, () => this.renderManualHarvest())}
+          ${when(this.activeTab === 2, () => this.renderHistory())}
+          ${when(this.activeTab === 3, () => this.renderAnalytics())}
         </div>
       </div>
 
@@ -744,8 +837,20 @@ class CalmHarvestInterface extends LitElement {
 
   renderAnalytics() {
     return html`
-      <h3 style="margin: 0 0 16px; font-size: 18px;">Harvest Trends</h3>
-      <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
+      <div class="analytics-grid">
+        <div class="chart-container full-width">
+          <div class="chart-title">Harvest Trends</div>
+          <canvas id="analyticsChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Run Status</div>
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Harvest Source</div>
+          <canvas id="sourceChart"></canvas>
+        </div>
+      </div>
     `;
   }
 
@@ -795,6 +900,7 @@ class CalmHarvestInterface extends LitElement {
       records: ids.length,
       duration: `${Math.floor(Math.random() * 30) + 5}s`,
       success: !0,
+      source: source,
     };
     this.recentHarvests = [newHarvest, ...this.recentHarvests];
     this.successDialogMessage = `Successfully harvested ${ids.length} record(s) from your ${source}.`;
@@ -804,15 +910,18 @@ class CalmHarvestInterface extends LitElement {
   }
   runHarvestForEnteredIds() {
     const ids = this.manualHarvestIds.split("\n").filter((id) => id.trim());
-    ids.length > 0 &&
-      (this.runHarvest(ids, "manual input"), (this.manualHarvestIds = ""));
+    if (ids.length > 0) {
+      this.runHarvest(ids, "Manual Input");
+      this.manualHarvestIds = "";
+    }
   }
   runHarvestForSelectedRecords() {
     const ids = this.selectedManualRecords.map((r) => r.id);
-    ids.length > 0 &&
-      (this.runHarvest(ids, "search selection"),
-      (this.manualSearchResults = []),
-      (this.manualSearchTerm = ""));
+    if (ids.length > 0) {
+      this.runHarvest(ids, "Manual Search");
+      this.manualSearchResults = [];
+      this.manualSearchTerm = "";
+    }
   }
   saveConfiguration() {
     this.successDialogMessage =
