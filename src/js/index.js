@@ -1,5 +1,3 @@
-alert("--- CURATE BUNDLE IS EXECUTING ---");
-
 import "../js/core/CurateFunctions/CurateFunctions.js";
 import "../js/core/CustomPreservationConfigs.js";
 import "../js/core/fileInfoModifier.js";

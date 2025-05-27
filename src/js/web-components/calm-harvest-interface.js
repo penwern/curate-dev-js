@@ -26,7 +26,6 @@ import "@material/web/divider/divider.js";
 import "@material/web/fab/fab.js";
 import "@material/web/switch/switch.js";
 
-// A static, realistic pool of records to simulate searching in CALM.
 const DUMMY_CALM_RECORDS = [
   {
     id: "REC/001/A",
@@ -76,18 +75,15 @@ class CalmHarvestInterface extends LitElement {
   static get properties() {
     return {
       activeTab: { type: Number, state: true },
-      // Automated harvest state
       queryFilters: { type: Array, state: true },
       isEnabled: { type: Boolean, state: true },
       showVariablesDialog: { type: Boolean, state: true },
-      // Manual harvest state
-      manualHarvestMode: { type: String, state: true }, // 'ids' or 'search'
+      manualHarvestMode: { type: String, state: true },
       manualHarvestIds: { type: String, state: true },
       manualSearchTerm: { type: String, state: true },
       isManualSearching: { type: Boolean, state: true },
       manualSearchResults: { type: Array, state: true },
       isManualHarvesting: { type: Boolean, state: true },
-      // Shared state
       recentHarvests: { type: Array, state: true },
       showSuccessDialog: { type: Boolean, state: true },
       successDialogMessage: { type: String, state: true },
@@ -152,13 +148,11 @@ class CalmHarvestInterface extends LitElement {
   }
 
   updated(changedProperties) {
-    if (changedProperties.has("activeTab")) {
-      if (this.activeTab === 3) {
-        this.initChart();
-      } else if (this.chart) {
-        this.chart.destroy();
-        this.chart = null;
-      }
+    if (changedProperties.has("activeTab") && this.activeTab === 3) {
+      this.initChart();
+    } else if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
     }
   }
 
@@ -180,8 +174,8 @@ class CalmHarvestInterface extends LitElement {
               label: "Records Harvested",
               data,
               fill: true,
-              borderColor: "#1976d2",
-              backgroundColor: "rgba(25, 118, 210, 0.1)",
+              borderColor: "var(--md-sys-color-primary)",
+              backgroundColor: "var(--md-sys-color-primary-container)",
               tension: 0.4,
             },
           ],
@@ -190,6 +184,13 @@ class CalmHarvestInterface extends LitElement {
           responsive: true,
           maintainAspectRatio: false,
           scales: { y: { beginAtZero: true } },
+          plugins: {
+            legend: {
+              labels: {
+                color: "var(--md-sys-color-on-surface)",
+              },
+            },
+          },
         },
       });
     });
@@ -197,11 +198,18 @@ class CalmHarvestInterface extends LitElement {
 
   static get styles() {
     return css`
+      /*
+       * Import the 'Material Symbols Outlined' font, which is what your working
+       * example uses. This ensures the component has access to the icon font
+       * inside its Shadow DOM, making it self-contained.
+       */
+      @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined");
+
       :host {
         display: block;
-        background: #f5f5f5;
+        background: var(--md-sys-color-background);
+        color: var(--md-sys-color-on-background);
         min-height: 100vh;
-        color: rgba(0, 0, 0, 0.87);
       }
       .header {
         background: var(--md-sys-color-primary-container);
@@ -232,14 +240,15 @@ class CalmHarvestInterface extends LitElement {
         position: relative;
       }
       .card {
-        background: white;
-        border-radius: 16px;
+        background: var(--md-sys-color-surface-2);
+        color: var(--md-sys-color-on-surface);
+        border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         margin-bottom: 24px;
       }
       md-tabs {
-        --md-primary-tab-container-color: white;
+        --md-primary-tab-container-color: var(--md-sys-color-surface-2);
       }
       .tab-content {
         padding: 24px;
@@ -259,7 +268,7 @@ class CalmHarvestInterface extends LitElement {
       }
       .form-section p {
         margin: 0 0 16px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--md-sys-color-on-surface-variant);
       }
       .harvest-list {
         display: flex;
@@ -267,7 +276,7 @@ class CalmHarvestInterface extends LitElement {
         gap: 12px;
       }
       .harvest-item {
-        background: #f5f5f5;
+        background: var(--md-sys-color-surface-1);
         border-radius: 12px;
         padding: 16px;
         display: grid;
@@ -284,8 +293,8 @@ class CalmHarvestInterface extends LitElement {
         justify-content: center;
       }
       .harvest-status.completed {
-        background: #e8f5e9;
-        color: #2e7d32;
+        background: var(--md-sys-color-tertiary-container);
+        color: var(--md-sys-color-on-tertiary-container);
       }
       .harvest-status.failed {
         background: var(--md-sys-color-error-container);
@@ -299,7 +308,7 @@ class CalmHarvestInterface extends LitElement {
         display: flex;
         gap: 16px;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--md-sys-color-on-surface-variant);
       }
       .button-group {
         display: flex;
@@ -308,10 +317,10 @@ class CalmHarvestInterface extends LitElement {
         justify-content: flex-end;
       }
       md-dialog {
-        --md-dialog-container-color: white;
+        --md-dialog-container-color: var(--md-sys-color-surface-3);
       }
       .query-builder-group {
-        background: #f5f5f5;
+        background: var(--md-sys-color-surface-1);
         border-radius: 8px;
         padding: 16px;
         border-left: 3px solid var(--md-sys-color-primary);
@@ -330,13 +339,13 @@ class CalmHarvestInterface extends LitElement {
       }
       .search-results-container {
         margin-top: 24px;
-        border-top: 1px solid #eee;
+        border-top: 1px solid var(--md-sys-color-outline-variant);
         padding-top: 24px;
       }
       .search-results-list {
         max-height: 400px;
         overflow-y: auto;
-        border: 1px solid #ddd;
+        border: 1px solid var(--md-sys-color-outline);
         border-radius: 8px;
       }
       .search-result-item {
@@ -348,7 +357,7 @@ class CalmHarvestInterface extends LitElement {
       .chart-container {
         position: relative;
         height: 350px;
-        background: #fafafa;
+        background: var(--md-sys-color-surface-1);
         border-radius: 8px;
         padding: 16px;
       }
@@ -359,12 +368,12 @@ class CalmHarvestInterface extends LitElement {
       }
       .variables-dialog-content dt {
         font-weight: 500;
-        color: #1e88e5;
+        color: var(--md-sys-color-primary);
       }
       .variables-dialog-content dd {
         margin-left: 16px;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.7);
+        color: var(--md-sys-color-on-surface-variant);
       }
     `;
   }
@@ -383,19 +392,16 @@ class CalmHarvestInterface extends LitElement {
             @change=${this.handleTabChange}
             .activeTabIndex=${this.activeTab}
           >
-            <md-primary-tab
-              ><md-icon slot="icon">tune</md-icon>Configuration</md-primary-tab
-            >
-            <md-primary-tab
-              ><md-icon slot="icon">play_for_work</md-icon>Manual
-              Harvest</md-primary-tab
-            >
-            <md-primary-tab
-              ><md-icon slot="icon">history</md-icon>History</md-primary-tab
-            >
-            <md-primary-tab
-              ><md-icon slot="icon">insights</md-icon>Analytics</md-primary-tab
-            >
+            <md-primary-tab>
+              <md-icon>tune</md-icon>Configuration
+            </md-primary-tab>
+            <md-primary-tab>
+              <md-icon>play_for_work</md-icon>Manual Harvest
+            </md-primary-tab>
+            <md-primary-tab> <md-icon>history</md-icon>History </md-primary-tab>
+            <md-primary-tab>
+              <md-icon>insights</md-icon>Analytics
+            </md-primary-tab>
           </md-tabs>
           <div class="tab-content">
             ${when(this.activeTab === 0, () => this.renderConfiguration())}
@@ -413,9 +419,9 @@ class CalmHarvestInterface extends LitElement {
         <div slot="headline">Success</div>
         <div slot="content">${this.successDialogMessage}</div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showSuccessDialog = false)}
-            >Close</md-text-button
-          >
+          <md-text-button @click=${() => (this.showSuccessDialog = false)}>
+            Close
+          </md-text-button>
         </div>
       </md-dialog>
 
@@ -441,9 +447,9 @@ class CalmHarvestInterface extends LitElement {
           </dl>
         </div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showVariablesDialog = false)}
-            >Got it</md-text-button
-          >
+          <md-text-button @click=${() => (this.showVariablesDialog = false)}>
+            Got it
+          </md-text-button>
         </div>
       </md-dialog>
     `;
@@ -476,27 +482,27 @@ class CalmHarvestInterface extends LitElement {
                   .value=${filter.field}
                   @change=${(e) => this.updateFilter(e, index, "field")}
                 >
-                  <md-select-option value="modified_date" selected
-                    ><div slot="headline">Modified Date</div></md-select-option
-                  >
-                  <md-select-option value="created_date"
-                    ><div slot="headline">Created Date</div></md-select-option
-                  >
-                  <md-select-option value="title"
-                    ><div slot="headline">Title</div></md-select-option
-                  >
+                  <md-select-option value="modified_date" selected>
+                    <div slot="headline">Modified Date</div>
+                  </md-select-option>
+                  <md-select-option value="created_date">
+                    <div slot="headline">Created Date</div>
+                  </md-select-option>
+                  <md-select-option value="title">
+                    <div slot="headline">Title</div>
+                  </md-select-option>
                 </md-outlined-select>
                 <md-outlined-select
                   label="Condition"
                   .value=${filter.condition}
                   @change=${(e) => this.updateFilter(e, index, "condition")}
                 >
-                  <md-select-option value="since" selected
-                    ><div slot="headline">Is After</div></md-select-option
-                  >
-                  <md-select-option value="contains"
-                    ><div slot="headline">Contains</div></md-select-option
-                  >
+                  <md-select-option value="since" selected>
+                    <div slot="headline">Is After</div>
+                  </md-select-option>
+                  <md-select-option value="contains">
+                    <div slot="headline">Contains</div>
+                  </md-select-option>
                 </md-outlined-select>
                 <md-outlined-text-field
                   label="Value"
@@ -506,14 +512,15 @@ class CalmHarvestInterface extends LitElement {
                 <md-icon-button
                   @click=${() => this.removeFilter(index)}
                   title="Remove filter"
-                  ><md-icon>delete</md-icon></md-icon-button
                 >
+                  <md-icon>delete</md-icon>
+                </md-icon-button>
               </div>
             `
           )}
-          <md-text-button @click=${this.addFilter}
-            ><md-icon slot="icon">add</md-icon> Add Criteria</md-text-button
-          >
+          <md-text-button @click=${this.addFilter}>
+            <md-icon>add</md-icon> Add Criteria
+          </md-text-button>
         </div>
       </div>
       <div class="form-section">
@@ -525,20 +532,19 @@ class CalmHarvestInterface extends LitElement {
             ?selected=${this.isEnabled}
             @change=${(e) => (this.isEnabled = e.target.selected)}
           ></md-switch>
-          <span
-            >Automated harvesting is currently
-            <strong>${this.isEnabled ? "enabled" : "disabled"}</strong>.</span
-          >
+          <span>
+            Automated harvesting is currently
+            <strong>${this.isEnabled ? "enabled" : "disabled"}</strong>.
+          </span>
         </div>
       </div>
       <div class="button-group">
-        <md-outlined-button @click=${this.resetForm}
-          ><md-icon slot="icon">restart_alt</md-icon>Reset</md-outlined-button
-        >
-        <md-filled-button @click=${this.saveConfiguration}
-          ><md-icon slot="icon">save</md-icon>Save
-          Configuration</md-filled-button
-        >
+        <md-outlined-button @click=${this.resetForm}>
+          <md-icon>restart_alt</md-icon>Reset
+        </md-outlined-button>
+        <md-filled-button @click=${this.saveConfiguration}>
+          <md-icon>save</md-icon>Save Configuration
+        </md-filled-button>
       </div>
     `;
   }
@@ -550,13 +556,13 @@ class CalmHarvestInterface extends LitElement {
           @click=${() => (this.manualHarvestMode = "ids")}
           ?disabled=${this.manualHarvestMode === "ids"}
         >
-          <md-icon slot="icon">short_text</md-icon> Enter IDs Directly
+          <md-icon>short_text</md-icon> Enter IDs Directly
         </md-filled-tonal-button>
         <md-filled-tonal-button
           @click=${() => (this.manualHarvestMode = "search")}
           ?disabled=${this.manualHarvestMode === "search"}
         >
-          <md-icon slot="icon">search</md-icon> Search & Select
+          <md-icon>search</md-icon> Search & Select
         </md-filled-tonal-button>
       </div>
       ${when(
@@ -589,9 +595,8 @@ class CalmHarvestInterface extends LitElement {
           @click=${this.runHarvestForEnteredIds}
           ?disabled=${!this.manualHarvestIds.trim() || this.isManualHarvesting}
         >
-          <md-icon slot="icon">play_arrow</md-icon> ${this.isManualHarvesting
-            ? "Harvesting..."
-            : "Start Harvest"}
+          <md-icon>play_arrow</md-icon>
+          ${this.isManualHarvesting ? "Harvesting..." : "Start Harvest"}
         </md-filled-button>
       </div>
     `;
@@ -617,9 +622,8 @@ class CalmHarvestInterface extends LitElement {
             @click=${this.runManualSearch}
             ?disabled=${!this.manualSearchTerm.trim() || this.isManualSearching}
           >
-            <md-icon slot="icon">search</md-icon> ${this.isManualSearching
-              ? "Searching..."
-              : "Search"}
+            <md-icon>search</md-icon>
+            ${this.isManualSearching ? "Searching..." : "Search"}
           </md-filled-button>
         </div>
       </div>
@@ -661,7 +665,7 @@ class CalmHarvestInterface extends LitElement {
                 @click=${this.runHarvestForSelectedRecords}
                 ?disabled=${selectedCount === 0 || this.isManualHarvesting}
               >
-                <md-icon slot="icon">play_arrow</md-icon>
+                <md-icon>play_arrow</md-icon>
                 ${this.isManualHarvesting
                   ? "Harvesting..."
                   : `Harvest ${selectedCount} Selected Record${
@@ -685,18 +689,18 @@ class CalmHarvestInterface extends LitElement {
           (harvest) => html`
             <div class="harvest-item">
               <div class="harvest-status ${harvest.status}">
-                <md-icon
-                  >${harvest.success ? "check" : "error_outline"}</md-icon
-                >
+                <md-icon>
+                  ${harvest.success ? "check" : "error_outline"}
+                </md-icon>
               </div>
               <div class="harvest-details">
                 <h4>${harvest.date}</h4>
                 <div class="harvest-meta">
-                  <span
-                    >${harvest.success
+                  <span>
+                    ${harvest.success
                       ? `${harvest.records} records`
-                      : `Error: ${harvest.error}`}</span
-                  >
+                      : `Error: ${harvest.error}`}
+                  </span>
                   <span>Duration: ${harvest.duration}</span>
                 </div>
               </div>
@@ -718,17 +722,18 @@ class CalmHarvestInterface extends LitElement {
   handleTabChange(e) {
     this.activeTab = e.target.activeTabIndex;
   }
+
   addFilter() {
     this.queryFilters = [
       ...this.queryFilters,
       { field: "title", condition: "contains", value: "" },
     ];
   }
+
   removeFilter(index) {
     this.queryFilters = this.queryFilters.filter((_, i) => i !== index);
   }
 
-  // Handles updating a specific property of a filter object
   updateFilter(e, index, property) {
     const newValue = e.target.value;
     this.queryFilters = this.queryFilters.map((filter, i) =>
@@ -760,7 +765,7 @@ class CalmHarvestInterface extends LitElement {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const newHarvest = {
       id: Date.now(),
-      date: new Date().toLocaleString(),
+      date: new Date().toLocaleString("en-GB"),
       status: "completed",
       records: ids.length,
       duration: `${Math.floor(Math.random() * 30) + 5}s`,
