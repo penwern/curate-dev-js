@@ -73,10 +73,13 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        // We exclude all node_modules, except for 'lit' and '@material/web'
-        // because they use modern JS that needs to be transpiled by Babel.
         exclude: /node_modules\/(?!(@material\/web|lit)\/).*/,
-        use: "babel-loader",
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+          },
+        },
       },
       {
         test: /\.worker\.js$/,
