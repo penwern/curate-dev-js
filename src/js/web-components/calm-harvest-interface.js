@@ -183,7 +183,17 @@ class CalmHarvestInterface extends LitElement {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: "var(--md-sys-color-on-surface)" },
+              grid: { color: "var(--md-sys-color-outline-variant)" },
+            },
+            x: {
+              ticks: { color: "var(--md-sys-color-on-surface)" },
+              grid: { color: "var(--md-sys-color-outline-variant)" },
+            },
+          },
           plugins: {
             legend: {
               labels: {
@@ -198,18 +208,22 @@ class CalmHarvestInterface extends LitElement {
 
   static get styles() {
     return css`
-      /*
-       * Import the 'Material Symbols Outlined' font, which is what your working
-       * example uses. This ensures the component has access to the icon font
-       * inside its Shadow DOM, making it self-contained.
-       */
-      @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined");
+      /* Import the platform's specific MDI font stylesheet. */
+      @import url("https://www.curate.penwern.co.uk/plug/gui.ajax/res/dist/pydio.material.min.css?v=965e74ba5b13cbcfe2719abdda6b6a1a");
+
+      /* Basic style for MDI icons to inherit color and size correctly. */
+      .mdi {
+        font-size: inherit;
+        color: inherit;
+        line-height: 1; /* Prevents layout shifts */
+      }
 
       :host {
         display: block;
         background: var(--md-sys-color-background);
         color: var(--md-sys-color-on-background);
         min-height: 100vh;
+        font-family: "Roboto", sans-serif;
       }
       .header {
         background: var(--md-sys-color-primary-container);
@@ -291,6 +305,7 @@ class CalmHarvestInterface extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 24px;
       }
       .harvest-status.completed {
         background: var(--md-sys-color-tertiary-container);
@@ -393,14 +408,17 @@ class CalmHarvestInterface extends LitElement {
             .activeTabIndex=${this.activeTab}
           >
             <md-primary-tab>
-              <md-icon>tune</md-icon>Configuration
+              <span class="mdi mdi-tune" slot="icon"></span>Configuration
             </md-primary-tab>
             <md-primary-tab>
-              <md-icon>play_for_work</md-icon>Manual Harvest
+              <span class="mdi mdi-database-import" slot="icon"></span>Manual
+              Harvest
             </md-primary-tab>
-            <md-primary-tab> <md-icon>history</md-icon>History </md-primary-tab>
             <md-primary-tab>
-              <md-icon>insights</md-icon>Analytics
+              <span class="mdi mdi-history" slot="icon"></span>History
+            </md-primary-tab>
+            <md-primary-tab>
+              <span class="mdi mdi-chart-line" slot="icon"></span>Analytics
             </md-primary-tab>
           </md-tabs>
           <div class="tab-content">
@@ -464,7 +482,7 @@ class CalmHarvestInterface extends LitElement {
             @click=${() => (this.showVariablesDialog = true)}
             title="View available variables"
           >
-            <md-icon>help_outline</md-icon>
+            <span class="mdi mdi-help-circle-outline"></span>
           </md-icon-button>
         </h3>
         <p>
@@ -513,18 +531,21 @@ class CalmHarvestInterface extends LitElement {
                   @click=${() => this.removeFilter(index)}
                   title="Remove filter"
                 >
-                  <md-icon>delete</md-icon>
+                  <span class="mdi mdi-delete"></span>
                 </md-icon-button>
               </div>
             `
           )}
           <md-text-button @click=${this.addFilter}>
-            <md-icon>add</md-icon> Add Criteria
+            <span class="mdi mdi-plus" slot="icon"></span> Add Criteria
           </md-text-button>
         </div>
       </div>
       <div class="form-section">
-        <h3><md-icon>power_settings_new</md-icon>Automated Harvest Status</h3>
+        <h3>
+          <span class="mdi mdi-power-plug-outline"></span>Automated Harvest
+          Status
+        </h3>
         <div
           style="display: flex; align-items: center; gap: 12px; padding: 8px 0;"
         >
@@ -540,10 +561,11 @@ class CalmHarvestInterface extends LitElement {
       </div>
       <div class="button-group">
         <md-outlined-button @click=${this.resetForm}>
-          <md-icon>restart_alt</md-icon>Reset
+          <span class="mdi mdi-restart" slot="icon"></span>Reset
         </md-outlined-button>
         <md-filled-button @click=${this.saveConfiguration}>
-          <md-icon>save</md-icon>Save Configuration
+          <span class="mdi mdi-content-save" slot="icon"></span>Save
+          Configuration
         </md-filled-button>
       </div>
     `;
@@ -556,13 +578,14 @@ class CalmHarvestInterface extends LitElement {
           @click=${() => (this.manualHarvestMode = "ids")}
           ?disabled=${this.manualHarvestMode === "ids"}
         >
-          <md-icon>short_text</md-icon> Enter IDs Directly
+          <span class="mdi mdi-form-textbox" slot="icon"></span> Enter IDs
+          Directly
         </md-filled-tonal-button>
         <md-filled-tonal-button
           @click=${() => (this.manualHarvestMode = "search")}
           ?disabled=${this.manualHarvestMode === "search"}
         >
-          <md-icon>search</md-icon> Search & Select
+          <span class="mdi mdi-magnify" slot="icon"></span> Search & Select
         </md-filled-tonal-button>
       </div>
       ${when(
@@ -576,7 +599,7 @@ class CalmHarvestInterface extends LitElement {
   renderManualHarvestByIds() {
     return html`
       <div class="form-section">
-        <h3><md-icon>short_text</md-icon>Harvest by Identifier</h3>
+        <h3><span class="mdi mdi-form-textbox"></span>Harvest by Identifier</h3>
         <p>
           Fetch specific records by pasting their unique CALM identifiers below,
           one per line.
@@ -595,7 +618,7 @@ class CalmHarvestInterface extends LitElement {
           @click=${this.runHarvestForEnteredIds}
           ?disabled=${!this.manualHarvestIds.trim() || this.isManualHarvesting}
         >
-          <md-icon>play_arrow</md-icon>
+          <span class="mdi mdi-play" slot="icon"></span>
           ${this.isManualHarvesting ? "Harvesting..." : "Start Harvest"}
         </md-filled-button>
       </div>
@@ -606,7 +629,7 @@ class CalmHarvestInterface extends LitElement {
     const selectedCount = this.selectedManualRecords.length;
     return html`
       <div class="form-section">
-        <h3><md-icon>search</md-icon>Find and Select Records</h3>
+        <h3><span class="mdi mdi-magnify"></span>Find and Select Records</h3>
         <p>
           Search for records using a keyword and then select the ones you wish
           to harvest.
@@ -622,7 +645,7 @@ class CalmHarvestInterface extends LitElement {
             @click=${this.runManualSearch}
             ?disabled=${!this.manualSearchTerm.trim() || this.isManualSearching}
           >
-            <md-icon>search</md-icon>
+            <span class="mdi mdi-magnify" slot="icon"></span>
             ${this.isManualSearching ? "Searching..." : "Search"}
           </md-filled-button>
         </div>
@@ -665,7 +688,7 @@ class CalmHarvestInterface extends LitElement {
                 @click=${this.runHarvestForSelectedRecords}
                 ?disabled=${selectedCount === 0 || this.isManualHarvesting}
               >
-                <md-icon>play_arrow</md-icon>
+                <span class="mdi mdi-play" slot="icon"></span>
                 ${this.isManualHarvesting
                   ? "Harvesting..."
                   : `Harvest ${selectedCount} Selected Record${
@@ -689,9 +712,11 @@ class CalmHarvestInterface extends LitElement {
           (harvest) => html`
             <div class="harvest-item">
               <div class="harvest-status ${harvest.status}">
-                <md-icon>
-                  ${harvest.success ? "check" : "error_outline"}
-                </md-icon>
+                <span
+                  class="mdi ${harvest.success
+                    ? "mdi-check-circle-outline"
+                    : "mdi-alert-circle-outline"}"
+                ></span>
               </div>
               <div class="harvest-details">
                 <h4>${harvest.date}</h4>
@@ -704,7 +729,9 @@ class CalmHarvestInterface extends LitElement {
                   <span>Duration: ${harvest.duration}</span>
                 </div>
               </div>
-              <md-icon-button><md-icon>chevron_right</md-icon></md-icon-button>
+              <md-icon-button
+                ><span class="mdi mdi-chevron-right"></span
+              ></md-icon-button>
             </div>
           `
         )}
