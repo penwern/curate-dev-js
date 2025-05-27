@@ -21,6 +21,7 @@ import {
   checkCircleIcon,
   alertCircleIcon,
   chevronRightIcon,
+  chevronDownIcon,
 } from "./icons.js";
 
 // All necessary Material Web Components
@@ -107,8 +108,8 @@ class CalmHarvestInterface extends LitElement {
       recentHarvests: { type: Array, state: true },
       showSuccessDialog: { type: Boolean, state: true },
       successDialogMessage: { type: String, state: true },
-      // New state to track the selected chart view
       selectedChart: { type: String, state: true },
+      expandedHistoryId: { type: Number, state: true },
     };
   }
 
@@ -129,6 +130,7 @@ class CalmHarvestInterface extends LitElement {
     this.showSuccessDialog = false;
     this.successDialogMessage = "";
     this.selectedChart = "trends";
+    this.expandedHistoryId = null;
     this.recentHarvests = [
       {
         id: 1,
@@ -166,6 +168,18 @@ class CalmHarvestInterface extends LitElement {
     return this.manualSearchResults.filter((r) => r.selected);
   }
 
+  get areAllSelected() {
+    return (
+      this.manualSearchResults.length > 0 &&
+      this.manualSearchResults.every((r) => r.selected)
+    );
+  }
+
+  get areSomeSelected() {
+    const selectedCount = this.selectedManualRecords.length;
+    return selectedCount > 0 && selectedCount < this.manualSearchResults.length;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this.destroyCharts();
@@ -179,7 +193,6 @@ class CalmHarvestInterface extends LitElement {
   }
 
   updated(changedProperties) {
-    // This logic handles initializing and destroying charts when the tab or chart selection changes.
     if (
       changedProperties.has("activeTab") ||
       changedProperties.has("selectedChart")
@@ -193,7 +206,6 @@ class CalmHarvestInterface extends LitElement {
     }
   }
 
-  // A single function to initialize the currently selected chart
   initSelectedChart() {
     requestAnimationFrame(() => {
       switch (this.selectedChart) {
@@ -241,7 +253,6 @@ class CalmHarvestInterface extends LitElement {
           y: {
             beginAtZero: true,
             ticks: { color: "var(--md-sys-color-on-surface-variant)" },
-            // Lighter horizontal grid lines
             grid: { color: "rgba(128, 128, 128, 0.2)" },
           },
           x: {
@@ -294,7 +305,6 @@ class CalmHarvestInterface extends LitElement {
               color: "var(--md-sys-color-on-surface-variant)",
               stepSize: 1,
             },
-            // Hide vertical grid lines
             grid: { display: false },
           },
           y: {
@@ -329,7 +339,6 @@ class CalmHarvestInterface extends LitElement {
               "rgba(234, 179, 8, 0.7)",
               "rgba(139, 92, 246, 0.7)",
             ],
-            // Use the chart's background color for the border to create a "gap"
             borderColor: "var(--md-sys-color-surface-1)",
             borderWidth: 2,
           },
@@ -366,22 +375,20 @@ class CalmHarvestInterface extends LitElement {
       md-primary-tab svg {
         margin-right: 8px;
       }
-
       .content-wrapper {
         background: var(--md-sys-color-surface-2);
         color: var(--md-sys-color-on-surface);
         border-radius: 12px;
         overflow: hidden;
         min-width: 800px;
-        /* box-shadow removed as requested */
       }
-
       md-tabs {
         --md-primary-tab-container-color: var(--md-sys-color-surface-2);
       }
       .tab-content {
         padding: 24px;
         min-height: 400px;
+        position: relative;
       }
       .form-section {
         margin-bottom: 32px;
@@ -411,8 +418,10 @@ class CalmHarvestInterface extends LitElement {
         padding: 16px;
         display: grid;
         grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto;
         gap: 16px;
         align-items: center;
+        transition: background-color 0.2s ease-in-out;
       }
       .harvest-status {
         width: 48px;
@@ -434,12 +443,34 @@ class CalmHarvestInterface extends LitElement {
       .harvest-details h4 {
         margin: 0 0 4px;
         font-size: 16px;
+        font-weight: 500;
       }
       .harvest-meta {
         display: flex;
         gap: 16px;
         font-size: 14px;
         color: var(--md-sys-color-on-surface-variant);
+      }
+      .history-details-grid {
+        grid-column: 1 / -1;
+        padding: 16px 0 0 0;
+        margin-top: 16px;
+        border-top: 1px solid var(--md-sys-color-outline-variant);
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 8px 16px;
+        font-size: 14px;
+      }
+      .history-details-grid dt {
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+      .history-details-grid dd {
+        margin: 0;
+        color: var(--md-sys-color-on-surface);
+      }
+      .history-details-grid dd.failed {
+        color: var(--md-sys-color-error);
       }
       .button-group {
         display: flex;
@@ -473,19 +504,80 @@ class CalmHarvestInterface extends LitElement {
         border-top: 1px solid var(--md-sys-color-outline-variant);
         padding-top: 24px;
       }
-      .search-results-list {
-        max-height: 400px;
-        overflow-y: auto;
+      .search-results-table {
         border: 1px solid var(--md-sys-color-outline);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .table-header,
+      .table-row {
+        display: grid;
+        grid-template-columns: 48px 2.5fr 1fr 1fr;
+        gap: 16px;
+        align-items: center;
+        padding: 8px 16px;
+      }
+      .table-header {
+        background: var(--md-sys-color-surface-1);
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface-variant);
+        border-bottom: 1px solid var(--md-sys-color-outline);
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .table-header md-checkbox {
+        margin-left: -10px;
+      }
+      .table-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+        border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      }
+      .table-row:last-child {
+        border-bottom: none;
+      }
+      .table-row:hover {
+        background-color: var(--md-sys-color-surface-container-hover);
+      }
+      .table-row md-checkbox {
+        margin-left: -10px;
+      }
+      .record-title {
+        font-weight: 500;
+      }
+      .record-collection {
+        font-size: 13px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+      .record-meta {
+        font-family: monospace;
+        font-size: 14px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+      .selection-summary-bar {
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+        padding: 8px 16px;
         border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 24px;
+        animation: slide-in 0.3s ease-out;
       }
-      .search-result-item {
-        --md-list-item-leading-space: 12px;
+      @keyframes slide-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-      .search-result-item md-checkbox {
-        margin-right: 8px;
+      .selection-summary-bar span {
+        font-weight: 500;
       }
-      /* Styles for analytics tab */
       .analytics-container {
         display: flex;
         flex-direction: column;
@@ -582,7 +674,6 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderConfiguration() {
-    // This template is unchanged.
     return html`
       <div class="form-section">
         <h3>
@@ -675,7 +766,6 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvest() {
-    // This template is unchanged.
     return html`
       <div class="mode-toggle-group">
         <md-filled-tonal-button
@@ -700,7 +790,6 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvestByIds() {
-    // This template is unchanged.
     return html`
       <div class="form-section">
         <h3><span>${textboxIcon}</span>Harvest by Identifier</h3>
@@ -732,14 +821,13 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvestBySearch() {
-    // This template is unchanged.
     const selectedCount = this.selectedManualRecords.length;
     return html`
       <div class="form-section">
         <h3><span>${searchIcon}</span>Find and Select Records</h3>
         <p>
-          Search for records using a keyword and then select the ones you wish
-          to harvest.
+          Search for records using a keyword, then select the ones you wish to
+          harvest.
         </p>
         <div style="display: flex; gap: 8px; align-items: center;">
           <md-outlined-text-field
@@ -765,77 +853,129 @@ class CalmHarvestInterface extends LitElement {
       )}
       ${when(
         this.manualSearchResults.length > 0 && !this.isManualSearching,
-        () => html` <div class="search-results-container">
-          <h4>Search Results</h4>
-          <div class="search-results-list">
-            <md-list>
+        () => html`
+          <div class="search-results-container">
+            <h4>Search Results</h4>
+            <div class="search-results-table">
+              <div class="table-header">
+                <md-checkbox
+                  aria-label="Select all results"
+                  ?checked=${this.areAllSelected}
+                  ?indeterminate=${this.areSomeSelected}
+                  @change=${this.toggleSelectAll}
+                ></md-checkbox>
+                <div>RECORD</div>
+                <div>ID</div>
+                <div>MODIFIED</div>
+              </div>
               ${repeat(
                 this.manualSearchResults,
                 (r) => r.id,
-                (record, index) => html` <md-list-item
-                  class="search-result-item"
-                  type="button"
-                  @click=${() => this.toggleRecordSelection(index)}
-                >
-                  <md-checkbox
-                    slot="start"
-                    ?checked=${record.selected}
-                  ></md-checkbox>
-                  <div slot="headline">${record.title}</div>
-                  <div slot="supporting-text">
-                    ID: ${record.id} | Modified: ${record.modified}
+                (record, index) => html`
+                  <div
+                    class="table-row"
+                    @click=${() => this.toggleRecordSelection(index)}
+                  >
+                    <md-checkbox
+                      ?checked=${record.selected}
+                      aria-labelledby="title-${index}"
+                    ></md-checkbox>
+                    <div>
+                      <div class="record-title" id="title-${index}">
+                        ${record.title}
+                      </div>
+                      <div class="record-collection">${record.collection}</div>
+                    </div>
+                    <div class="record-meta">${record.id}</div>
+                    <div class="record-meta">${record.modified}</div>
                   </div>
-                </md-list-item>`
+                `
               )}
-            </md-list>
+            </div>
           </div>
-          <div class="button-group">
+        `
+      )}
+      ${when(
+        selectedCount > 0,
+        () => html`
+          <div class="selection-summary-bar">
+            <span
+              >${selectedCount} record${selectedCount === 1 ? "" : "s"}
+              selected</span
+            >
             <md-filled-button
               @click=${this.runHarvestForSelectedRecords}
-              ?disabled=${selectedCount === 0 || this.isManualHarvesting}
+              ?disabled=${this.isManualHarvesting}
             >
               <span
                 >${playIcon}
-                ${this.isManualHarvesting
-                  ? "Harvesting..."
-                  : `Harvest ${selectedCount} Selected Record${
-                      selectedCount === 1 ? "" : "s"
-                    }`}</span
+                ${this.isManualHarvesting ? "Harvesting..." : "Harvest"}</span
               >
             </md-filled-button>
           </div>
-        </div>`
+        `
       )}
     `;
   }
 
   renderHistory() {
-    // This template is unchanged.
     return html`
       <h3 style="margin: 0 0 16px; font-size: 18px;">Recent Harvests</h3>
       <div class="harvest-list">
         ${repeat(
           this.recentHarvests,
           (h) => h.id,
-          (harvest) => html` <div class="harvest-item">
-            <div class="harvest-status ${harvest.status}">
-              ${harvest.success ? checkCircleIcon : alertCircleIcon}
-            </div>
-            <div class="harvest-details">
-              <h4>${harvest.date}</h4>
-              <div class="harvest-meta">
-                <span
-                  >${harvest.success
-                    ? `${harvest.records} records`
-                    : `Error: ${harvest.error}`}</span
-                >
-                <span>Duration: ${harvest.duration}</span>
+          (harvest) => html`
+            <div class="harvest-item">
+              <div class="harvest-status ${harvest.status}">
+                ${harvest.success ? checkCircleIcon : alertCircleIcon}
               </div>
+              <div class="harvest-details">
+                <h4>${harvest.date}</h4>
+                <div class="harvest-meta">
+                  <span
+                    >${harvest.success
+                      ? `${harvest.records} records`
+                      : `Error: ${harvest.error}`}</span
+                  >
+                  <span>Duration: ${harvest.duration}</span>
+                </div>
+              </div>
+              <md-icon-button
+                @click=${() => this.toggleHistoryExpansion(harvest.id)}
+              >
+                ${this.expandedHistoryId === harvest.id
+                  ? chevronDownIcon
+                  : chevronRightIcon}
+              </md-icon-button>
+
+              ${when(this.expandedHistoryId === harvest.id, () =>
+                this.renderHistoryDetails(harvest)
+              )}
             </div>
-            <md-icon-button>${chevronRightIcon}</md-icon-button>
-          </div>`
+          `
         )}
       </div>
+    `;
+  }
+
+  renderHistoryDetails(harvest) {
+    return html`
+      <dl class="history-details-grid">
+        <dt>Harvest ID</dt>
+        <dd>${harvest.id}</dd>
+        <dt>Source</dt>
+        <dd>${harvest.source}</dd>
+        <dt>Status</dt>
+        <dd class="${harvest.status}">${harvest.status}</dd>
+        ${when(
+          !harvest.success,
+          () => html`
+            <dt>Error Detail</dt>
+            <dd class="failed">${harvest.error}</dd>
+          `
+        )}
+      </dl>
     `;
   }
 
@@ -876,7 +1016,6 @@ class CalmHarvestInterface extends LitElement {
     `;
   }
 
-  // All other component logic...
   handleTabChange(e) {
     this.activeTab = e.target.activeTabIndex;
   }
@@ -896,16 +1035,16 @@ class CalmHarvestInterface extends LitElement {
     );
   }
   async runManualSearch() {
-    this.isManualSearching = !0;
+    this.isManualSearching = true;
     this.manualSearchResults = [];
-    await new Promise((resolve) => setTimeout(resolve, 1e3));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const searchTerm = this.manualSearchTerm.toLowerCase();
     this.manualSearchResults = DUMMY_CALM_RECORDS.filter(
       (record) =>
         record.title.toLowerCase().includes(searchTerm) ||
         record.id.toLowerCase().includes(searchTerm)
     );
-    this.isManualSearching = !1;
+    this.isManualSearching = false;
   }
   toggleRecordSelection(index) {
     this.manualSearchResults = this.manualSearchResults.map((r, i) =>
@@ -913,21 +1052,21 @@ class CalmHarvestInterface extends LitElement {
     );
   }
   async runHarvest(ids, source) {
-    this.isManualHarvesting = !0;
-    await new Promise((resolve) => setTimeout(resolve, 2e3));
+    this.isManualHarvesting = true;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const newHarvest = {
       id: Date.now(),
       date: new Date().toLocaleString("en-GB"),
       status: "completed",
       records: ids.length,
       duration: `${Math.floor(Math.random() * 30) + 5}s`,
-      success: !0,
+      success: true,
       source: source,
     };
     this.recentHarvests = [newHarvest, ...this.recentHarvests];
     this.successDialogMessage = `Successfully harvested ${ids.length} record(s) from your ${source}.`;
-    this.showSuccessDialog = !0;
-    this.isManualHarvesting = !1;
+    this.showSuccessDialog = true;
+    this.isManualHarvesting = false;
     this.activeTab = 2;
   }
   runHarvestForEnteredIds() {
@@ -948,13 +1087,27 @@ class CalmHarvestInterface extends LitElement {
   saveConfiguration() {
     this.successDialogMessage =
       "Your automated harvest configuration has been saved.";
-    this.showSuccessDialog = !0;
+    this.showSuccessDialog = true;
   }
   resetForm() {
     this.queryFilters = [
       { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
     ];
-    this.isEnabled = !0;
+    this.isEnabled = true;
+  }
+  toggleHistoryExpansion(id) {
+    if (this.expandedHistoryId === id) {
+      this.expandedHistoryId = null;
+    } else {
+      this.expandedHistoryId = id;
+    }
+  }
+  toggleSelectAll(e) {
+    const isChecked = e.target.checked;
+    this.manualSearchResults = this.manualSearchResults.map((r) => ({
+      ...r,
+      selected: isChecked,
+    }));
   }
 }
 
