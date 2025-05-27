@@ -4,7 +4,13 @@
         const paths = pydio._dataModel._selectedNodes.map(n => ({
             path: Curate.workspaces.getOpenWorkspace() + n._path,
             slug: n._metadata.get("usermeta-atom-linked-description") || ""
-        }));
+        })); // change this to be something like:
+        /**
+         * JSON.stringify({
+            "Paths": ["quarantine/dublin-old-photos.jpg"],
+            "JobParameters": {"ConfigId": "3"}
+         * })
+         */
         const bodyData = JSON.stringify({ "Paths": paths, "JobParameters": { "ConfigId": configId.toString() } })
         const headers = {
             "accept": "application/json",
