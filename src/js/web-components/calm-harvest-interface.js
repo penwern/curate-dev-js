@@ -107,6 +107,8 @@ class CalmHarvestInterface extends LitElement {
       recentHarvests: { type: Array, state: true },
       showSuccessDialog: { type: Boolean, state: true },
       successDialogMessage: { type: String, state: true },
+      // New state to track the selected chart view
+      selectedChart: { type: String, state: true },
     };
   }
 
@@ -126,6 +128,7 @@ class CalmHarvestInterface extends LitElement {
     this.isManualHarvesting = false;
     this.showSuccessDialog = false;
     this.successDialogMessage = "";
+    this.selectedChart = "trends";
     this.recentHarvests = [
       {
         id: 1,
@@ -156,7 +159,6 @@ class CalmHarvestInterface extends LitElement {
         error: "Connection timeout",
       },
     ];
-    // Manages all active chart instances.
     this.charts = {};
   }
 
@@ -171,31 +173,40 @@ class CalmHarvestInterface extends LitElement {
 
   destroyCharts() {
     Object.values(this.charts).forEach((chart) => {
-      if (chart) {
-        chart.destroy();
-      }
+      if (chart) chart.destroy();
     });
     this.charts = {};
   }
 
   updated(changedProperties) {
-    if (changedProperties.has("activeTab")) {
-      // Destroy charts when leaving the analytics tab.
-      if (this.activeTab !== 3) {
+    // This logic handles initializing and destroying charts when the tab or chart selection changes.
+    if (
+      changedProperties.has("activeTab") ||
+      changedProperties.has("selectedChart")
+    ) {
+      if (this.activeTab === 3) {
         this.destroyCharts();
-      } else {
-        // Initialise charts when entering the analytics tab.
-        this.initCharts();
+        this.initSelectedChart();
+      } else if (changedProperties.get("activeTab") === 3) {
+        this.destroyCharts();
       }
     }
   }
 
-  initCharts() {
-    // Use requestAnimationFrame to ensure the canvas elements are rendered.
+  // A single function to initialize the currently selected chart
+  initSelectedChart() {
     requestAnimationFrame(() => {
-      this.initLineChart();
-      this.initBarChart();
-      this.initDoughnutChart();
+      switch (this.selectedChart) {
+        case "trends":
+          this.initLineChart();
+          break;
+        case "status":
+          this.initBarChart();
+          break;
+        case "source":
+          this.initDoughnutChart();
+          break;
+      }
     });
   }
 
@@ -217,7 +228,6 @@ class CalmHarvestInterface extends LitElement {
             label: "Records Harvested",
             data,
             fill: true,
-            // Set explicit blue colors for the line and fill.
             borderColor: "rgba(59, 130, 246, 1)",
             backgroundColor: "rgba(59, 130, 246, 0.2)",
             tension: 0.4,
@@ -231,7 +241,8 @@ class CalmHarvestInterface extends LitElement {
           y: {
             beginAtZero: true,
             ticks: { color: "var(--md-sys-color-on-surface-variant)" },
-            grid: { color: "var(--md-sys-color-outline-variant)" },
+            // Lighter horizontal grid lines
+            grid: { color: "rgba(128, 128, 128, 0.2)" },
           },
           x: {
             ticks: { color: "var(--md-sys-color-on-surface-variant)" },
@@ -241,9 +252,7 @@ class CalmHarvestInterface extends LitElement {
         plugins: {
           legend: {
             position: "bottom",
-            labels: {
-              color: "var(--md-sys-color-on-surface)",
-            },
+            labels: { color: "var(--md-sys-color-on-surface)" },
           },
         },
       },
@@ -278,18 +287,15 @@ class CalmHarvestInterface extends LitElement {
         responsive: true,
         maintainAspectRatio: false,
         indexAxis: "y",
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
+        plugins: { legend: { display: false } },
         scales: {
           x: {
             ticks: {
               color: "var(--md-sys-color-on-surface-variant)",
               stepSize: 1,
             },
-            grid: { color: "var(--md-sys-color-outline-variant)" },
+            // Hide vertical grid lines
+            grid: { display: false },
           },
           y: {
             ticks: { color: "var(--md-sys-color-on-surface-variant)" },
@@ -323,7 +329,9 @@ class CalmHarvestInterface extends LitElement {
               "rgba(234, 179, 8, 0.7)",
               "rgba(139, 92, 246, 0.7)",
             ],
-            borderColor: "var(--md-sys-color-surface-2)",
+            // Use the chart's background color for the border to create a "gap"
+            borderColor: "var(--md-sys-color-surface-1)",
+            borderWidth: 2,
           },
         ],
       },
@@ -333,9 +341,7 @@ class CalmHarvestInterface extends LitElement {
         plugins: {
           legend: {
             position: "bottom",
-            labels: {
-              color: "var(--md-sys-color-on-surface)",
-            },
+            labels: { color: "var(--md-sys-color-on-surface)" },
           },
         },
       },
@@ -349,7 +355,6 @@ class CalmHarvestInterface extends LitElement {
         color: var(--md-sys-color-on-background);
         font-family: "Roboto", sans-serif;
       }
-      /* Helpers to align icons in buttons and tabs */
       md-filled-button span,
       md-outlined-button span,
       md-text-button span,
@@ -362,14 +367,13 @@ class CalmHarvestInterface extends LitElement {
         margin-right: 8px;
       }
 
-      /* Main content wrapper, sets a min-width to avoid resizing */
       .content-wrapper {
         background: var(--md-sys-color-surface-2);
         color: var(--md-sys-color-on-surface);
         border-radius: 12px;
         overflow: hidden;
         min-width: 800px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        /* box-shadow removed as requested */
       }
 
       md-tabs {
@@ -394,7 +398,7 @@ class CalmHarvestInterface extends LitElement {
       .form-section p {
         margin: 0 0 16px;
         color: var(--md-sys-color-on-surface-variant);
-        max-width: 65ch; /* Improve readability */
+        max-width: 65ch;
       }
       .harvest-list {
         display: flex;
@@ -481,26 +485,21 @@ class CalmHarvestInterface extends LitElement {
       .search-result-item md-checkbox {
         margin-right: 8px;
       }
-      /* New styles for the analytics tab */
-      .analytics-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
+      /* Styles for analytics tab */
+      .analytics-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
-      .chart-container {
+      md-outlined-select {
+        max-width: 300px;
+      }
+      .chart-wrapper {
         position: relative;
-        height: 350px;
+        height: 380px;
         background: var(--md-sys-color-surface-1);
         border-radius: 12px;
         padding: 16px;
-      }
-      .chart-container.full-width {
-        grid-column: 1 / -1;
-      }
-      .chart-title {
-        font-weight: 500;
-        margin-bottom: 12px;
-        color: var(--md-sys-color-on-surface-variant);
       }
       .variables-dialog-content {
         display: flex;
@@ -583,6 +582,7 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderConfiguration() {
+    // This template is unchanged.
     return html`
       <div class="form-section">
         <h3>
@@ -675,6 +675,7 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvest() {
+    // This template is unchanged.
     return html`
       <div class="mode-toggle-group">
         <md-filled-tonal-button
@@ -699,6 +700,7 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvestByIds() {
+    // This template is unchanged.
     return html`
       <div class="form-section">
         <h3><span>${textboxIcon}</span>Harvest by Identifier</h3>
@@ -730,6 +732,7 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderManualHarvestBySearch() {
+    // This template is unchanged.
     const selectedCount = this.selectedManualRecords.length;
     return html`
       <div class="form-section">
@@ -807,6 +810,7 @@ class CalmHarvestInterface extends LitElement {
   }
 
   renderHistory() {
+    // This template is unchanged.
     return html`
       <h3 style="margin: 0 0 16px; font-size: 18px;">Recent Harvests</h3>
       <div class="harvest-list">
@@ -837,18 +841,36 @@ class CalmHarvestInterface extends LitElement {
 
   renderAnalytics() {
     return html`
-      <div class="analytics-grid">
-        <div class="chart-container full-width">
-          <div class="chart-title">Harvest Trends</div>
-          <canvas id="analyticsChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <div class="chart-title">Run Status</div>
-          <canvas id="statusChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <div class="chart-title">Harvest Source</div>
-          <canvas id="sourceChart"></canvas>
+      <div class="analytics-container">
+        <md-outlined-select
+          label="Chart Type"
+          .value=${this.selectedChart}
+          @change=${(e) => (this.selectedChart = e.target.value)}
+        >
+          <md-select-option value="trends"
+            ><div slot="headline">Harvest Trends</div></md-select-option
+          >
+          <md-select-option value="status"
+            ><div slot="headline">Run Status</div></md-select-option
+          >
+          <md-select-option value="source"
+            ><div slot="headline">Harvest Source</div></md-select-option
+          >
+        </md-outlined-select>
+
+        <div class="chart-wrapper">
+          ${when(
+            this.selectedChart === "trends",
+            () => html`<canvas id="analyticsChart"></canvas>`
+          )}
+          ${when(
+            this.selectedChart === "status",
+            () => html`<canvas id="statusChart"></canvas>`
+          )}
+          ${when(
+            this.selectedChart === "source",
+            () => html`<canvas id="sourceChart"></canvas>`
+          )}
         </div>
       </div>
     `;
