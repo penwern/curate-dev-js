@@ -46,7 +46,6 @@ class PreservationConfigManager extends LitElement {
       max-width: 1400px;
       margin: 0 auto;
       font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
-      background: var(--md-sys-color-surface, #fefbff);
       min-height: 100vh;
     }
 
@@ -84,7 +83,7 @@ class PreservationConfigManager extends LitElement {
 
     .form-section,
     .saved-configs-section {
-      background: var(--md-sys-color-surface-container, #f3f4f9);
+      background: var(--md-sys-color-secondary-container);
       border-radius: 24px;
       padding: 32px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04);
@@ -139,7 +138,7 @@ class PreservationConfigManager extends LitElement {
 
     .category {
       margin-bottom: 32px;
-      background: var(--md-sys-color-surface, #fefbff);
+      background: var(--md-sys-color-surface-1);
       border-radius: 16px;
       padding: 24px;
       border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
@@ -689,8 +688,6 @@ class PreservationConfigManager extends LitElement {
 
   render() {
     return html`
-      <div class="header">Preservation Configs</div>
-
       <div class="main-container">
         <div class="panels-wrapper">
           <!-- Form Section -->
