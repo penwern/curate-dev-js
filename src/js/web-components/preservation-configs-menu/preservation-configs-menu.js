@@ -1,8 +1,8 @@
 import { LitElement, html, css, svg } from "lit";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
-import "@material/web/textfield/filled-text-field.js";
-import "@material/web/select/filled-select.js";
+import "@material/web/textfield/outlined-text-field.js";
+import "@material/web/select/outlined-select.js";
 import "@material/web/select/select-option.js";
 import "@material/web/switch/switch.js";
 import "@material/web/slider/slider.js";
@@ -43,6 +43,7 @@ class PreservationConfigManager extends LitElement {
     :host {
       display: block;
       padding: 32px;
+      padding-top: 0;
       max-width: 1400px;
       margin: 0 auto;
       font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
@@ -121,8 +122,7 @@ class PreservationConfigManager extends LitElement {
     }
 
     .section-title {
-      font-size: 28px;
-      font-weight: 500;
+      font-size: 22px;
       margin-bottom: 32px;
       color: var(--md-sys-color-on-surface, #1d1b20);
       display: flex;
@@ -314,7 +314,6 @@ class PreservationConfigManager extends LitElement {
 
     .config-name {
       font-size: 18px;
-      font-weight: 600;
       color: var(--md-sys-color-on-surface, #1d1b20);
       line-height: 1.3;
     }
@@ -423,12 +422,12 @@ class PreservationConfigManager extends LitElement {
       margin-right: 8px;
     }
 
-    md-filled-text-field,
-    md-filled-select {
+    md-outlined-text-field,
+    md-outlined-select {
       width: 100%;
       margin-bottom: 8px;
-      --md-filled-text-field-container-shape: 12px;
-      --md-filled-select-text-field-container-shape: 12px;
+      --md-outlined-text-field-container-shape: 12px;
+      --md-outlined-select-text-field-container-shape: 12px;
     }
 
     md-switch {
@@ -701,22 +700,22 @@ class PreservationConfigManager extends LitElement {
               <div class="category-header">Details</div>
 
               <div class="form-field">
-                <md-filled-text-field
+                <md-outlined-text-field
                   label="Config Name"
                   .value=${this.configName}
                   @input=${(e) => (this.configName = e.target.value)}
                   required
                 >
-                </md-filled-text-field>
+                </md-outlined-text-field>
               </div>
 
               <div class="form-field">
-                <md-filled-text-field
+                <md-outlined-text-field
                   label="Config Description"
                   .value=${this.configDescription}
                   @input=${(e) => (this.configDescription = e.target.value)}
                 >
-                </md-filled-text-field>
+                </md-outlined-text-field>
               </div>
             </div>
 
@@ -735,7 +734,7 @@ class PreservationConfigManager extends LitElement {
 
               <div class="suboptions ${this.normalize ? "enabled" : ""}">
                 <div class="form-field">
-                  <md-filled-select
+                  <md-outlined-select
                     label="Image Normalisation Format"
                     .value=${this.imageNormalizationTiff}
                     @change=${(e) =>
@@ -748,7 +747,7 @@ class PreservationConfigManager extends LitElement {
                     <md-select-option value="JPEG2000">
                       <div slot="headline">JPEG2000</div>
                     </md-select-option>
-                  </md-filled-select>
+                  </md-outlined-select>
                 </div>
               </div>
             </div>
@@ -787,7 +786,7 @@ class PreservationConfigManager extends LitElement {
               <div class="category-header">Packaging and Compression</div>
 
               <div class="form-field">
-                <md-filled-select
+                <md-outlined-select
                   label="AIP Packaging Type"
                   .value=${this.processType}
                   @change=${(e) => (this.processType = e.target.value)}
@@ -798,7 +797,7 @@ class PreservationConfigManager extends LitElement {
                   <md-select-option value="eark">
                     <div slot="headline">eark</div>
                   </md-select-option>
-                </md-filled-select>
+                </md-outlined-select>
               </div>
 
               <div class="toggle-field">
@@ -820,7 +819,7 @@ class PreservationConfigManager extends LitElement {
                 </div>
 
                 <div class="form-field">
-                  <md-filled-select
+                  <md-outlined-select
                     label="Compression Algorithm"
                     .value=${this.compressionAlgorithm}
                     @change=${(e) =>
@@ -845,7 +844,7 @@ class PreservationConfigManager extends LitElement {
                     <md-select-option value="s7_lzma">
                       <div slot="headline">s7_lzma</div>
                     </md-select-option>
-                  </md-filled-select>
+                  </md-outlined-select>
                 </div>
 
                 <div class="form-field">
