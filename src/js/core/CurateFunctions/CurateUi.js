@@ -50,9 +50,18 @@ const CurateUi = {
                 const container = document.createElement('div');
                 container.classList.add('config-modal-container');
                 container.style.display = 'flex';
+
+                // Add event listener to close the popup when the user clicks outside of it
                 container.addEventListener("click", function (e) {
                     clickAway(e, container);
                 }, { once: true });
+
+                // Add event listener to close the popup when the user presses the Escape key
+                container.addEventListener("keyup", function (e) {
+                    if (e.key === "Escape") {
+                        closePopup(container);
+                    }
+                });
                         
                 // Create the content element
                 const contentDiv = document.createElement('div');
