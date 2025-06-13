@@ -117,7 +117,12 @@
         noConfigs.addEventListener("mouseleave", e => { e.target.style.background = "none" })
         noConfigs.addEventListener("click", e => {
             document.querySelector("#preservationConfigsSubMenu").remove()
-            createCuratePopup("Preservation Configs", inputs)
+            //createCuratePopup("Preservation Configs", inputs)
+            const preservationConfigsPopup = new Curate.ui.modals.curatePopup({title:"Preservation Configs"},{
+                afterLoaded: (popup)=>{
+                    const configsInterface = document.createElement("preservation-config-manager");
+                    popup.querySelector(".config-main-options-container").appendChild(configsInterface);
+            }}).fire();
         })
         div.querySelector('[role="menu"]').appendChild(noConfigs)
         document.body.appendChild(div);

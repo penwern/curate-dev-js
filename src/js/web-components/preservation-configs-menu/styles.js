@@ -128,6 +128,10 @@ export const styles = css`
 
     .form-field {
       margin-bottom: 20px;
+      padding-top: 16px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .toggle-field {
@@ -193,6 +197,9 @@ export const styles = css`
       padding: 16px;
       background: var(--md-sys-color-surface-variant, #e7e0ec);
       border-radius: 12px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .slider-label {
@@ -212,6 +219,11 @@ export const styles = css`
       border-radius: 8px;
       min-width: 32px;
       text-align: center;
+    }
+
+    .slider-container md-slider {
+      width: 100%;
+      min-width: 0;
     }
 
     .form-actions {
@@ -386,10 +398,16 @@ export const styles = css`
     md-outlined-text-field,
     md-outlined-select {
       width: 100%;
+      max-width: 100%;
       margin-bottom: 8px;
       --md-outlined-text-field-container-shape: 12px;
       --md-outlined-select-text-field-container-shape: 12px;
     }
+
+    .form-field md-outlined-select {
+  width: 100%;
+  min-width: 0; /* This is important - allows shrinking below content width */
+}
 
     md-switch {
       --md-switch-selected-track-color: var(--md-sys-color-primary, #6750a4);
