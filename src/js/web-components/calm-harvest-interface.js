@@ -22,7 +22,7 @@ import {
   alertCircleIcon,
   chevronRightIcon,
   chevronDownIcon,
-} from "./icons.js";
+} from "./utils/icons.js";
 
 // All necessary Material Web Components
 import "@material/web/button/filled-button.js";

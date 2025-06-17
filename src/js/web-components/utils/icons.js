@@ -20,7 +20,7 @@ import {
 } from "@mdi/js";
 
 // A helper to wrap the SVG path data in an <svg> tag
-const icon = (path, slot = "") => svg`
+export const icon = (path, slot = "") => svg`
   <svg slot=${slot} viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;">
     <path d="${path}"></path>
   </svg>
