@@ -1,15 +1,9 @@
 async function submitPreservationRequest(configId) {
   const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
   const url = `${window.location.origin}/a/scheduler/hooks/preserve`;
-  const paths = pydio._dataModel._selectedNodes.map((n) => ({
-    path: Curate.workspaces.getOpenWorkspace() + n._path,
-  })); // change this to be something like:
-  /**
-     * JSON.stringify({
-        "Paths": ["quarantine/dublin-old-photos.jpg"],
-        "JobParameters": {"ConfigId": "3"}
-    * })
-    */
+  const paths = pydio._dataModel._selectedNodes.map(
+    (n) => Curate.workspaces.getOpenWorkspace() + n._path
+  );
   const bodyData = JSON.stringify({
     Paths: paths,
     JobParameters: { ConfigId: configId.toString() },
