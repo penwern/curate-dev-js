@@ -57,11 +57,13 @@ const CurateUi = {
                 }, { once: true });
 
                 // Add event listener to close the popup when the user presses the Escape key
-                container.addEventListener("keyup", function (e) {
+                const escapePopup = (e) => {
                     if (e.key === "Escape") {
                         closePopup(container);
+                        document.removeEventListener("keyup", escapePopup);
                     }
-                });
+                }
+                document.addEventListener("keyup", escapePopup);
                         
                 // Create the content element
                 const contentDiv = document.createElement('div');
