@@ -14,22 +14,28 @@ import { PreservationConfigAPI } from "./api-client.js";
 import { icon } from "../utils/icons.js";
 import {styles} from "./styles.js";   
 
-
 class PreservationConfigManager extends LitElement {
   static properties = {
     configName: { state: true },
     configDescription: { state: true },
-    normalize: { state: true },
-    imageNormalizationTiff: { state: true },
-    dipEnabled: { state: true },
-    processType: { state: true },
-    compressAip: { state: true },
-    compressionAlgorithm: { state: true },
-    compressionLevel: { state: true },
-    genTransferStructReport: { state: true },
-    documentEmptyDirectories: { state: true },
-    extractPackages: { state: true },
-    deletePackagesAfterExtraction: { state: true },
+    AssignUuidsToDirectories: { state: true },
+    ExamineContents: { state: true },
+    GenerateTransferStructureReport: { state: true },
+    DocumentEmptyDirectories: { state: true },
+    ExtractPackages: { state: true },
+    DeletePackagesAfterExtraction: { state: true },
+    IdentifyTransfer: { state: true },
+    IdentifySubmissionAndMetadata: { state: true },
+    IdentifyBeforeNormalization: { state: true },
+    Normalize: { state: true },
+    TranscribeFiles: { state: true },
+    PerformPolicyChecksOnOriginals: { state: true },
+    PerformPolicyChecksOnPreservationDerivatives: { state: true },
+    PerformPolicyChecksOnAccessDerivatives: { state: true },
+    ThumbnailMode: { state: true },
+    CompressAip: { state: true },
+    AipCompressionLevel: { state: true },
+    AipCompressionAlgorithm: { state: true },
     savedConfigs: { state: true },
     isEditMode: { state: true },
     editConfigId: { state: true },
@@ -43,17 +49,24 @@ class PreservationConfigManager extends LitElement {
     super();
     this.configName = "";
     this.configDescription = "";
-    this.normalize = false;
-    this.imageNormalizationTiff = "TIFF";
-    this.dipEnabled = false;
-    this.processType = "standard";
-    this.compressAip = false;
-    this.compressionAlgorithm = "tar";
-    this.compressionLevel = 1;
-    this.genTransferStructReport = false;
-    this.documentEmptyDirectories = false;
-    this.extractPackages = false;
-    this.deletePackagesAfterExtraction = false;
+    this.AssignUuidsToDirectories = true;
+    this.ExamineContents = false;
+    this.GenerateTransferStructureReport = true;
+    this.DocumentEmptyDirectories = true;
+    this.ExtractPackages = true;
+    this.DeletePackagesAfterExtraction = false;
+    this.IdentifyTransfer = true;
+    this.IdentifySubmissionAndMetadata = true;
+    this.IdentifyBeforeNormalization = true;
+    this.Normalize = true;
+    this.TranscribeFiles = true;
+    this.PerformPolicyChecksOnOriginals = true;
+    this.PerformPolicyChecksOnPreservationDerivatives = true;
+    this.PerformPolicyChecksOnAccessDerivatives = true;
+    this.ThumbnailMode = 1; // GENERATE
+    this.CompressAip = false;
+    this.AipCompressionLevel = 1;
+    this.AipCompressionAlgorithm = "ZIP";
     this.savedConfigs = [];
     this.isEditMode = false;
     this.editConfigId = null;
@@ -84,17 +97,24 @@ class PreservationConfigManager extends LitElement {
   clearForm() {
     this.configName = "";
     this.configDescription = "";
-    this.normalize = false;
-    this.imageNormalizationTiff = "TIFF";
-    this.dipEnabled = false;
-    this.processType = "standard";
-    this.compressAip = false;
-    this.compressionAlgorithm = "tar";
-    this.compressionLevel = 1;
-    this.genTransferStructReport = false;
-    this.documentEmptyDirectories = false;
-    this.extractPackages = false;
-    this.deletePackagesAfterExtraction = false;
+    this.AssignUuidsToDirectories = true;
+    this.ExamineContents = false;
+    this.GenerateTransferStructureReport = true;
+    this.DocumentEmptyDirectories = true;
+    this.ExtractPackages = true;
+    this.DeletePackagesAfterExtraction = false;
+    this.IdentifyTransfer = true;
+    this.IdentifySubmissionAndMetadata = true;
+    this.IdentifyBeforeNormalization = true;
+    this.Normalize = true;
+    this.TranscribeFiles = true;
+    this.PerformPolicyChecksOnOriginals = true;
+    this.PerformPolicyChecksOnPreservationDerivatives = true;
+    this.PerformPolicyChecksOnAccessDerivatives = true;
+    this.ThumbnailMode = 1;
+    this.CompressAip = false;
+    this.AipCompressionLevel = 1;
+    this.AipCompressionAlgorithm = "ZIP";
     this.isEditMode = false;
     this.editConfigId = null;
   }
@@ -111,20 +131,26 @@ class PreservationConfigManager extends LitElement {
       const config = {
         name: this.configName,
         description: this.configDescription,
-        normalize: this.normalize ? 1 : 0,
-        image_normalization_tiff:
-          this.imageNormalizationTiff === "TIFF" ? 1 : 0,
-        dip_enabled: this.dipEnabled ? 1 : 0,
-        process_type: this.processType.toLowerCase(),
-        compress_aip: this.compressAip ? 1 : 0,
-        compression_algorithm: this.compressionAlgorithm.toLowerCase(),
-        compression_level: this.compressionLevel,
-        gen_transfer_struct_report: this.genTransferStructReport ? 1 : 0,
-        document_empty_directories: this.documentEmptyDirectories ? 1 : 0,
-        extract_packages: this.extractPackages ? 1 : 0,
-        delete_packages_after_extraction: this.deletePackagesAfterExtraction
-          ? 1
-          : 0,
+        compress_aip: this.CompressAip,
+        aip_compression_level: this.AipCompressionLevel,
+        aip_compression_algorithm: this.AipCompressionAlgorithm,
+        a3m_config: {
+          assign_uuids_to_directories: this.AssignUuidsToDirectories,
+          examine_contents: this.ExamineContents,
+          generate_transfer_structure_report: this.GenerateTransferStructureReport,
+          document_empty_directories: this.DocumentEmptyDirectories,
+          extract_packages: this.ExtractPackages,
+          delete_packages_after_extraction: this.DeletePackagesAfterExtraction,
+          identify_transfer: this.IdentifyTransfer,
+          identify_submission_and_metadata: this.IdentifySubmissionAndMetadata,
+          identify_before_normalization: this.IdentifyBeforeNormalization,
+          normalize: this.Normalize,
+          transcribe_files: this.TranscribeFiles,
+          perform_policy_checks_on_originals: this.PerformPolicyChecksOnOriginals,
+          perform_policy_checks_on_preservation_derivatives: this.PerformPolicyChecksOnPreservationDerivatives,
+          perform_policy_checks_on_access_derivatives: this.PerformPolicyChecksOnAccessDerivatives,
+          thumbnail_mode: this.ThumbnailMode,
+        },
         user: pydio?.user?.id || "current-user", // Use actual user if available
       };
 
@@ -152,19 +178,31 @@ class PreservationConfigManager extends LitElement {
   loadConfig(config) {
     this.configName = config.name || "";
     this.configDescription = config.description || "";
-    this.normalize = !!config.normalize;
-    this.imageNormalizationTiff =
-      config.image_normalization_tiff === 1 ? "TIFF" : "JPEG2000";
-    this.dipEnabled = !!config.dip_enabled;
-    this.processType = config.process_type || "standard";
-    this.compressAip = !!config.compress_aip;
-    this.compressionAlgorithm = config.compression_algorithm || "tar";
-    this.compressionLevel = config.compression_level || 1;
-    this.genTransferStructReport = !!config.gen_transfer_struct_report;
-    this.documentEmptyDirectories = !!config.document_empty_directories;
-    this.extractPackages = !!config.extract_packages;
-    this.deletePackagesAfterExtraction =
-      !!config.delete_packages_after_extraction;
+    
+    // Handle new nested structure
+    const a3mConfig = config.a3m_config || {};
+    
+    this.AssignUuidsToDirectories = a3mConfig.assign_uuids_to_directories !== undefined ? !!a3mConfig.assign_uuids_to_directories : true;
+    this.ExamineContents = a3mConfig.examine_contents !== undefined ? !!a3mConfig.examine_contents : false;
+    this.GenerateTransferStructureReport = a3mConfig.generate_transfer_structure_report !== undefined ? !!a3mConfig.generate_transfer_structure_report : true;
+    this.DocumentEmptyDirectories = a3mConfig.document_empty_directories !== undefined ? !!a3mConfig.document_empty_directories : true;
+    this.ExtractPackages = a3mConfig.extract_packages !== undefined ? !!a3mConfig.extract_packages : true;
+    this.DeletePackagesAfterExtraction = a3mConfig.delete_packages_after_extraction !== undefined ? !!a3mConfig.delete_packages_after_extraction : false;
+    this.IdentifyTransfer = a3mConfig.identify_transfer !== undefined ? !!a3mConfig.identify_transfer : true;
+    this.IdentifySubmissionAndMetadata = a3mConfig.identify_submission_and_metadata !== undefined ? !!a3mConfig.identify_submission_and_metadata : true;
+    this.IdentifyBeforeNormalization = a3mConfig.identify_before_normalization !== undefined ? !!a3mConfig.identify_before_normalization : true;
+    this.Normalize = a3mConfig.normalize !== undefined ? !!a3mConfig.normalize : true;
+    this.TranscribeFiles = a3mConfig.transcribe_files !== undefined ? !!a3mConfig.transcribe_files : true;
+    this.PerformPolicyChecksOnOriginals = a3mConfig.perform_policy_checks_on_originals !== undefined ? !!a3mConfig.perform_policy_checks_on_originals : true;
+    this.PerformPolicyChecksOnPreservationDerivatives = a3mConfig.perform_policy_checks_on_preservation_derivatives !== undefined ? !!a3mConfig.perform_policy_checks_on_preservation_derivatives : true;
+    this.PerformPolicyChecksOnAccessDerivatives = a3mConfig.perform_policy_checks_on_access_derivatives !== undefined ? !!a3mConfig.perform_policy_checks_on_access_derivatives : true;
+    
+    // Handle root-level properties
+    this.ThumbnailMode = config.a3m_config?.thumbnail_mode !== undefined ? config.a3m_config.thumbnail_mode : 1;
+    this.CompressAip = config.compress_aip !== undefined ? !!config.compress_aip : false;
+    this.AipCompressionLevel = config.aip_compression_level !== undefined ? config.aip_compression_level : 1;
+    this.AipCompressionAlgorithm = config.aip_compression_algorithm || "ZIP";
+    
     this.isEditMode = true;
     this.editConfigId = config.id;
   }
@@ -231,6 +269,19 @@ class PreservationConfigManager extends LitElement {
     return this.isEditMode ? "Update Config" : "Save Config";
   }
 
+  getThumbnailModeText(mode) {
+    switch (mode) {
+      case 1:
+        return "Generate";
+      case 2:
+        return "Generate (Non-default)";
+      case 3:
+        return "Do Not Generate";
+      default:
+        return "Generate";
+    }
+  }
+
   render() {
     return html`
       <div class="main-container">
@@ -265,98 +316,197 @@ class PreservationConfigManager extends LitElement {
               </div>
             </div>
 
-            <!-- Normalisation Category -->
+            <!-- Directory and Transfer Processing -->
             <div class="category">
-              <div class="category-header">Normalisation</div>
+              <div class="category-header">Directory and Transfer Processing</div>
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.normalize}
-                  @change=${(e) => (this.normalize = e.target.selected)}
+                  ?selected=${this.AssignUuidsToDirectories}
+                  @change=${(e) => (this.AssignUuidsToDirectories = e.target.selected)}
                 >
                 </md-switch>
-                <label>Normalise Objects</label>
+                <label>Assign UUIDs to Directories</label>
               </div>
 
-              <div class="suboptions ${this.normalize ? "enabled" : ""}">
-                <div class="form-field">
-                  <md-outlined-select
-                    label="Image Normalisation Format"
-                    .value=${this.imageNormalizationTiff}
-                    @change=${(e) =>
-                      (this.imageNormalizationTiff = e.target.value)}
-                    ?disabled=${!this.normalize}
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.ExamineContents}
+                  @change=${(e) => (this.ExamineContents = e.target.selected)}
+                >
+                </md-switch>
+                <label>Examine Contents</label>
+              </div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.GenerateTransferStructureReport}
+                  @change=${(e) => (this.GenerateTransferStructureReport = e.target.selected)}
+                >
+                </md-switch>
+                <label>Generate Transfer Structure Report</label>
+              </div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.DocumentEmptyDirectories}
+                  @change=${(e) => (this.DocumentEmptyDirectories = e.target.selected)}
+                >
+                </md-switch>
+                <label>Document Empty Directories</label>
+              </div>
+            </div>
+
+            <!-- Package Extraction -->
+            <div class="category">
+              <div class="category-header">Package Extraction</div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.ExtractPackages}
+                  @change=${(e) => (this.ExtractPackages = e.target.selected)}
+                >
+                </md-switch>
+                <label>Extract Packages</label>
+              </div>
+
+              <div class="suboptions ${this.ExtractPackages ? "enabled" : ""}">
+                <div class="toggle-field">
+                  <md-switch
+                    ?selected=${this.DeletePackagesAfterExtraction}
+                    @change=${(e) => (this.DeletePackagesAfterExtraction = e.target.selected)}
+                    ?disabled=${!this.ExtractPackages}
                   >
-                    <md-select-option value="TIFF">
-                      <div slot="headline">TIFF</div>
-                    </md-select-option>
-                    <md-select-option value="JPEG2000">
-                      <div slot="headline">JPEG2000</div>
-                    </md-select-option>
-                  </md-outlined-select>
+                  </md-switch>
+                  <label>Delete Packages After Extraction</label>
                 </div>
               </div>
             </div>
 
-            <!-- Dissemination Category !!commented out for now since we just auto generate DIPs when AtoM slug is connected, keeping in because
-            it's likely users will want want to generate DIPs on their own in the future -->
-            <!--<div class="category">
-              <div class="category-header">Dissemination</div>
+            <!-- Identification -->
+            <div class="category">
+              <div class="category-header">Identification</div>
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.dipEnabled}
-                  @change=${(e) => (this.dipEnabled = e.target.selected)}
+                  ?selected=${this.IdentifyTransfer}
+                  @change=${(e) => (this.IdentifyTransfer = e.target.selected)}
                 >
                 </md-switch>
-                <label>Create Dissemination Package</label>
+                <label>Identify Transfer</label>
               </div>
 
-              <div class="suboptions ${this.dipEnabled ? "enabled" : ""}">
-                <div class="info-panel">
-                  Create dissemination packages from AIPs generated by this
-                  config. Created DIPs will automatically be connected to the
-                  linked description of the source data. For this option to
-                  work, you must configure a connected AtoM instance.
-                </div>
-                <md-filled-button
-                  @click=${this.openAtomConfig}
-                  ?disabled=${!this.dipEnabled}
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.IdentifySubmissionAndMetadata}
+                  @change=${(e) => (this.IdentifySubmissionAndMetadata = e.target.selected)}
                 >
-                  Go to AtoM Configuration
-                </md-filled-button>
+                </md-switch>
+                <label>Identify Submission and Metadata</label>
               </div>
-            </div> -->
 
-            <!-- Packaging and Compression Category -->
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.IdentifyBeforeNormalization}
+                  @change=${(e) => (this.IdentifyBeforeNormalization = e.target.selected)}
+                >
+                </md-switch>
+                <label>Identify Before Normalization</label>
+              </div>
+            </div>
+
+            <!-- Normalization -->
             <div class="category">
-              <div class="category-header">Packaging and Compression</div>
+              <div class="category-header">Normalization</div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.Normalize}
+                  @change=${(e) => (this.Normalize = e.target.selected)}
+                >
+                </md-switch>
+                <label>Normalize Files</label>
+              </div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.TranscribeFiles}
+                  @change=${(e) => (this.TranscribeFiles = e.target.selected)}
+                >
+                </md-switch>
+                <label>Transcribe Files</label>
+              </div>
+            </div>
+
+            <!-- Policy Checks -->
+            <div class="category">
+              <div class="category-header">Policy Checks</div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.PerformPolicyChecksOnOriginals}
+                  @change=${(e) => (this.PerformPolicyChecksOnOriginals = e.target.selected)}
+                >
+                </md-switch>
+                <label>Perform Policy Checks on Originals</label>
+              </div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.PerformPolicyChecksOnPreservationDerivatives}
+                  @change=${(e) => (this.PerformPolicyChecksOnPreservationDerivatives = e.target.selected)}
+                >
+                </md-switch>
+                <label>Perform Policy Checks on Preservation Derivatives</label>
+              </div>
+
+              <div class="toggle-field">
+                <md-switch
+                  ?selected=${this.PerformPolicyChecksOnAccessDerivatives}
+                  @change=${(e) => (this.PerformPolicyChecksOnAccessDerivatives = e.target.selected)}
+                >
+                </md-switch>
+                <label>Perform Policy Checks on Access Derivatives</label>
+              </div>
+            </div>
+
+            <!-- Thumbnail Generation -->
+            <div class="category">
+              <div class="category-header">Thumbnail Generation</div>
 
               <div class="form-field">
                 <md-outlined-select
-                  label="AIP Packaging Type"
-                  .value=${this.processType}
-                  @change=${(e) => (this.processType = e.target.value)}
+                  label="Thumbnail Mode"
+                  .value=${this.ThumbnailMode}
+                  @change=${(e) => (this.ThumbnailMode = parseInt(e.target.value))}
                 >
-                  <md-select-option value="standard">
-                    <div slot="headline">standard</div>
+                  <md-select-option value="1">
+                    <div slot="headline">Generate</div>
                   </md-select-option>
-                  <md-select-option value="eark">
-                    <div slot="headline">eark</div>
+                  <md-select-option value="2">
+                    <div slot="headline">Generate (Non-default)</div>
+                  </md-select-option>
+                  <md-select-option value="3">
+                    <div slot="headline">Do Not Generate</div>
                   </md-select-option>
                 </md-outlined-select>
               </div>
+            </div>
+
+            <!-- AIP Compression -->
+            <div class="category">
+              <div class="category-header">AIP Compression</div>
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.compressAip}
-                  @change=${(e) => (this.compressAip = e.target.selected)}
+                  ?selected=${this.CompressAip}
+                  @change=${(e) => (this.CompressAip = e.target.selected)}
                 >
                 </md-switch>
-                <label>Compress AIPs</label>
+                <label>Compress AIP</label>
               </div>
 
-              <div class="suboptions ${this.compressAip ? "enabled" : ""}">
+              <div class="suboptions ${this.CompressAip ? "enabled" : ""}">
                 <div class="info-panel">
                   Compressing AIPs will make their contents unsearchable and
                   prevent descriptive metadata from being reassociated with
@@ -368,97 +518,20 @@ class PreservationConfigManager extends LitElement {
                 <div class="form-field">
                   <md-outlined-select
                     label="Compression Algorithm"
-                    .value=${this.compressionAlgorithm}
-                    @change=${(e) =>
-                      (this.compressionAlgorithm = e.target.value)}
-                    ?disabled=${!this.compressAip}
+                    .value=${this.AipCompressionAlgorithm}
+                    @change=${(e) => (this.AipCompressionAlgorithm = e.target.value)}
+                    ?disabled=${!this.CompressAip}
                   >
-                    <md-select-option value="tar">
-                      <div slot="headline">tar</div>
-                    </md-select-option>
-                    <md-select-option value="tar_bzip2">
-                      <div slot="headline">tar_bzip2</div>
-                    </md-select-option>
-                    <md-select-option value="tar_gzip">
-                      <div slot="headline">tar_gzip</div>
-                    </md-select-option>
-                    <md-select-option value="s7_copy">
-                      <div slot="headline">s7_copy</div>
-                    </md-select-option>
-                    <md-select-option value="s7_bzip2">
-                      <div slot="headline">s7_bzip2</div>
-                    </md-select-option>
-                    <md-select-option value="s7_lzma">
-                      <div slot="headline">s7_lzma</div>
+                    <md-select-option value="ZIP">
+                      <div slot="headline">ZIP</div>
                     </md-select-option>
                   </md-outlined-select>
                 </div>
 
                 <div class="form-field">
-                  <div class="slider-container">
-                    <div class="slider-label">
-                      <span>Compression Level</span>
-                      <span class="slider-value">${this.compressionLevel}</span>
-                    </div>
-                    <md-slider
-                      min="1"
-                      max="9"
-                      step="1"
-                      .value=${this.compressionLevel}
-                      @input=${(e) =>
-                        (this.compressionLevel = parseInt(e.target.value))}
-                      ?disabled=${!this.compressAip}
-                      labeled
-                    >
-                    </md-slider>
+                  <div class="info-panel">
+                    <em>Compression level options coming soon</em>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Transfer Options Category -->
-            <div class="category">
-              <div class="category-header">Transfer Options</div>
-
-              <div class="toggle-field">
-                <md-switch
-                  ?selected=${this.genTransferStructReport}
-                  @change=${(e) =>
-                    (this.genTransferStructReport = e.target.selected)}
-                >
-                </md-switch>
-                <label>Generate Transfer Structure Report</label>
-              </div>
-
-              <div class="toggle-field">
-                <md-switch
-                  ?selected=${this.documentEmptyDirectories}
-                  @change=${(e) =>
-                    (this.documentEmptyDirectories = e.target.selected)}
-                >
-                </md-switch>
-                <label>Document Empty Directories</label>
-              </div>
-
-              <div class="toggle-field">
-                <md-switch
-                  ?selected=${this.extractPackages}
-                  @change=${(e) => (this.extractPackages = e.target.selected)}
-                >
-                </md-switch>
-                <label>Extract Packages</label>
-              </div>
-
-              <div class="suboptions ${this.extractPackages ? "enabled" : ""}">
-                <div class="toggle-field">
-                  <md-switch
-                    ?selected=${this.deletePackagesAfterExtraction}
-                    @change=${(e) =>
-                      (this.deletePackagesAfterExtraction = e.target.selected)}
-                    ?disabled=${!this.extractPackages}
-                  >
-                  </md-switch>
-                  <label>Delete Packages After Extraction</label>
                 </div>
               </div>
             </div>
@@ -533,6 +606,9 @@ class PreservationConfigManager extends LitElement {
                             ${config.description || "No description"}
                           </div>
                           <div><strong>User:</strong> ${config.user}</div>
+                          <div><strong>Normalize:</strong> ${config.a3m_config?.normalize ? "Yes" : "No"}</div>
+                          <div><strong>Compress AIP:</strong> ${config.compress_aip ? "Yes" : "No"}</div>
+                          <!-- <div><strong>Thumbnail Mode:</strong> ${this.getThumbnailModeText(config.a3m_config?.thumbnail_mode)}</div> -->
                         </div>
                       </div>
                     `
