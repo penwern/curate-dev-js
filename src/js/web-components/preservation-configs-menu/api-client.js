@@ -4,7 +4,7 @@
  */
 class PreservationConfigAPI {
   constructor() {
-    this.baseUrl = `${window.location.protocol}//${window.location.hostname}/api/preservation`;
+    this.baseUrl = `${window.location.protocol}//${window.location.hostname}/api/v1`;
   }
 
   /**
@@ -16,6 +16,32 @@ class PreservationConfigAPI {
   }
 
   /**
+   * Health check endpoint
+   * @returns {Promise<Object>} Health status response
+   */
+  async healthCheck() {
+    const token = await this.getAuthToken();
+
+    try {
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error checking health:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all preservation configurations
    * @returns {Promise<Array>} Array of preservation configs
    */
@@ -23,7 +49,7 @@ class PreservationConfigAPI {
     const token = await this.getAuthToken();
 
     try {
-      const response = await fetch(this.baseUrl, {
+      const response = await fetch(`${this.baseUrl}/preservation-configs`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -47,6 +73,33 @@ class PreservationConfigAPI {
   }
 
   /**
+   * Get a specific preservation configuration by ID
+   * @param {string|number} configId - ID of the config to retrieve
+   * @returns {Promise<Object>} Configuration object
+   */
+  async getConfig(configId) {
+    const token = await this.getAuthToken();
+
+    try {
+      const response = await fetch(`${this.baseUrl}/preservation-configs/${configId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching preservation config:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Create a new preservation configuration
    * @param {Object} config - Configuration object
    * @returns {Promise<Object>} Created config response
@@ -55,7 +108,7 @@ class PreservationConfigAPI {
     const token = await this.getAuthToken();
 
     try {
-      const response = await fetch(this.baseUrl, {
+      const response = await fetch(`${this.baseUrl}/preservation-configs`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -89,11 +142,11 @@ class PreservationConfigAPI {
    */
   async updateConfig(config) {
     const token = await this.getAuthToken();
-    const url = `${this.baseUrl}/${config.id}`;
+    const url = `${this.baseUrl}/preservation-configs/${config.id}`;
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: "PUT",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -128,7 +181,7 @@ class PreservationConfigAPI {
    */
   async deleteConfig(configId) {
     const token = await this.getAuthToken();
-    const url = `${this.baseUrl}/${configId}`;
+    const url = `${this.baseUrl}/preservation-configs/${configId}`;
 
     try {
       const response = await fetch(url, {
