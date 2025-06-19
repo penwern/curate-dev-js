@@ -86,9 +86,8 @@ class PreservationGoConfigManager extends LitElement {
       const configs = await this.api.getConfigs();
       this.savedConfigs = configs || [];
     } catch (error) {
-      console.error("Failed to load configs:", error);
-      // Fall back to cached configs from session storage
-      this.savedConfigs = this.api.getConfigsFromStorage();
+      console.error("Failed to load preservation go configs:", error);
+      this.savedConfigs = [];
     } finally {
       this.isLoading = false;
     }
@@ -168,7 +167,7 @@ class PreservationGoConfigManager extends LitElement {
       // Clear the form
       this.clearForm();
     } catch (error) {
-      console.error("Failed to save config:", error);
+      console.error("Failed to save preservation go config:", error);
       // Error modal is already shown by the API client
     } finally {
       this.saveInProgress = false;
@@ -221,7 +220,7 @@ class PreservationGoConfigManager extends LitElement {
       // Reload configs after successful deletion
       await this.loadConfigs();
     } catch (error) {
-      console.error("Failed to delete config:", error);
+      console.error("Failed to delete preservation go config:", error);
       // Error modal is already shown by the API client
     }
   }
