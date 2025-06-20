@@ -139,6 +139,7 @@ const Curate = (function() {
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
+          let data;
           switch(type){
               case "text":
                   data = await response.text();
