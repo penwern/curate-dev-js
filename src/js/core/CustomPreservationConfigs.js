@@ -73,7 +73,7 @@ function createDivBesideElement(targetElement, content, childItems) {
   div.innerHTML = content;
   childItems.forEach((item) => {
     let c = document.createElement("div");
-    const bookmark = JSON.parse(localStorage.getItem(item.id));
+    const bookmark = JSON.parse(localStorage.getItem(item.id) || "{}");
     c.style.transition = "0.3s ease all";
     c.addEventListener("mouseenter", (e) => {
       e.target.style.background = "var(--md-sys-color-outline-variant-50)";
@@ -242,7 +242,7 @@ function addPreservationWorkflows(menu) {
         });
         savedConfigs.forEach((config) => {
           const bookmark = JSON.parse(
-            localStorage.getItem(config.id.toString())
+            localStorage.getItem(config.id.toString()) || "{}"
           );
           if (bookmark && bookmark.bookmarked) {
             const markedConfigDiv = createMenuItem(config.name, "mdi-console");

@@ -72,7 +72,7 @@ function createCuratePopup(title, inputs) {
     saveConfig.textContent = "Save Config"
     saveConfig.addEventListener("click", e => {
         //validate save
-        const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+        const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
         const saveName = optionsContainer.querySelector("#name").value
 
         // Flatten the input labels
@@ -125,10 +125,10 @@ function createCuratePopup(title, inputs) {
             editPreservationConfig(curConfig).then(r => {
                 console.log(r)
                 if (r) {
-                    const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+                    const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
                     getPreservationConfigs()
                         .then(r => {
-                            const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+                            const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
                             console.log(newConfigs)
                             if (curConfig.id) {
                                 document.querySelector("#config-" + curConfig.id).remove()
@@ -148,10 +148,10 @@ function createCuratePopup(title, inputs) {
                 console.log(r)
                 if (r) {
                     console.log("saved new config")
-                    const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+                    const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
                     getPreservationConfigs()
                         .then(r => {
-                            const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+                            const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
                             console.log(newConfigs)
                             
                             const newObject = newConfigs.find(newObj => !curConfigs.some(curObj => curObj.id === newObj.id));
@@ -188,7 +188,7 @@ function createCuratePopup(title, inputs) {
     savedTitle.style = "padding-bottom: 1em; !important"
     savedTitle.textContent = "Saved Configs"
     savedConfigsContainer.appendChild(savedTitle)
-    const savedConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"))
+    const savedConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]")
     createConfigsBox(savedScrollContainer, savedConfigsContainer, savedConfigs)
     savedConfigsContainer.appendChild(savedScrollContainer)
     mainOptionsContainer.appendChild(savedConfigsContainer);
@@ -459,7 +459,7 @@ function createConfigsBox(target, container, configs) {
             }
         })
         const bookmarkIcon = document.createElement("span")
-        const bookmarkCheck = JSON.parse(localStorage.getItem(config.id.toString()))
+        const bookmarkCheck = JSON.parse(localStorage.getItem(config.id.toString()) || "{}")
         if (bookmarkCheck && bookmarkCheck.bookmarked) {
             bookmarkIcon.classList.add("mdi-star")
         } else {
