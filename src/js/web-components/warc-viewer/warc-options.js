@@ -2,7 +2,6 @@ import { LitElement, html, css } from "lit";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/button/text-button.js";
 import "@material/web/button/filled-button.js";
-
 import { Curate } from "../../core/CurateFunctions/CurateFunctions";
 
 export class WarcOptionsModal extends LitElement {
@@ -19,35 +18,29 @@ export class WarcOptionsModal extends LitElement {
       max-width: 500px;
       background: var(--md-sys-color-surface);
     }
-
     .file-info h3 {
       margin: 0 0 8px 0;
       font-size: 1.25rem;
       color: var(--md-sys-color-on-surface);
       font-weight: 500;
     }
-
     .filename {
       color: var(--md-sys-color-on-surface-variant);
       margin: 0 0 24px 0;
       font-size: 0.875rem;
     }
-
     .form-field {
       margin-bottom: 24px;
     }
-
     md-outlined-text-field {
       width: 100%;
     }
-
     .actions {
       display: flex;
       gap: 12px;
       justify-content: flex-end;
       margin-top: 32px;
     }
-
     .archive-icon {
       display: inline-flex;
       align-items: center;
@@ -76,7 +69,6 @@ export class WarcOptionsModal extends LitElement {
           <h3>Preview Web-Archive</h3>
           <p class="filename">${this.fileName}</p>
         </div>
-
         <div class="form-field">
           <md-outlined-text-field
             label="Starting URL (optional)"
@@ -88,7 +80,6 @@ export class WarcOptionsModal extends LitElement {
           >
           </md-outlined-text-field>
         </div>
-
         <div class="actions">
           <md-text-button @click=${this.handleCancel}> Cancel </md-text-button>
           <md-filled-button @click=${this.handleOpenViewer}>
@@ -112,16 +103,41 @@ export class WarcOptionsModal extends LitElement {
       fileUrl: this.fileUrl,
       startingUrl: this.startingUrl,
     });
+
+    // Close the current modal
     this.closeSelf();
-    Curate.ui.modals
-      .curatePopup({
+
+    // Create the viewer modal using the callback approach
+    const viewerModal = Curate.ui.modals.curatePopup(
+      {
         title: "Preview Web-Archive",
-        content: html`<warc-viewer-modal
-          .fileUrl=${this.fileUrl}
-          .startingUrl=${this.startingUrl}
-        ></warc-viewer-modal>`,
-      })
-      .fire();
+      },
+      {
+        afterLoaded: (container) => {
+          // Find the main content container and update it with the web component
+          const mainContent = container.querySelector(
+            ".config-main-options-container"
+          );
+          if (mainContent) {
+            // Clear existing content
+            mainContent.innerHTML = "";
+
+            // Create the warc-viewer-modal web component
+            const warcViewer = document.createElement("warc-viewer-modal");
+            warcViewer.fileUrl = this.fileUrl;
+            warcViewer.startingUrl = this.startingUrl;
+
+            // If the viewer component also needs a close method, pass it
+            warcViewer.closeSelf = viewerModal.close;
+
+            mainContent.appendChild(warcViewer);
+          }
+        },
+      }
+    );
+
+    // Fire the viewer modal
+    viewerModal.fire();
   }
 
   setFileInfo(fileUrl, fileName) {
