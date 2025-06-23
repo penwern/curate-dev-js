@@ -38,17 +38,40 @@ const handlerId = Curate.eventDelegator.addEventListener(
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
+
         const url = await PydioApi._PydioClient.buildPresignedGetUrl(
           pydio._dataModel._selectedNodes[0]
         );
-        const optionsModal = Curate.ui.modals.curatePopup({
-          title: "Preview Web-Archive",
-          content: html`<warc-options-modal
-            .closeSelf=${optionsModal.close}
-            .fileUrl=${url}
-          ></warc-options-modal>`,
-        });
 
+        // Create the modal with a callback-based approach
+        const optionsModal = Curate.ui.modals.curatePopup(
+          {
+            title: "Preview Web-Archive",
+            content: "", // Will be set in afterLoaded
+          },
+          {
+            afterLoaded: (container) => {
+              // Find the main content container and update it with the web component
+              const mainContent = container.querySelector(
+                ".config-main-options-container"
+              );
+              if (mainContent) {
+                // Clear existing content
+                mainContent.innerHTML = "";
+
+                // Create the web component with the close method
+                const warcOptions =
+                  document.createElement("warc-options-modal");
+                warcOptions.closeSelf = optionsModal.close;
+                warcOptions.fileUrl = url;
+
+                mainContent.appendChild(warcOptions);
+              }
+            },
+          }
+        );
+
+        // Fire the modal
         optionsModal.fire();
 
         return false;
