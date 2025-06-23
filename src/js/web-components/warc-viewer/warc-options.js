@@ -10,6 +10,7 @@ export class WarcOptionsModal extends LitElement {
     fileUrl: { type: String },
     fileName: { type: String },
     startingUrl: { type: String },
+    closeSelf: { type: Function },
   };
 
   static styles = css`
@@ -111,6 +112,7 @@ export class WarcOptionsModal extends LitElement {
       fileUrl: this.fileUrl,
       startingUrl: this.startingUrl,
     });
+    closeSelf();
     Curate.ui.modals
       .curatePopup({
         title: "Preview Web-Archive",
