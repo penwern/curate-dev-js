@@ -175,27 +175,41 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   loadConfig(config) {
+    if (window.curateDebug) {
+      console.log("Load requested with values:", config);
+    }
+    
     this.configName = config.name || "";
     this.configDescription = config.description || "";
     
-    // Handle a3m
+    // Handle a3m - support both camelCase and snake_case property names
     const a3mConfig = config.a3m_config || {};
     
-    this.AssignUuidsToDirectories = a3mConfig.assign_uuids_to_directories !== undefined ? !!a3mConfig.assign_uuids_to_directories : true;
-    this.ExamineContents = a3mConfig.examine_contents !== undefined ? !!a3mConfig.examine_contents : false;
-    this.GenerateTransferStructureReport = a3mConfig.generate_transfer_structure_report !== undefined ? !!a3mConfig.generate_transfer_structure_report : true;
-    this.DocumentEmptyDirectories = a3mConfig.document_empty_directories !== undefined ? !!a3mConfig.document_empty_directories : true;
-    this.ExtractPackages = a3mConfig.extract_packages !== undefined ? !!a3mConfig.extract_packages : true;
-    this.DeletePackagesAfterExtraction = a3mConfig.delete_packages_after_extraction !== undefined ? !!a3mConfig.delete_packages_after_extraction : false;
-    this.IdentifyTransfer = a3mConfig.identify_transfer !== undefined ? !!a3mConfig.identify_transfer : true;
-    this.IdentifySubmissionAndMetadata = a3mConfig.identify_submission_and_metadata !== undefined ? !!a3mConfig.identify_submission_and_metadata : true;
-    this.IdentifyBeforeNormalization = a3mConfig.identify_before_normalization !== undefined ? !!a3mConfig.identify_before_normalization : true;
-    this.Normalize = a3mConfig.normalize !== undefined ? !!a3mConfig.normalize : true;
-    this.TranscribeFiles = a3mConfig.transcribe_files !== undefined ? !!a3mConfig.transcribe_files : true;
-    this.PerformPolicyChecksOnOriginals = a3mConfig.perform_policy_checks_on_originals !== undefined ? !!a3mConfig.perform_policy_checks_on_originals : true;
-    this.PerformPolicyChecksOnPreservationDerivatives = a3mConfig.perform_policy_checks_on_preservation_derivatives !== undefined ? !!a3mConfig.perform_policy_checks_on_preservation_derivatives : true;
-    this.PerformPolicyChecksOnAccessDerivatives = a3mConfig.perform_policy_checks_on_access_derivatives !== undefined ? !!a3mConfig.perform_policy_checks_on_access_derivatives : true;
-    this.ThumbnailMode = config.a3m_config?.thumbnail_mode !== undefined ? config.a3m_config.thumbnail_mode : 1;
+    // Helper function to get value from either camelCase or snake_case
+    const getValue = (camelCase, snakeCase, defaultValue) => {
+      if (a3mConfig[camelCase] !== undefined) return !!a3mConfig[camelCase];
+      if (a3mConfig[snakeCase] !== undefined) return !!a3mConfig[snakeCase];
+      return defaultValue;
+    };
+    
+    this.AssignUuidsToDirectories = getValue('assignUuidsToDirectories', 'assign_uuids_to_directories', true);
+    this.ExamineContents = getValue('examineContents', 'examine_contents', false);
+    this.GenerateTransferStructureReport = getValue('generateTransferStructureReport', 'generate_transfer_structure_report', true);
+    this.DocumentEmptyDirectories = getValue('documentEmptyDirectories', 'document_empty_directories', true);
+    this.ExtractPackages = getValue('extractPackages', 'extract_packages', true);
+    this.DeletePackagesAfterExtraction = getValue('deletePackagesAfterExtraction', 'delete_packages_after_extraction', false);
+    this.IdentifyTransfer = getValue('identifyTransfer', 'identify_transfer', true);
+    this.IdentifySubmissionAndMetadata = getValue('identifySubmissionAndMetadata', 'identify_submission_and_metadata', true);
+    this.IdentifyBeforeNormalization = getValue('identifyBeforeNormalization', 'identify_before_normalization', true);
+    this.Normalize = getValue('normalize', 'normalize', true);
+    this.TranscribeFiles = getValue('transcribeFiles', 'transcribe_files', true);
+    this.PerformPolicyChecksOnOriginals = getValue('performPolicyChecksOnOriginals', 'perform_policy_checks_on_originals', true);
+    this.PerformPolicyChecksOnPreservationDerivatives = getValue('performPolicyChecksOnPreservationDerivatives', 'perform_policy_checks_on_preservation_derivatives', true);
+    this.PerformPolicyChecksOnAccessDerivatives = getValue('performPolicyChecksOnAccessDerivatives', 'perform_policy_checks_on_access_derivatives', true);
+    
+    // Handle thumbnail mode - support both camelCase and snake_case
+    this.ThumbnailMode = a3mConfig.thumbnailMode !== undefined ? a3mConfig.thumbnailMode : 
+                       (a3mConfig.thumbnail_mode !== undefined ? a3mConfig.thumbnail_mode : 1);
     
     // Handle root-level properties
     this.CompressAip = config.compress_aip !== undefined ? !!config.compress_aip : false;
