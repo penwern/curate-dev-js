@@ -112,7 +112,7 @@ export class WarcOptionsModal extends LitElement {
       fileUrl: this.fileUrl,
       startingUrl: this.startingUrl,
     });
-    closeSelf();
+    this.closeSelf();
     Curate.ui.modals
       .curatePopup({
         title: "Preview Web-Archive",
