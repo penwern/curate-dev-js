@@ -1,9 +1,10 @@
+import { html } from "lit";
 import { Curate } from "../CurateFunctions/CurateFunctions";
 
 const handlerId = Curate.eventDelegator.addEventListener(
   ".action-open_with",
   "click",
-  function (e) {
+  async function (e) {
     // 'this' is the matched element (.action-open_with button)
     if (pydio._dataModel._selectedNodes.length == 1) {
       const selectedNode = pydio._dataModel._selectedNodes[0];
@@ -37,13 +38,18 @@ const handlerId = Curate.eventDelegator.addEventListener(
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
+        const url = await PydioApi._PydioClient.buildPresignedGetUrl(
+          pydio._dataModel._selectedNodes[0]
+        );
+        const optionsModal = Curate.ui.modals.curatePopup({
+          title: "Preview Web-Archive",
+          content: html`<warc-options-modal
+            .closeSelf=${optionsModal.close}
+            .fileUrl=${url}
+          ></warc-options-modal>`,
+        });
 
-        Curate.ui.modals
-          .curatePopup({
-            title: "Preview Web-Archive",
-            content: `<warc-options-modal></warc-options-modal>`,
-          })
-          .fire();
+        optionsModal.fire();
 
         return false;
       }
