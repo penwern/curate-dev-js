@@ -4,7 +4,7 @@ import CurateUi from "./CurateUi.js";
 import CurateMetadata from "./CurateMetadata.js";
 import CurateContextualHelp from "./CurateContextualHelp.js";
 import eventDelegator from "./CurateEvents.js";
-const Curate = (function () {
+export const Curate = (function () {
   const api = CurateApi;
   const workspaces = CurateWorkspaces;
   const ui = CurateUi;
@@ -19,5 +19,5 @@ const Curate = (function () {
     eventDelegator,
   };
 })();
-// Export Curate so it's accessible globally
+// Attach Curate to window so it's accessible globally in the browser for tinkering and debugging
 window.Curate = Curate;
