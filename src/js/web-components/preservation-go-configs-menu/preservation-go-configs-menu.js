@@ -9,10 +9,12 @@ import "@material/web/switch/switch.js";
 import "@material/web/slider/slider.js";
 import "@material/web/divider/divider.js";
 import "@material/web/iconbutton/icon-button.js";
-import { mdiStar, mdiStarOutline, mdiDelete, mdiCog } from "@mdi/js";
+import { mdiStar, mdiStarOutline, mdiCog } from "@mdi/js";
 import { PreservationConfigAPI } from "./api-client.js";
 import { icon } from "../utils/icons.js";
-import {styles} from "./styles.js";   
+import {styles} from "./styles.js";
+
+const defaultConfigId = 1;
 
 class PreservationGoConfigManager extends LitElement {
   static properties = {
@@ -127,6 +129,15 @@ class PreservationGoConfigManager extends LitElement {
     this.saveInProgress = true;
 
     try {
+      if (window.curateDebug) {
+        console.log("Save requested with values:", {
+          configName: this.configName,
+          configDescription: this.configDescription,
+          CompressAip: this.CompressAip,
+          Normalize: this.Normalize
+        });
+      }
+      
       const config = {
         name: this.configName,
         description: this.configDescription,
@@ -149,13 +160,16 @@ class PreservationGoConfigManager extends LitElement {
           perform_policy_checks_on_preservation_derivatives: this.PerformPolicyChecksOnPreservationDerivatives,
           perform_policy_checks_on_access_derivatives: this.PerformPolicyChecksOnAccessDerivatives,
           thumbnail_mode: this.ThumbnailMode,
-        },
-        user: pydio?.user?.id || "current-user", // Use actual user if available
+        }
       };
 
       // Add ID if editing existing config
       if (this.isEditMode && this.editConfigId) {
         config.id = this.editConfigId;
+      }
+
+      if (window.curateDebug) {
+        console.log("Saving config:", config);
       }
 
       // Save using API
@@ -218,11 +232,20 @@ class PreservationGoConfigManager extends LitElement {
     
     this.isEditMode = true;
     this.editConfigId = config.id;
+    
+    if (window.curateDebug) {
+      console.log("Config loaded with values:", {
+        configName: this.configName,
+        configDescription: this.configDescription,
+        CompressAip: this.CompressAip,
+        Normalize: this.Normalize
+      });
+    }
   }
 
   async deleteConfig(configId) {
     // Prevent deletion of the default config (id: 1)
-    if (configId === 1) {
+    if (configId === defaultConfigId) {
       alert("Cannot delete the default config. This is a system configuration that must be preserved.");
       return;
     }
@@ -302,6 +325,9 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   render() {
+    if (window.curateDebug) {
+      console.log("Rendering Preservation Go Configs Menu");
+    }
     return html`
       <div class="main-container">
         <div class="panels-wrapper">
@@ -496,7 +522,7 @@ class PreservationGoConfigManager extends LitElement {
               <div class="form-field">
                 <md-outlined-select
                   label="Thumbnail Mode"
-                  .value=${this.ThumbnailMode}
+                  .value=${this.ThumbnailMode.toString()}
                   @change=${(e) => (this.ThumbnailMode = parseInt(e.target.value))}
                 >
                   <md-select-option value="1">
@@ -606,7 +632,7 @@ class PreservationGoConfigManager extends LitElement {
                                 ? icon(mdiStar)
                                 : icon(mdiStarOutline)}
                             </md-icon-button>
-                            ${when(config.user !== "System" && config.name !== "Default", ()=>{
+                            ${when(config.id !== defaultConfigId, ()=>{
                                 return html`<md-outlined-button
                               class="delete-btn"
                               @click=${(e) => {
@@ -624,7 +650,6 @@ class PreservationGoConfigManager extends LitElement {
                             <strong>Description:</strong>
                             ${config.description || "No description"}
                           </div>
-                          <div><strong>User:</strong> ${config.user}</div>
                           <div><strong>Normalize:</strong> ${config.a3m_config?.normalize ? "Yes" : "No"}</div>
                           <div><strong>Compress AIP:</strong> ${config.compress_aip ? "Yes" : "No"}</div>
                           <!-- <div><strong>Thumbnail Mode:</strong> ${this.getThumbnailModeText(config.a3m_config?.thumbnail_mode)}</div> -->
