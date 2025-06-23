@@ -4,7 +4,7 @@
  */
 class PreservationConfigAPI {
   constructor() {
-    this.baseUrl = `${window.location.protocol}//${window.location.hostname}/api/v1`;
+    this.baseUrl = `${window.location.origin}/api/v1`;
   }
 
   /**
