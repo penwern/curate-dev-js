@@ -632,16 +632,16 @@ class PreservationGoConfigManager extends LitElement {
                                 ? icon(mdiStar)
                                 : icon(mdiStarOutline)}
                             </md-icon-button>
-                            ${when(config.id !== defaultConfigId, ()=>{
-                                return html`<md-outlined-button
-                              class="delete-btn"
-                              @click=${(e) => {
-                                e.stopPropagation();
-                                this.deleteConfig(config.id);
-                              }}
-                            >
-                              Delete
-                            </md-outlined-button>`
+                            ${when(config.id !== defaultConfigId, () => {
+                              return html`<md-outlined-button
+                                class="delete-btn"
+                                @click=${(e) => {
+                                  e.stopPropagation();
+                                  this.deleteConfig(config.id);
+                                }}
+                              >
+                                Delete
+                              </md-outlined-button>`
                             })}
                           </div>
                         </div>
