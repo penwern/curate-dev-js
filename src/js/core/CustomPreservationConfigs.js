@@ -44,7 +44,14 @@ async function submitPreservationRequest(configId) {
 // Retrieves saved preservation configs from the server at route GET /api/preservation
 // Stores the configs in sessionStorage under the key "preservationConfigs"
 async function getPreservationConfigs() {
-  const url = `${window.location.origin}/api/preservation`;
+  let url;
+  const endpoint = window.preservationMode === "new-go" 
+    ? "/api/v1/preservation-configs" 
+    : "/api/preservation";
+  if (window.curateDebug) {
+    console.log(`Preservation endpoint: ${endpoint}`);
+  }
+  url = `${window.location.origin}${endpoint}`;
   const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
   return fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -135,9 +142,10 @@ function createDivBesideElement(targetElement, content, childItems) {
       { title: "Preservation Configs" },
       {
         afterLoaded: (popup) => {
-          const configsInterface = document.createElement(
-            "preservation-config-manager"
-          );
+          const configsInterface =
+            window.preservationMode === "new-go"
+              ? document.createElement("preservation-go-config-manager")
+              : document.createElement("preservation-config-manager");
           popup
             .querySelector(".config-main-options-container")
             .appendChild(configsInterface);
