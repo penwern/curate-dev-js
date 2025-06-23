@@ -24,7 +24,7 @@ const permissionHandlers = {
             target: document,
             description: "enforce no custom actions for shared sites",
             handler: (e)=>{
-                console.log("shared site enforce no custom actions")
+                // console.log("shared site enforce no custom actions")
                 if (window.location.pathname.includes("/public/") && false == true){
                     const mutationObserver = new MutationObserver(mutations => {
                         mutations.forEach(mutation => {
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded",e=>{
 function attachAllEventHandlers(permissionEvents) {
     Object.entries(permissionEvents).forEach(([category, events]) => {
         Object.entries(events).forEach(([eventName, {event, target, handler}]) => {
-            console.log("attaching event handler", permissionEvents[category][eventName])
+            // console.log("attaching event handler", permissionEvents[category][eventName])
             try{
                 target.addEventListener(event, handler);
             }catch(err){
