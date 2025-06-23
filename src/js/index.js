@@ -20,6 +20,7 @@ import "./web-components/preservation-configs-menu/preservation-configs-menu.js"
 import "./web-components/preservation-go-configs-menu/preservation-go-configs-menu.js";
 import "./web-components/warc-viewer/warc-viewer.js";
 import "./web-components/warc-viewer/warc-options.js";
+import "./core/Events/PreviewWarc.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
 import "../js/external/ExternalScripts.js";
