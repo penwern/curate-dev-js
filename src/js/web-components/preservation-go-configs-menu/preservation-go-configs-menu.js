@@ -207,6 +207,12 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   async deleteConfig(configId) {
+    // Prevent deletion of the default config (id: 1)
+    if (configId === 1) {
+      alert("Cannot delete the default config. This is a system configuration that must be preserved.");
+      return;
+    }
+
     if (
       !confirm(
         "Deleting a config is permanent and cannot be reverted, do you wish to continue?"
