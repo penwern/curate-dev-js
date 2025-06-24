@@ -124,7 +124,7 @@ export class WarcViewerModal extends LitElement {
           <replay-web-page
             source=${this.fileUrl}
             url=${this.startingUrl}
-            replayBase="https://penwern.github.io/curate-dev-js/4.4.2/replay/"
+            noWebWorker
             embed="default"
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
