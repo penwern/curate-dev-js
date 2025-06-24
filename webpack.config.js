@@ -118,6 +118,15 @@ module.exports = (env, argv) => {
       // Add these for better development experience
       watchFiles: ['src/**/*'],
       liveReload: true,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+        'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
+      },
+      allowedHosts: [
+        '.penwern.co.uk',
+        'localhost'
+      ]
     },
   };
 };
