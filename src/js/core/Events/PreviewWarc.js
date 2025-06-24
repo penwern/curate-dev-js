@@ -64,6 +64,7 @@ const handlerId = Curate.eventDelegator.addEventListener(
                   document.createElement("warc-options-modal");
                 warcOptions.closeSelf = optionsModal.close;
                 warcOptions.fileUrl = url;
+                warcOptions.fileName = name;
 
                 mainContent.appendChild(warcOptions);
               }

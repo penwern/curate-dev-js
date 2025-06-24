@@ -16,7 +16,6 @@ export class WarcOptionsModal extends LitElement {
     .warc-options {
       padding: 24px;
       max-width: 500px;
-      background: var(--md-sys-color-surface);
     }
     .file-info h3 {
       margin: 0 0 8px 0;
@@ -66,7 +65,7 @@ export class WarcOptionsModal extends LitElement {
     return html`
       <div class="warc-options">
         <div class="file-info">
-          <h3>Preview Web-Archive</h3>
+          <h3>Preview</h3>
           <p class="filename">${this.fileName}</p>
         </div>
         <div class="form-field">
@@ -81,7 +80,6 @@ export class WarcOptionsModal extends LitElement {
           </md-outlined-text-field>
         </div>
         <div class="actions">
-          <md-text-button @click=${this.handleCancel}> Cancel </md-text-button>
           <md-filled-button @click=${this.handleOpenViewer}>
             Open Viewer
           </md-filled-button>
