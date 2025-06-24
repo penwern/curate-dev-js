@@ -112,29 +112,47 @@ export class WarcOptionsModal extends LitElement {
       },
       {
         afterLoaded: (container) => {
+          // Style the popup for maximum size
+          const modalContent = container.querySelector(".config-modal-content");
+          if (modalContent) {
+            modalContent.style.width = "95vw";
+            modalContent.style.height = "90vh";
+            modalContent.style.maxWidth = "1400px";
+            modalContent.style.maxHeight = "900px";
+            modalContent.style.padding = "16px";
+          }
+
           // Find the main content container and update it with the web component
           const mainContent = container.querySelector(
             ".config-main-options-container"
           );
           if (mainContent) {
-            // Clear existing content
-            mainContent.innerHTML = `<script src="https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js"></script>
-<replay-web-page 
-  source="${this.fileUrl}" 
-  replayBase="/workers/" 
-  embed="default"
-  style="width: 800px; height: 600px;">
-</replay-web-page>`;
+            // Style the main content to take full space
+            mainContent.style.height = "100%";
+            mainContent.style.display = "flex";
+            mainContent.style.flexDirection = "column";
 
-            // Create the warc-viewer-modal web component
-            /**const warcViewer = document.createElement("warc-viewer-modal");
-            warcViewer.fileUrl = this.fileUrl;
-            warcViewer.startingUrl = this.startingUrl;
+            // Create wrapper with border radius
+            const viewerWrapper = document.createElement("div");
+            viewerWrapper.style.cssText = `
+              flex: 1;
+              border-radius: 12px;
+              overflow: hidden;
+              border: 1px solid var(--md-sys-color-outline-variant);
+              background: var(--md-sys-color-surface);
+            `;
 
-            // If the viewer component also needs a close method, pass it
-            warcViewer.closeSelf = viewerModal.close;
+            // Clear existing content and add the replay component inside wrapper
+            mainContent.innerHTML = "";
+            viewerWrapper.innerHTML = `<replay-web-page 
+              source="${this.fileUrl}" 
+              url="${this.startingUrl}"
+              replayBase="/workers/" 
+              embed="default"
+              style="width: 100%; height: 100%; display: block; border-radius: inherit;">
+            </replay-web-page>`;
 
-            mainContent.appendChild(warcViewer);**/
+            mainContent.appendChild(viewerWrapper);
           }
         },
       }
