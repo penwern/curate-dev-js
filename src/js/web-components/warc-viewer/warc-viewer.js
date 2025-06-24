@@ -143,40 +143,70 @@ export class WarcViewerModal extends LitElement {
   }
 
   async loadReplayWebPage() {
+    console.log("=== ReplayWeb.page Loading Debug ===");
+    console.log("File URL:", this.fileUrl);
+    console.log("Starting URL:", this.startingUrl);
+    console.log("Current location:", window.location.href);
+
     if (window.replayWebPageLoaded) {
+      console.log("ReplayWeb.page already loaded, skipping script load");
       this.isLoading = false;
       return;
     }
 
     try {
-      console.log("Loading ReplayWeb.page from CDN...");
-
+      console.log("Creating script element...");
       const script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js";
 
       script.onload = async () => {
+        console.log("✅ ReplayWeb.page script loaded successfully");
         console.log(
-          "ReplayWeb.page script loaded, waiting for custom elements..."
+          "Available custom elements:",
+          Object.keys(window.customElements._registry || {})
         );
+
         try {
+          console.log("Waiting for replay-web-page element definition...");
           await customElements.whenDefined("replay-web-page");
-          console.log("replay-web-page element defined");
+          console.log("✅ replay-web-page element defined");
+
+          // Check if element exists in DOM
+          const replayElement =
+            this.shadowRoot.querySelector("replay-web-page");
+          console.log("Replay element in DOM:", replayElement);
+
           window.replayWebPageLoaded = true;
           this.isLoading = false;
+
+          // Force update to show the element
+          this.requestUpdate();
+
+          // Additional check after render
+          setTimeout(() => {
+            const replayElementAfter =
+              this.shadowRoot.querySelector("replay-web-page");
+            console.log("Replay element after render:", replayElementAfter);
+            console.log(
+              "Element attributes:",
+              replayElementAfter?.getAttributeNames()
+            );
+          }, 1000);
         } catch (error) {
-          console.error("Error waiting for custom elements:", error);
+          console.error("❌ Error waiting for custom elements:", error);
           this.showError("Failed to initialize archive viewer");
         }
       };
 
       script.onerror = (error) => {
-        console.error("Error loading ReplayWeb.page script:", error);
+        console.error("❌ Error loading ReplayWeb.page script:", error);
         this.showError("Failed to load archive viewer from CDN");
       };
 
+      console.log("Appending script to head...");
       document.head.appendChild(script);
     } catch (error) {
-      console.error("Error in loadReplayWebPage:", error);
+      console.error("❌ Error in loadReplayWebPage:", error);
       this.showError("Error loading archive viewer");
     }
   }
