@@ -1,37 +1,106 @@
-## Welcome to GitHub Pages
+# Curate Extensible JavaScript
 
-You can use the [editor on GitHub](https://github.com/Sunday-Crunk/curate-extensible-js/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+A comprehensive JavaScript library for extending Curate/Pydio Cells with advanced functionality including metadata management, UI components, preservation workflows, and external integrations.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Version
+Current version: **4.4.2**
 
-### Markdown
+## Overview
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+This library provides a modular set of JavaScript extensions that enhance the Curate digital preservation platform. It includes:
 
-```markdown
-Syntax highlighted code block
+- **Core API Functions** - Simplified interfaces for Curate/Pydio operations
+- **UI Components** - Custom modals, forms, and interactive elements
+- **Metadata Management** - Schema handling and metadata mapping tools
+- **Preservation Workflows** - Configuration management and validation
+- **External Integrations** - AtoM connector, OAI harvesting, and more
+- **Web Components** - Modern custom elements for enhanced functionality
 
-# Header 1
-## Header 2
-### Header 3
+## Installation
 
-- Bulleted
-- List
+### Prerequisites
+- Node.js (version 14 or higher)
+- npm or yarn package manager
+- Curate/Pydio Cells instance
 
-1. Numbered
-2. List
+### Build from Source
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+1. Clone the repository:
+```bash
+git clone https://github.com/your-org/curate-dev-js.git
+cd curate-dev-js
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+2. Install dependencies:
+```bash
+npm install
+```
 
-### Jekyll Themes
+3. Build the project:
+```bash
+npm run build
+```
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Sunday-Crunk/curate-extensible-js/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+This creates:
+- `dist/{version}/main_{version}.js` - Versioned build
+- `dist/@latest/main.js` - Latest build for easy deployment
 
-### Support or Contact
+## Usage
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+The library automatically exposes a global `Curate` object with all functionality.
+
+### UI Components
+
+```javascript
+// Create a modal popup
+const popup = new Curate.ui.modals.curatePopup({
+  title: "Confirmation",
+  message: "Are you sure you want to proceed?",
+  type: "warning",
+  buttonType: "okCancel"
+}, {
+  afterLoaded: (popup) => {
+    console.log('Popup loaded');
+  },
+  onOk: () => {
+    console.log('User confirmed');
+  },
+  onCancel: () => {
+    console.log('User cancelled');
+  }
+});
+
+popup.fire();
+```
+
+## Development
+
+### Project Structure
+
+- `src/` - Source code
+- `dist/` - Built distributions
+- `webpack.config.js` - Build configuration
+- `package.json` - Dependencies and scripts
+
+### Building
+
+The project uses Webpack for building:
+
+```bash
+# Development build
+npm run build
+
+# The build creates versioned outputs in dist/
+```
+
+```bash
+# Local development server with hot reload
+npm run serve
+
+# Access via 'http://localhost:6900/main.js'
+```
+
+```bash
+# Container deployment with docker
+npm run docker:up
+```
