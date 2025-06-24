@@ -118,17 +118,23 @@ export class WarcOptionsModal extends LitElement {
           );
           if (mainContent) {
             // Clear existing content
-            mainContent.innerHTML = "";
+            mainContent.innerHTML = `<script src="https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js"></script>
+<replay-web-page 
+  source="https://curate.penwern.co.uk/io/quarantine/my-archiving-session.wacz?AWSAccessKeyId=gateway&Expires=1750779559&Signature=tbC8kQzK6L8kN1cT3HKkWEULE6E%3D&pydio_jwt=wsrHwpN60C9Bd0nr7FWim-pj_YZn67BCh5VSnM6qTFw.i8C6ul9siZAT1_sJf0WPmRZRhbjc7Jb1cKTqqmZ-ObA" 
+  replayBase="/workers/" 
+  embed="default"
+  style="width: 800px; height: 600px;">
+</replay-web-page>`;
 
             // Create the warc-viewer-modal web component
-            const warcViewer = document.createElement("warc-viewer-modal");
+            /**const warcViewer = document.createElement("warc-viewer-modal");
             warcViewer.fileUrl = this.fileUrl;
             warcViewer.startingUrl = this.startingUrl;
 
             // If the viewer component also needs a close method, pass it
             warcViewer.closeSelf = viewerModal.close;
 
-            mainContent.appendChild(warcViewer);
+            mainContent.appendChild(warcViewer);**/
           }
         },
       }
