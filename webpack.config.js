@@ -113,9 +113,7 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'dist'),
       },
       port: 6900,
-      open: true,
       hot: true,
-      // Add these for better development experience
       watchFiles: ['src/**/*'],
       liveReload: true,
       headers: {
