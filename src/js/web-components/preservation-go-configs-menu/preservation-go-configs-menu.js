@@ -337,8 +337,9 @@ class PreservationGoConfigManager extends LitElement {
               ${icon(mdiCog)} Create or Edit Configs
             </div>
 
-            <!-- Details Category -->
-            <div class="category">
+            <div class="form-scroll-container">
+              <!-- Details Category -->
+              <div class="category">
               <div class="category-header">Details</div>
 
               <div class="form-field">
@@ -553,11 +554,10 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="suboptions ${this.CompressAip ? "enabled" : ""}">
                 <div class="info-panel">
-                  Compressing AIPs will make their contents unsearchable and
-                  prevent descriptive metadata from being reassociated with
-                  output objects. You can compress your AIPs for distribution or
-                  deep-storage while conserving the uncompressed AIP by
-                  right-clicking an AIP in a workspace.
+                  Compressing AIPs makes their contents unsearchable and breaks
+                  metadata reassociation. To preserve searchability, compress only
+                  for distribution or deep storage by right-clicking the AIP in a
+                  workspace while keeping the original uncompressed.
                 </div>
 
                 <div class="form-field">
@@ -579,6 +579,7 @@ class PreservationGoConfigManager extends LitElement {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
 
             <div class="form-actions">

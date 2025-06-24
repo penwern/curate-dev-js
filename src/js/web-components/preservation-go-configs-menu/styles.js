@@ -27,19 +27,32 @@ export const styles = css`
     .panels-wrapper {
       display: flex;
       gap: 32px;
+      height: calc(100vh - 120px);
+      min-height: 600px;
     }
 
     .form-section {
       flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .saved-configs-section {
       flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     @media (max-width: 1100px) {
       .panels-wrapper {
         flex-direction: column;
+        height: auto;
+      }
+      
+      .form-section,
+      .saved-configs-section {
+        height: 70vh;
+        min-height: 500px;
       }
     }
 
@@ -47,7 +60,7 @@ export const styles = css`
     .saved-configs-section {
       background: var(--md-sys-color-secondary-container);
       border-radius: 24px;
-      padding: 32px;
+      padding: 16px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04);
       border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
       position: relative;
@@ -84,7 +97,9 @@ export const styles = css`
 
     .section-title {
       font-size: 22px;
+      margin-top: 16px;
       margin-bottom: 32px;
+      margin-left: 8px;
       color: var(--md-sys-color-on-surface, #1d1b20);
       display: flex;
       align-items: center;
@@ -127,7 +142,7 @@ export const styles = css`
     }
 
     .form-field {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       padding-top: 16px;
       width: 100%;
       max-width: 100%;
@@ -229,11 +244,16 @@ export const styles = css`
     .form-actions {
       display: flex;
       gap: 16px;
-      margin-top: 32px;
+      margin-top: 0;
       flex-wrap: wrap;
       justify-content: flex-end;
-      padding-top: 20px;
+      padding: 20px 0;
       border-top: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
+      background: var(--md-sys-color-secondary-container);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      flex-shrink: 0;
     }
 
     .config-item {
@@ -326,27 +346,38 @@ export const styles = css`
     }
 
     .scroll-container {
-      max-height: 700px;
+      flex: 1;
       overflow-y: auto;
       padding-right: 8px;
       margin-right: -8px;
     }
 
-    .scroll-container::-webkit-scrollbar {
+    .form-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+      margin-right: -8px;
+    }
+
+    .scroll-container::-webkit-scrollbar,
+    .form-scroll-container::-webkit-scrollbar {
       width: 8px;
     }
 
-    .scroll-container::-webkit-scrollbar-track {
+    .scroll-container::-webkit-scrollbar-track,
+    .form-scroll-container::-webkit-scrollbar-track {
       background: var(--md-sys-color-surface-variant, #e7e0ec);
       border-radius: 4px;
     }
 
-    .scroll-container::-webkit-scrollbar-thumb {
+    .scroll-container::-webkit-scrollbar-thumb,
+    .form-scroll-container::-webkit-scrollbar-thumb {
       background: var(--md-sys-color-outline, #79747e);
       border-radius: 4px;
     }
 
-    .scroll-container::-webkit-scrollbar-thumb:hover {
+    .scroll-container::-webkit-scrollbar-thumb:hover,
+    .form-scroll-container::-webkit-scrollbar-thumb:hover {
       background: var(--md-sys-color-on-surface-variant, #49454f);
     }
 
