@@ -19,7 +19,7 @@ jobs:
           node-version: "16" # Adjust Node.js version if needed
 
       - name: Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm # Caching npm modules to speed up installs
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
