@@ -31,6 +31,7 @@ export const styles = css`
     height: 80vh;
     min-height: 600px;
     max-height: 800px;
+    padding-bottom: 8px;
   }
 
   .form-section,
@@ -337,6 +338,7 @@ export const styles = css`
     display: flex;
     flex-direction: column;
     gap: 16px;
+    padding-bottom: 16px;
   }
 
   .form-scroll-container {
@@ -386,11 +388,14 @@ export const styles = css`
     .panels-wrapper {
       flex-direction: column;
       height: auto;
+      min-height: auto;
+      max-height: none;
     }
 
     .form-section,
     .saved-configs-section {
-      height: 70vh;
+      height: auto;
+      min-height: auto;
     }
   }
 
