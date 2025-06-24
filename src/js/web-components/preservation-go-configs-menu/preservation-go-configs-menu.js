@@ -124,7 +124,11 @@ class PreservationGoConfigManager extends LitElement {
 
   async saveConfig() {
     if (!this.configName || this.configName.trim().length < 3) {
-      alert("Please enter a config name with at least 3 characters");
+      Curate.ui.modals.curatePopup({
+        title: "Invalid Configuration",
+        message: "Please enter a config name with at least 3 characters",
+        type: "warning"
+      }).fire();
       return;
     }
 
@@ -248,26 +252,34 @@ class PreservationGoConfigManager extends LitElement {
   async deleteConfig(configId) {
     // Prevent deletion of the default config (id: 1)
     if (configId === defaultConfigId) {
-      alert("Cannot delete the default config. This is a system configuration that must be preserved.");
+      Curate.ui.modals.curatePopup({
+        title: "Cannot Delete Default Config",
+        message: "Cannot delete the default config. This is a system configuration that must be preserved.",
+        type: "error"
+      }).fire();
       return;
     }
 
-    if (
-      !confirm(
-        "Deleting a config is permanent and cannot be reverted, do you wish to continue?"
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await this.api.deleteConfig(configId);
-      // Reload configs after successful deletion
-      await this.loadConfigs();
-    } catch (error) {
-      console.error("Failed to delete preservation go config:", error);
-      // Error modal is already shown by the API client
-    }
+    Curate.ui.modals.curatePopup({
+      title: "Confirm Deletion",
+      message: "Deleting a config is permanent and cannot be reverted, do you wish to continue?",
+      type: "warning",
+      buttonType: "okCancel"
+    }, {
+      onOk: async () => {
+        try {
+          await this.api.deleteConfig(configId);
+          // Reload configs after successful deletion
+          await this.loadConfigs();
+        } catch (error) {
+          console.error("Failed to delete preservation go config:", error);
+          // Error modal is already shown by the API client
+        }
+      },
+      onCancel: () => {
+        // User cancelled - no action needed
+      }
+    }).fire();
   }
 
   toggleBookmark(configId) {
@@ -294,7 +306,11 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   openAtomConfig() {
-    alert("AtoM Configuration would open here");
+    Curate.ui.modals.curatePopup({
+      title: "AtoM Configuration",
+      message: "AtoM Configuration would open here",
+      type: "info"
+    }).fire();
   }
 
   get canSave() {
