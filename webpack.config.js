@@ -16,7 +16,11 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      "process.env.VERSION": JSON.stringify(packageJson.version),
+      APP_CONFIG: JSON.stringify({
+        version: packageJson.version,
+        githubPagesBase: "https://penwern.github.io/curate-dev-js",
+        replayBase: `https://penwern.github.io/curate-dev-js/${packageJson.version}/replay/`,
+      }),
     }),
     // Custom plugin to handle the creation of the @latest folder AND ReplayWeb service worker
     {
