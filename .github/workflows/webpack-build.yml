@@ -3,28 +3,21 @@ name: Webpack Build and Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # This triggers the workflow when changes are pushed to main
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest # Using the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3 # Check out the repository to work with it
+        uses: actions/checkout@v4 
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "16" # Adjust Node.js version if needed
-
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm # Caching npm modules to speed up installs
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          node-version: "20"
+          cache: 'npm'
 
       - name: Install dependencies
         run: |
@@ -35,10 +28,10 @@ jobs:
           npm run build  # Run Webpack to create the build
 
       - name: Deploy to GitHub Pages (gh-pages)
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # Authentication using the GitHub token
-          publish_dir: ./dist # Path to the build directory (dist)
-          publish_branch: gh-pages # Deploy to the gh-pages branch
-          user_name: "github-actions" # Default username for GitHub Actions
-          user_email: "github-actions@github.com" # Default email for GitHub Actions
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          user_name: "github-actions"
+          user_email: "github-actions@github.com"
