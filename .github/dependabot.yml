@@ -1,24 +1,16 @@
 version: 2
 updates:
-  # Enable version updates for npm dependencies
+  # Version updates for npm dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "@curate-dev-js/maintainers"
-    assignees:
-      - "@curate-dev-js/maintainers"
-    commit-message:
-      prefix: "npm"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "npm"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
     groups:
+      # Dependencies for local development
       dev-dependencies:
         patterns:
           - "@babel/*"
@@ -27,6 +19,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # Dependencies for production
       production-dependencies:
         patterns:
           - "*"
@@ -38,21 +31,16 @@ updates:
           - "minor"
           - "patch"
 
-  # Enable version updates for GitHub Actions
+  # Version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-    open-pull-requests-limit: 3
-    reviewers:
-      - "@curate-dev-js/maintainers"
-    assignees:
-      - "@curate-dev-js/maintainers"
-    commit-message:
-      prefix: "ci"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "github-actions" 
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*" 
