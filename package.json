@@ -2,7 +2,10 @@
   "name": "curate-js",
   "version": "4.4.2",
   "scripts": {
-    "build": "webpack --mode production --config ./webpack.config.js"
+    "build": "webpack --mode production --config ./webpack.config.js",
+    "serve": "npx webpack serve --mode development --config ./webpack.config.js",
+    "docker:build": "DOCKER_BUILDKIT=1 docker compose build",
+    "docker:up": "DOCKER_BUILDKIT=1 docker compose up -d --build"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +29,7 @@
     "terser-webpack-plugin": "^5.3.10",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.2",
     "worker-loader": "^3.0.8"
   }
 }

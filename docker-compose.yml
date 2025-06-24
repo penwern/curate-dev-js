@@ -1,0 +1,17 @@
+services:
+  curate-js:
+    container_name: curate-js
+    build: .
+    ports:
+      - "6900:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.curate-js.rule=Host(`curate-js.localhost`)"
+      - "traefik.http.services.curate-js.loadbalancer.server.port=80"

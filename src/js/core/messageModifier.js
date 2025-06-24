@@ -1,7 +1,7 @@
 const systemName = window.curateDistrobution || "Soteria+"; // could be replaced with something that figures out whether we're in Soteria+ or Curate
 
 const welcomeMessage = () => {
-  console.log("message modifier");
+  // console.log("message modifier");
   const messages = pydioBootstrap.parameters.get("i18nMessages");
 
   // Function to handle both "Cells" and "Pydio Cells" replacements

@@ -354,10 +354,22 @@ function cyB() {
 }
 
 function uDfC(e) {
-    let t = "usermeta-" + Object.fromEntries(e._metadata).uuid,
-        i = JSON.parse(sessionStorage.getItem(t));
+    let t = "usermeta-" + Object.fromEntries(e._metadata).uuid;
+    try {
+        i = JSON.parse(sessionStorage.getItem(t) || "{}");
+    } catch (err) {
+        console.error("Error parsing session storage data:", err);
+        i = {};
+    }
     setTimeout(function() {
-        for (var e in i) document.querySelector("#" + e.replace("usermeta-", "")).value = JSON.parse(i[e])
+        for (var e in i) {
+            try {
+                document.querySelector("#" + e.replace("usermeta-", "")).value = JSON.parse(i[e]);
+            } catch (err) {
+                console.error("Error parsing individual metadata value:", err);
+                document.querySelector("#" + e.replace("usermeta-", "")).value = i[e] || "";
+            }
+        }
     }, 10)
 }
 

@@ -4,7 +4,7 @@
  */
 class PreservationConfigAPI {
   constructor() {
-    this.baseUrl = `${window.location.protocol}//${window.location.hostname}/api/v1`;
+    this.baseUrl = `${window.location.origin}/api/v1`;
   }
 
   /**
@@ -177,7 +177,7 @@ class PreservationConfigAPI {
   /**
    * Delete a preservation configuration
    * @param {string|number} configId - ID of the config to delete
-   * @returns {Promise<Object>} Delete response
+   * @returns {Promise<void>} Delete response
    */
   async deleteConfig(configId) {
     const token = await this.getAuthToken();
@@ -187,8 +187,6 @@ class PreservationConfigAPI {
       const response = await fetch(url, {
         method: "DELETE",
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -197,14 +195,13 @@ class PreservationConfigAPI {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      if (data) {
+      // Check for successful deletion (204 No Content or 200 OK)
+      if (response.status === 204 || response.status === 200) {
         // Refresh configs in session storage
         await this.getConfigs();
-        return data;
+        return;
       } else {
-        throw new Error("Delete operation failed.");
+        throw new Error(`Unexpected response status: ${response.status}`);
       }
     } catch (error) {
       console.error("Error deleting preservation config:", error);

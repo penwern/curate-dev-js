@@ -1,0 +1,14 @@
+node_modules
+dist
+.webpack-cache
+.git
+.gitignore
+README.md
+.DS_Store
+*.log
+.env*
+coverage
+.nyc_output
+*.md
+!package*.json
+!DOCKER_README.md 
