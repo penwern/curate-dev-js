@@ -124,8 +124,8 @@ export class WarcViewerModal extends LitElement {
           <replay-web-page
             source=${this.fileUrl}
             url=${this.startingUrl}
-            replayBase="/workers/"
             embed="default"
+            replayBase="/workers/"
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
               : "display: block;"}
@@ -141,41 +141,9 @@ export class WarcViewerModal extends LitElement {
   }
 
   async loadReplayWebPage() {
-    console.log("=== SERVICE WORKER DEBUG ===");
-
-    // Test if service worker is accessible
-    try {
-      const swResponse = await fetch("/workers/sw.js");
-      console.log("✅ Service worker accessible:", swResponse.status);
-      const swContent = await swResponse.text();
-      console.log("Service worker content:", swContent);
-    } catch (error) {
-      console.error("❌ Service worker fetch failed:", error);
-    }
-
-    // Check if service workers are supported
-    if ("serviceWorker" in navigator) {
-      console.log("✅ Service Workers supported");
-
-      // Check existing registrations
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      console.log("Existing SW registrations:", registrations);
-
-      // Try to manually register the service worker
-      try {
-        const registration = await navigator.serviceWorker.register(
-          "/workers/sw.js",
-          {
-            scope: "/workers/",
-          }
-        );
-        console.log("✅ Manual SW registration successful:", registration);
-      } catch (error) {
-        console.error("❌ Manual SW registration failed:", error);
-      }
-    } else {
-      console.error("❌ Service Workers not supported");
-    }
+    console.log("=== Loading ReplayWeb.page ===");
+    console.log("File URL:", this.fileUrl);
+    console.log("Starting URL:", this.startingUrl);
 
     if (window.replayWebPageLoaded) {
       console.log("ReplayWeb.page already loaded");
@@ -198,19 +166,9 @@ export class WarcViewerModal extends LitElement {
           this.isLoading = false;
           this.requestUpdate();
 
-          // Check the element after it renders
-          setTimeout(() => {
-            const element = this.shadowRoot.querySelector("replay-web-page");
-            console.log("Element after render:", element);
-            if (element) {
-              console.log("Element's internal state:", {
-                source: element.getAttribute("source"),
-                replayBase: element.getAttribute("replayBase"),
-                hasContent: !!element.shadowRoot,
-                shadowRootChildren: element.shadowRoot?.children.length || 0,
-              });
-            }
-          }, 3000);
+          console.log(
+            "ReplayWeb.page ready - letting it handle service worker automatically"
+          );
         } catch (error) {
           console.error("❌ Element definition failed:", error);
           this.showError("Failed to initialize archive viewer");
