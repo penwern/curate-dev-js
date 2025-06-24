@@ -124,7 +124,7 @@ export class WarcViewerModal extends LitElement {
           <replay-web-page
             source=${this.fileUrl}
             url=${this.startingUrl}
-            noWebWorker
+            replayBase="/workers/"
             embed="default"
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
