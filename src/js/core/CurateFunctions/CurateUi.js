@@ -202,13 +202,15 @@ const CurateUi = {
           closePopup();
         } else {
           // Reattach the listener if the click wasn't on the container
-          containerElement.addEventListener(
-            "click",
-            function (e) {
-              clickAway(e, containerElement);
-            },
-            { once: true }
-          );
+          if (containerElement && containerElement.parentNode) {
+            containerElement.addEventListener(
+              "click",
+              function (e) {
+                clickAway(e, containerElement);
+              },
+              { once: true }
+            );
+          }
         }
       }
 
