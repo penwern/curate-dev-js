@@ -3,18 +3,16 @@ import { css } from "lit";
 export const styles = css`
     :host {
       display: block;
-      padding: 32px;
+      padding: 16px;
       padding-top: 0;
       max-width: 1400px;
       margin: 0 auto;
       font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
-      min-height: 100vh;
     }
 
     .header {
       font-size: 36px;
       font-weight: 400;
-      margin-bottom: 40px;
       color: var(--md-sys-color-on-surface, #1d1b20);
       text-align: center;
       letter-spacing: -0.5px;
@@ -22,25 +20,25 @@ export const styles = css`
 
     .main-container {
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
     }
 
     .panels-wrapper {
       display: flex;
-      gap: 32px;
-      height: calc(100vh - 120px);
+      gap: 24px;
+      height: 80vh;
       min-height: 600px;
+      max-height: 800px;
     }
 
-    .form-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
+    .form-section,
     .saved-configs-section {
       flex: 1;
       display: flex;
       flex-direction: column;
+      padding: 24px;
     }
 
     @media (max-width: 1100px) {
@@ -52,7 +50,6 @@ export const styles = css`
       .form-section,
       .saved-configs-section {
         height: 70vh;
-        min-height: 500px;
       }
     }
 
@@ -60,11 +57,13 @@ export const styles = css`
     .saved-configs-section {
       background: var(--md-sys-color-secondary-container);
       border-radius: 24px;
-      padding: 16px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04);
       border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .form-section::before {
@@ -97,13 +96,12 @@ export const styles = css`
 
     .section-title {
       font-size: 22px;
-      margin-top: 16px;
-      margin-bottom: 32px;
-      margin-left: 8px;
+      margin: 8px;
       color: var(--md-sys-color-on-surface, #1d1b20);
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-shrink: 0;
     }
 
     .section-title svg {
@@ -113,22 +111,25 @@ export const styles = css`
     }
 
     .category {
-      margin-bottom: 32px;
       background: var(--md-sys-color-surface-1);
       border-radius: 16px;
       padding: 24px;
       border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .category-header {
       font-size: 20px;
       font-weight: 500;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
       color: var(--md-sys-color-primary, #6750a4);
       padding-bottom: 12px;
       border-bottom: 2px solid var(--md-sys-color-primary-container, #eaddff);
       position: relative;
+      flex-shrink: 0;
     }
 
     .category-header::after {
@@ -142,8 +143,6 @@ export const styles = css`
     }
 
     .form-field {
-      margin-bottom: 16px;
-      padding-top: 16px;
       width: 100%;
       max-width: 100%;
       overflow: hidden;
@@ -153,7 +152,6 @@ export const styles = css`
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 20px;
       padding: 16px;
       background: var(--md-sys-color-surface-variant, #e7e0ec);
       border-radius: 12px;
@@ -165,7 +163,7 @@ export const styles = css`
     }
 
     .toggle-field label {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--md-sys-color-on-surface, #1d1b20);
       cursor: pointer;
@@ -173,6 +171,7 @@ export const styles = css`
 
     .suboptions {
       margin-left: 16px;
+      margin-top: -8px;
       padding: 16px;
       border-left: 3px solid var(--md-sys-color-outline-variant, #c7c5d0);
       border-radius: 0 8px 8px 0;
@@ -244,10 +243,9 @@ export const styles = css`
     .form-actions {
       display: flex;
       gap: 16px;
-      margin-top: 0;
       flex-wrap: wrap;
-      justify-content: flex-end;
-      padding: 20px 0;
+      justify-content: center;
+      padding-top: 16px;
       border-top: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
       background: var(--md-sys-color-secondary-container);
       position: sticky;
@@ -261,7 +259,6 @@ export const styles = css`
       border: 2px solid var(--md-sys-color-outline-variant, #c7c5d0);
       border-radius: 16px;
       padding: 20px;
-      margin-bottom: 16px;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       animation: slideIn 0.4s ease-out forwards;
@@ -300,7 +297,7 @@ export const styles = css`
     .config-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       margin-bottom: 12px;
       gap: 16px;
     }
@@ -350,6 +347,9 @@ export const styles = css`
       overflow-y: auto;
       padding-right: 8px;
       margin-right: -8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .form-scroll-container {
@@ -357,6 +357,9 @@ export const styles = css`
       overflow-y: auto;
       padding-right: 8px;
       margin-right: -8px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
     .scroll-container::-webkit-scrollbar,
@@ -385,6 +388,9 @@ export const styles = css`
       text-align: center;
       padding: 32px;
       color: var(--md-sys-color-on-surface-variant, #49454f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .error {
@@ -433,6 +439,10 @@ export const styles = css`
       margin-bottom: 8px;
       --md-outlined-text-field-container-shape: 12px;
       --md-outlined-select-text-field-container-shape: 12px;
+    }
+
+    md-outlined-select {
+      margin-top: 8px;
     }
 
     .form-field md-outlined-select {

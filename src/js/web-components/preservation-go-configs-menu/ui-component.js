@@ -289,7 +289,9 @@ export const preservationGoConfigUI = (component) => html`
             : component.savedConfigs.length === 0
             ? html`
                 <div class="no-configs">
-                  No Saved Preservation Configs Found
+                  ${component.loadError 
+                    ? "Failed to load preservation configs. Please try refreshing or check your connection."
+                    : "No Saved Preservation Configs Found"}
                 </div>
               `
             : component.savedConfigs.map(

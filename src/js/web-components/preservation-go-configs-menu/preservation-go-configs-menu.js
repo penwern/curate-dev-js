@@ -41,6 +41,7 @@ class PreservationGoConfigManager extends LitElement {
     editConfigId: { state: true },
     isLoading: { state: true },
     saveInProgress: { state: true },
+    loadError: { state: true },
   };
 
   static styles = styles;
@@ -72,6 +73,7 @@ class PreservationGoConfigManager extends LitElement {
     this.editConfigId = null;
     this.isLoading = false;
     this.saveInProgress = false;
+    this.loadError = false;
 
     // Initialize the API client
     this.api = new PreservationConfigAPI();
@@ -82,12 +84,14 @@ class PreservationGoConfigManager extends LitElement {
 
   async loadConfigs() {
     this.isLoading = true;
+    this.loadError = false;
     try {
       const configs = await this.api.getConfigs();
       this.savedConfigs = configs || [];
     } catch (error) {
       console.error("Failed to load preservation go configs:", error);
       this.savedConfigs = [];
+      this.loadError = true;
     } finally {
       this.isLoading = false;
     }
