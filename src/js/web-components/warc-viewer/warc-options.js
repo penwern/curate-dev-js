@@ -120,7 +120,7 @@ export class WarcOptionsModal extends LitElement {
             // Clear existing content
             mainContent.innerHTML = `<script src="https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js"></script>
 <replay-web-page 
-  source="https://curate.penwern.co.uk/io/quarantine/my-archiving-session.wacz?AWSAccessKeyId=gateway&Expires=1750779559&Signature=tbC8kQzK6L8kN1cT3HKkWEULE6E%3D&pydio_jwt=wsrHwpN60C9Bd0nr7FWim-pj_YZn67BCh5VSnM6qTFw.i8C6ul9siZAT1_sJf0WPmRZRhbjc7Jb1cKTqqmZ-ObA" 
+  source="${this.fileUrl}" 
   replayBase="/workers/" 
   embed="default"
   style="width: 800px; height: 600px;">
