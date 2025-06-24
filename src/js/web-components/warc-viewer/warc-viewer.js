@@ -141,70 +141,90 @@ export class WarcViewerModal extends LitElement {
   }
 
   async loadReplayWebPage() {
-    console.log("=== ReplayWeb.page Loading Debug ===");
-    console.log("File URL:", this.fileUrl);
-    console.log("Starting URL:", this.startingUrl);
-    console.log("Current location:", window.location.href);
+    console.log("=== SERVICE WORKER DEBUG ===");
+
+    // Test if service worker is accessible
+    try {
+      const swResponse = await fetch("/workers/sw.js");
+      console.log("✅ Service worker accessible:", swResponse.status);
+      const swContent = await swResponse.text();
+      console.log("Service worker content:", swContent);
+    } catch (error) {
+      console.error("❌ Service worker fetch failed:", error);
+    }
+
+    // Check if service workers are supported
+    if ("serviceWorker" in navigator) {
+      console.log("✅ Service Workers supported");
+
+      // Check existing registrations
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      console.log("Existing SW registrations:", registrations);
+
+      // Try to manually register the service worker
+      try {
+        const registration = await navigator.serviceWorker.register(
+          "/workers/sw.js",
+          {
+            scope: "/workers/",
+          }
+        );
+        console.log("✅ Manual SW registration successful:", registration);
+      } catch (error) {
+        console.error("❌ Manual SW registration failed:", error);
+      }
+    } else {
+      console.error("❌ Service Workers not supported");
+    }
 
     if (window.replayWebPageLoaded) {
-      console.log("ReplayWeb.page already loaded, skipping script load");
+      console.log("ReplayWeb.page already loaded");
       this.isLoading = false;
       return;
     }
 
     try {
-      console.log("Creating script element...");
       const script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js";
 
       script.onload = async () => {
-        console.log("✅ ReplayWeb.page script loaded successfully");
-        console.log(
-          "Available custom elements:",
-          Object.keys(window.customElements._registry || {})
-        );
+        console.log("✅ ReplayWeb.page UI loaded");
 
         try {
-          console.log("Waiting for replay-web-page element definition...");
           await customElements.whenDefined("replay-web-page");
           console.log("✅ replay-web-page element defined");
 
-          // Check if element exists in DOM
-          const replayElement =
-            this.shadowRoot.querySelector("replay-web-page");
-          console.log("Replay element in DOM:", replayElement);
-
           window.replayWebPageLoaded = true;
           this.isLoading = false;
-
-          // Force update to show the element
           this.requestUpdate();
 
-          // Additional check after render
+          // Check the element after it renders
           setTimeout(() => {
-            const replayElementAfter =
-              this.shadowRoot.querySelector("replay-web-page");
-            console.log("Replay element after render:", replayElementAfter);
-            console.log(
-              "Element attributes:",
-              replayElementAfter?.getAttributeNames()
-            );
-          }, 1000);
+            const element = this.shadowRoot.querySelector("replay-web-page");
+            console.log("Element after render:", element);
+            if (element) {
+              console.log("Element's internal state:", {
+                source: element.getAttribute("source"),
+                replayBase: element.getAttribute("replayBase"),
+                hasContent: !!element.shadowRoot,
+                shadowRootChildren: element.shadowRoot?.children.length || 0,
+              });
+            }
+          }, 3000);
         } catch (error) {
-          console.error("❌ Error waiting for custom elements:", error);
+          console.error("❌ Element definition failed:", error);
           this.showError("Failed to initialize archive viewer");
         }
       };
 
       script.onerror = (error) => {
-        console.error("❌ Error loading ReplayWeb.page script:", error);
+        console.error("❌ Script load failed:", error);
         this.showError("Failed to load archive viewer from CDN");
       };
 
-      console.log("Appending script to head...");
       document.head.appendChild(script);
     } catch (error) {
-      console.error("❌ Error in loadReplayWebPage:", error);
+      console.error("❌ loadReplayWebPage error:", error);
       this.showError("Error loading archive viewer");
     }
   }
