@@ -2,6 +2,7 @@ import { LitElement, html, css } from "lit";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/icon/icon.js";
 import "@material/web/progress/circular-progress.js";
+import "../../workers/replaywebpage.worker.js";
 
 export class WarcViewerModal extends LitElement {
   static properties = {
@@ -128,7 +129,6 @@ export class WarcViewerModal extends LitElement {
             source=${this.fileUrl}
             url=${this.startingUrl}
             embed="default"
-            replayBase="https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/"
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
               : "display: block;"}
@@ -148,6 +148,17 @@ export class WarcViewerModal extends LitElement {
     console.log("File URL:", this.fileUrl);
     console.log("Starting URL:", this.startingUrl);
     console.log("Current location:", window.location.href);
+
+    if ("serviceWorker" in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register(
+          ReplayWebWorker
+        );
+        console.log("ReplayWeb service worker registered:", registration);
+      } catch (error) {
+        console.error("Service worker registration failed:", error);
+      }
+    }
 
     if (window.replayWebPageLoaded) {
       console.log("ReplayWeb.page already loaded, skipping script load");
