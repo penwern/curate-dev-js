@@ -367,8 +367,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.AssignUuidsToDirectories}
-                  @change=${(e) => (this.AssignUuidsToDirectories = e.target.selected)}
+                  .selected=${this.AssignUuidsToDirectories}
+                  @change=${(e) => (this.AssignUuidsToDirectories = !this.AssignUuidsToDirectories)}
                 >
                 </md-switch>
                 <label>Assign UUIDs to Directories</label>
@@ -376,8 +376,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.ExamineContents}
-                  @change=${(e) => (this.ExamineContents = e.target.selected)}
+                  .selected=${this.ExamineContents}
+                  @change=${(e) => (this.ExamineContents = !this.ExamineContents)}
                 >
                 </md-switch>
                 <label>Examine Contents</label>
@@ -385,8 +385,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.GenerateTransferStructureReport}
-                  @change=${(e) => (this.GenerateTransferStructureReport = e.target.selected)}
+                  .selected=${this.GenerateTransferStructureReport}
+                  @change=${(e) => (this.GenerateTransferStructureReport = !this.GenerateTransferStructureReport)}
                 >
                 </md-switch>
                 <label>Generate Transfer Structure Report</label>
@@ -394,8 +394,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.DocumentEmptyDirectories}
-                  @change=${(e) => (this.DocumentEmptyDirectories = e.target.selected)}
+                  .selected=${this.DocumentEmptyDirectories}
+                  @change=${(e) => (this.DocumentEmptyDirectories = !this.DocumentEmptyDirectories)}
                 >
                 </md-switch>
                 <label>Document Empty Directories</label>
@@ -408,8 +408,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.ExtractPackages}
-                  @change=${(e) => (this.ExtractPackages = e.target.selected)}
+                  .selected=${this.ExtractPackages}
+                  @change=${(e) => (this.ExtractPackages = !this.ExtractPackages)}
                 >
                 </md-switch>
                 <label>Extract Packages</label>
@@ -418,8 +418,8 @@ class PreservationGoConfigManager extends LitElement {
               <div class="suboptions ${this.ExtractPackages ? "enabled" : ""}">
                 <div class="toggle-field">
                   <md-switch
-                    ?selected=${this.DeletePackagesAfterExtraction}
-                    @change=${(e) => (this.DeletePackagesAfterExtraction = e.target.selected)}
+                    .selected=${this.DeletePackagesAfterExtraction}
+                    @change=${(e) => (this.DeletePackagesAfterExtraction = !this.DeletePackagesAfterExtraction)}
                     ?disabled=${!this.ExtractPackages}
                   >
                   </md-switch>
@@ -434,8 +434,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.IdentifyTransfer}
-                  @change=${(e) => (this.IdentifyTransfer = e.target.selected)}
+                  .selected=${this.IdentifyTransfer}
+                  @change=${(e) => (this.IdentifyTransfer = !this.IdentifyTransfer)}
                 >
                 </md-switch>
                 <label>Identify Transfer</label>
@@ -443,8 +443,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.IdentifySubmissionAndMetadata}
-                  @change=${(e) => (this.IdentifySubmissionAndMetadata = e.target.selected)}
+                  .selected=${this.IdentifySubmissionAndMetadata}
+                  @change=${(e) => (this.IdentifySubmissionAndMetadata = !this.IdentifySubmissionAndMetadata)}
                 >
                 </md-switch>
                 <label>Identify Submission and Metadata</label>
@@ -452,8 +452,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.IdentifyBeforeNormalization}
-                  @change=${(e) => (this.IdentifyBeforeNormalization = e.target.selected)}
+                  .selected=${this.IdentifyBeforeNormalization}
+                  @change=${(e) => (this.IdentifyBeforeNormalization = !this.IdentifyBeforeNormalization)}
                 >
                 </md-switch>
                 <label>Identify Before Normalization</label>
@@ -466,8 +466,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.Normalize}
-                  @change=${(e) => (this.Normalize = e.target.selected)}
+                  .selected=${this.Normalize}
+                  @change=${(e) => (this.Normalize = !this.Normalize)}
                 >
                 </md-switch>
                 <label>Normalize Files</label>
@@ -475,8 +475,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.TranscribeFiles}
-                  @change=${(e) => (this.TranscribeFiles = e.target.selected)}
+                  .selected=${this.TranscribeFiles}
+                  @change=${(e) => (this.TranscribeFiles = !this.TranscribeFiles)}
                 >
                 </md-switch>
                 <label>Transcribe Files</label>
@@ -489,8 +489,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.PerformPolicyChecksOnOriginals}
-                  @change=${(e) => (this.PerformPolicyChecksOnOriginals = e.target.selected)}
+                  .selected=${this.PerformPolicyChecksOnOriginals}
+                  @change=${(e) => (this.PerformPolicyChecksOnOriginals = !this.PerformPolicyChecksOnOriginals)}
                 >
                 </md-switch>
                 <label>Perform Policy Checks on Originals</label>
@@ -498,8 +498,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.PerformPolicyChecksOnPreservationDerivatives}
-                  @change=${(e) => (this.PerformPolicyChecksOnPreservationDerivatives = e.target.selected)}
+                  .selected=${this.PerformPolicyChecksOnPreservationDerivatives}
+                  @change=${(e) => (this.PerformPolicyChecksOnPreservationDerivatives = !this.PerformPolicyChecksOnPreservationDerivatives)}
                 >
                 </md-switch>
                 <label>Perform Policy Checks on Preservation Derivatives</label>
@@ -507,8 +507,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.PerformPolicyChecksOnAccessDerivatives}
-                  @change=${(e) => (this.PerformPolicyChecksOnAccessDerivatives = e.target.selected)}
+                  .selected=${this.PerformPolicyChecksOnAccessDerivatives}
+                  @change=${(e) => (this.PerformPolicyChecksOnAccessDerivatives = !this.PerformPolicyChecksOnAccessDerivatives)}
                 >
                 </md-switch>
                 <label>Perform Policy Checks on Access Derivatives</label>
@@ -544,8 +544,8 @@ class PreservationGoConfigManager extends LitElement {
 
               <div class="toggle-field">
                 <md-switch
-                  ?selected=${this.CompressAip}
-                  @change=${(e) => (this.CompressAip = e.target.selected)}
+                  .selected=${this.CompressAip}
+                  @change=${(e) => (this.CompressAip = !this.CompressAip)}
                 >
                 </md-switch>
                 <label>Compress AIP</label>
