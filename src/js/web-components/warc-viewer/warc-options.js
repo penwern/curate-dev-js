@@ -122,7 +122,7 @@ export class WarcOptionsModal extends LitElement {
             modalContent.style.padding = "16px";
           }
 
-          // Find the main content container and update it with the web component
+          // Find the main content container and update it
           const mainContent = container.querySelector(
             ".config-main-options-container"
           );

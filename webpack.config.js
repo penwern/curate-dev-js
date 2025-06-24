@@ -18,11 +18,12 @@ module.exports = {
     new webpack.DefinePlugin({
       "process.env.VERSION": JSON.stringify(packageJson.version),
     }),
-    // Custom plugin to handle the creation of the @latest folder AND ReplayWeb service worker
+
+    // Custom plugin to handle the creation of the @latest folder
     {
       apply(compiler) {
         compiler.hooks.afterEmit.tapAsync(
-          "CopyLatestBuildAndReplayWorker",
+          "CopyLatestBuild",
           (compilation, callback) => {
             const versionDir = path.resolve(
               __dirname,
@@ -30,7 +31,9 @@ module.exports = {
               packageJson.version
             );
             const latestDir = path.resolve(__dirname, "dist", "@latest");
-            s;
+
+            // Make sure the @latest folder exists
+            fs.emptyDirSync(latestDir); // Remove old contents if any
 
             // Copy versioned files to @latest folder without version numbers
             fs.readdir(versionDir, (err, files) => {
@@ -40,9 +43,6 @@ module.exports = {
               }
 
               files.forEach((file) => {
-                // Skip the replay directory since we already handled it
-                if (file === "replay") return;
-
                 const sourcePath = path.resolve(versionDir, file);
                 const targetPath = path.resolve(
                   latestDir,
@@ -61,6 +61,7 @@ module.exports = {
                   }
                 });
               });
+
               callback(); // Don't forget to call callback to signal Webpack we're done
             });
           }
