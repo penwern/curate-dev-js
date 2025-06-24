@@ -11,15 +11,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3 # Check out the repository to work with it
+        uses: actions/checkout@v4 # Check out the repository to work with it
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "16" # Adjust Node.js version if needed
 
       - name: Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm # Caching npm modules to speed up installs
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -35,7 +35,7 @@ jobs:
           npm run build  # Run Webpack to create the build
 
       - name: Deploy to GitHub Pages (gh-pages)
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Authentication using the GitHub token
           publish_dir: ./dist # Path to the build directory (dist)
