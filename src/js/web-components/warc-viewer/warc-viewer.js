@@ -2,7 +2,7 @@ import { LitElement, html, css } from "lit";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/icon/icon.js";
 import "@material/web/progress/circular-progress.js";
-import "../../workers/replaywebpage.worker.js";
+import ReplayWebWorker from "../../workers/replaywebpage.worker.js";
 
 export class WarcViewerModal extends LitElement {
   static properties = {
