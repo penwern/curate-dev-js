@@ -102,9 +102,6 @@ export class WarcViewerModal extends LitElement {
       <div class="warc-viewer">
         <div class="viewer-header">
           <h3>Web-Archive Viewer</h3>
-          <md-icon-button @click=${this.handleClose}>
-            <md-icon>close</md-icon>
-          </md-icon-button>
         </div>
 
         <div class="viewer-content">
@@ -128,7 +125,7 @@ export class WarcViewerModal extends LitElement {
             source=${this.fileUrl}
             url=${this.startingUrl}
             embed="default"
-            replayBase=${APP_CONFIG.replayBase}
+            replayBase="https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/"
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
               : "display: block;"}
