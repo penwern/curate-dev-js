@@ -433,6 +433,7 @@ export const styles = css`
     --md-outlined-select-text-field-container-shape: 12px;
   }
 
+  md-outlined-text-field,
   md-outlined-select {
     margin-top: 8px;
   }
