@@ -41,48 +41,69 @@ function handleWarcFileAction(node) {
 }
 
 // Event handler for "open" button clicks
-Curate.eventDelegator.addEventListener(".action-open", "click", (e) => {
-  const nodes = pydio._dataModel._selectedNodes;
-  if (nodes.length === 1) {
-    const handled = handleWarcFileAction(nodes[0]);
-    if (handled) {
-      e.preventDefault(); // Prevent default open action
-      e.stopPropagation();
+Curate.eventDelegator.addEventListener(
+  ".action-open",
+  "click",
+  (e) => {
+    const nodes = pydio._dataModel._selectedNodes;
+    if (nodes.length === 1) {
+      const handled = handleWarcFileAction(nodes[0]);
+      if (handled) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
     }
-  }
-});
+  },
+  true
+); // Use capture phase
 
 // Event handler for double-click in main files list
-Curate.eventDelegator.addEventListener(".main-files-list", "dblclick", (e) => {
-  console.log("Double-click in main files list:", e);
-  if (e.target.closest(".material-list-entry")) {
-    const nodes = pydio._dataModel._selectedNodes;
-    if (nodes.length === 1) {
-      console.log("Single node double clicked:", nodes[0]);
-      const handled = handleWarcFileAction(nodes[0]);
-      if (handled) {
-        e.preventDefault(); // Prevent default double-click action
-        e.stopPropagation();
+Curate.eventDelegator.addEventListener(
+  ".main-files-list",
+  "dblclick",
+  (e) => {
+    console.log("Double-click in main files list:", e);
+    if (e.target.closest(".material-list-entry")) {
+      const nodes = pydio._dataModel._selectedNodes;
+      if (nodes.length === 1) {
+        console.log("Single node double clicked:", nodes[0]);
+        const handled = handleWarcFileAction(nodes[0]);
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          return false;
+        }
       }
     }
-  }
-});
+  },
+  true
+); // Use capture phase
 
 // Event handler for double-click in image gallery (masonry grid)
-Curate.eventDelegator.addEventListener(".masonry-grid", "dblclick", (e) => {
-  console.log("Double-click in masonry grid:", e);
-  if (e.target.closest(".masonry-card")) {
-    const nodes = pydio._dataModel._selectedNodes;
-    if (nodes.length === 1) {
-      console.log("Single node double clicked:", nodes[0]);
-      const handled = handleWarcFileAction(nodes[0]);
-      if (handled) {
-        e.preventDefault(); // Prevent default double-click action
-        e.stopPropagation();
+Curate.eventDelegator.addEventListener(
+  ".masonry-grid",
+  "dblclick",
+  (e) => {
+    console.log("Double-click in masonry grid:", e);
+    if (e.target.closest(".masonry-card")) {
+      const nodes = pydio._dataModel._selectedNodes;
+      if (nodes.length === 1) {
+        console.log("Single node double clicked:", nodes[0]);
+        const handled = handleWarcFileAction(nodes[0]);
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          return false;
+        }
       }
     }
-  }
-});
+  },
+  true
+); // Use capture phase
 
 // Event handler for context menu "Open" clicks
 Curate.eventDelegator.addEventListener(
@@ -96,10 +117,13 @@ Curate.eventDelegator.addEventListener(
         console.log("Single node from context menu:", nodes[0]);
         const handled = handleWarcFileAction(nodes[0]);
         if (handled) {
-          e.preventDefault(); // Prevent default context menu action
+          e.preventDefault();
           e.stopPropagation();
+          e.stopImmediatePropagation();
+          return false;
         }
       }
     }
-  }
-);
+  },
+  true
+); // Use capture phase
