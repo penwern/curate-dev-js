@@ -1,5 +1,5 @@
 // Shared function to handle WARC file detection and viewing
-function handleWarcFileAction(node) {
+async function handleWarcFileAction(node) {
   console.log("Checking node for WARC compatibility:", node);
 
   // Check if it's a WARC-compatible file
@@ -14,7 +14,7 @@ function handleWarcFileAction(node) {
   console.log("WARC-compatible file detected, launching viewer");
 
   // Get the file URL using your existing logic
-  const fileUrl = `${window.location.origin}/io/quarantine/${fileName}${window.location.search}`;
+  const fileUrl = await PydioApi._PydioClient.buildPresignedGetUrl(node);
 
   // Create and show the WARC options modal
   const optionsModal = Curate.ui.modals.curatePopup(
