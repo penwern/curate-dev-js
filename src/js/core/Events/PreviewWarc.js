@@ -1,83 +1,105 @@
-import { html } from "lit";
-import { Curate } from "../CurateFunctions/CurateFunctions";
+// Shared function to handle WARC file detection and viewing
+function handleWarcFileAction(node) {
+  console.log("Checking node for WARC compatibility:", node);
 
-const handlerId = Curate.eventDelegator.addEventListener(
-  ".action-open_with",
-  "click",
-  async function (e) {
-    // 'this' is the matched element (.action-open_with button)
-    if (pydio._dataModel._selectedNodes.length == 1) {
-      const selectedNode = pydio._dataModel._selectedNodes[0];
-      const mime = selectedNode._metadata.get("mime");
-      const name = selectedNode._metadata.get("name");
+  // Check if it's a WARC-compatible file
+  const fileName = node.getLabel();
+  const isWarcCompatible = fileName.match(/\.(warc|warc\.gz|wacz)$/i);
 
-      // extension parsing for archive files
-      function getFileExtension(filename) {
-        const lowerName = filename.toLowerCase();
-        if (lowerName.endsWith(".warc.gz")) return "warc.gz";
-        if (lowerName.endsWith(".warc")) return "warc";
-        if (lowerName.endsWith(".wacz")) return "wacz";
-        return null;
-      }
+  if (!isWarcCompatible) {
+    console.log("Not a WARC-compatible file, ignoring");
+    return false; // Return false to indicate we didn't handle it
+  }
 
-      const extension = getFileExtension(name);
-      const allowedMimes = ["application/zip", "application/gzip"];
-      const allowedExtensions = ["warc", "warc.gz", "wacz"];
+  console.log("WARC-compatible file detected, launching viewer");
 
-      if (
-        extension &&
-        allowedMimes.includes(mime) &&
-        allowedExtensions.includes(extension)
-      ) {
-        console.log(
-          "it's a good file!: extension: ",
-          extension,
-          " mime: ",
-          mime
+  // Get the file URL using your existing logic
+  const fileUrl = `${window.location.origin}/io/quarantine/${fileName}${window.location.search}`;
+
+  // Create and show the WARC options modal
+  const optionsModal = Curate.ui.modals.curatePopup(
+    {
+      title: "Preview Web Archive",
+    },
+    {
+      afterLoaded: (container) => {
+        const mainContent = container.querySelector(
+          ".config-main-options-container"
         );
-        e.preventDefault();
+        if (mainContent) {
+          const warcOptions = document.createElement("warc-options-modal");
+          warcOptions.setFileInfo(fileUrl, fileName);
+          warcOptions.closeSelf = optionsModal.close;
+          mainContent.appendChild(warcOptions);
+        }
+      },
+    }
+  );
+
+  optionsModal.fire();
+  return true; // Return true to indicate we handled it
+}
+
+// Event handler for "open" button clicks
+Curate.eventDelegator.addEventListener(".action-open", "click", (e) => {
+  const nodes = pydio._dataModel._selectedNodes;
+  if (nodes.length === 1) {
+    const handled = handleWarcFileAction(nodes[0]);
+    if (handled) {
+      e.preventDefault(); // Prevent default open action
+      e.stopPropagation();
+    }
+  }
+});
+
+// Event handler for double-click in main files list
+Curate.eventDelegator.addEventListener(".main-files-list", "dblclick", (e) => {
+  console.log("Double-click in main files list:", e);
+  if (e.target.closest(".material-list-entry")) {
+    const nodes = pydio._dataModel._selectedNodes;
+    if (nodes.length === 1) {
+      console.log("Single node double clicked:", nodes[0]);
+      const handled = handleWarcFileAction(nodes[0]);
+      if (handled) {
+        e.preventDefault(); // Prevent default double-click action
         e.stopPropagation();
-        e.stopImmediatePropagation();
-
-        const url = await PydioApi._PydioClient.buildPresignedGetUrl(
-          pydio._dataModel._selectedNodes[0]
-        );
-
-        // Create the modal with a callback-based approach
-        const optionsModal = Curate.ui.modals.curatePopup(
-          {
-            title: "Preview Web-Archive",
-            content: "", // Will be set in afterLoaded
-          },
-          {
-            afterLoaded: (container) => {
-              // Find the main content container and update it with the web component
-              const mainContent = container.querySelector(
-                ".config-main-options-container"
-              );
-              if (mainContent) {
-                // Clear existing content
-                mainContent.innerHTML = "";
-
-                // Create the web component with the close method
-                const warcOptions =
-                  document.createElement("warc-options-modal");
-                warcOptions.closeSelf = optionsModal.close;
-                warcOptions.fileUrl = url;
-                warcOptions.fileName = name;
-
-                mainContent.appendChild(warcOptions);
-              }
-            },
-          }
-        );
-
-        // Fire the modal
-        optionsModal.fire();
-
-        return false;
       }
     }
-  },
-  { capture: true } // Use capture phase to prevent event bubbling
+  }
+});
+
+// Event handler for double-click in image gallery (masonry grid)
+Curate.eventDelegator.addEventListener(".masonry-grid", "dblclick", (e) => {
+  console.log("Double-click in masonry grid:", e);
+  if (e.target.closest(".masonry-card")) {
+    const nodes = pydio._dataModel._selectedNodes;
+    if (nodes.length === 1) {
+      console.log("Single node double clicked:", nodes[0]);
+      const handled = handleWarcFileAction(nodes[0]);
+      if (handled) {
+        e.preventDefault(); // Prevent default double-click action
+        e.stopPropagation();
+      }
+    }
+  }
+});
+
+// Event handler for context menu "Open" clicks
+Curate.eventDelegator.addEventListener(
+  ".context-menu [role=menuitem]",
+  "click",
+  (e) => {
+    if (e.target.innerText.toLowerCase() === "open") {
+      console.log("Open context menu clicked");
+      const nodes = pydio._dataModel._selectedNodes;
+      if (nodes.length === 1) {
+        console.log("Single node from context menu:", nodes[0]);
+        const handled = handleWarcFileAction(nodes[0]);
+        if (handled) {
+          e.preventDefault(); // Prevent default context menu action
+          e.stopPropagation();
+        }
+      }
+    }
+  }
 );
