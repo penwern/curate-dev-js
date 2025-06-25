@@ -40,9 +40,9 @@ function handleWarcFileAction(node) {
   return true; // Return true to indicate we handled it
 }
 
-// Event handler for "open" button clicks
+// Event handler for "open" button clicks (your original working code)
 Curate.eventDelegator.addEventListener(
-  ".action-open",
+  ".action-open_with",
   "click",
   (e) => {
     const nodes = pydio._dataModel._selectedNodes;
