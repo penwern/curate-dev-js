@@ -139,11 +139,9 @@ class EventDelegator {
     const listenerKey = `${eventType}-${useCapture}`;
 
     if (!this.documentListeners.has(listenerKey)) {
-      const handler = this._createDocumentHandler(eventType);
+      const handler = this._createDocumentHandler(eventType, useCapture); // Pass useCapture
       document.addEventListener(eventType, handler, useCapture);
       this.documentListeners.add(listenerKey);
-
-      // Store handler reference for cleanup
       this[`_${listenerKey}Handler`] = handler;
     }
   }
@@ -152,12 +150,16 @@ class EventDelegator {
    * Create document-level event handler
    * @private
    */
-  _createDocumentHandler(eventType) {
+  _createDocumentHandler(eventType, useCapture) {
     return (event) => {
       const handlersMap = this.handlers.get(eventType);
       if (!handlersMap) return;
 
       for (const { selector, callback, options } of handlersMap.values()) {
+        // Only execute handlers that match the current phase
+        const handlerCapture = options.capture || false;
+        if (handlerCapture !== useCapture) continue;
+
         let targetElement = null;
 
         // Check if event target matches selector
