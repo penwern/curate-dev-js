@@ -52,21 +52,21 @@ function handleWarcFileAction(node) {
                 // Create wrapper with border radius
                 const viewerWrapper = document.createElement("div");
                 viewerWrapper.style.cssText = `
-                    flex: 1;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    border: 1px solid var(--md-sys-color-outline-variant);
-                    background: var(--md-sys-color-surface);
-                  `;
+                      flex: 1;
+                      border-radius: 12px;
+                      overflow: hidden;
+                      border: 1px solid var(--md-sys-color-outline-variant);
+                      background: var(--md-sys-color-surface);
+                    `;
                 // Clear existing content and add the replay component inside wrapper
                 mainContent.innerHTML = "";
                 viewerWrapper.innerHTML = `<replay-web-page
-                    source="${fileUrl}"
-                    url=""
-                    replayBase="/workers/"
-                    embed="default"
-                    style="width: 100%; height: 100%; display: block; border-radius: inherit;">
-                  </replay-web-page>`;
+                      source="${fileUrl}"
+                      url=""
+                      replayBase="/workers/"
+                      embed="default"
+                      style="width: 100%; height: 100%; display: block; border-radius: inherit;">
+                    </replay-web-page>`;
                 mainContent.appendChild(viewerWrapper);
               }
             },
