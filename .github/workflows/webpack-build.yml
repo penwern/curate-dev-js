@@ -21,11 +21,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install  # Install dependencies
+          npm install
 
       - name: Build with Webpack
         run: |
-          npm run build  # Run Webpack to create the build
+          npm run build
 
       - name: Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4
