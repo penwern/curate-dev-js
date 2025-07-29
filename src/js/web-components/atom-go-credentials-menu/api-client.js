@@ -60,12 +60,7 @@ class AtomConfigAPI {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      // Save configs to session storage
-      sessionStorage.setItem("atomConfigs", JSON.stringify(data));
-
-      return data;
+      return await response.json();
     } catch (error) {
       console.error("Error fetching atom configs:", error);
       throw error;
@@ -162,14 +157,6 @@ class AtomConfigAPI {
     }
   }
 
-  /**
-   * Get configs from session storage
-   * @returns {Array} Array of configs from session storage
-   */
-  getConfigsFromStorage() {
-    const configs = sessionStorage.getItem("atomConfigs");
-    return configs ? JSON.parse(configs) : [];
-  }
 
   /**
    * Show error modal using the existing Curate UI system
