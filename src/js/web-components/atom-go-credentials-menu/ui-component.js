@@ -81,7 +81,6 @@ export const atomGoConfigUI = (component) => html`
                   placeholder="rsync -av --delete"
                   .value=${component.rsynccommand}
                   @input=${(e) => (component.rsynccommand = e.target.value)}
-                  required
                 ></md-outlined-text-field>
               </div>
             </div>
