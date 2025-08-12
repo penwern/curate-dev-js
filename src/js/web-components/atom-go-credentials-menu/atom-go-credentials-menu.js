@@ -79,7 +79,7 @@ class AtomGoCredentialsManager extends LitElement {
   }
 
   async saveConfig() {
-    if (!this.host || !this.apikey || !this.loginemail || !this.loginpassword || !this.rsynctarget || !this.rsynccommand) {
+    if (!this.host || !this.apikey || !this.loginemail || !this.loginpassword || !this.rsynctarget) {
       Curate.ui.modals.curatePopup({
         title: "Missing Required Fields",
         message: "Please fill in all required fields",
@@ -133,14 +133,13 @@ class AtomGoCredentialsManager extends LitElement {
       this.loginemail &&
       this.loginpassword &&
       this.rsynctarget &&
-      this.rsynccommand &&
       !this.saveInProgress
     );
   }
 
   get saveButtonText() {
     if (this.saveInProgress) return "Saving...";
-    if (!this.host || !this.apikey || !this.loginemail || !this.loginpassword || !this.rsynctarget || !this.rsynccommand)
+    if (!this.host || !this.apikey || !this.loginemail || !this.loginpassword || !this.rsynctarget)
       return "Fill in all required fields";
     return this.currentConfig ? "Update Configuration" : "Save Configuration";
   }
