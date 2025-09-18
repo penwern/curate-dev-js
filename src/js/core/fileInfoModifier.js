@@ -16,27 +16,28 @@ const daysSince = (scanDate) => Math.floor((new Date() - new Date(scanDate)) / 8
 
 const getQuarantineStatus = (scan, scan2, scanTag, scanDate) => {
     const openWs = Curate.workspaces.getOpenWorkspace()
-    if ((!scanTag || scan == 'File has not been scanned') && openWs == 'quarantine' && scanTag !== 'Scan Limit Exceeded') {
+    if ((!scanTag || scan == 'File has not been scanned') && openWs == 'quarantine' && scanTag !== 'SizeLimitTag') {
         return 'This file has not been scanned and is at risk.'
     }
-    if ((!scanTag || scan == 'File has not been scanned') && openWs !== 'quarantine' && scanTag !== 'Scan Limit Exceeded') {
-        return 'This file has not been scanned and is at risk. Please move it into the Quarantine workspace to be scanned.'
-    }
-    if (scanTag == 'Quarantined') {
+    // commenting out for now because I believe a file will not be rescanned if uploaded to a different workspace and then moved to quarantine
+    //if ((!scanTag || scan == 'File has not been scanned') && openWs !== 'quarantine' && scanTag !== 'Scan Limit Exceeded') {
+    //    return 'This file has not been scanned and is at risk. Please move it into the Quarantine workspace to be scanned.'
+    //}
+    if (scanTag == 'QuarantineTag') {
         return `File in quarantine, current period: ${daysSince(scanDate)} days.`
     }
-    if (scanTag == 'Scan Limit Exceeded') {
+    if (scanTag == 'SizeLimitTag') {
         return `File is too large to be scanned.`
     }
-    if (scanTag == 'Passed' && (openWs == 'personal-files' || openWs == 'common files')) {
+    if (scanTag == 'PassTag' && (openWs == 'personal-files' || openWs == 'common files')) {
         return `File has passed the ${openWs.replace('-', ' ')} scan.`
-    }else if (scanTag == 'Passed'){
+    }else if (scanTag == 'PassTag'){
         return `File has passed an initial scan but will not be scanned again, please move it into the Quarantine workspace.`
     }
-    if (scanTag == 'Released') {
+    if (scanTag == 'ReleaseTag') {
         return `File has been released from quarantine.`
     }
-    if (scanTag == 'Risk') {
+    if (scanTag == 'FailTag') {
         return `File has not completed its quarantine period and is at risk.`
     }
 }
