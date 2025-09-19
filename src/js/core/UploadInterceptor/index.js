@@ -15,7 +15,7 @@ window.addEventListener("load", () => {
 
   // Register plugins
   UploadInterceptor.register(ChecksumValidationPlugin);
-  UploadInterceptor.register(UploadVolumeChecker);
+  //UploadInterceptor.register(UploadVolumeChecker);
 
   console.log('UploadInterceptor: System initialized with plugins:', UploadInterceptor.getRegisteredPlugins());
 });
