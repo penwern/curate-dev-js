@@ -68,7 +68,17 @@ class CurateWorkerManager {
     if (this.taskQueue.length > 0) {
       const task = this.taskQueue.shift();
       this.currentTasks.set(workerId, task);
-      worker.postMessage({ file: task.file, msg: "begin hash" });
+
+      // Get PydioApi values and pass them to worker
+      const multipartThreshold = PydioApi.getMultipartThreshold();
+      const multipartPartSize = PydioApi.getMultipartPartSize();
+
+      worker.postMessage({
+        file: task.file,
+        msg: "begin hash",
+        multipartThreshold,
+        multipartPartSize
+      });
     } else if (this.currentTasks.size === 0) {
       // No more tasks in queue and no running tasks - cleanup workers
       this.cleanupWorkers();
