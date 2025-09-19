@@ -1,4 +1,4 @@
-class CurateWorkerManager {
+class ChecksumWorkerManager {
   constructor(poolSize = 5) {
     this.poolSize = poolSize;
     this.workers = new Map(); // Map of active workers
@@ -99,4 +99,4 @@ class CurateWorkerManager {
   }
 }
 
-export default CurateWorkerManager;
+export default ChecksumWorkerManager;

@@ -66,6 +66,8 @@ class UploadInterceptor {
       return;
     }
 
+    this.isPatched = true; // Set immediately to prevent double calls
+
     // Wait for UploaderModel to be available
     this.waitForUploaderModel().then(() => {
       this.applyUploadPatch();
@@ -92,7 +94,6 @@ class UploadInterceptor {
     // Override the uploadPresigned method
     UploaderModel.UploadItem.prototype.uploadPresigned = this.createPatchedUploadMethod();
 
-    this.isPatched = true;
     console.log('UploadInterceptor: Successfully patched upload system');
   }
 
