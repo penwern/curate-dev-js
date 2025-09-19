@@ -108,11 +108,17 @@ class UploadInterceptor {
       // 'this' refers to the UploaderModel.UploadItem instance
       const uploadItem = this;
 
-      // Execute the original upload logic first
-      const originalPromise = self.originalUploadPresigned.apply(uploadItem, arguments);
+      // Call beforeUpload hooks first to allow blocking
+      const shouldProceed = self.callPluginHooks('beforeUpload', uploadItem);
 
-      // Call beforeUpload hooks
-      self.callPluginHooks('beforeUpload', uploadItem);
+      // If any plugin returned false, block the upload
+      if (shouldProceed === false) {
+        console.log('UploadInterceptor: Upload blocked by plugin for:', uploadItem._label);
+        return Promise.reject(new Error('Upload blocked by volume checker'));
+      }
+
+      // Execute the original upload logic
+      const originalPromise = self.originalUploadPresigned.apply(uploadItem, arguments);
 
       // Create observer to watch for upload status changes
       const observer = (status) => {
@@ -146,15 +152,28 @@ class UploadInterceptor {
    * Call a specific hook on all registered plugins
    * @param {string} hookName - Name of hook to call
    * @param {...any} args - Arguments to pass to hook
+   * @returns {any} For beforeUpload, returns false if any plugin blocks, otherwise undefined
    */
   callPluginHooks(hookName, ...args) {
     for (const [pluginName, plugin] of this.plugins) {
       try {
         if (plugin.hooks && typeof plugin.hooks[hookName] === 'function') {
-          plugin.hooks[hookName](...args);
+          const result = plugin.hooks[hookName].call(plugin, ...args);
+
+          // For beforeUpload hook, if any plugin returns false, block the upload
+          if (hookName === 'beforeUpload' && result === false) {
+            console.log(`UploadInterceptor: Plugin '${pluginName}' blocked upload`);
+            return false;
+          }
         }
       } catch (error) {
         console.error(`UploadInterceptor: Error in plugin '${pluginName}' hook '${hookName}':`, error);
+
+        // For beforeUpload, treat errors as blocking
+        if (hookName === 'beforeUpload') {
+          console.log(`UploadInterceptor: Plugin '${pluginName}' error treated as block`);
+          return false;
+        }
       }
     }
   }
