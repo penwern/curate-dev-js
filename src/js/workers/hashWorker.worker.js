@@ -1,4 +1,4 @@
-import SparkMD5 from "spark-md5";
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js")
 
 // Function to calculate the checksum for multipart files
 const calculateMultipartChecksum = (file, partSize) =>
@@ -53,19 +53,65 @@ const calculateMultipartChecksum = (file, partSize) =>
     loadNext();
   });
 
+
+const incrementalMD5 = file => new Promise((resolve, reject) => {
+  var loaded = 0;
+  var startTime = performance.now();
+  var tSize = file.size;
+  const fileReader = new FileReader();
+  const spark = new SparkMD5.ArrayBuffer();
+  const chunkSize = 2097152; // Read in chunks of 2MB
+  const chunks = Math.ceil(file.size / chunkSize);
+  let currentChunk = 0;
+
+  fileReader.onload = event => {
+      spark.append(event.target.result); // Append array buffer
+      ++currentChunk;
+      if (currentChunk < chunks) {
+          loadNext();
+      } else {
+          resolve(spark.end()); // Compute hash
+      }
+  };
+  
+  fileReader.addEventListener("progress", event => {
+      loaded += event.loaded;
+      let pE = Math.round((loaded / tSize) * 100);
+      let rS = pE + "%";
+      // console.log(rS)
+  });
+  
+  fileReader.addEventListener("loadend", event => {
+      if (event.total > 0) {
+          var endTime = performance.now();
+          // console.log(`Took ${endTime - startTime} milliseconds`)
+      }
+  });
+
+  fileReader.onerror = () => reject(fileReader.error);
+
+  const loadNext = () => {
+      const start = currentChunk * chunkSize;
+      const end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+      fileReader.readAsArrayBuffer(File.prototype.slice.call(file, start, end));
+  };
+
+  loadNext();
+});
+
 // Main worker handler
 self.onmessage = async function (event) {
   if (event.data.file && event.data.msg == "begin hash") {
-    console.log("ello chum!");
     const file = event.data.file;
-    const multipartThreshold = PydioApi.getMultipartPartSize(); // Get the current multipart chunk size
+    const multipartThreshold = event.data.multipartThreshold;
+    const multipartPartSize = event.data.multipartPartSize;
 
     if (file.size > multipartThreshold) {
       // Only run multipart checksum logic for files above the threshold
       try {
         const finalChecksum = await calculateMultipartChecksum(
           file,
-          multipartThreshold
+          multipartPartSize
         );
         postMessage({ status: "complete", hash: finalChecksum });
       } catch (error) {
