@@ -122,6 +122,6 @@ self.onmessage = async function (event) {
       const gmd5 = await incrementalMD5(file);
       postMessage({ status: "complete", hash: gmd5 });
     }
-    self.close();
+    // Note: Worker stays alive for reuse - ChecksumWorkerManager handles cleanup
   }
 };
