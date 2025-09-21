@@ -32,49 +32,31 @@ function updateMetaField(uuid, namespace, value) {
     Operation: "PUT",
   };
 
-  Curate.api.fetchCurate(url, "PUT", metadatas)
-    .then((response) => {
-      console.log(`updateMetaField: Successfully updated metadata for UUID: ${uuid}`, response);
-    })
-    .catch((error) => {
-      console.error(`updateMetaField: Failed to update metadata for UUID: ${uuid}`, error);
-    });
+  Curate.api.fetchCurate(url, "PUT", metadatas);
+  console.log(`Attempted to update metadata '${namespace}' for UUID ${uuid}`);
 }
 
 function fetchCurateStats(filePath, expectedChecksum, retryCount) {
-  
-
   Curate.api
     .fetchCurate("/a/tree/stats", "POST", {
       NodePaths: [filePath],
     })
     .then((data) => {
-      
-
       const node = data.Nodes.find((node) => node.Path === filePath);
       if (node) {
-        
         // If node data is found, proceed to validate its checksum.
         validateChecksum(node, expectedChecksum, filePath, retryCount);
       } else {
         // Handle case where the specific node wasn't found in the API response.
-        console.error(`❌ fetchCurateStats: Node not found in stats response for path: ${filePath}`);
-       
+        // This might happen if path construction failed or the node doesn't exist.
+        console.error("Node not found in stats response:", filePath);
         // Consider updating meta here to indicate a lookup failure if desired.
       }
     })
     .catch((error) => {
       // Handle errors during the API call itself (network issues, server errors).
-      console.error(`💥 fetchCurateStats: API error for ${filePath}:`, error);
-      
-
-      // Add retry logic for API failures
-      if (retryCount < 3) {
-        console.log(`🔄 fetchCurateStats: Retrying API call for ${filePath} in 2 seconds...`);
-        setTimeout(() => {
-          fetchCurateStats(filePath, expectedChecksum, retryCount + 1);
-        }, 2000);
-      }
+      console.error("Error fetching node stats:", error, filePath);
+      // Consider retrying or updating meta based on the error type if desired.
     });
 }
 
@@ -85,14 +67,17 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
   // The backend might return 'temporary' if its Etag calculation isn't finished.
   // Retry fetching stats a few times if this occurs.
   if (node.Etag === "temporary" && retryCount < maxRetries) {
-    
+    console.log(
+      `Checksum temporary for ${filePath}. Retrying (${
+        retryCount + 1
+      }/${maxRetries})...`
+    );
     setTimeout(() => {
       fetchCurateStats(filePath, expectedChecksum, retryCount + 1);
     }, retryDelay);
   } else if (node.Etag === expectedChecksum) {
     // Checksum matches the expected value.
-    console.log(`✅ validateChecksum: Checksum validation PASSED for ${filePath}!`);
-
+    console.log(`Checksum validation passed for ${filePath}.`);
     updateMetaField(
       node.Uuid,
       "usermeta-file-integrity", // Namespace for integrity status
@@ -101,12 +86,13 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
   } else {
     // Checksum mismatch, or max retries for 'temporary' reached.
     console.error(
-      `❌ validateChecksum: Checksum validation FAILED for ${filePath}!`
+      `Checksum validation FAILED for ${filePath}.`,
+      "Expected:",
+      expectedChecksum,
+      "Received:",
+      node.Etag,
+      `(Attempt ${retryCount + 1})`
     );
-    console.error(`❌ validateChecksum: Expected: ${expectedChecksum}`);
-    console.error(`❌ validateChecksum: Received: ${node.Etag}`);
-    console.error(`❌ validateChecksum: Attempt: ${retryCount + 1}`);
-
     updateMetaField(
       node.Uuid,
       "usermeta-file-integrity",
@@ -243,32 +229,27 @@ export default {
 
   hooks: {
     onUploadComplete: async (uploadItem) => {
-      
+      console.log('ChecksumValidation: Processing upload completion for:', uploadItem._label);
 
       try {
         // Generate checksum for the uploaded file
-        
         const finalChecksum = await generateChecksum(uploadItem);
-        
 
         // Construct the file path for validation
         const filePath = constructFilePath(uploadItem);
-       
+        console.log("Constructed final path for stats API:", filePath);
 
         // Introduce a small delay before fetching stats.
         // Delay scales slightly with file size but is capped.
         const delay = Math.min(5000, Math.max(500, uploadItem._file.size * 0.01));
-        
-
         setTimeout(() => {
-          
           // Initiate the checksum validation process using the final path.
           fetchCurateStats(filePath, finalChecksum, 0);
         }, delay);
 
       } catch (error) {
         console.error(
-          "❌ ChecksumValidation: Failed to process upload:",
+          "ChecksumValidation: Failed to process upload:",
           error,
           "for file:",
           uploadItem._label
