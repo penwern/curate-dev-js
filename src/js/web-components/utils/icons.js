@@ -17,6 +17,14 @@ import {
   mdiAlertCircleOutline,
   mdiChevronRight,
   mdiChevronDown,
+  mdiCheckCircle,
+  mdiSitemap,
+  mdiPencil,
+  mdiLinkVariantOff,
+  mdiCheckboxBlankCircleOutline,
+  mdiLockOutline,
+  mdiBlockHelper,
+  mdiCached,
 } from "@mdi/js";
 
 // A helper to wrap the SVG path data in an <svg> tag
@@ -44,3 +52,11 @@ export const checkCircleIcon = icon(mdiCheckCircleOutline);
 export const alertCircleIcon = icon(mdiAlertCircleOutline);
 export const chevronRightIcon = icon(mdiChevronRight);
 export const chevronDownIcon = icon(mdiChevronDown);
+export const checkCircleFilledIcon = icon(mdiCheckCircle);
+export const sitemapIcon = icon(mdiSitemap);
+export const pencilIcon = icon(mdiPencil);
+export const linkVariantOffIcon = icon(mdiLinkVariantOff);
+export const checkboxBlankCircleIcon = icon(mdiCheckboxBlankCircleOutline);
+export const lockIcon = icon(mdiLockOutline);
+export const blockHelperIcon = icon(mdiBlockHelper);
+export const cachedIcon = icon(mdiCached);
