@@ -1,4 +1,5 @@
 // api-service.js
+
 class ApiService {
   constructor(baseUrl = `${window.location.origin}/api/v1`) {
     // Different port for Pure integration

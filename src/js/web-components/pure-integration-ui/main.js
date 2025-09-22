@@ -832,4 +832,5 @@ class PureIntegrationInterface extends LitElement {
 }
 
 customElements.define("pure-integration-interface", PureIntegrationInterface);
+
 export default PureIntegrationInterface;

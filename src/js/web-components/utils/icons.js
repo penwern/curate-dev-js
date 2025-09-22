@@ -60,3 +60,4 @@ export const checkboxBlankCircleIcon = icon(mdiCheckboxBlankCircleOutline);
 export const lockIcon = icon(mdiLockOutline);
 export const blockHelperIcon = icon(mdiBlockHelper);
 export const cachedIcon = icon(mdiCached);
+export const blockIcon = icon(mdiBlockHelper);

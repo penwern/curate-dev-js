@@ -25,13 +25,12 @@ import "@material/web/select/outlined-select.js";
 
 // Icons
 import {
-  linkOffIcon,
   checkCircleIcon,
-  unmappedStatusIcon,
+  checkboxBlankCircleIcon,
   lockIcon,
   searchIcon,
   blockIcon,
-  cacheIcon,
+  cachedIcon,
   plusIcon,
   deleteIcon,
   pencilIcon,
@@ -1445,7 +1444,7 @@ class MetadataMappingTabContent extends LitElement {
                 ?disabled=${this._isProcessingCached}
               >
                 <span style="display: flex; align-items: center; gap: 8px;">
-                  ${cacheIcon}${this._isProcessingCached
+                  ${cachedIcon}${this._isProcessingCached
                     ? "Processing..."
                     : "Process Cached Records"}
                 </span>
@@ -1504,7 +1503,7 @@ class MetadataMappingTabContent extends LitElement {
                     ? checkCircleIcon
                     : action === "rejected"
                     ? blockIcon
-                    : unmappedStatusIcon}
+                    : checkboxBlankCircleIcon}
                 </md-icon>
               </div>
 
