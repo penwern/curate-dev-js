@@ -210,9 +210,11 @@ class HistoryTabContent extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: calc(100vh - 480px);
-      overflow-y: auto;
-      padding-right: 8px;
+      height: auto;
+      max-height: none;
+      min-height: 300px;
+      overflow-y: visible;
+      padding-right: 0;
     }
     .empty-state {
       text-align: center;

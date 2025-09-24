@@ -28,10 +28,28 @@ class SearchResultsTable extends LitElement {
     .table-header,
     .table-row {
       display: grid;
-      grid-template-columns: 48px 2.5fr 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 48px 3fr 1.2fr 1fr;
+      gap: 20px;
       align-items: center;
-      padding: 8px 16px;
+      padding: 12px 20px;
+    }
+
+    @media (max-width: 1200px) {
+      .table-header,
+      .table-row {
+        grid-template-columns: 48px 2.5fr 1fr 1fr;
+        gap: 16px;
+        padding: 8px 16px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .table-header,
+      .table-row {
+        grid-template-columns: 40px 2fr 0.8fr 0.8fr;
+        gap: 12px;
+        padding: 6px 12px;
+      }
     }
     .table-header {
       background: var(--md-sys-color-surface-1);
@@ -312,8 +330,8 @@ class ManualHarvestBySearchPanel extends LitElement {
       color: var(--md-sys-color-on-surface);
     }
     .results-container {
-      max-height: 400px;
-      overflow-y: auto;
+      max-height: none;
+      overflow-y: visible;
       border-radius: 12px;
     }
     .selection-summary-bar {

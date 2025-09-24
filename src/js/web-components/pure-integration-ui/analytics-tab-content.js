@@ -19,6 +19,7 @@ class AnalyticsTabContent extends LitElement {
     apiService: { type: Object },
     systemStats: { type: Object, state: true },
     isLoadingStats: { type: Boolean, state: true },
+    selectedHealthMetric: { type: String, state: true },
   };
 
   constructor() {
@@ -26,6 +27,7 @@ class AnalyticsTabContent extends LitElement {
     this.charts = {};
     this.systemStats = null;
     this.isLoadingStats = false;
+    this.selectedHealthMetric = 'overview';
   }
 
   static styles = css`
@@ -104,7 +106,9 @@ class AnalyticsTabContent extends LitElement {
     super.updated(changedProperties);
     if (
       changedProperties.has("selectedChart") ||
-      changedProperties.has("recentHarvests")
+      changedProperties.has("recentHarvests") ||
+      changedProperties.has("selectedHealthMetric") ||
+      changedProperties.has("systemStats")
     ) {
       this.destroyCharts();
       this.initSelectedChart();
@@ -166,6 +170,9 @@ class AnalyticsTabContent extends LitElement {
           break;
         case "health":
           this.initHealthChart();
+          break;
+        case "fields":
+          this.initFieldMappingChart();
           break;
       }
     });
@@ -313,15 +320,50 @@ class AnalyticsTabContent extends LitElement {
     const canvas = this.shadowRoot.querySelector("#healthChart");
     if (!canvas || this.charts.health) return;
     const ctx = canvas.getContext("2d");
-    
+
     const stats = this.systemStats || this._calculateFallbackStats();
-    const healthData = {
-      'Successful Records': stats.successful_records || 0,
-      'Failed Records': stats.failed_records || 0,
-      'Cached Records': stats.cached_records_count || 0,
-      'Mapped Fields': stats.mapped_fields_count || 0,
-      'Unmapped Fields': stats.unmapped_fields_count || 0,
-    };
+    let healthData = {};
+    let chartTitle = "";
+
+    switch (this.selectedHealthMetric) {
+      case 'harvest_performance':
+        healthData = {
+          'Successful Jobs': stats.successful_jobs || 0,
+          'Failed Jobs': stats.failed_jobs || 0,
+          'Partial Success': stats.partial_success_jobs || 0,
+        };
+        chartTitle = `Harvest Performance: ${stats.success_rate || 0}% Success Rate`;
+        break;
+
+      case 'field_mapping':
+        healthData = {
+          'Mapped Fields': stats.mapped_fields_count || 0,
+          'Rejected Fields': stats.rejected_fields_count || 0,
+          'Unmapped Fields': stats.unmapped_fields_count || 0,
+          'Blocking Fields': stats.blocking_unmapped_fields_count || 0,
+        };
+        chartTitle = `Field Mapping: ${Math.round(stats.field_mapping_completion || 0)}% Complete`;
+        break;
+
+      case 'recent_activity':
+        healthData = {
+          'Recent Jobs': stats.recent_jobs_count || 0,
+          'Recent Records': stats.recent_records_processed || 0,
+          'Recent Successful': stats.recent_successful_records || 0,
+          'Recent Cached': stats.recent_records_cached || 0,
+        };
+        chartTitle = `Recent Activity: ${stats.recent_success_rate || 0}% Success Rate`;
+        break;
+
+      default: // overview
+        healthData = {
+          'Successful Records': stats.successful_records || 0,
+          'Failed Records': stats.failed_records || 0,
+          'Cached Records': stats.cached_records_count || 0,
+          'Total Jobs': stats.total_harvest_jobs || 0,
+        };
+        chartTitle = `System Overview: ${stats.system_health?.harvest_success_rate || stats.success_rate || 0}% Health`;
+    }
 
     this.charts.health = new Chart(ctx, {
       type: "bar",
@@ -332,11 +374,11 @@ class AnalyticsTabContent extends LitElement {
             label: "System Health Metrics",
             data: Object.values(healthData),
             backgroundColor: [
-              "rgba(52, 211, 153, 0.7)", // green - successful
-              "rgba(248, 113, 113, 0.7)", // red - failed  
-              "rgba(250, 204, 21, 0.7)",  // yellow - cached
-              "rgba(59, 130, 246, 0.7)",  // blue - mapped
-              "rgba(156, 163, 175, 0.7)", // gray - unmapped
+              "rgba(52, 211, 153, 0.7)", // green
+              "rgba(248, 113, 113, 0.7)", // red
+              "rgba(250, 204, 21, 0.7)",  // yellow
+              "rgba(59, 130, 246, 0.7)",  // blue
+              "rgba(156, 163, 175, 0.7)", // gray
             ],
             borderColor: [
               "rgba(52, 211, 153, 1)",
@@ -352,11 +394,11 @@ class AnalyticsTabContent extends LitElement {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { 
+        plugins: {
           legend: { display: false },
           title: {
             display: true,
-            text: `System Health: ${stats.system_health?.harvest_success_rate || 0}% Success Rate`,
+            text: chartTitle,
             color: "var(--md-sys-color-on-surface)",
           }
         },
@@ -370,7 +412,7 @@ class AnalyticsTabContent extends LitElement {
             grid: { color: "rgba(128,128,128,0.2)" },
           },
           x: {
-            ticks: { 
+            ticks: {
               color: "var(--md-sys-color-on-surface-variant)",
               maxRotation: 45,
             },
@@ -391,6 +433,67 @@ class AnalyticsTabContent extends LitElement {
     );
   }
 
+  _handleHealthMetricSelect(e) {
+    this.selectedHealthMetric = e.target.value;
+    // Recreate the health chart with the new metric
+    if (this.selectedChart === 'health') {
+      this.destroyCharts();
+      this.initHealthChart();
+    }
+  }
+
+  initFieldMappingChart() {
+    const canvas = this.shadowRoot.querySelector("#fieldsChart");
+    if (!canvas || this.charts.fields) return;
+    const ctx = canvas.getContext("2d");
+
+    const stats = this.systemStats || this._calculateFallbackStats();
+    const fieldData = {
+      'Mapped': stats.mapped_fields_count || 0,
+      'Rejected': stats.rejected_fields_count || 0,
+      'Unmapped': stats.unmapped_fields_count || 0,
+      'Discovered': stats.discovered_fields_count || 0,
+      'Whitelisted': stats.whitelisted_fields_count || 0,
+    };
+
+    this.charts.fields = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(fieldData),
+        datasets: [
+          {
+            label: "Field Mappings",
+            data: Object.values(fieldData),
+            backgroundColor: [
+              "rgba(52, 211, 153, 0.8)", // green - mapped
+              "rgba(248, 113, 113, 0.8)", // red - rejected
+              "rgba(156, 163, 175, 0.8)", // gray - unmapped
+              "rgba(59, 130, 246, 0.8)",  // blue - discovered
+              "rgba(250, 204, 21, 0.8)",  // yellow - whitelisted
+            ],
+            borderColor: "var(--md-sys-color-surface-1)",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "right",
+            labels: { color: "var(--md-sys-color-on-surface)" },
+          },
+          title: {
+            display: true,
+            text: `Field Mapping Status: ${Math.round(stats.field_mapping_completion || 0)}% Complete`,
+            color: "var(--md-sys-color-on-surface)",
+          }
+        },
+      },
+    });
+  }
+
   render() {
     const stats = this.systemStats || this._calculateFallbackStats();
 
@@ -406,27 +509,56 @@ class AnalyticsTabContent extends LitElement {
 
         <div class="stats-header">
           <h3 style="margin: 0; color: var(--md-sys-color-on-surface);">System Statistics</h3>
-          <md-outlined-select
-            label="Chart Type"
-            .value=${this.selectedChart}
-            @change=${this._handleChartSelect}
-          >
-            <md-select-option value="trends">
-              <div slot="headline">Harvest Trends</div>
-            </md-select-option>
-            <md-select-option value="status">
-              <div slot="headline">Success vs Failed</div>
-            </md-select-option>
-            <md-select-option value="source">
-              <div slot="headline">Harvest Sources</div>
-            </md-select-option>
-            <md-select-option value="health">
-              <div slot="headline">System Health</div>
-            </md-select-option>
-          </md-outlined-select>
+          <div style="display: flex; gap: 12px;">
+            <md-outlined-select
+              label="Chart Type"
+              .value=${this.selectedChart}
+              @change=${this._handleChartSelect}
+            >
+              <md-select-option value="trends">
+                <div slot="headline">Harvest Trends</div>
+              </md-select-option>
+              <md-select-option value="status">
+                <div slot="headline">Success vs Failed</div>
+              </md-select-option>
+              <md-select-option value="source">
+                <div slot="headline">Harvest Sources</div>
+              </md-select-option>
+              <md-select-option value="health">
+                <div slot="headline">System Health</div>
+              </md-select-option>
+              <md-select-option value="fields">
+                <div slot="headline">Field Mappings</div>
+              </md-select-option>
+            </md-outlined-select>
+            ${when(
+              this.selectedChart === 'health',
+              () => html`
+                <md-outlined-select
+                  label="Health Metric"
+                  .value=${this.selectedHealthMetric}
+                  @change=${this._handleHealthMetricSelect}
+                >
+                  <md-select-option value="overview">
+                    <div slot="headline">Overview</div>
+                  </md-select-option>
+                  <md-select-option value="harvest_performance">
+                    <div slot="headline">Harvest Performance</div>
+                  </md-select-option>
+                  <md-select-option value="field_mapping">
+                    <div slot="headline">Field Mapping Status</div>
+                  </md-select-option>
+                  <md-select-option value="recent_activity">
+                    <div slot="headline">Recent Activity</div>
+                  </md-select-option>
+                </md-outlined-select>
+              `
+            )}
+          </div>
         </div>
 
         <div class="stats-cards">
+          <!-- Harvest Statistics -->
           <div class="stat-card">
             <h4>Total Harvests</h4>
             <p class="value">${stats.total_harvest_jobs || 0}</p>
@@ -436,22 +568,58 @@ class AnalyticsTabContent extends LitElement {
             <p class="value">${stats.success_rate || 0}%</p>
           </div>
           <div class="stat-card">
+            <h4>Failed Jobs</h4>
+            <p class="value">${stats.failed_jobs || 0}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Automated Jobs</h4>
+            <p class="value">${stats.automated_jobs || 0}</p>
+          </div>
+
+          <!-- Record Statistics -->
+          <div class="stat-card">
             <h4>Records Processed</h4>
             <p class="value">${stats.total_records_processed || 0}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Successful Records</h4>
+            <p class="value">${stats.successful_records || 0}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Failed Records</h4>
+            <p class="value">${stats.failed_records || 0}</p>
           </div>
           <div class="stat-card">
             <h4>Cached Records</h4>
             <p class="value">${stats.cached_records_count || 0}</p>
           </div>
-          <div class="stat-card">
-            <h4>Failed Jobs</h4>
-            <p class="value">
-              ${(stats.total_harvest_jobs || 0) - (stats.successful_jobs || 0)}
-            </p>
-          </div>
+
+          <!-- Field Mapping Statistics -->
           <div class="stat-card">
             <h4>Field Mapping</h4>
-            <p class="value">${stats.field_mapping_completion || 0}%</p>
+            <p class="value">${Math.round(stats.field_mapping_completion || 0)}%</p>
+          </div>
+          <div class="stat-card">
+            <h4>Mapped Fields</h4>
+            <p class="value">${stats.mapped_fields_count || 0}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Rejected Fields</h4>
+            <p class="value">${stats.rejected_fields_count || 0}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Unmapped Fields</h4>
+            <p class="value">${stats.unmapped_fields_count || 0}</p>
+          </div>
+
+          <!-- System Health -->
+          <div class="stat-card">
+            <h4>Pure API Status</h4>
+            <p class="value" style="font-size: 14px; text-transform: capitalize;">${stats.pure_api_status || 'unknown'}</p>
+          </div>
+          <div class="stat-card">
+            <h4>Blocking Fields</h4>
+            <p class="value">${stats.blocking_unmapped_fields_count || 0}</p>
           </div>
         </div>
 
@@ -471,6 +639,10 @@ class AnalyticsTabContent extends LitElement {
           ${when(
             this.selectedChart === "health",
             () => html`<canvas id="healthChart"></canvas>`
+          )}
+          ${when(
+            this.selectedChart === "fields",
+            () => html`<canvas id="fieldsChart"></canvas>`
           )}
         </div>
       </div>

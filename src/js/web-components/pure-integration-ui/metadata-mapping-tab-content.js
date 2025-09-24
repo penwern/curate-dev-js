@@ -573,26 +573,94 @@ class MetadataMappingTabContent extends LitElement {
     }
 
     try {
+      const existingMappings = this.fieldMappings[fieldId] || [];
+      const existingMappedMappings = existingMappings.filter(m => m.action === "mapped");
+      const existingRejectedMappings = existingMappings.filter(m => m.action === "rejected");
+
+      let newMappings = [];
+      let needsCleanup = false;
+
       if (this._currentDialogAction === "mapped" && this._selectedCurateFields.size > 0) {
+        // If we're adding mapped fields but there are existing rejected mappings, delete them first
+        if (existingRejectedMappings.length > 0) {
+          needsCleanup = true;
+          for (const rejectedMapping of existingRejectedMappings) {
+            await this.apiService.deleteMetadataMapping(rejectedMapping.mapping_id);
+          }
+        }
+
         // Create multiple mappings for selected fields
         const mappingPromises = Array.from(this._selectedCurateFields).map(curateField =>
           this.apiService.addMetadataMapping(fieldId, curateField, "mapped")
         );
 
-        await Promise.all(mappingPromises);
+        const responses = await Promise.all(mappingPromises);
+
+        // Create optimistic mappings for immediate UI update
+        Array.from(this._selectedCurateFields).forEach((curateField, index) => {
+          newMappings.push({
+            mapping_id: responses[index]?.mapping_id || `temp-${Date.now()}-${index}`,
+            pure_field: fieldId,
+            curate_field: curateField,
+            action: "mapped"
+          });
+        });
 
         const count = this._selectedCurateFields.size;
         this._showSuccess(`Added ${count} mapping${count > 1 ? 's' : ''} for ${fieldId}`);
       } else if (this._currentDialogAction === "rejected") {
-        await this.apiService.addMetadataMapping(
-          fieldId,
-          null,
-          "rejected"
-        );
+        // If we're marking as rejected, delete any existing mapped mappings first
+        if (existingMappedMappings.length > 0) {
+          needsCleanup = true;
+          for (const mappedMapping of existingMappedMappings) {
+            await this.apiService.deleteMetadataMapping(mappedMapping.mapping_id);
+          }
+        }
+
+        // Only add rejection if there isn't already one
+        if (existingRejectedMappings.length === 0) {
+          const response = await this.apiService.addMetadataMapping(
+            fieldId,
+            null,
+            "rejected"
+          );
+
+          // Create optimistic rejection mapping for immediate UI update
+          newMappings.push({
+            mapping_id: response?.mapping_id || `temp-${Date.now()}`,
+            pure_field: fieldId,
+            curate_field: null,
+            action: "rejected"
+          });
+        }
+
         this._showSuccess(`Marked field as rejected: ${fieldId}`);
       }
 
-      // Refresh the mapping data to show the new mappings
+      // Optimistically update the local fieldMappings to show changes immediately
+      if (needsCleanup || newMappings.length > 0) {
+        let updatedFieldMappings = [...existingMappings];
+
+        // Remove deleted mappings from local state
+        if (needsCleanup) {
+          if (this._currentDialogAction === "mapped") {
+            updatedFieldMappings = updatedFieldMappings.filter(m => m.action !== "rejected");
+          } else if (this._currentDialogAction === "rejected") {
+            updatedFieldMappings = updatedFieldMappings.filter(m => m.action !== "mapped");
+          }
+        }
+
+        // Add new mappings
+        updatedFieldMappings = [...updatedFieldMappings, ...newMappings];
+
+        this.fieldMappings = {
+          ...this.fieldMappings,
+          [fieldId]: updatedFieldMappings
+        };
+        this.requestUpdate();
+      }
+
+      // Refresh the mapping data to get the authoritative state from server
       this.dispatchEvent(
         new CustomEvent("refresh-mapping-data", {
           bubbles: true,
@@ -618,7 +686,19 @@ class MetadataMappingTabContent extends LitElement {
       await this.apiService.deleteMetadataMapping(mappingId);
       this._showSuccess("Mapping deleted");
 
-      // Refresh the mapping data
+      // Optimistically remove the mapping from local state for immediate UI update
+      const updatedMappings = { ...this.fieldMappings };
+      for (const fieldId in updatedMappings) {
+        if (Array.isArray(updatedMappings[fieldId])) {
+          updatedMappings[fieldId] = updatedMappings[fieldId].filter(
+            mapping => mapping.mapping_id !== mappingId
+          );
+        }
+      }
+      this.fieldMappings = updatedMappings;
+      this.requestUpdate();
+
+      // Refresh the mapping data to get the authoritative state from server
       this.dispatchEvent(
         new CustomEvent("refresh-mapping-data", {
           bubbles: true,
@@ -739,9 +819,9 @@ class MetadataMappingTabContent extends LitElement {
 
     .action-bar {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       margin-bottom: 16px;
-      padding: 12px;
+      padding: 16px;
       background-color: var(--md-sys-color-surface-container-low);
       border-radius: 12px;
       align-items: center;
@@ -800,8 +880,8 @@ class MetadataMappingTabContent extends LitElement {
       padding: 0.5em;
       border-radius: 12px;
       margin-bottom: 16px;
-      height: 390px;
-      overflow-y: auto;
+      height: auto;
+      overflow-y: visible;
     }
 
     .field-list md-list-item {
@@ -873,12 +953,29 @@ class MetadataMappingTabContent extends LitElement {
       gap: 6px;
     }
 
+    /* Material Design dialog color overrides - provide the missing variables */
+    md-dialog {
+      --md-dialog-container-color: var(--md-sys-color-surface-4);
+      --md-sys-color-surface-container-high: var(--md-sys-color-surface-4);
+      --md-dialog-headline-color: var(--md-sys-color-on-surface);
+      --md-dialog-supporting-text-color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* Material Design chip color overrides */
+    md-filter-chip {
+      --md-filter-chip-container-color: var(--md-sys-color-surface-container-low);
+      --md-filter-chip-label-text-color: var(--md-sys-color-on-surface);
+      --md-filter-chip-selected-container-color: var(--md-sys-color-secondary-container);
+      --md-filter-chip-selected-label-text-color: var(--md-sys-color-on-secondary-container);
+      --md-filter-chip-outline-color: var(--md-sys-color-outline);
+    }
+
     .dialog-content {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      height: 60vh;
-      max-height: 500px;
+      overflow: visible;
+      height: auto;
+      max-height: none;
     }
 
     .dialog-content > p {
@@ -897,17 +994,26 @@ class MetadataMappingTabContent extends LitElement {
       flex-grow: 1;
       flex-shrink: 1;
       min-height: 200px;
-      overflow-y: auto;
-      border: 1px solid var(--md-sys-color-outline);
-      border-radius: 4px;
+      overflow-y: visible;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 8px;
+      background: var(--md-sys-color-surface-container);
+    }
+
+    .curate-targets-list md-list-item {
+      --md-list-item-container-color: transparent;
+      --md-list-item-label-text-color: var(--md-sys-color-on-surface);
+      --md-list-item-supporting-text-color: var(--md-sys-color-on-surface-variant);
     }
 
     .curate-targets-list md-list-item[selected] {
-      background-color: var(--md-sys-color-secondary-container);
+      --md-list-item-container-color: var(--md-sys-color-secondary-container);
+      --md-list-item-label-text-color: var(--md-sys-color-on-secondary-container);
+      --md-list-item-supporting-text-color: var(--md-sys-color-on-secondary-container);
     }
 
     .curate-targets-list md-list-item[disabled] {
-      opacity: 0.5;
+      opacity: 0.38;
       pointer-events: none;
     }
 
@@ -920,9 +1026,9 @@ class MetadataMappingTabContent extends LitElement {
 
     .discovered-controls-bar {
       display: flex;
-      gap: 8px;
+      gap: 16px;
       margin-bottom: 12px;
-      padding: 12px;
+      padding: 16px;
       background-color: var(--md-sys-color-surface-container-low);
       border-radius: 12px;
       align-items: center;
@@ -980,8 +1086,8 @@ class MetadataMappingTabContent extends LitElement {
 
     /* Improve the field list for better performance with many items */
     .discovered-fields-list {
-      height: 340px;
-      overflow-y: auto;
+      height: auto;
+      overflow-y: visible;
       scroll-behavior: smooth;
     }
 
@@ -1474,7 +1580,7 @@ class MetadataMappingTabContent extends LitElement {
       </div>
 
       <!-- Mapping List -->
-      <md-list class="field-list" style="height: 360px; max-height: none;">
+      <md-list class="field-list">
         ${map(this.discoveredFields, (field) => {
           const mappingInfo = this._getFieldMappingInfo(field.id);
           const { action, mappings } = mappingInfo;

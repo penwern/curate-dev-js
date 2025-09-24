@@ -140,6 +140,7 @@ class PureIntegrationInterface extends LitElement {
     return css`
       :host {
         display: block;
+        width: 100%;
         color: var(--md-sys-color-on-background);
         font-family: "Roboto", sans-serif;
       }
@@ -156,7 +157,9 @@ class PureIntegrationInterface extends LitElement {
         color: var(--md-sys-color-on-surface);
         border-radius: 12px;
         overflow: hidden;
-        min-width: 800px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
       }
 
       md-tabs {
@@ -165,9 +168,10 @@ class PureIntegrationInterface extends LitElement {
 
       .tab-content {
         padding: 24px;
-        height: 650px;
-        max-height: 650px;
-        overflow-y: auto;
+        height: auto;
+        max-height: none;
+        min-height: 500px;
+        overflow-y: visible;
         position: relative;
       }
 
@@ -240,6 +244,44 @@ class PureIntegrationInterface extends LitElement {
         to {
           opacity: 0;
           transform: translateX(-50%) translateY(100%);
+        }
+      }
+
+      /* Desktop responsiveness breakpoints */
+      @media (max-width: 1200px) {
+        .content-wrapper {
+          min-width: 600px;
+        }
+
+        .tab-content {
+          padding: 16px;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .content-wrapper {
+          min-width: 500px;
+        }
+
+        .tab-content {
+          height: 75vh;
+          max-height: 75vh;
+          min-height: 450px;
+          padding: 12px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .content-wrapper {
+          border-radius: 8px;
+          min-width: 320px;
+        }
+
+        .tab-content {
+          height: 80vh;
+          max-height: 80vh;
+          min-height: 400px;
+          padding: 8px;
         }
       }
     `;
