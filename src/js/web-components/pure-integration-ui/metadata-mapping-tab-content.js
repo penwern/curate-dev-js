@@ -464,7 +464,7 @@ class MetadataMappingTabContent extends LitElement {
       const result = await this.apiService.processCachedRecords();
 
       if (result.status === "success") {
-        this._processingMessage = `Processed ${result.processed_count} cached records (${result.remaining_count} remaining)`;
+        this._processingMessage = `Processed ${result.records_processed} cached records (${result.records_remaining} remaining)`;
 
         // Trigger refresh of cached records count
         this.dispatchEvent(
@@ -850,6 +850,23 @@ class MetadataMappingTabContent extends LitElement {
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .cached-badge.processing {
+      background: var(--md-sys-color-tertiary-container);
+      color: var(--md-sys-color-on-tertiary-container);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .cached-badge.blocked {
+      background: var(--md-sys-color-error-container);
+      color: var(--md-sys-color-on-error-container);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     .whitelist-stats {
@@ -1483,9 +1500,16 @@ class MetadataMappingTabContent extends LitElement {
     // Count fields by their mapping status
     let mappedCount = 0;
     let rejectedCount = 0;
+    let unmappedCount = 0;
 
-    Object.values(this.fieldMappings).forEach(mappings => {
-      if (!Array.isArray(mappings) || mappings.length === 0) return;
+    // Check each discovered field to see its mapping status
+    this.discoveredFields.forEach(field => {
+      const mappings = this.fieldMappings[field.id] || [];
+
+      if (!Array.isArray(mappings) || mappings.length === 0) {
+        unmappedCount++;
+        return;
+      }
 
       const hasMapped = mappings.some(m => m.action === "mapped" && m.curate_field);
       const hasRejected = mappings.some(m => m.action === "rejected");
@@ -1494,10 +1518,13 @@ class MetadataMappingTabContent extends LitElement {
         rejectedCount++;
       } else if (hasMapped) {
         mappedCount++;
+      } else {
+        unmappedCount++;
       }
     });
 
     const totalFields = this.discoveredFields.length;
+    const hasUnmappedFields = unmappedCount > 0;
 
     return html`
       <!-- Summary Bar -->
@@ -1505,7 +1532,7 @@ class MetadataMappingTabContent extends LitElement {
         <span>
           <strong>${mappedCount}</strong> mapped,
           <strong>${rejectedCount}</strong> rejected,
-          <strong>${totalFields - mappedCount - rejectedCount}</strong> unmapped
+          <strong>${unmappedCount}</strong> unmapped
           of <strong>${totalFields}</strong> whitelisted fields
           ${when(
             this._hasPendingChanges,
@@ -1547,33 +1574,30 @@ class MetadataMappingTabContent extends LitElement {
             <div class="action-section">
               <md-outlined-button
                 @click=${this._handleProcessCachedRecords}
-                ?disabled=${this._isProcessingCached}
+                ?disabled=${this._isProcessingCached || hasUnmappedFields}
+                title=${hasUnmappedFields ? "Cannot process cached records while there are unmapped fields" : ""}
               >
                 <span style="display: flex; align-items: center; gap: 8px;">
-                  ${cachedIcon}${this._isProcessingCached
+                  ${hasUnmappedFields ? blockIcon : cachedIcon}${this._isProcessingCached
                     ? "Processing..."
+                    : hasUnmappedFields
+                    ? "Resolve Unmapped Fields First"
                     : "Process Cached Records"}
                 </span>
               </md-outlined-button>
-              <span class="cached-badge">
+              <span class="cached-badge ${this._isProcessingCached ? 'processing' : hasUnmappedFields ? 'blocked' : ''}">
                 <span style="display: flex; align-items: center; gap: 8px;">
-                  ${this.cachedRecordsCount} records waiting to be processed
+                  ${when(
+                    this._isProcessingCached,
+                    () => html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress>`
+                  )}
+                  ${this._isProcessingCached
+                    ? (this._processingMessage || "Processing cached records...")
+                    : hasUnmappedFields
+                    ? `${this.cachedRecordsCount} records blocked by ${unmappedCount} unmapped field${unmappedCount === 1 ? '' : 's'}`
+                    : `${this.cachedRecordsCount} records waiting to be processed`}
                 </span>
               </span>
-              ${when(
-                this._isProcessingCached,
-                () =>
-                  html`<md-circular-progress
-                    indeterminate
-                  ></md-circular-progress>`
-              )}
-              ${when(
-                this._processingMessage,
-                () =>
-                  html`<span class="action-message"
-                    >${this._processingMessage}</span
-                  >`
-              )}
             </div>
           `
         )}

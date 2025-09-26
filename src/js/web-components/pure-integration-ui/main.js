@@ -419,6 +419,25 @@ class PureIntegrationInterface extends LitElement {
     this.showSuccessDialog = true;
   }
 
+  _formatHarvestResultMessage(result) {
+    const details = [
+      `Job ID: ${result.job_id}`,
+      `Records Checked: ${result.records_checked || 0}`,
+      `Records Attempted: ${result.records_attempted || 0}`,
+      `Records Successful: ${result.records_successful || 0}`,
+    ];
+
+    if (result.records_failed > 0) {
+      details.push(`Records Failed: ${result.records_failed}`);
+    }
+
+    if (result.records_cached > 0) {
+      details.push(`Records Cached: ${result.records_cached}`);
+    }
+
+    return `Harvest completed successfully!\n\n${details.join('\n')}\n\n${result.message || ''}`;
+  }
+
   // Updated Event Handlers with API Integration
 
   // Configuration Tab Events
@@ -685,10 +704,7 @@ class PureIntegrationInterface extends LitElement {
 
       const result = await this.apiService.harvestByIds(ids, "Manual ID Entry");
 
-      this._showSuccess(
-        `Harvest job ${result.job_id} started successfully. ` +
-          `${result.records_successful}/${result.records_attempted} records processed.`
-      );
+      this._showSuccess(this._formatHarvestResultMessage(result));
 
       // Clear the input and refresh history
       this.manualHarvestIds = "";
@@ -718,10 +734,7 @@ class PureIntegrationInterface extends LitElement {
         "Manual Search Selection"
       );
 
-      this._showSuccess(
-        `Harvest job ${result.job_id} started successfully. ` +
-          `${result.records_successful}/${result.records_attempted} records processed.`
-      );
+      this._showSuccess(this._formatHarvestResultMessage(result));
 
       this.manualSearchResults = [];
       this.manualSearchQuery = {
@@ -821,7 +834,7 @@ class PureIntegrationInterface extends LitElement {
         @closed=${() => (this.showSuccessDialog = false)}
       >
         <div slot="headline">Success</div>
-        <div slot="content">${this.successDialogMessage}</div>
+        <div slot="content" style="white-space: pre-line;">${this.successDialogMessage}</div>
         <div slot="actions">
           <md-text-button @click=${() => (this.showSuccessDialog = false)}
             >Close</md-text-button

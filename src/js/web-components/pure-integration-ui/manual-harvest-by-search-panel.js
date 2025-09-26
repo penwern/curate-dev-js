@@ -258,6 +258,9 @@ class ManualHarvestBySearchPanel extends LitElement {
       gap: 8px;
       align-items: flex-end;
     }
+    .search-input-row md-filled-button {
+      margin: auto;
+    }
     .search-results-container {
       margin-top: 4px;
       border-top: 1px solid var(--md-sys-color-outline-variant);
