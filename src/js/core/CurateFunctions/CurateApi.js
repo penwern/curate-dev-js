@@ -6,9 +6,10 @@ const CurateApi = {
      * @param {string} endpoint the API endpoint to make a request to, e.g: "/a/tree/stat"
      * @param {string} method HTTP method to use in the request
      * @param {string} body string body to be used in the request
+     * @param {string} baseUrl optional base URL override, defaults to window.location.origin
      * @returns {json} JSON body of successful Curate request
     */
-    fetchCurate : async function(endpoint, method="POST", body) {
+    fetchCurate : async function(endpoint, method="POST", body, baseUrl) {
         if (!endpoint){
             throw new Error("No endpoint provided");
         }
@@ -34,7 +35,7 @@ const CurateApi = {
             if (!["GET", "HEAD"].includes(method)) {
                 fetchProps.body = JSON.stringify(body);
             }
-            const response = await fetch(window.location.origin + endpoint, fetchProps);
+            const response = await fetch((baseUrl || window.location.origin) + endpoint, fetchProps);
 
             if (!response.ok) {
                 throw new Error("Network response was not ok");

@@ -135,3 +135,7 @@ Thumbs.db
 # Lock files (uncomment if you want to ignore them)
 # package-lock.json
 # yarn.lock
+
+# Claude Code configuration and cache
+.claude/
+CLAUDE.md
