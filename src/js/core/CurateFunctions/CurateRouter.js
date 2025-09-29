@@ -295,6 +295,8 @@ const CurateRouter = (function () {
           if (currentPage && typeof cleanup === 'function') {
             currentPage.cleanup = cleanup;
           }
+          // Re-ensure positioning after route handler runs (in case it modified styles)
+          repositionCurrentPage();
           setupFocusManagement(container.element);
         })
         .catch(error => {
@@ -317,7 +319,7 @@ const CurateRouter = (function () {
       left: 0;
       right: 0;
       bottom: 0;
-      background: white;
+      background: var(--md-sys-color-surface-variant);
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -335,6 +337,8 @@ const CurateRouter = (function () {
         flex: 1;
         overflow: auto;
         padding: 20px;
+        overscroll-behavior: auto;
+        -webkit-overflow-scrolling: touch;
       `;
       pageElement.appendChild(contentElement);
     } else {
@@ -615,10 +619,14 @@ const CurateRouter = (function () {
 
       if (rect.width > 0 && rect.height > 0) {
         const pageElement = currentPage.container.element;
+        // Reapply critical positioning styles that might have been overridden
+        pageElement.style.position = 'fixed';
         pageElement.style.top = rect.top + 'px';
         pageElement.style.left = rect.left + 'px';
         pageElement.style.width = rect.width + 'px';
         pageElement.style.height = rect.height + 'px';
+        pageElement.style.zIndex = '901';
+        pageElement.style.pointerEvents = 'auto';
       }
     }
   }
