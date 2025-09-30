@@ -26,7 +26,7 @@ class ChecksumWorkerManager {
    */
   createWorker() {
     const workerId = crypto.randomUUID();
-    const worker = new Worker("/workers/hashWorker.worker.js");
+    const worker = new Worker("/workers/hashWorker.js");
 
     const metadata = {
       createdAt: Date.now(),
