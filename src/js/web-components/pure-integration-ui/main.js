@@ -70,8 +70,8 @@ class PureIntegrationInterface extends LitElement {
     super();
 
     // API Configuration - can be overridden via property
-    this.baseApiUrl = "http://localhost:8001"; // Pure integration port
-    this.apiService = new ApiService(this.baseApiUrl);
+    //this.baseApiUrl = "http://localhost:8001"; // Pure integration port
+    this.apiService = new ApiService();
 
     // Initialize standard properties
     this.activeTab = 0;
