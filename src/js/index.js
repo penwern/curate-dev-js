@@ -1,4 +1,5 @@
 import "../js/core/CurateFunctions/CurateFunctions.js";
+import "./custom-pages/index.js";
 import "../js/core/CustomPreservationConfigs.js";
 import "../js/core/fileInfoModifier.js";
 import "../js/core/MetadataHierarchies.js";
