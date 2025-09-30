@@ -2,7 +2,7 @@
 import CurateApi from '../../core/CurateFunctions/CurateApi.js';
 
 class ApiService {
-  constructor(baseUrl = `${window.location.origin}/api/v1`) {
+  constructor(baseUrl = `${window.location.origin}/api/pure`) {
     // Different port for Pure integration
     this.baseUrl = baseUrl;
   }
