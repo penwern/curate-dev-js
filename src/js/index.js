@@ -1,3 +1,5 @@
+// IMPORTANT: RouteProtection must be imported FIRST to intercept Pydio redirects
+import "../js/core/RouteProtection.js";
 import "../js/core/CurateFunctions/CurateFunctions.js";
 import "./custom-pages/index.js";
 import "../js/core/CustomPreservationConfigs.js";
