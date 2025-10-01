@@ -15,6 +15,7 @@ const CurateRouter = (function () {
   let routePrefix = '/custom';
   let focusTrap = null;
   let isInitialized = false;
+  let lastNonCustomUrl = '/'; // Track last non-custom URL for close button
   let configuration = {
     routePrefix: '/custom',
     showHeader: true,
@@ -120,6 +121,15 @@ const CurateRouter = (function () {
     const path = window.location.pathname;
 
     if (path.startsWith(routePrefix)) {
+      // Check if user is logged in before rendering custom routes
+      if (typeof pydio !== 'undefined' && (!pydio.user || pydio.user === null)) {
+        // User is not logged in, don't render custom page
+        if (currentPage) {
+          closePage();
+        }
+        return;
+      }
+
       const routePath = path.substring(routePrefix.length) || '/';
 
       // Check if we're already on this route - prevent duplicate navigation
@@ -137,9 +147,14 @@ const CurateRouter = (function () {
       } else {
         showErrorPage(`Route not found: ${routePath}`);
       }
-    } else if (currentPage) {
-      // We're navigating away from custom routes
-      closePage();
+    } else {
+      // Track non-custom URLs for the close button
+      lastNonCustomUrl = path;
+
+      if (currentPage) {
+        // We're navigating away from custom routes
+        closePage();
+      }
     }
   }
 
@@ -420,39 +435,62 @@ const CurateRouter = (function () {
     header.className = 'curate-router-header';
     header.style.cssText = `
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 16px 20px;
-      border-bottom: 1px solid #e0e0e0;
-      background: #f5f5f5;
-      min-height: 56px;
+      padding: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--md-sys-color-outline, #c4c7c5);
+      background: var(--md-sys-color-surface-variant, #fdfcff);
     `;
-
-    const backButton = document.createElement('button');
-    backButton.className = 'curate-router-back-button';
-    backButton.innerHTML = '← Back';
-    backButton.style.cssText = `
-      background: none;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 4px;
-      margin-right: 16px;
-    `;
-    backButton.addEventListener('click', back);
 
     const titleElement = document.createElement('h1');
     titleElement.textContent = title;
     titleElement.style.cssText = `
       margin: 0;
-      font-size: 18px;
-      font-weight: 600;
+      color: var(--md-sys-color-on-background, #1d1b20);
+      font-size: 28px;
+      font-weight: 400;
     `;
 
-    header.appendChild(backButton);
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '✕ Close';
+    closeButton.addEventListener('click', closeAndReturnToUnderlying);
+    closeButton.style.cssText = `
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    `;
+
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.opacity = '0.8';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.opacity = '1';
+    });
+
     header.appendChild(titleElement);
+    header.appendChild(closeButton);
 
     return header;
+  }
+
+  /**
+   * Close the custom page and return to the underlying Pydio URL
+   */
+  function closeAndReturnToUnderlying() {
+    if (currentPage) {
+      // Navigate to the last non-custom URL (or fallback to base path)
+      const targetUrl = lastNonCustomUrl || '/';
+      window.history.pushState(null, '', targetUrl);
+      closePage();
+    }
   }
 
   function createNavigationUtils() {
@@ -599,6 +637,40 @@ const CurateRouter = (function () {
   }
 
   /**
+   * Check if a given path is a valid registered route
+   *
+   * @param {string} path - The path to check (can be full path or just route path)
+   * @returns {boolean} True if the path matches a registered route, false otherwise
+   *
+   * @example
+   * // Check if current URL is a valid custom route
+   * if (Curate.router.isValidRoute(window.location.pathname)) {
+   *   console.log('Current URL is a valid custom route');
+   * }
+   *
+   * @example
+   * // Check a specific route
+   * if (Curate.router.isValidRoute('/custom/pure-integration')) {
+   *   console.log('Pure integration route exists');
+   * }
+   */
+  function isValidRoute(path) {
+    if (!path) return false;
+
+    // If path includes the route prefix, extract just the route part
+    let routePath = path;
+    if (path.startsWith(routePrefix)) {
+      routePath = path.substring(routePrefix.length) || '/';
+    } else if (!path.startsWith('/')) {
+      routePath = '/' + path;
+    }
+
+    // Check if this route matches any registered routes
+    const match = findMatchingRoute(routePath);
+    return match !== null;
+  }
+
+  /**
    * Manually check and navigate to current URL route
    * Useful for handling page refreshes or manual URL entry
    *
@@ -638,6 +710,7 @@ const CurateRouter = (function () {
     back,
     getCurrentPage,
     isActive,
+    isValidRoute,
     checkRoute
   };
 })();
