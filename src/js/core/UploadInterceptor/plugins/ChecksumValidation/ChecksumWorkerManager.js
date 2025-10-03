@@ -17,7 +17,6 @@ class ChecksumWorkerManager {
     this.healthCheckTimer = null;
     this.isShuttingDown = false;
 
-    console.log('ChecksumWorkerManager: Initialized');
     this.startHealthMonitoring();
   }
 
@@ -49,7 +48,6 @@ class ChecksumWorkerManager {
     // Store worker with metadata
     this.workers.set(workerId, { worker, metadata });
 
-    console.log(`ChecksumWorkerManager: Created worker ${workerId} (total: ${this.workers.size})`);
     return workerId;
   }
 
@@ -86,11 +84,8 @@ class ChecksumWorkerManager {
         // Remove from current tasks
         this.currentTasks.delete(workerId);
 
-        console.log(`✅ ChecksumWorkerManager: Worker ${workerId} completed task ${metadata.taskCount}`);
-
         // Check if worker needs recycling
         if (metadata.taskCount >= this.config.maxTasksPerWorker) {
-          console.log(`♻️ ChecksumWorkerManager: Recycling worker ${workerId} after ${metadata.taskCount} tasks`);
           this.recycleWorker(workerId);
         } else {
           // Process next task or start idle timer
@@ -130,8 +125,6 @@ class ChecksumWorkerManager {
       const task = { file, resolve, reject, createdAt: Date.now() };
       this.taskQueue.push(task);
 
-      console.log(`ChecksumWorkerManager: Queued task for ${file.name} (queue size: ${this.taskQueue.length})`);
-
       // Try to assign to available worker or create new one
       this.assignTask();
     });
@@ -160,8 +153,6 @@ class ChecksumWorkerManager {
     // Assign task if worker available
     if (availableWorkerId) {
       this.processNextTask(availableWorkerId);
-    } else {
-      console.log(`⏳ ChecksumWorkerManager: All workers busy, task queued (${this.taskQueue.length} waiting)`);
     }
   }
 
@@ -200,8 +191,6 @@ class ChecksumWorkerManager {
     const multipartThreshold = PydioApi.getMultipartThreshold();
     const multipartPartSize = PydioApi.getMultipartPartSize();
 
-    console.log(`ChecksumWorkerManager: Assigned task to worker ${workerId} for ${task.file.name}`);
-
     worker.postMessage({
       file: task.file,
       msg: "begin hash",
@@ -231,12 +220,9 @@ class ChecksumWorkerManager {
 
     metadata.idleTimer = setTimeout(() => {
       if (this.taskQueue.length === 0 && !this.currentTasks.has(workerId)) {
-        console.log(`🧹 ChecksumWorkerManager: Cleaning up idle worker ${workerId}`);
         this.removeWorker(workerId);
       }
     }, this.config.idleTimeoutMs);
-
-    console.log(`💤 ChecksumWorkerManager: Worker ${workerId} idle, cleanup in ${this.config.idleTimeoutMs}ms`);
   }
 
   /**
@@ -286,8 +272,6 @@ class ChecksumWorkerManager {
     // Remove from maps
     this.workers.delete(workerId);
     this.currentTasks.delete(workerId);
-
-    console.log(`🗑️ ChecksumWorkerManager: Removed worker ${workerId} (remaining: ${this.workers.size})`);
   }
 
   /**
@@ -306,13 +290,9 @@ class ChecksumWorkerManager {
         const age = now - metadata.lastActivity;
 
         if (age > this.config.taskTimeoutMs * 2) {
-          console.warn(`ChecksumWorkerManager: Worker ${workerId} appears stale (${age}ms since activity)`);
           this.replaceWorker(workerId);
         }
       }
-
-      // Log status
-      console.log(`ChecksumWorkerManager: Health check - Workers: ${this.workers.size}, Queue: ${this.taskQueue.length}, Active: ${this.currentTasks.size}`);
 
     }, this.config.healthCheckIntervalMs);
   }
@@ -341,8 +321,6 @@ class ChecksumWorkerManager {
    * Shutdown all workers
    */
   terminate() {
-    console.log('ChecksumWorkerManager: Shutting down...');
-
     this.isShuttingDown = true;
 
     // Clear health monitoring
@@ -359,8 +337,6 @@ class ChecksumWorkerManager {
     // Clear queues
     this.taskQueue = [];
     this.currentTasks.clear();
-
-    console.log('ChecksumWorkerManager: Shutdown complete');
   }
 }
 
