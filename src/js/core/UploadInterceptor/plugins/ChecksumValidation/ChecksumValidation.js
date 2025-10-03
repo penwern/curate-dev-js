@@ -33,7 +33,6 @@ function updateMetaField(uuid, namespace, value) {
   };
 
   Curate.api.fetchCurate(url, "PUT", metadatas);
-  console.log(`Attempted to update metadata '${namespace}' for UUID ${uuid}`);
 }
 
 function fetchCurateStats(filePath, expectedChecksum, retryCount) {
@@ -107,7 +106,6 @@ let workerManager = null;
 async function generateChecksum(uploadItem) {
   if (!workerManager) {
     workerManager = new ChecksumWorkerManager();
-    console.log("ChecksumWorkerManager initialized");
   }
 
   const multipartDecisionThreshold = PydioApi.getMultipartThreshold();
@@ -119,10 +117,6 @@ async function generateChecksum(uploadItem) {
     // Calculate checksum: use multipart calculation for large files, single MD5 for smaller ones.
     if (uploadItem._file.size > multipartDecisionThreshold) {
       // Multipart checksum logic:
-      console.log(
-        "File exceeds multipart threshold, generating part checksums for:",
-        uploadItem._label
-      );
       const partSize = multipartPartSize;
       const parts = Math.ceil(uploadItem._file.size / partSize);
       const partChecksumsHex = []; // Store hex for potential debugging
@@ -153,10 +147,6 @@ async function generateChecksum(uploadItem) {
       );
     } else {
       // Single part checksum calculation for smaller files.
-      console.log(
-        "File below multipart threshold, generating single checksum for:",
-        uploadItem._label
-      );
       const checksumData = await workerManager.generateChecksum(uploadItem._file);
       finalChecksum = checksumData.hash;
       console.log("Generated single checksum:", finalChecksum);
@@ -175,50 +165,68 @@ async function generateChecksum(uploadItem) {
 }
 
 function constructFilePath(uploadItem) {
-  // This logic determines the correct path to query for stats, accounting for
-  // potential server-side renaming on filename collision (e.g., file.txt -> file-1.txt).
-  const workspace = Curate.workspaces.getOpenWorkspace();
-  const targetPath = uploadItem._targetNode._path; // Path of the destination folder.
-  const relativeFilePath = uploadItem._file.webkitRelativePath; // Original path *within* an uploaded folder structure, or "" for single files.
-  const finalLabel = uploadItem._label; // This property is updated by the UploaderModel to reflect the FINAL filename after potential renaming.
+  console.log("constructing file path for item: ", uploadItem);
 
-  // Normalize workspace and target paths to ensure correct slash handling.
+  // Extract the file path from the presigned URL responseURL.
+  // This is the source of truth for where the file was actually uploaded.
+  const responseURL = uploadItem.xhr?.responseURL;
+
+  if (responseURL) {
+    try {
+      // Parse the URL to extract the path between /io/ and the query parameters
+      const url = new URL(responseURL);
+      const pathname = url.pathname;
+
+      // Extract everything after /io/
+      const ioIndex = pathname.indexOf('/io/');
+      if (ioIndex !== -1) {
+        const pathAfterIo = pathname.substring(ioIndex + 4); // +4 to skip '/io/'
+        // Decode URI components to handle encoded characters
+        const decodedPath = decodeURIComponent(pathAfterIo);
+        console.log("Extracted path from responseURL:", decodedPath);
+        return decodedPath;
+      }
+    } catch (error) {
+      console.error("Failed to parse responseURL:", error);
+      // Fall through to legacy path construction
+    }
+  }
+
+  // Fallback to legacy path construction if responseURL is unavailable
+  console.warn("responseURL not available, using legacy path construction");
+  const workspace = Curate.workspaces.getOpenWorkspace();
+  const targetPath = uploadItem._targetNode._path;
+  const relativeFilePath = uploadItem._file.webkitRelativePath;
+  const finalLabel = uploadItem._label;
+
   const normWorkspace = workspace.endsWith("/") ? workspace : workspace + "/";
   let normTarget = "";
   if (targetPath && targetPath !== "/") {
-    // Handle root path '/'
-    normTarget = targetPath.replace(/^\/+|\/+$/g, ""); // Remove leading/trailing slashes
+    normTarget = targetPath.replace(/^\/+|\/+$/g, "");
   }
 
   let fileComponent = "";
-  // Check if a folder structure was uploaded (relativeFilePath is not empty).
   if (relativeFilePath) {
-    // Combine the original directory structure from relativeFilePath with the FINAL filename from finalLabel.
     const lastSlashIndex = relativeFilePath.lastIndexOf("/");
     if (lastSlashIndex !== -1) {
-      // Extract the directory part (e.g., "folder/subfolder/")
       const dirPart = relativeFilePath.substring(0, lastSlashIndex + 1);
-      fileComponent = dirPart + finalLabel; // Append the final filename
+      fileComponent = dirPart + finalLabel;
     } else {
-      // Relative path contained only the original filename, so just use the final label.
       fileComponent = finalLabel;
     }
-    // Ensure no leading slash inherited from relativeFilePath.
     if (fileComponent.startsWith("/")) {
       fileComponent = fileComponent.substring(1);
     }
   } else {
-    // Single file upload, use the final label directly as the file component.
     fileComponent = finalLabel;
   }
 
-  // Combine all parts into the final path.
   let filename = normWorkspace;
   if (normTarget) {
-    filename += normTarget + "/"; // Add normalized target path if not root
+    filename += normTarget + "/";
   }
-  filename += fileComponent; // Add the final file/path component
-  filename = filename.replace(/\/+/g, "/"); // Clean up any resulting double slashes.
+  filename += fileComponent;
+  filename = filename.replace(/\/+/g, "/");
 
   return filename;
 }
@@ -229,7 +237,6 @@ export default {
 
   hooks: {
     onUploadComplete: async (uploadItem) => {
-      console.log('ChecksumValidation: Processing upload completion for:', uploadItem._label);
 
       try {
         // Generate checksum for the uploaded file
