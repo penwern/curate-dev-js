@@ -1,3 +1,4 @@
+import "../js/core/Logging/consolePatch.js";
 import "../js/core/CurateFunctions/CurateFunctions.js";
 import "./custom-pages/index.js";
 import "../js/core/CustomPreservationConfigs.js";

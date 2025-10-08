@@ -1,4 +1,4 @@
-# Curate Extensible JavaScript
+﻿# Curate Extensible JavaScript
 
 A comprehensive JavaScript library for extending Curate/Pydio Cells with advanced functionality including metadata management, UI components, preservation workflows, and external integrations.
 
@@ -104,3 +104,15 @@ npm run serve
 # Container deployment with docker
 npm run docker:up
 ```
+
+### Console Logging Controls
+
+The bundle patches the global console so non-error methods respect window.curateDebug.
+
+- Set window.curateDebug = false to silence everything except console.error.
+- Call window.curateDebugSet('info') (or assign window.curateDebug = 'info') to enable logging at that level and above (warn, error).
+- Use window.curateDebugSet('debug') for full logging; it persists until the page reloads or you change the value again.
+- Boolean values map to levels (	rue → debug, alse → silent).
+
+Errors are never suppressed so unexpected failures continue to surface during development.
+
