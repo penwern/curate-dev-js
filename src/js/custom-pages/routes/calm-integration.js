@@ -5,7 +5,7 @@ import { Curate } from '../../core/CurateFunctions/CurateFunctions.js';
  * Provides the calm Integration interface for managing calm integration settings
  */
 export function registerCalmIntegrationRoute() {
-  Curate.router.addRoute('/calm-integration', (container) => {
+  Curate.router.addRoute('/calm-integration', async (container) => {
     // Create container with proper styling for the calm UI
     container.style.cssText = `
       padding: 20px;
@@ -41,6 +41,10 @@ export function registerCalmIntegrationRoute() {
     `;
 
     header.appendChild(title);
+
+    // Wait for the custom element to be defined before creating it
+    // This prevents race conditions on page refresh
+    await customElements.whenDefined('calm-integration-interface');
 
     // Create the calm Integration UI component
     const calmUI = document.createElement('calm-integration-interface');

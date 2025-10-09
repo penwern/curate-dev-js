@@ -49,6 +49,49 @@ This creates:
 
 The library automatically exposes a global `Curate` object with all functionality.
 
+### Custom Page Router
+
+The Curate Router allows you to create full-page custom UIs that integrate seamlessly with Pydio Cells.
+
+#### Creating a New Custom Route
+
+Use the route template as a starting point:
+
+```bash
+# Copy the template
+cp src/js/custom-pages/routes/_route-template.js src/js/custom-pages/routes/my-feature.js
+```
+
+#### Important: Preventing Race Conditions with Custom Elements
+
+When creating routes that use web components, **always make your route handler async** and **wait for the custom element to be defined** before creating it:
+
+```javascript
+export function registerMyFeatureRoute() {
+  Curate.router.addRoute('/my-feature', async (container) => {
+    // CRITICAL: Wait for custom element to be defined
+    // This prevents race conditions on page refresh
+    await customElements.whenDefined('my-custom-element');
+
+    // Now safe to create the element
+    const element = document.createElement('my-custom-element');
+    container.appendChild(element);
+
+    return () => element.remove();
+  }, {
+    title: 'My Feature',
+    showHeader: true
+  });
+}
+```
+
+**Why this is necessary:**
+- On page refresh, the router may initialize before web component registration completes
+- Without `await customElements.whenDefined()`, the element may not render
+- This race condition is timing-dependent (dev tools open = slower = works; dev tools closed = faster = fails)
+
+See [_route-template.js](src/js/custom-pages/routes/_route-template.js) for complete examples.
+
 ### UI Components
 
 ```javascript

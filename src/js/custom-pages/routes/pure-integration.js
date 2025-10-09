@@ -5,7 +5,7 @@ import { Curate } from '../../core/CurateFunctions/CurateFunctions.js';
  * Provides the Pure Integration interface for managing Pure integration settings
  */
 export function registerPureIntegrationRoute() {
-  Curate.router.addRoute('/pure-integration', (container) => {
+  Curate.router.addRoute('/pure-integration', async (container) => {
     // Create container with proper styling for the Pure UI
     container.style.cssText = `
       padding: 20px;
@@ -19,6 +19,10 @@ export function registerPureIntegrationRoute() {
       overscroll-behavior: auto;
       -webkit-overflow-scrolling: touch;
     `;
+
+    // Wait for the custom element to be defined before creating it
+    // This prevents race conditions on page refresh
+    await customElements.whenDefined('pure-integration-interface');
 
     // Create the Pure Integration UI component
     const pureUI = document.createElement('pure-integration-interface');
