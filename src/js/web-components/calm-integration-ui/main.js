@@ -136,7 +136,7 @@ class CalmIntegrationInterface extends LitElement {
         display: block;
         color: var(--md-sys-color-on-background);
         font-family: "Roboto", sans-serif;
-        
+        padding-bottom: 100px;
       }
 
       md-primary-tab svg {
