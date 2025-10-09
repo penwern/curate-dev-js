@@ -5,6 +5,7 @@
 
 // Import route registration functions
 import { registerPureIntegrationRoute } from './pure-integration.js';
+import { registerCalmIntegrationRoute } from './calm-integration.js';
 import { registerDemoRoutes } from './demo-routes.js';
 
 /**
@@ -14,6 +15,7 @@ import { registerDemoRoutes } from './demo-routes.js';
 export function registerAllRoutes() {
   // Production routes
   registerPureIntegrationRoute();
+  registerCalmIntegrationRoute();
 
   // Demo routes (optional - could be conditionally loaded)
   registerDemoRoutes();
@@ -26,6 +28,7 @@ export function registerAllRoutes() {
  */
 export function registerProductionRoutes() {
   registerPureIntegrationRoute();
+  registerCalmIntegrationRoute();
 
   console.log('Production routes have been registered');
 }

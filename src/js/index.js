@@ -26,6 +26,7 @@ import "./web-components/warc-viewer/warc-viewer.js";
 import "./web-components/warc-viewer/warc-options.js";
 import "./core/Events/PreviewWarc.js";
 import "./web-components/pure-integration-ui/main.js";
+import "./web-components/calm-integration-ui/main.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
 import "../js/external/ExternalScripts.js";
