@@ -143,6 +143,7 @@ class PureIntegrationInterface extends LitElement {
         width: 100%;
         color: var(--md-sys-color-on-background);
         font-family: "Roboto", sans-serif;
+        padding-bottom: 100px;
       }
 
       md-primary-tab svg {
