@@ -153,7 +153,6 @@ class CalmIntegrationInterface extends LitElement {
         overflow: hidden;
         width: 100%;
         max-width: 100%;
-        min-width: 0;
         margin: 0 auto;
       }
 
