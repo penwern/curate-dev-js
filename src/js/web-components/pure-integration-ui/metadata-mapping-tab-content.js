@@ -1797,7 +1797,7 @@ class MetadataMappingTabContent extends LitElement {
               <div class="action-chips">
                 <md-chip-set>
                   <md-filter-chip
-                    label="Map to Curate Field"
+                    label="Map to Field"
                     ?selected=${this._currentDialogAction === "mapped"}
                     @click=${() => this._handleDialogActionChange("mapped")}
                   >
@@ -1821,7 +1821,7 @@ class MetadataMappingTabContent extends LitElement {
                 this._currentDialogAction === "mapped",
                 () => html`
                   <md-outlined-text-field
-                    label="Search Curate Target Fields"
+                    label="Search Target Fields"
                     .value=${this._curateTargetSearchTerm}
                     @input=${(e) =>
                       (this._curateTargetSearchTerm = e.target.value)}
