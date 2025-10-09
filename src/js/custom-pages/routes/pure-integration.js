@@ -6,6 +6,9 @@ import { Curate } from '../../core/CurateFunctions/CurateFunctions.js';
  */
 export function registerPureIntegrationRoute() {
   Curate.router.addRoute('/pure-integration', async (container) => {
+    // Wait for the custom element to be defined before creating it
+    await customElements.whenDefined('pure-integration-interface');
+
     // Create container with proper styling for the Pure UI
     container.style.cssText = `
       padding: 20px;
@@ -20,10 +23,6 @@ export function registerPureIntegrationRoute() {
       -webkit-overflow-scrolling: touch;
     `;
 
-    // Wait for the custom element to be defined before creating it
-    // This prevents race conditions on page refresh
-    await customElements.whenDefined('pure-integration-interface');
-
     // Create the Pure Integration UI component
     const pureUI = document.createElement('pure-integration-interface');
     pureUI.style.cssText = `
@@ -31,10 +30,9 @@ export function registerPureIntegrationRoute() {
       width: 100%;
     `;
 
-    // Assemble the page
     container.appendChild(pureUI);
 
-    // Return cleanup function to remove the component
+    // Return cleanup function
     return () => {
       if (pureUI && pureUI.parentNode) {
         pureUI.remove();

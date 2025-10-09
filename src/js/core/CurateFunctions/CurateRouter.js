@@ -16,6 +16,7 @@ const CurateRouter = (function () {
   let focusTrap = null;
   let isInitialized = false;
   let lastNonCustomUrl = '/'; // Track last non-custom URL for close button
+  let pydioInitCheckCount = 0; // Track how many times we've checked for pydio.user
   let configuration = {
     routePrefix: '/custom',
     showHeader: true,
@@ -121,16 +122,32 @@ const CurateRouter = (function () {
     const path = window.location.pathname;
 
     if (path.startsWith(routePrefix)) {
+      const routePath = path.substring(routePrefix.length) || '/';
+
       // Check if user is logged in before rendering custom routes
-      if (typeof pydio !== 'undefined' && (!pydio.user || pydio.user === null)) {
-        // User is not logged in, don't render custom page
-        if (currentPage) {
-          closePage();
+      // pydio.user starts as null and gets set during Pydio initialization
+      if (typeof pydio !== 'undefined' && pydio.user === null) {
+        // pydio exists but user is null - could be initializing or logged out
+        pydioInitCheckCount++;
+
+        // If we've checked more than 30 times (3 seconds), assume user is logged out
+        if (pydioInitCheckCount > 30) {
+          if (currentPage) {
+            closePage();
+          }
+          pydioInitCheckCount = 0; // Reset for next navigation
+          return;
         }
+
+        // Still waiting for Pydio to initialize - check again soon
+        setTimeout(() => checkCurrentRoute(), 100);
         return;
       }
 
-      const routePath = path.substring(routePrefix.length) || '/';
+      // Reset check count when we successfully find a user
+      if (typeof pydio !== 'undefined' && pydio.user && pydio.user.id) {
+        pydioInitCheckCount = 0;
+      }
 
       // Check if we're already on this route - prevent duplicate navigation
       if (currentPage) {
