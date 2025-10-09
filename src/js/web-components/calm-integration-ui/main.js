@@ -151,7 +151,9 @@ class CalmIntegrationInterface extends LitElement {
         color: var(--md-sys-color-on-surface);
         border-radius: 12px;
         overflow: hidden;
-        width: min(100%, 1200px);
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         margin: 0 auto;
       }
 
