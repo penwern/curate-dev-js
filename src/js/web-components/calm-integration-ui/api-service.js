@@ -1,38 +1,23 @@
 // api-service.js
+import CurateApi from '../../core/CurateFunctions/CurateApi.js';
+
 class ApiService {
   constructor(baseUrl = `${window.location.origin}/api/calm`) {
     this.baseUrl = baseUrl;
   }
 
   async _makeRequest(endpoint, options = {}) {
-    const url = `${this.baseUrl}${endpoint}`;
-    const defaultOptions = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+    const method = options.method || 'GET';
+    let body = null;
 
-    const finalOptions = { ...defaultOptions, ...options };
+    if (options.body) {
+      body = JSON.parse(options.body);
+    }
 
     try {
-      const response = await fetch(url, finalOptions);
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ detail: "Unknown error" }));
-        throw new Error(
-          errorData.detail || `HTTP ${response.status}: ${response.statusText}`
-        );
-      }
-
-      if (response.status === 204) {
-        return { status: "success" };
-      }
-
-      return await response.json();
+      return await CurateApi.fetchCurate(endpoint, method, body, this.baseUrl);
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
+      console.error(`CALM API request failed: ${endpoint}`, error);
       throw error;
     }
   }

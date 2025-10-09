@@ -20,6 +20,7 @@ import {
   alertCircleIcon,
   chevronRightIcon,
   chevronDownIcon,
+  restartIcon
 } from "../utils/icons.js";
 
 class HarvestHistoryItemDetails extends LitElement {
@@ -306,9 +307,9 @@ class HistoryTabContent extends LitElement {
             class="refresh-button"
             @click=${this._handleRefresh}
           >
-            <md-icon slot="icon">refresh</md-icon>
-            Refresh
-          </md-outlined-button>
+              ${restartIcon}
+              Refresh
+            </md-outlined-button>
         </div>
         <div class="empty-state">
           <h4>No harvest history found</h4>
