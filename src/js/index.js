@@ -31,7 +31,10 @@ import "../js/core/UploadInterceptor/index.js";
 import "../js/core/PassOaiToChildren.js";
 import "../js/core/consoleModifier.js";
 import "../js/core/messageModifier.js";
+//fixes
 import "../js/core/fixes/FixInfoPanelScroll.js";
+import "../js/core/fixes/accessibility/index.js";
+
 import "./core/Events/PreviewWarc.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
