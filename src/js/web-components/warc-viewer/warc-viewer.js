@@ -152,35 +152,33 @@ export class WarcViewerModal extends LitElement {
     }
 
     try {
+      // Load the bundled replaywebpage UI from the copied file
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/replaywebpage@2.3.12/ui.js";
+      script.src = "/replaywebpage-ui.js";
 
-      script.onload = async () => {
-        console.log("✅ ReplayWeb.page UI loaded");
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
 
-        try {
-          await customElements.whenDefined("replay-web-page");
-          console.log("✅ replay-web-page element defined");
+      console.log("✅ ReplayWeb.page UI loaded");
 
-          window.replayWebPageLoaded = true;
-          this.isLoading = false;
-          this.requestUpdate();
+      try {
+        await customElements.whenDefined("replay-web-page");
+        console.log("✅ replay-web-page element defined");
 
-          console.log(
-            "ReplayWeb.page ready - letting it handle service worker automatically"
-          );
-        } catch (error) {
-          console.error("❌ Element definition failed:", error);
-          this.showError("Failed to initialize archive viewer");
-        }
-      };
+        window.replayWebPageLoaded = true;
+        this.isLoading = false;
+        this.requestUpdate();
 
-      script.onerror = (error) => {
-        console.error("❌ Script load failed:", error);
-        this.showError("Failed to load archive viewer from CDN");
-      };
-
-      document.head.appendChild(script);
+        console.log(
+          "ReplayWeb.page ready - letting it handle service worker automatically"
+        );
+      } catch (error) {
+        console.error("❌ Element definition failed:", error);
+        this.showError("Failed to initialize archive viewer");
+      }
     } catch (error) {
       console.error("❌ loadReplayWebPage error:", error);
       this.showError("Error loading archive viewer");
