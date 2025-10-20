@@ -4,7 +4,7 @@
 import he from 'he';
 import Swal from 'sweetalert2';
 import Papa from 'papaparse';
-import { Chart } from 'chart.js';
+import Chart from 'chart.js/auto';
 import SparkMD5 from 'spark-md5';
 
 // Make libraries available globally for legacy code that expects them
