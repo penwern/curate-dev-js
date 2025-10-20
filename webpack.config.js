@@ -172,8 +172,6 @@ module.exports = (env, argv) => {
       host: '0.0.0.0', // Listen on all network interfaces
       port: 6900,
       hot: true,
-      // Remove the explicit watchFiles - let webpack handle it automatically
-      // watchFiles: ['src/**/*'],  // <-- This was causing the issue
       liveReload: true,
       headers: {
         'Access-Control-Allow-Origin': '*',
@@ -183,7 +181,7 @@ module.exports = (env, argv) => {
       allowedHosts: 'all', // Allow connections from any host
       client: {
         webSocketURL: {
-          hostname: 'localhost', // Always connect to local dev server
+          hostname: 'localhost', // Connect to local dev server
           port: 6900,
           protocol: 'ws', // Use ws:// for local development
           pathname: '/ws',
