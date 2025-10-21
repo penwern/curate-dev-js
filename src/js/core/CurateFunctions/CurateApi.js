@@ -209,7 +209,54 @@ const CurateApi = {
 
 
             return updateResponse
-        }  
+        },
+        /**
+         * Get metadata for one or more nodes using the bulk metadata endpoint
+         * @param {object|object[]} nodes - Single node or array of nodes to get metadata for
+         * @param {number} limit - Maximum number of results to return (default: 100)
+         * @param {boolean} getChildren - Whether to include children metadata for folders (default: true)
+         * @returns {object} Response from the bulk metadata endpoint containing node metadata
+         * @example
+         * // Single node
+         * const metadata = await Curate.api.files.getNodeMetadata(node);
+         *
+         * // Multiple nodes
+         * const metadata = await Curate.api.files.getNodeMetadata([node1, node2, node3]);
+         *
+         * // Folder node (automatically includes children with /*)
+         * const folderData = await Curate.api.files.getNodeMetadata(folderNode);
+         *
+         * // Folder node without children
+         * const folderOnly = await Curate.api.files.getNodeMetadata(folderNode, 100, false);
+         */
+        getNodeMetadata: async function(nodes, limit = 100, getChildren = true) {
+            if (!nodes) {
+                throw new Error("No nodes provided");
+            }
+
+            // Normalize to array
+            const nodeArray = Array.isArray(nodes) ? nodes : [nodes];
+
+            // Build NodePaths array
+            const nodePaths = [];
+            for (const node of nodeArray) {
+                const path = Curate.workspaces.getOpenWorkspace() + node.getPath();
+                nodePaths.push(path);
+
+                // If it's a folder (not a leaf) and getChildren is true, add the /* path to get children
+                if (!node.isLeaf() && getChildren) {
+                    nodePaths.push(path + "/*");
+                }
+            }
+
+            // Make the bulk metadata request
+            const response = await Curate.api.fetchCurate("/a/meta/bulk/get", "POST", {
+                Limit: limit,
+                NodePaths: nodePaths
+            });
+
+            return response;
+        }
     }
 };
 export default CurateApi;
