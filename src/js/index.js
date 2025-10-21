@@ -32,7 +32,7 @@ import "../js/core/PassOaiToChildren.js";
 import "../js/core/consoleModifier.js";
 import "../js/core/messageModifier.js";
 import "../js/core/fixes/FixInfoPanelScroll.js";
-import "./core/Events/PreviewWarc.js";
+import "./core/Events/index.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
 import "../js/external/ExternalScripts.js";
