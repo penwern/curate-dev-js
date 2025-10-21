@@ -116,6 +116,98 @@ const popup = new Curate.ui.modals.curatePopup({
 popup.fire();
 ```
 
+### Event Delegation API
+
+The Curate library includes a powerful event delegation system that allows you to attach event listeners to dynamically added elements without repeatedly binding handlers. This is more efficient than traditional event listeners, especially for elements that are frequently added/removed from the DOM.
+
+#### Basic Usage
+
+```javascript
+// Add a delegated click handler
+const handlerId = Curate.eventDelegator.addEventListener(
+  '.my-button',      // CSS selector
+  'click',           // Event type
+  function(event) {  // Handler function
+    console.log('Button clicked:', this);
+    // 'this' refers to the matched element
+  }
+);
+
+// Later, remove the specific handler
+Curate.eventDelegator.removeEventListener(handlerId);
+```
+
+#### API Methods
+
+**addEventListener(selector, type, callback, options)**
+- `selector` (string) - CSS selector to match elements
+- `type` (string) - Event type (e.g., 'click', 'mousedown', 'input')
+- `callback` (function) - Event handler function (receives event object, `this` is the matched element)
+- `options` (object|boolean) - Event listener options
+  - `capture` (boolean) - Use capture phase
+  - `once` (boolean) - Remove handler after first execution
+- Returns: Handler ID for later removal
+
+**removeEventListener(handlerId)**
+- `handlerId` (number) - ID returned by addEventListener
+- Returns: `true` if handler was found and removed
+
+**removeEventListeners(selector, type)**
+- Removes all handlers matching a specific selector and event type
+- Returns: Number of handlers removed
+
+**removeAllEventListeners()**
+- Removes all delegated event listeners
+
+**getHandlerCount()**
+- Returns: Total number of active handlers
+
+#### Examples
+
+```javascript
+// Simple click handler
+const id = Curate.eventDelegator.addEventListener(
+  '.delete-btn',
+  'click',
+  (e) => {
+    e.preventDefault();
+    console.log('Delete clicked');
+  }
+);
+
+// One-time handler that auto-removes after first trigger
+Curate.eventDelegator.addEventListener(
+  '.welcome-message',
+  'click',
+  function() {
+    console.log('First click only!');
+  },
+  { once: true }
+);
+
+// Capture phase handler
+Curate.eventDelegator.addEventListener(
+  'input[type="text"]',
+  'focus',
+  function() {
+    this.select(); // Select all text on focus
+  },
+  { capture: true }
+);
+
+// Remove all handlers for a specific selector/event
+const removed = Curate.eventDelegator.removeEventListeners('.my-button', 'click');
+console.log(`Removed ${removed} handlers`);
+```
+
+#### Benefits
+
+- **Performance**: Single document-level listener per event type instead of multiple element-level listeners
+- **Dynamic Elements**: Automatically works with elements added to the DOM after handler registration
+- **Memory Efficient**: Automatic cleanup when handlers are removed
+- **Phase Control**: Support for both capture and bubble phases
+- **Easy Management**: Handler IDs make it simple to track and remove specific listeners
+
 ## Development
 
 ### Project Structure
