@@ -6,12 +6,17 @@ class ChecksumWorkerManager {
       idleTimeoutMs: 30000,         // Cleanup after 30s idle
       healthCheckIntervalMs: 10000, // Check worker health every 10s
       taskTimeoutMs: 60000,         // Max time per task
+      maxConsecutiveFailures: 3,    // Stop creating workers after N consecutive failures
     };
 
     // Worker pool with metadata
     this.workers = new Map(); // workerId -> { worker, metadata }
     this.taskQueue = [];
     this.currentTasks = new Map(); // workerId -> task
+
+    // Circuit breaker for worker failures
+    this.consecutiveFailures = 0;
+    this.circuitBreakerTripped = false;
 
     // Cleanup and monitoring
     this.healthCheckTimer = null;
@@ -24,31 +29,48 @@ class ChecksumWorkerManager {
    * Create a new worker with full lifecycle management
    */
   createWorker() {
-    const workerId = crypto.randomUUID();
-    const worker = new Worker("/workers/hashWorker.js");
+    // Check circuit breaker
+    if (this.circuitBreakerTripped) {
+      console.error('ChecksumWorkerManager: Circuit breaker tripped. Too many consecutive worker failures. Not creating new workers.');
+      return null;
+    }
 
-    const metadata = {
-      createdAt: Date.now(),
-      lastActivity: Date.now(),
-      taskCount: 0,
-      status: 'idle', // idle, busy, error
-      idleTimer: null,
-      taskTimer: null,
-    };
+    try {
+      const workerId = crypto.randomUUID();
+      const worker = new Worker("/workers/hashWorker.js");
 
-    // Set up worker event handlers
-    worker.onmessage = (event) => {
-      this.handleWorkerMessage(workerId, event);
-    };
+      const metadata = {
+        createdAt: Date.now(),
+        lastActivity: Date.now(),
+        taskCount: 0,
+        status: 'idle', // idle, busy, error
+        idleTimer: null,
+        taskTimer: null,
+        failedImmediately: false, // Track if worker failed before first task
+      };
 
-    worker.onerror = (event) => {
-      this.handleWorkerError(workerId, event);
-    };
+      // Set up worker event handlers
+      worker.onmessage = (event) => {
+        this.handleWorkerMessage(workerId, event);
+      };
 
-    // Store worker with metadata
-    this.workers.set(workerId, { worker, metadata });
+      worker.onerror = (event) => {
+        this.handleWorkerError(workerId, event);
+      };
 
-    return workerId;
+      // Store worker with metadata
+      this.workers.set(workerId, { worker, metadata });
+
+      return workerId;
+    } catch (error) {
+      console.error('ChecksumWorkerManager: Failed to create worker:', error);
+      this.consecutiveFailures++;
+      if (this.consecutiveFailures >= this.config.maxConsecutiveFailures) {
+        this.circuitBreakerTripped = true;
+        console.error('ChecksumWorkerManager: Circuit breaker tripped after', this.consecutiveFailures, 'consecutive failures');
+      }
+      return null;
+    }
   }
 
   /**
@@ -61,6 +83,9 @@ class ChecksumWorkerManager {
     const { metadata } = workerData;
 
     if (event.data.status === "complete") {
+      // Worker successfully completed a task - reset failure counter
+      this.consecutiveFailures = 0;
+
       const currentTask = this.currentTasks.get(workerId);
       if (currentTask) {
         // Clear task timeout
@@ -105,6 +130,24 @@ class ChecksumWorkerManager {
     if (workerData) {
       workerData.metadata.status = 'error';
 
+      // Check if worker failed immediately (before processing any tasks)
+      const failedImmediately = workerData.metadata.taskCount === 0 && !this.currentTasks.has(workerId);
+      if (failedImmediately) {
+        workerData.metadata.failedImmediately = true;
+        this.consecutiveFailures++;
+
+        if (this.consecutiveFailures >= this.config.maxConsecutiveFailures) {
+          this.circuitBreakerTripped = true;
+          console.error(`ChecksumWorkerManager: Circuit breaker tripped after ${this.consecutiveFailures} consecutive immediate worker failures. Rejecting all queued tasks.`);
+
+          // Reject all queued tasks
+          while (this.taskQueue.length > 0) {
+            const task = this.taskQueue.shift();
+            task.reject(new Error('ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize. Check worker file path and browser console for errors.'));
+          }
+        }
+      }
+
       // Reject current task if any
       const currentTask = this.currentTasks.get(workerId);
       if (currentTask) {
@@ -112,8 +155,13 @@ class ChecksumWorkerManager {
         this.currentTasks.delete(workerId);
       }
 
-      // Replace the failed worker
-      this.replaceWorker(workerId);
+      // Only replace the worker if circuit breaker hasn't tripped
+      if (!this.circuitBreakerTripped) {
+        this.replaceWorker(workerId);
+      } else {
+        // Just remove the failed worker, don't replace
+        this.removeWorker(workerId);
+      }
     }
   }
 
@@ -135,6 +183,17 @@ class ChecksumWorkerManager {
    */
   assignTask() {
     if (this.taskQueue.length === 0) return;
+
+    // Check if circuit breaker is tripped
+    if (this.circuitBreakerTripped) {
+      console.error('ChecksumWorkerManager: Cannot assign task - circuit breaker is tripped');
+      // Reject the task
+      const task = this.taskQueue.shift();
+      if (task) {
+        task.reject(new Error('ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize'));
+      }
+      return;
+    }
 
     // Find idle worker
     let availableWorkerId = null;
@@ -244,12 +303,14 @@ class ChecksumWorkerManager {
   replaceWorker(workerId) {
     this.removeWorker(workerId);
 
-    // Always create replacement for failed workers
-    const newWorkerId = this.createWorker();
+    // Only create replacement if circuit breaker hasn't tripped
+    if (!this.circuitBreakerTripped) {
+      const newWorkerId = this.createWorker();
 
-    // Process next task if available
-    if (this.taskQueue.length > 0) {
-      this.processNextTask(newWorkerId);
+      // Process next task if available and worker was created
+      if (newWorkerId && this.taskQueue.length > 0) {
+        this.processNextTask(newWorkerId);
+      }
     }
   }
 
