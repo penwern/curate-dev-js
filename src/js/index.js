@@ -36,7 +36,7 @@ import "../js/core/fixes/FixInfoPanelScroll.js";
 import "./core/Events/index.js";
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
-import "../js/external/ExternalScripts.js";
+import "../js/external/BundledLibraries.js";
 //import 'chart.js';
 //import Swal from 'sweetalert2';
 //import Papa from 'papaparse';

@@ -1,4 +1,5 @@
-importScripts("https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js")
+// Load the bundled spark-md5 library
+importScripts("/spark-md5.js");
 
 // Function to calculate the checksum for multipart files
 const calculateMultipartChecksum = (file, partSize) =>

@@ -78,7 +78,7 @@ export const atomGoConfigUI = (component) => html`
               <div class="form-field">
                 <md-outlined-text-field
                   label="Rsync Command"
-                  placeholder="rsync -av --delete"
+                  placeholder="-e 'ssh -p 2222'"
                   .value=${component.rsynccommand}
                   @input=${(e) => (component.rsynccommand = e.target.value)}
                 ></md-outlined-text-field>
