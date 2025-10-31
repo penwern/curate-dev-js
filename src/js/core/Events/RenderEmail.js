@@ -1,5 +1,6 @@
 import { mdiOpenInNew, mdiEye } from "@mdi/js";
-
+import { Curate } from "../CurateFunctions/CurateFunctions";
+import { openEmailViewerPage } from "../../custom-pages/routes/email-viewer.js";
 // Create icon SVG helper (plain HTML strings, not Lit templates)
 const createIconSVG = (path) => `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;display:flex;align-items:center;"><path d="${path}"></path></svg>`;
 
@@ -8,6 +9,8 @@ const openIcon = createIconSVG(mdiOpenInNew);
 const renderIcon = createIconSVG(mdiEye);
 
 // Create the popup instance
+let pendingNode = null;
+
 const actionPopup = new Curate.ui.modals.curatePopup(
   {
     title: "Choose Action",
@@ -51,6 +54,7 @@ const actionPopup = new Curate.ui.modals.curatePopup(
       openBtn.addEventListener("click", () => {
         console.log("Open action selected");
         actionPopup.close();
+        pendingNode = null;
 
         // Use Pydio's goTo to navigate into the folder
         pydio.goTo(pydio._dataModel._selectedNodes[0]);
@@ -58,26 +62,59 @@ const actionPopup = new Curate.ui.modals.curatePopup(
 
       renderBtn.addEventListener("click", () => {
         console.log("Render action selected");
-        // TODO: Add render logic here
         actionPopup.close();
+        const nodeToRender = pendingNode || (pydio._dataModel._selectedNodes?.[0] ?? null);
+        pendingNode = null;
+
+        if (!nodeToRender) {
+          console.warn("RenderEmail: No node available to render.");
+          return;
+        }
+
+        const workspaceId =
+          (typeof Curate.workspaces?.getOpenWorkspace === "function" && Curate.workspaces.getOpenWorkspace()) ||
+          (typeof nodeToRender.getRepositoryId === "function" && nodeToRender.getRepositoryId()) ||
+          nodeToRender._repositoryId ||
+          nodeToRender.Repository;
+
+        const rawPath =
+          (typeof nodeToRender.getPath === "function" && nodeToRender.getPath()) ||
+          nodeToRender.Path ||
+          nodeToRender._path ||
+          "";
+
+        if (!workspaceId || !rawPath) {
+          console.warn("RenderEmail: Missing workspace or path for email viewer.", { workspaceId, rawPath });
+          return;
+        }
+
+        const archivePath = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+
+        openEmailViewerPage({
+          archiveWorkspace: workspaceId,
+          archivePath,
+          archiveMode: "curate"
+        });
       });
     },
     afterClosed: () => {
       console.log("Popup closed");
+      pendingNode = null;
     }
   }
 );
 
 const handleEmailFileAction = async (node) => {
-    const nodeData = await Curate.api.files.getNodeMetadata(node, 100, true)
-    const containsManifest = nodeData.Nodes.some(n=>n.Path.endsWith("manifest.json"))
+  const nodeData = await Curate.api.files.getNodeMetadata(node, 100, true);
+  const containsManifest = nodeData.Nodes.some((n) => n.Path.endsWith("manifest.json"));
 
-    if (containsManifest){
-        console.log("it's a custom email file!")
-        // Show the popup
-        actionPopup.fire();
-    }
-}
+  if (containsManifest) {
+    console.log("it's a custom email file!");
+    // Show the popup
+    pendingNode = node;
+    actionPopup.fire();
+  }
+};
 
 // Register the event handler
 Curate.eventDelegator.addEventListener(

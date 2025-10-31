@@ -17,6 +17,7 @@ import {
   mdiAlertCircleOutline,
   mdiChevronRight,
   mdiChevronDown,
+  mdiChevronLeft,
   mdiCheckCircle,
   mdiSitemap,
   mdiPencil,
@@ -52,6 +53,7 @@ export const checkCircleIcon = icon(mdiCheckCircleOutline);
 export const alertCircleIcon = icon(mdiAlertCircleOutline);
 export const chevronRightIcon = icon(mdiChevronRight);
 export const chevronDownIcon = icon(mdiChevronDown);
+export const chevronLeftIcon = icon(mdiChevronLeft);
 export const checkCircleFilledIcon = icon(mdiCheckCircle);
 export const sitemapIcon = icon(mdiSitemap);
 export const pencilIcon = icon(mdiPencil);
@@ -61,3 +63,35 @@ export const lockIcon = icon(mdiLockOutline);
 export const blockHelperIcon = icon(mdiBlockHelper);
 export const cachedIcon = icon(mdiCached);
 export const blockIcon = icon(mdiBlockHelper);
+
+//need to sort out icons, in future import icon handler 
+// and then just import mdi icons directly in components 
+// and wrap with icon. Then they can be named whatever.
+// Email viewer icons (added for mbox viewer)
+import {
+  mdiEmail,
+  mdiEmailOutline,
+  mdiAttachment,
+  mdiDownload,
+  mdiSort,
+  mdiFilterOutline,
+  mdiChevronUp,
+  mdiClose,
+  mdiArrowLeft,
+  mdiDotsVertical,
+  mdiImageOutline,
+  mdiForum,
+} from "@mdi/js";
+
+export const emailIcon = icon(mdiEmail);
+export const emailOutlineIcon = icon(mdiEmailOutline);
+export const attachmentIcon = icon(mdiAttachment);
+export const downloadIcon = icon(mdiDownload);
+export const sortIcon = icon(mdiSort, "icon");
+export const filterIcon = icon(mdiFilterOutline, "icon");
+export const chevronUpIcon = icon(mdiChevronUp);
+export const closeIcon = icon(mdiClose);
+export const arrowLeftIcon = icon(mdiArrowLeft);
+export const dotsVerticalIcon = icon(mdiDotsVertical);
+export const imageIcon = icon(mdiImageOutline);
+export const forumIcon = icon(mdiForum);

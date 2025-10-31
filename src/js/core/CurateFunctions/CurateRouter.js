@@ -160,6 +160,14 @@ const CurateRouter = (function () {
       const match = findMatchingRoute(routePath);
 
       if (match) {
+        if (match.route?.options?.allowUrlAccess === false) {
+          console.warn('CurateRouter: Protected route cannot be accessed directly via URL:', routePath);
+          const targetUrl = lastNonCustomUrl || '/';
+          if (path !== targetUrl) {
+            window.history.replaceState(null, '', targetUrl);
+          }
+          return;
+        }
         navigateToRoute(match.route, match.params, false);
       } else {
         showErrorPage(`Route not found: ${routePath}`);
@@ -170,7 +178,20 @@ const CurateRouter = (function () {
 
       if (currentPage) {
         // We're navigating away from custom routes
-        closePage();
+        if (currentPage.isStandalone) {
+          const origin = currentPage.initialUrl;
+          const shouldClose =
+            currentPage.closeOnUrlChange !== false &&
+            origin !== null &&
+            origin !== undefined &&
+            path !== origin;
+
+          if (shouldClose) {
+            closePage();
+          }
+        } else {
+          closePage();
+        }
       }
     }
   }
@@ -248,9 +269,10 @@ const CurateRouter = (function () {
     const route = {
       handler,
       options: {
+        ...options,
         title: options.title || 'Custom Page',
         showHeader: options.showHeader !== false,
-        ...options
+        allowUrlAccess: options.allowUrlAccess !== false
       }
     };
 
@@ -294,6 +316,44 @@ const CurateRouter = (function () {
     checkCurrentRoute();
   }
 
+  function openRoute(path, params = {}, overrides = {}) {
+    if (!isInitialized) {
+      throw new Error('CurateRouter: Not initialized. Call initialize() first.');
+    }
+
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    const route = routes.get(normalizedPath);
+
+    if (!route) {
+      throw new Error(`CurateRouter: Route not found for path ${normalizedPath}`);
+    }
+
+    const closeOnUrlChange = Object.prototype.hasOwnProperty.call(overrides, 'closeOnUrlChange')
+      ? overrides.closeOnUrlChange !== false
+      : route.options?.closeOnUrlChange !== false;
+
+    const standaloneRoute = {
+      handler: route.handler,
+      options: {
+        ...route.options,
+        ...overrides,
+        keepOpenWithoutRoute: true,
+        closeOnUrlChange,
+        routePath: normalizedPath
+      }
+    };
+
+    const initialUrl = window.location.pathname;
+    navigateToRoute(standaloneRoute, params, false);
+
+    if (currentPage) {
+      currentPage.isStandalone = true;
+      currentPage.initialUrl = initialUrl;
+      currentPage.closeOnUrlChange = closeOnUrlChange;
+      currentPage.routePath = normalizedPath;
+    }
+  }
+
   function navigateToRoute(route, params, updateHistory = true) {
     try {
       if (currentPage) {
@@ -308,7 +368,11 @@ const CurateRouter = (function () {
         route,
         params,
         container,
-        cleanup: null
+        cleanup: null,
+        isStandalone: route?.options?.keepOpenWithoutRoute === true,
+        initialUrl: route?.options?.keepOpenWithoutRoute === true ? window.location.pathname : null,
+        closeOnUrlChange: route?.options?.closeOnUrlChange !== false,
+        routePath: route?.options?.routePath || null
       };
 
       const query = new URLSearchParams(window.location.search);
@@ -455,7 +519,6 @@ const CurateRouter = (function () {
       justify-content: space-between;
       align-items: center;
       padding: 20px;
-      margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--md-sys-color-outline, #c4c7c5);
       background: var(--md-sys-color-surface-variant, #fdfcff);
@@ -472,7 +535,7 @@ const CurateRouter = (function () {
 
     // Create close button
     const closeButton = document.createElement('button');
-    closeButton.textContent = '✕ Close';
+    closeButton.textContent = 'Close';
     closeButton.addEventListener('click', closeAndReturnToUnderlying);
     closeButton.style.cssText = `
       background: var(--md-sys-color-primary-container);
@@ -502,18 +565,25 @@ const CurateRouter = (function () {
    * Close the custom page and return to the underlying Pydio URL
    */
   function closeAndReturnToUnderlying() {
-    if (currentPage) {
-      // Navigate to the last non-custom URL (or fallback to base path)
-      const targetUrl = lastNonCustomUrl || '/';
-      window.history.pushState(null, '', targetUrl);
-      closePage();
+    if (!currentPage) {
+      return;
     }
+
+    if (currentPage.isStandalone) {
+      closePage();
+      return;
+    }
+
+    // Navigate to the last non-custom URL (or fallback to base path)
+    const targetUrl = lastNonCustomUrl || '/';
+    window.history.pushState(null, '', targetUrl);
+    closePage();
   }
 
   function createNavigationUtils() {
     return {
       navigate: (path) => navigate(path),
-      close: () => back(),
+      close: () => close(),
       back: () => back()
     };
   }
@@ -589,9 +659,19 @@ const CurateRouter = (function () {
    * Curate.router.back();
    */
   function back() {
-    if (currentPage) {
+    if (!currentPage) {
+      return;
+    }
+
+    if (currentPage.isStandalone) {
+      closePage();
+    } else {
       window.history.back();
     }
+  }
+
+  function close() {
+    closeAndReturnToUnderlying();
   }
 
   function showErrorPage(message) {
@@ -724,6 +804,8 @@ const CurateRouter = (function () {
     initialize,
     addRoute,
     navigate,
+    open: openRoute,
+    close,
     back,
     getCurrentPage,
     isActive,
