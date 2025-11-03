@@ -1,4 +1,4 @@
-const DEFAULT_DOCK_ICON_CLASS = "mdi-window-restore";
+﻿const DEFAULT_DOCK_ICON_CLASS = "mdi-window-restore";
 const MODAL_STYLE_ID = "curate-modal-enhancements";
 const MODAL_STYLE_CONTENT = `
 .config-modal-header {
@@ -7,7 +7,6 @@ const MODAL_STYLE_CONTENT = `
   align-items: center;
   justify-content: center;
   gap: 0.5em;
-  margin-top: 1em !important;
 }
 .config-modal-content .action-buttons {
   justify-content: flex-start !important;
@@ -29,16 +28,16 @@ const MODAL_STYLE_CONTENT = `
 }
 .config-modal-action-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--md-sys-color-outline, rgba(0, 0, 0, 0.2));
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline);
 }
 .config-modal-minimize-button {
-  background-color: var(--md-sys-color-surface-variant, rgba(0, 0, 0, 0.05));
-  color: var(--md-sys-color-inverse-surface, #222);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-background);
 }
 .config-modal-minimize-button:hover,
 .config-modal-minimize-button:focus {
-  background-color: var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.16));
-  color: var(--md-sys-color-on-secondary, #000);
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
 }
 .config-modal-dock {
   position: fixed;
@@ -56,19 +55,19 @@ const MODAL_STYLE_CONTENT = `
   border: none;
   border-radius: 999px;
   padding: 0.35em 0.85em;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-  background: var(--md-sys-color-surface-4, #fff);
-  color: var(--md-sys-color-inverse-surface, #222);
+  box-shadow: 0px 4px 12px var(--md-sys-color-shadow);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-background);
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 .config-modal-dock-item:hover {
-  background: var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.16));
+  background: var(--md-sys-color-primary);
   transform: translateY(-2px);
 }
 .config-modal-dock-item:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--md-sys-color-outline, rgba(0, 0, 0, 0.2));
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline);
 }
 .config-modal-dock-item-label {
   font-size: 0.85rem;
@@ -78,12 +77,16 @@ const MODAL_STYLE_CONTENT = `
   font-size: 1.1rem;
   line-height: 1;
 }
+.config-modal-dock-item .mdi,
+.config-modal-dock-item-label {
+  color: inherit;
+}
 .config-modal-dock-item-badge {
   min-width: 1.4em;
   height: 1.4em;
   border-radius: 999px;
-  background: var(--md-sys-color-error, #c1121f);
-  color: #fff;
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -690,3 +693,14 @@ const CurateUi = {
   },
 };
 export default CurateUi;
+
+
+
+
+
+
+
+
+
+
+
