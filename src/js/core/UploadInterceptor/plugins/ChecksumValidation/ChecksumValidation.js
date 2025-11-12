@@ -35,6 +35,48 @@ function updateMetaField(uuid, namespace, value) {
   Curate.api.fetchCurate(url, "PUT", metadatas);
 }
 
+function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) {
+  const maxRetries = 10; // Max number of retries waiting for Premis and virus scan
+  const retryDelay = 3000; // Delay in ms before retrying
+
+  // Check if both required metadata exist on the node
+  const hasPremis = node.MetaStore && node.MetaStore.Premis;
+  const hasVirusScan = node.MetaStore && node.MetaStore["usermeta-virus-scan-first"];
+
+  if (hasPremis && hasVirusScan) {
+    // Both required metadata exist, safe to apply the integrity tag
+    console.log(`Premis and virus scan metadata found for ${filePath}, applying integrity tag.`);
+    updateMetaField(
+      node.Uuid,
+      "usermeta-file-integrity",
+      integrityTag
+    );
+  } else if (retryCount < maxRetries) {
+    // Required metadata not yet available, retry after delay
+    const missing = [];
+    if (!hasPremis) missing.push("Premis");
+    if (!hasVirusScan) missing.push("virus-scan");
+    console.log(
+      `Waiting for metadata (${missing.join(", ")}) on ${filePath}. Retrying (${
+        retryCount + 1
+      }/${maxRetries})...`
+    );
+    setTimeout(() => {
+      waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount + 1);
+    }, retryDelay);
+  } else {
+    // Max retries reached, apply tag anyway
+    console.warn(
+      `Max retries reached waiting for required metadata on ${filePath}. Applying integrity tag anyway.`
+    );
+    updateMetaField(
+      node.Uuid,
+      "usermeta-file-integrity",
+      integrityTag
+    );
+  }
+}
+
 function fetchCurateStats(filePath, expectedChecksum, retryCount) {
   Curate.api
     .fetchCurate("/a/tree/stats", "POST", {
@@ -77,9 +119,10 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
   } else if (node.Etag === expectedChecksum) {
     // Checksum matches the expected value.
     console.log(`Checksum validation passed for ${filePath}.`);
-    updateMetaField(
-      node.Uuid,
-      "usermeta-file-integrity", // Namespace for integrity status
+    // Defer tag writing until Premis metadata exists
+    waitForPremisAndApplyTag(
+      node,
+      filePath,
       "✓ Integrity verified"
     );
   } else {
@@ -92,10 +135,11 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
       node.Etag,
       `(Attempt ${retryCount + 1})`
     );
-    updateMetaField(
-      node.Uuid,
-      "usermeta-file-integrity",
-      "X Integrity compromised" // Status indicating failure
+    // Defer tag writing until Premis metadata exists
+    waitForPremisAndApplyTag(
+      node,
+      filePath,
+      "X Integrity compromised"
     );
   }
 }
