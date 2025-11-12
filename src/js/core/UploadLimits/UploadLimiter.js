@@ -7,9 +7,14 @@ const DEFAULT_MAX_UPLOAD_FILES = 1000;
 function getMaxUploadFiles() {
   // maxUploadFiles is a global constant, not a window property
   // this is so that it cannot be overwritten by the user
-  // this could be done with Object.defineProperty, 
+  // this could be done with Object.defineProperty,
   // but that's more complicated and not necessary
-  const configuredLimit = maxUploadFiles;
+  let configuredLimit;
+  try {
+    configuredLimit = maxUploadFiles; // Will throw ReferenceError if not declared
+  } catch (e) {
+    configuredLimit = undefined;
+  }
   if (typeof configuredLimit === 'number' && configuredLimit > 0) {
     return configuredLimit;
   }
