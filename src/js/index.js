@@ -28,6 +28,7 @@ import "../js/core/OAIHarvestClient.js";
 import "../js/core/publicAccessModifier.js";
 import "../js/core/tourModifier.js";
 import "../js/core/UploadInterceptor/index.js";
+import "../js/core/UploadLimits/UploadLimiter.js";
 import "../js/core/PassOaiToChildren.js";
 import "../js/core/consoleModifier.js";
 import "../js/core/messageModifier.js";
