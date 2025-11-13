@@ -10,15 +10,18 @@
   "private": true,
   "dependencies": {
     "@iconify/iconify": "^3.1.1",
+    "@lit-labs/virtualizer": "^2.1.1",
     "@material/web": "^2.3.0",
     "@mdi/js": "^7.4.47",
     "chart.js": "^3.7.0",
+    "dompurify": "^3.3.0",
     "focus-trap": "^7.6.5",
     "fs-extra": "^11.2.0",
     "he": "^1.2.0",
     "lit": "^3.3.0",
     "lodash-es": "^4.17.21",
     "papaparse": "^5.4.1",
+    "postal-mime": "^2.5.0",
     "replaywebpage": "^2.3.14",
     "spark-md5": "^3.0.2",
     "sweetalert2": "^11.0.20"

@@ -1,3 +1,289 @@
+﻿const DEFAULT_DOCK_ICON_CLASS = "mdi-window-restore";
+const MODAL_STYLE_ID = "curate-modal-enhancements";
+const MODAL_STYLE_CONTENT = `
+.config-modal-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+.config-modal-content .action-buttons {
+  justify-content: flex-start !important;
+  gap: 1em;
+  width: 100%;
+}
+.config-modal-action-button {
+  flex: 1 1 0;
+  width: auto !important;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6em;
+  border-radius: 0.5em;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.config-modal-action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline);
+}
+.config-modal-minimize-button {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-background);
+}
+.config-modal-minimize-button:hover,
+.config-modal-minimize-button:focus {
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+}
+.config-modal-dock {
+  position: fixed;
+  right: 1.5em;
+  bottom: 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  z-index: 1490;
+}
+.config-modal-dock-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  border: none;
+  border-radius: 999px;
+  padding: 0.35em 0.85em;
+  box-shadow: 0px 4px 12px var(--md-sys-color-shadow);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-background);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.config-modal-dock-item:hover {
+  background: var(--md-sys-color-primary);
+  transform: translateY(-2px);
+}
+.config-modal-dock-item:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline);
+}
+.config-modal-dock-item-label {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.config-modal-dock-item .mdi {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.config-modal-dock-item .mdi,
+.config-modal-dock-item-label {
+  color: inherit;
+}
+.config-modal-dock-item-badge {
+  min-width: 1.4em;
+  height: 1.4em;
+  border-radius: 999px;
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0 0.35em;
+  font-weight: 600;
+}
+`;
+
+function ensureModalEnhancementStyles() {
+  if (typeof document === "undefined") {
+    return;
+  }
+  if (document.getElementById(MODAL_STYLE_ID)) {
+    return;
+  }
+
+  const styleTag = document.createElement("style");
+  styleTag.id = MODAL_STYLE_ID;
+  styleTag.textContent = MODAL_STYLE_CONTENT;
+  document.head.appendChild(styleTag);
+}
+
+/**
+ * Internal manager that keeps track of minimized modals and renders the dock UI.
+ */
+const CurateModalDock = (() => {
+  let dockElement = null;
+  const entries = new Map();
+  function normalizeIconClass(iconClass) {
+    if (typeof iconClass !== "string") {
+      return DEFAULT_DOCK_ICON_CLASS;
+    }
+    const trimmed = iconClass.trim();
+    return trimmed.length ? trimmed : DEFAULT_DOCK_ICON_CLASS;
+  }
+
+  function applyDockIcon(iconElement, iconClass) {
+    const resolved = normalizeIconClass(iconClass);
+    iconElement.className = "";
+    iconElement.classList.add("mdi");
+    resolved.split(/\s+/).forEach((cls) => {
+      if (!cls || cls === "mdi") {
+        return;
+      }
+      if (cls.startsWith("mdi-")) {
+        iconElement.classList.add(cls);
+      } else {
+        iconElement.classList.add(`mdi-${cls}`);
+      }
+    });
+    return resolved;
+  }
+
+  function ensureDock() {
+    if (!dockElement) {
+      dockElement = document.createElement("div");
+      dockElement.classList.add("config-modal-dock");
+      document.body.appendChild(dockElement);
+    }
+  }
+
+  function destroyDockIfEmpty() {
+    if (dockElement && entries.size === 0) {
+      dockElement.remove();
+      dockElement = null;
+    }
+  }
+
+  function createDockEntry(id, labelText, iconClass, onRestore, ariaLabel) {
+    ensureDock();
+    const displayLabel =
+      typeof labelText === "string" ? labelText.trim() : "";
+    let accessibleLabel =
+      typeof ariaLabel === "string" && ariaLabel.trim()
+        ? ariaLabel.trim()
+        : displayLabel || "Modal";
+
+    let entry = entries.get(id);
+    if (entry) {
+      entry.updateLabel(displayLabel, accessibleLabel);
+      entry.updateIcon(iconClass);
+      return entry;
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.classList.add("config-modal-dock-item");
+    button.setAttribute("aria-expanded", "false");
+    button.title = accessibleLabel;
+    button.setAttribute("aria-label", accessibleLabel);
+
+    const iconElem = document.createElement("i");
+    iconElem.setAttribute("aria-hidden", "true");
+    const resolvedIcon = applyDockIcon(iconElem, iconClass);
+
+    const labelSpan = document.createElement("span");
+    labelSpan.classList.add("config-modal-dock-item-label");
+    labelSpan.textContent = displayLabel;
+    labelSpan.hidden = !displayLabel;
+
+    const badgeSpan = document.createElement("span");
+    badgeSpan.classList.add("config-modal-dock-item-badge");
+    badgeSpan.setAttribute("aria-hidden", "true");
+    badgeSpan.hidden = true;
+
+    button.appendChild(iconElem);
+    button.appendChild(labelSpan);
+    button.appendChild(badgeSpan);
+    button.addEventListener("click", () => {
+      button.setAttribute("aria-expanded", "true");
+      onRestore();
+    });
+
+    dockElement.appendChild(button);
+
+    entry = {
+      id,
+      button,
+      labelSpan,
+      badgeSpan,
+      iconElem,
+      iconClass: resolvedIcon,
+      accessibleLabel,
+      updateLabel(newLabel, newAriaLabel) {
+        const nextLabel =
+          typeof newLabel === "string" ? newLabel.trim() : "";
+        labelSpan.textContent = nextLabel;
+        labelSpan.hidden = !nextLabel;
+
+        if (typeof newAriaLabel === "string" && newAriaLabel.trim()) {
+          this.accessibleLabel = newAriaLabel.trim();
+        } else if (nextLabel) {
+          this.accessibleLabel = nextLabel;
+        }
+
+        button.title = this.accessibleLabel;
+        button.setAttribute("aria-label", this.accessibleLabel);
+      },
+      updateIcon(newIconClass) {
+        this.iconClass = applyDockIcon(iconElem, newIconClass);
+      },
+      updateBadge(count) {
+        if (typeof count === "number" && count > 0) {
+          badgeSpan.hidden = false;
+          badgeSpan.textContent = `${count}`;
+        } else {
+          badgeSpan.hidden = true;
+          badgeSpan.textContent = "";
+        }
+      },
+      setExpanded(isExpanded) {
+        button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+      },
+      remove() {
+        button.remove();
+        entries.delete(id);
+        destroyDockIfEmpty();
+      },
+    };
+
+    entries.set(id, entry);
+    return entry;
+  }
+
+  return {
+    attach(id, label, iconClass, onRestore, ariaLabel) {
+      ensureModalEnhancementStyles();
+      return createDockEntry(id, label, iconClass, onRestore, ariaLabel);
+    },
+    detach(id) {
+      const entry = entries.get(id);
+      if (entry) {
+        entry.remove();
+      }
+    },
+    updateBadge(id, count) {
+      const entry = entries.get(id);
+      if (entry) {
+        entry.updateBadge(count);
+      }
+    },
+    updateLabel(id, label, ariaLabel) {
+      const entry = entries.get(id);
+      if (entry) {
+        entry.updateLabel(label, ariaLabel);
+      }
+    },
+    updateIcon(id, iconClass) {
+      const entry = entries.get(id);
+      if (entry) {
+        entry.updateIcon(iconClass);
+      }
+    },
+  };
+})();
+
 const CurateUi = {
   modals: {
     /**
@@ -17,13 +303,27 @@ const CurateUi = {
      * @param {string} [props.type] - The type of the popup ('warning', 'error', 'success', or 'info').
      * @param {string} [props.content] - Additional HTML content for the popup.
      * @param {string} [props.buttonType='close'] - The type of buttons to display ('close' or 'okCancel').
+     * @param {boolean} [props.minimizable=false] - Enables minimize controls and dock integration.
+     * @param {string} [props.minimizeLabel] - Optional label for the minimized dock button (defaults to title).
+     * @param {string} [props.minimizeButtonText='Minimize'] - Optional label for the minimize action button.
+     * @param {string} [props.minimizeAriaLabel] - Optional accessible label for the minimized dock button.
+     * @param {string} [props.minimizeIcon='mdi-window-restore'] - Material Design icon class used in the dock pill.
+     * @param {number} [props.badgeCount=0] - Optional initial badge count for the minimized dock button.
+     * @param {string} [props.id] - Optional identifier used to keep the dock entry stable across modal instances.
      * @param {Object} callbacks - An object containing callback functions for popup events.
      * @property {Function} callbacks.afterLoaded - Callback function that fires after the popup is spawned in the DOM.
      * @property {Function} callbacks.afterClosed - Callback function that fires after the popup is removed from the DOM.
      * @property {Function} [callbacks.onOk] - Callback function that fires when the OK button is clicked (only for 'okCancel' buttonType).
      * @property {Function} [callbacks.onCancel] - Callback function that fires when the Cancel button is clicked (only for 'okCancel' buttonType).
+     * @property {Function} [callbacks.afterMinimized] - Callback that fires after the modal is minimized.
+     * @property {Function} [callbacks.afterRestored] - Callback that fires after the modal is restored.
      * @function fire - Initiates the popup in the DOM.
      * @function close - Programmatically closes and cleans up the popup.
+     * @function minimize - Minimizes the popup (only available when minimizable=true).
+     * @function restore - Restores a minimized popup.
+     * @function updateBadge - Updates the badge number displayed on the dock button.
+     * @function updateMinimizeLabel - Updates the visible/accessible label used for the minimized dock button.
+     * @function updateDockIcon - Updates the icon used by the minimized dock button.
      */
     curatePopup: function (props, callbacks) {
       // Extracting props
@@ -32,12 +332,33 @@ const CurateUi = {
       const type = props.type;
       const content = props.content;
       const buttonType = props.buttonType || "close";
+      const minimizable = Boolean(props.minimizable);
+      let dockLabelText =
+        typeof props.minimizeLabel === "string"
+          ? props.minimizeLabel.trim()
+          : "";
+      let dockAriaLabel =
+        typeof props.minimizeAriaLabel === "string" &&
+        props.minimizeAriaLabel.trim()
+          ? props.minimizeAriaLabel.trim()
+          : dockLabelText || title || "Modal";
+      let dockIconClass = props.minimizeIcon || DEFAULT_DOCK_ICON_CLASS;
+      const minimizeButtonText = props.minimizeButtonText || "Minimize";
+      const modalId =
+        props.id ||
+        `curate-modal-${Date.now().toString(36)}-${Math.random()
+          .toString(36)
+          .slice(2, 8)}`;
+      const initialBadge = Number(props.badgeCount);
+      let badgeCount = Number.isFinite(initialBadge) ? initialBadge : 0;
 
       // Extracting callbacks or defaulting to empty functions
       const afterLoaded = callbacks?.afterLoaded || function () {};
       const afterClosed = callbacks?.afterClosed || function () {};
       const onOk = callbacks?.onOk || function () {};
       const onCancel = callbacks?.onCancel || function () {};
+      const afterMinimized = callbacks?.afterMinimized || function () {};
+      const afterRestored = callbacks?.afterRestored || function () {};
 
       // Define type-specific styles and icons
       const typeStyles = {
@@ -50,13 +371,19 @@ const CurateUi = {
       // Store references for cleanup
       let container = null;
       let escapePopupHandler = null;
+      let dockEntry = null;
+      let contentNode = null;
+      let escapeHandlerBound = false;
 
       // Define fire method
       function fire() {
         // Prevent multiple instances
         if (container) {
+          restore();
           return;
         }
+
+        ensureModalEnhancementStyles();
 
         // Create the container element
         container = document.createElement("div");
@@ -79,13 +406,13 @@ const CurateUi = {
           }
         };
         document.addEventListener("keyup", escapePopupHandler);
+        escapeHandlerBound = true;
 
         // Create the content element
         const contentDiv = document.createElement("div");
         contentDiv.classList.add("config-modal-content");
-        if (type) {
-          contentDiv.style.borderTop = `4px solid ${typeStyles[type].color}`;
-        }
+        contentDiv.setAttribute("tabindex", "-1");
+        contentNode = contentDiv;
 
         // Create the title element
         const titleElem = document.createElement("div");
@@ -98,8 +425,16 @@ const CurateUi = {
           iconElem.style.marginRight = "10px";
           titleElem.appendChild(iconElem);
         }
-        const titleText = document.createTextNode(title);
+        const titleText = document.createTextNode(title || "");
         titleElem.appendChild(titleText);
+
+        const header = document.createElement("div");
+        header.classList.add("config-modal-header");
+        header.appendChild(titleElem);
+
+        if (type) {
+          contentDiv.style.borderTop = `4px solid ${typeStyles[type].color}`;
+        }
 
         // Create the main body container
         const mainContent = document.createElement("div");
@@ -122,10 +457,28 @@ const CurateUi = {
         const actionButtons = document.createElement("div");
         actionButtons.classList.add("action-buttons");
 
+        if (minimizable) {
+          const minimizeActionButton = document.createElement("button");
+          minimizeActionButton.type = "button";
+          minimizeActionButton.classList.add(
+            "config-modal-action-button",
+            "config-modal-minimize-button"
+          );
+          minimizeActionButton.textContent = minimizeButtonText;
+          minimizeActionButton.setAttribute("aria-label", "Minimize modal");
+          minimizeActionButton.addEventListener("click", () => {
+            minimize();
+          });
+          actionButtons.appendChild(minimizeActionButton);
+        }
+
         // Create buttons based on buttonType
         if (buttonType === "okCancel") {
           const okButton = document.createElement("button");
-          okButton.classList.add("config-modal-ok-button");
+          okButton.classList.add(
+            "config-modal-action-button",
+            "config-modal-ok-button"
+          );
           okButton.textContent = "OK";
           okButton.addEventListener("click", () => {
             onOk();
@@ -133,7 +486,10 @@ const CurateUi = {
           });
 
           const cancelButton = document.createElement("button");
-          cancelButton.classList.add("config-modal-cancel-button");
+          cancelButton.classList.add(
+            "config-modal-action-button",
+            "config-modal-cancel-button"
+          );
           cancelButton.textContent = "Cancel";
           cancelButton.addEventListener("click", () => {
             onCancel();
@@ -145,7 +501,10 @@ const CurateUi = {
         } else {
           // Default to 'close' button
           const closeButton = document.createElement("button");
-          closeButton.classList.add("config-modal-close-button");
+          closeButton.classList.add(
+            "config-modal-action-button",
+            "config-modal-close-button"
+          );
           closeButton.textContent = "Close";
           closeButton.addEventListener("click", () => {
             closePopup();
@@ -155,7 +514,7 @@ const CurateUi = {
         }
 
         // Append elements to their respective parents
-        contentDiv.appendChild(titleElem);
+        contentDiv.appendChild(header);
         contentDiv.appendChild(mainContent);
         contentDiv.appendChild(actionButtons);
         container.appendChild(contentDiv);
@@ -170,6 +529,9 @@ const CurateUi = {
 
         // Call afterLoaded callback with the created popup
         afterLoaded(container);
+        if (minimizable && badgeCount > 0) {
+          updateBadge(badgeCount);
+        }
       }
 
       // Define close method for external cleanup
@@ -185,13 +547,20 @@ const CurateUi = {
         }
 
         // Clean up event listeners
-        if (escapePopupHandler) {
+        if (escapePopupHandler && escapeHandlerBound) {
           document.removeEventListener("keyup", escapePopupHandler);
+          escapeHandlerBound = false;
           escapePopupHandler = null;
+        }
+
+        if (dockEntry) {
+          dockEntry.remove();
+          dockEntry = null;
         }
 
         // Reset container reference
         container = null;
+        contentNode = null;
 
         // Call afterClosed callback
         afterClosed();
@@ -214,12 +583,124 @@ const CurateUi = {
         }
       }
 
+      function minimize() {
+        if (!container) {
+          return;
+        }
+
+        container.style.display = "none";
+        if (!dockEntry) {
+          dockEntry = CurateModalDock.attach(
+            modalId,
+            dockLabelText,
+            dockIconClass,
+            restore,
+            dockAriaLabel
+          );
+        } else {
+          CurateModalDock.updateLabel(modalId, dockLabelText, dockAriaLabel);
+          CurateModalDock.updateIcon(modalId, dockIconClass);
+        }
+        dockEntry.setExpanded(false);
+        if (escapePopupHandler && escapeHandlerBound) {
+          document.removeEventListener("keyup", escapePopupHandler);
+          escapeHandlerBound = false;
+        }
+        CurateModalDock.updateBadge(modalId, badgeCount);
+        afterMinimized(container);
+      }
+
+      function restore() {
+        if (!container) {
+          return;
+        }
+
+        container.style.display = "flex";
+        contentNode?.focus();
+        if (escapePopupHandler && !escapeHandlerBound) {
+          document.addEventListener("keyup", escapePopupHandler);
+          escapeHandlerBound = true;
+        }
+        if (dockEntry) {
+          CurateModalDock.detach(modalId);
+          dockEntry = null;
+        }
+        afterRestored(container);
+      }
+
+      function updateBadge(count) {
+        if (!minimizable) {
+          return;
+        }
+
+        const parsedCount = Number(count);
+        if (Number.isFinite(parsedCount)) {
+          badgeCount = parsedCount;
+          CurateModalDock.updateBadge(modalId, badgeCount);
+        }
+      }
+
+      function updateDockLabel(label, ariaLabel) {
+        if (!minimizable) {
+          return;
+        }
+
+        if (label !== undefined) {
+          if (label === null) {
+            dockLabelText = "";
+          } else if (typeof label === "string") {
+            dockLabelText = label.trim();
+          }
+        }
+
+        if (ariaLabel !== undefined) {
+          if (typeof ariaLabel === "string" && ariaLabel.trim()) {
+            dockAriaLabel = ariaLabel.trim();
+          } else {
+            dockAriaLabel = title || "Modal";
+          }
+        } else if (label !== undefined && dockLabelText) {
+          dockAriaLabel = dockLabelText;
+        }
+
+        CurateModalDock.updateLabel(modalId, dockLabelText, dockAriaLabel);
+      }
+
+      function updateDockIcon(iconClass) {
+        if (!minimizable) {
+          return;
+        }
+        if (typeof iconClass !== "string" || !iconClass.trim()) {
+          dockIconClass = DEFAULT_DOCK_ICON_CLASS;
+        } else {
+          dockIconClass = iconClass;
+        }
+        CurateModalDock.updateIcon(modalId, dockIconClass);
+      }
+
       // Return an object with the fire and close methods
       return {
         fire: fire,
         close: close,
+        minimize: minimize,
+        restore: restore,
+        updateBadge: updateBadge,
+        updateMinimizeLabel: updateDockLabel,
+        updateDockIcon: updateDockIcon,
+        id: modalId,
       };
     },
   },
 };
 export default CurateUi;
+
+
+
+
+
+
+
+
+
+
+

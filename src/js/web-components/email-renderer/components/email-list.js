@@ -1,0 +1,721 @@
+import { LitElement, html, css } from 'lit';
+import { styleMap } from 'lit/directives/style-map.js';
+import '@lit-labs/virtualizer';
+import './email-list-item.js';
+import { sortEmails } from '../utils/search.js';
+import {
+  searchIcon,
+  sortIcon,
+  chevronUpIcon,
+  chevronDownIcon,
+  chevronRightIcon,
+  closeIcon
+} from "../../utils/icons.js";
+
+export class EmailList extends LitElement {
+  static properties = {
+    emails: { type: Array },
+    threads: { type: Object },
+    selectedId: { type: String },
+    searchQuery: { type: String, state: true },
+    sortBy: { type: String, state: true },
+    sortDirection: { type: String, state: true },
+    collapsedThreads: { type: Set, state: true }
+  };
+
+  constructor() {
+    super();
+    this.emails = [];
+    this.threads = {};
+    this.selectedId = null;
+    this.searchQuery = '';
+    this.sortBy = 'date';
+    this.sortDirection = 'desc';
+    this.collapsedThreads = new Set();
+    this._searchCache = new Map();
+    this._renderGroupItem = this._renderGroupItem.bind(this);
+    this._groupKey = this._groupKey.bind(this);
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('emails')) {
+      this._rebuildSearchCache();
+    }
+  }
+
+  static styles = css`
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: transparent;
+    }
+
+    .search-bar .icon,
+    .search-clear .icon,
+    .sort-select .icon,
+    .sort-direction-btn .icon,
+    .thread-header .chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-bar .icon svg,
+    .search-clear .icon svg,
+    .sort-select .icon svg,
+    .sort-direction-btn .icon svg,
+    .thread-header .chevron svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .list-header {
+      padding: 16px 18px;
+      background: var(--md-sys-color-surface-1);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .list-summary {
+      margin: 0;
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.4;
+    }
+
+    .summary-highlight {
+      color: var(--md-sys-color-primary);
+      font-weight: 500;
+    }
+
+    .list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-bar {
+      position: relative;
+      flex: 1 0 240px;
+      min-width: 200px;
+      max-width: 100%;
+    }
+
+    .search-bar .icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 40px 10px 44px;
+      border-radius: 999px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      font-size: 13px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+    }
+
+    .search-bar input::placeholder {
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.65;
+    }
+
+    .search-bar input::-webkit-search-decoration,
+    .search-bar input::-webkit-search-cancel-button,
+    .search-bar input::-webkit-search-results-button,
+    .search-bar input::-webkit-search-results-decoration {
+      display: none;
+    }
+
+    .search-bar input::-ms-clear {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .search-clear:hover {
+      background: var(--md-sys-color-surface-variant);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .search-clear:focus-visible {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+    }
+
+    .search-clear .icon {
+      position: static;
+      transform: none;
+      width: 16px;
+      height: 16px;
+      color: currentColor;
+    }
+
+    .sort-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
+    }
+
+    .sort-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .sort-select {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .sort-select select {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 24px 4px 8px;
+      cursor: pointer;
+    }
+
+    .sort-select select:focus {
+      outline: none;
+    }
+
+    .sort-select .icon {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .sort-direction-btn {
+      border: none;
+      background: var(--md-sys-color-surface-variant);
+      color: var(--md-sys-color-on-surface);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .sort-direction-btn:hover {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+
+    .sort-direction-btn .icon {
+      width: 16px;
+      height: 16px;
+      color: currentColor;
+    }
+
+    .list-body {
+      flex: 1;
+      padding: 16px 20px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      background: var(--md-sys-color-surface);
+      min-height: 0;
+    }
+
+    .list-body-scroll {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-virtualizer {
+      height: 100%;
+      width: 100%;
+      display: block;
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+
+    .list-item-wrapper {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+    }
+
+    .list-item-wrapper:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .list-item-wrapper email-list-item,
+    .list-item-wrapper .thread-group {
+      display: block;
+      width: 100%;
+    }
+
+    .no-results {
+      margin-top: 48px;
+      text-align: center;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 14px;
+    }
+
+    .thread-group {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 14px;
+      background: var(--md-sys-color-surface-1);
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .thread-header {
+      width: 100%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      color: inherit;
+      text-align: left;
+      transition: background 0.2s ease;
+      border-radius: 14px;
+    }
+
+    .thread-header:hover {
+      background: var(--md-sys-color-surface-2);
+    }
+
+    .thread-header:focus-visible {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+      border-radius: 12px;
+    }
+
+    .thread-header .chevron {
+      width: 18px;
+      height: 18px;
+      color: var(--md-sys-color-on-surface-variant);
+      flex-shrink: 0;
+    }
+
+    .thread-header-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .thread-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .thread-meta {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      letter-spacing: 0.02em;
+    }
+
+    .thread-count {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .thread-collection {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 10px 12px 10px;
+      background: var(--md-sys-color-surface);
+      border-radius: 0 0 14px 14px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .list-header {
+        padding: 14px 16px;
+      }
+
+      .list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .search-bar {
+        flex: 1 0 auto;
+        min-width: 0;
+        width: 100%;
+      }
+
+      .sort-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .list-body {
+        padding: 12px 16px 20px 16px;
+      }
+    }
+  `;
+
+  _clearSearch() {
+    this.searchQuery = '';
+  }
+
+  _rebuildSearchCache() {
+    this._searchCache = new Map();
+    if (!Array.isArray(this.emails)) {
+      return;
+    }
+    for (const email of this.emails) {
+      this._createSearchEntry(email);
+    }
+  }
+
+  _createSearchEntry(email) {
+    if (!email || !email.id) {
+      return '';
+    }
+
+    const values = [];
+    const pushValue = (value) => {
+      if (typeof value === 'string' && value.length > 0) {
+        values.push(value.toLowerCase());
+      }
+    };
+
+    const pushParticipant = (participant) => {
+      if (!participant) {
+        return;
+      }
+      pushValue(participant.name);
+      pushValue(participant.email);
+    };
+
+    pushValue(email.subject);
+    pushValue(email.snippet);
+    pushParticipant(email.from);
+
+    if (Array.isArray(email.to)) {
+      email.to.forEach(pushParticipant);
+    }
+    if (Array.isArray(email.cc)) {
+      email.cc.forEach(pushParticipant);
+    }
+    if (Array.isArray(email.bcc)) {
+      email.bcc.forEach(pushParticipant);
+    }
+
+    const combined = values.join(' ');
+    this._searchCache.set(email.id, combined);
+    return combined;
+  }
+
+  _filterEmails(emails, query) {
+    if (!Array.isArray(emails) || !query || !query.trim()) {
+      return emails;
+    }
+
+    const needle = query.trim().toLowerCase();
+    const cache = this._searchCache;
+
+    return emails.filter((email) => {
+      if (!email || !email.id) {
+        return false;
+      }
+      const haystack = cache.get(email.id) ?? this._createSearchEntry(email);
+      return haystack.includes(needle);
+    });
+  }
+
+  _pluralize(word, count) {
+    return count === 1 ? word : `${word}s`;
+  }
+
+  _groupEmailsByThread(filteredEmails) {
+    const groups = [];
+    const processed = new Set();
+
+    for (const email of filteredEmails) {
+      if (processed.has(email.id)) {
+        continue;
+      }
+
+      if (email.threadId && this.threads[email.threadId]) {
+        const source = this.threads[email.threadId];
+        const memberIds = Array.isArray(source) ? source : (source?.emailIds || []);
+        const threadEmails = memberIds
+          .map(id => filteredEmails.find(candidate => candidate.id === id))
+          .filter(Boolean);
+
+        if (threadEmails.length > 0) {
+          groups.push({
+            type: 'thread',
+            threadId: email.threadId,
+            emails: threadEmails,
+            collapsed: this.collapsedThreads.has(email.threadId)
+          });
+          threadEmails.forEach(entry => processed.add(entry.id));
+          continue;
+        }
+      }
+
+      groups.push({
+        type: 'single',
+        email
+      });
+      processed.add(email.id);
+    }
+
+    return groups;
+  }
+
+  _groupKey(group) {
+    if (!group) {
+      return '';
+    }
+    if (group.type === 'single') {
+      return `single-${group.email?.id ?? ''}`;
+    }
+    return `thread-${group.threadId ?? ''}`;
+  }
+
+  _renderGroupItem(group) {
+    if (!group) {
+      return html``;
+    }
+
+    if (group.type === 'single') {
+      const email = group.email;
+      return html`
+        <div class="list-item-wrapper">
+          <email-list-item
+            role="listitem"
+            .email=${email}
+            .selected=${email?.id === this.selectedId}
+            .threadCount=${1}
+            .isInThread=${false}
+            .threadIndex=${0}
+            @email-selected=${this._handleSelection}
+          ></email-list-item>
+        </div>
+      `;
+    }
+
+    const visibleEmails = group.collapsed ? [group.emails[0]] : group.emails;
+    const primarySubject = group.emails[0]?.subject || 'Conversation';
+
+    return html`
+      <div class="list-item-wrapper">
+        <div class="thread-group" role="group" aria-label="Thread with ${group.emails.length} messages">
+          <button
+            class="thread-header"
+            type="button"
+            @click=${() => this._toggleThread(group.threadId)}
+            aria-expanded=${String(!group.collapsed)}
+          >
+            <span class="chevron">${group.collapsed ? chevronRightIcon : chevronDownIcon}</span>
+            <div class="thread-header-content">
+              <span class="thread-title">${primarySubject}</span>
+              <span class="thread-meta">${group.emails.length} ${this._pluralize('message', group.emails.length)}</span>
+            </div>
+            <span class="thread-count">${group.emails.length}</span>
+          </button>
+
+          <div class="thread-collection">
+            ${visibleEmails.map((email, index) => html`
+              <email-list-item
+                role="listitem"
+                .email=${email}
+                .selected=${email.id === this.selectedId}
+                .threadCount=${group.emails.length}
+                .isInThread=${true}
+                .threadIndex=${index}
+                .isCollapsedPreview=${group.collapsed}
+                @email-selected=${this._handleSelection}
+              ></email-list-item>
+            `)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  _toggleThread(threadId) {
+    const updated = new Set(this.collapsedThreads);
+    if (updated.has(threadId)) {
+      updated.delete(threadId);
+    } else {
+      updated.add(threadId);
+    }
+    this.collapsedThreads = updated;
+  }
+
+  _handleSelection(event) {
+    this.dispatchEvent(new CustomEvent('email-selected', {
+      detail: event.detail,
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  _toggleSortDirection() {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+  }
+
+  render() {
+    const filtered = this._filterEmails(this.emails, this.searchQuery);
+    const sorted = sortEmails(filtered, this.sortBy, this.sortDirection);
+    const grouped = this._groupEmailsByThread(sorted);
+    const visibleCount = sorted.length;
+    const totalCount = this.emails.length;
+
+    return html`
+      <div class="list-header">
+        <p class="list-summary">
+          Showing ${visibleCount} of ${totalCount} ${this._pluralize('message', totalCount)}
+          ${this.searchQuery ? html`<span class="summary-highlight">- Filtered by "${this.searchQuery}"</span>` : ''}
+        </p>
+        <div class="list-toolbar">
+          <div class="search-bar">
+            <span class="icon">${searchIcon}</span>
+            <input
+              type="search"
+              placeholder="Search senders, subjects, or content"
+              .value=${this.searchQuery}
+              @input=${(event) => this.searchQuery = event.target.value}
+            />
+            ${this.searchQuery ? html`
+              <button class="search-clear" type="button" @click=${this._clearSearch} aria-label="Clear search">
+                <span class="icon">${closeIcon}</span>
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="sort-controls">
+            <span class="sort-label">Sort</span>
+            <div class="sort-select">
+              <select @change=${(event) => this.sortBy = event.target.value} .value=${this.sortBy}>
+                <option value="date">Date</option>
+                <option value="from">From</option>
+                <option value="subject">Subject</option>
+              </select>
+              <span class="icon">${sortIcon}</span>
+            </div>
+            <button
+              class="sort-direction-btn"
+              type="button"
+              @click=${this._toggleSortDirection}
+              title="${this.sortDirection === 'asc' ? 'Ascending' : 'Descending'}"
+              aria-label="Toggle sort direction"
+            >
+              <span class="icon">
+                ${this.sortDirection === 'asc' ? chevronUpIcon : chevronDownIcon}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-body">
+        <div class="list-body-scroll">
+          ${grouped.length === 0 ? html`
+            <div class="no-results">
+              ${this.searchQuery ? 'No emails match your search' : 'There are no emails to display yet.'}
+            </div>
+          ` : html`
+            <lit-virtualizer
+              class="list-virtualizer"
+              scroller
+              style=${styleMap({ height: '100%' })}
+              role="list"
+              layout="vertical"
+              .items=${grouped}
+              .renderItem=${this._renderGroupItem}
+              .keyFunction=${this._groupKey}
+            ></lit-virtualizer>
+          `}
+        </div>
+      </div>
+    `;
+  }
+}
+
+customElements.define('email-list', EmailList);
+
+
+
+
+
+
