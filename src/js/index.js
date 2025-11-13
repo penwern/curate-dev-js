@@ -30,11 +30,15 @@ import "../js/core/OAIHarvestClient.js";
 import "../js/core/publicAccessModifier.js";
 import "../js/core/tourModifier.js";
 import "../js/core/UploadInterceptor/index.js";
+import "../js/core/UploadLimits/UploadLimiter.js";
 import "../js/core/PassOaiToChildren.js";
 import "../js/core/consoleModifier.js";
 import "../js/core/messageModifier.js";
+//fixes
 import "../js/core/fixes/FixInfoPanelScroll.js";
 import "./core/Events/index.js";
+import "../js/core/fixes/accessibility/index.js";
+
 //import './deprecated/UploadChecksumGenerator.js';
 import "../js/core/PermissionEnforcers.js";
 import "../js/external/BundledLibraries.js";

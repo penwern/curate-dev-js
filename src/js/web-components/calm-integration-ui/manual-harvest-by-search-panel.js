@@ -32,6 +32,10 @@ class SearchResultsTable extends LitElement {
       padding: 8px 16px;
     }
 
+    .table-header > div:first-child {
+      grid-column: 1 / 2;
+    }
+
     .table-header {
       background: var(--md-sys-color-surface-1);
       font-weight: 500;
@@ -168,12 +172,7 @@ class SearchResultsTable extends LitElement {
     return html`
       <div class="search-results-table">
         <div class="table-header">
-          <md-checkbox
-            aria-label="Select all results"
-            ?checked=${this.areAllSelected}
-            ?indeterminate=${this.areSomeSelected}
-            @change=${this._toggleAll}
-          ></md-checkbox>
+          <div></div>
           <div>RECORD</div>
           <div>ID</div>
           <div>MODIFIED</div>
