@@ -1,7 +1,7 @@
 ﻿import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { formatEmailDate } from '../utils/dateFormat.js';
-import { attachmentIcon, forumIcon } from "../../utils/icons.js";
+import { attachmentIcon, forumIcon, folderIcon } from "../../utils/icons.js";
 
 export class EmailListItem extends LitElement {
   static properties = {
@@ -154,6 +154,11 @@ export class EmailListItem extends LitElement {
       height: 14px !important;
       fill: currentColor;
     }
+
+    .meta-pill.folder {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+    }
   `;
 
   _handleClick() {
@@ -189,6 +194,7 @@ export class EmailListItem extends LitElement {
 
     const sender = this.email.from?.name || this.email.from?.email || 'Unknown sender';
     const subject = this.email.subject || '(No subject)';
+    const folderLabel = this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || '';
 
     return html`
       <article
@@ -216,6 +222,12 @@ export class EmailListItem extends LitElement {
           ` : ''}
           ${this.email.hasAttachments ? html`
             <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span>
+          ` : ''}
+          ${folderLabel ? html`
+            <span class="meta-pill folder">
+              ${folderIcon}
+              <span>${folderLabel}</span>
+            </span>
           ` : ''}
         </div>
       </article>

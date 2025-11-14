@@ -8,12 +8,100 @@ export const mockManifest = {
   processedDate: "2024-03-15T10:30:00Z",
   totalEmails: 15,
   version: "1.0",
+  pstFolders: {
+    "Inbox": {
+      name: "Inbox",
+      path: "Inbox",
+      emailIds: []
+    },
+    "Inbox/Newsletters": {
+      name: "Newsletters",
+      path: "Inbox/Newsletters",
+      emailIds: ["006", "013"]
+    },
+    "Inbox/DevOps": {
+      name: "DevOps Alerts",
+      path: "Inbox/DevOps",
+      emailIds: ["008"]
+    },
+    "Calendar": {
+      name: "Calendar",
+      path: "Calendar",
+      emailIds: ["010"]
+    },
+    "Support": {
+      name: "Support",
+      path: "Support",
+      emailIds: []
+    },
+    "Support/Tickets": {
+      name: "Tickets",
+      path: "Support/Tickets",
+      emailIds: ["011"]
+    },
+    "Projects": {
+      name: "Projects",
+      path: "Projects",
+      emailIds: []
+    },
+    "Projects/Finance": {
+      name: "Finance Review",
+      path: "Projects/Finance",
+      emailIds: ["001", "002", "003"]
+    },
+    "Projects/Design": {
+      name: "Design Feedback",
+      path: "Projects/Design",
+      emailIds: ["004", "005"]
+    },
+    "Sales": {
+      name: "Sales",
+      path: "Sales",
+      emailIds: []
+    },
+    "Sales/Reports": {
+      name: "Reports",
+      path: "Sales/Reports",
+      emailIds: ["012"]
+    },
+    "Company Updates": {
+      name: "Company Updates",
+      path: "Company Updates",
+      emailIds: []
+    },
+    "Company Updates/HR": {
+      name: "HR",
+      path: "Company Updates/HR",
+      emailIds: ["007"]
+    },
+    "Company Updates/Security": {
+      name: "Security",
+      path: "Company Updates/Security",
+      emailIds: ["009"]
+    },
+    "Company Updates/IT": {
+      name: "IT",
+      path: "Company Updates/IT",
+      emailIds: ["014"]
+    },
+    "Vendors": {
+      name: "Vendors",
+      path: "Vendors",
+      emailIds: []
+    },
+    "Vendors/Procurement": {
+      name: "Procurement",
+      path: "Vendors/Procurement",
+      emailIds: ["015"]
+    }
+  },
 
   emails: [
     // Thread 1: Budget discussion (3 emails)
     {
       id: "001",
       folder: "001",
+      pstFolder: "Projects/Finance",
       emlPath: "001/message.eml",
       from: { name: "Alice Johnson", email: "alice@company.com" },
       to: [{ name: "Bob Smith", email: "bob@company.com" }],
@@ -43,6 +131,7 @@ export const mockManifest = {
     {
       id: "002",
       folder: "002",
+      pstFolder: "Projects/Finance",
       emlPath: "002/message.eml",
       from: { name: "Bob Smith", email: "bob@company.com" },
       to: [{ name: "Alice Johnson", email: "alice@company.com" }],
@@ -63,6 +152,7 @@ export const mockManifest = {
     {
       id: "003",
       folder: "003",
+      pstFolder: "Projects/Finance",
       emlPath: "003/message.eml",
       from: { name: "Alice Johnson", email: "alice@company.com" },
       to: [{ name: "Bob Smith", email: "bob@company.com" }],
@@ -94,6 +184,7 @@ export const mockManifest = {
     {
       id: "004",
       folder: "004",
+      pstFolder: "Projects/Design",
       emlPath: "004/message.eml",
       from: { name: "Design Team", email: "design@company.com" },
       to: [{ name: "Product Team", email: "product@company.com" }],
@@ -131,6 +222,7 @@ export const mockManifest = {
     {
       id: "005",
       folder: "005",
+      pstFolder: "Projects/Design",
       emlPath: "005/message.eml",
       from: { name: "Product Team", email: "product@company.com" },
       to: [{ name: "Design Team", email: "design@company.com" }],
@@ -153,6 +245,7 @@ export const mockManifest = {
     {
       id: "006",
       folder: "006",
+      pstFolder: "Inbox/Newsletters",
       emlPath: "006/message.eml",
       from: { name: "Newsletter Service", email: "news@example.com" },
       to: [{ name: "You", email: "user@company.com" }],
@@ -173,6 +266,7 @@ export const mockManifest = {
     {
       id: "007",
       folder: "007",
+      pstFolder: "Company Updates/HR",
       emlPath: "007/message.eml",
       from: { name: "HR Department", email: "hr@company.com" },
       to: [
@@ -208,6 +302,7 @@ export const mockManifest = {
     {
       id: "008",
       folder: "008",
+      pstFolder: "Inbox/DevOps",
       emlPath: "008/message.eml",
       from: { name: "GitHub", email: "noreply@github.com" },
       to: [{ name: "Developer", email: "dev@company.com" }],
@@ -228,6 +323,7 @@ export const mockManifest = {
     {
       id: "009",
       folder: "009",
+      pstFolder: "Company Updates/Security",
       emlPath: "009/message.eml",
       from: { name: "Security Team", email: "security@company.com" },
       to: [{ name: "All Employees", email: "everyone@company.com" }],
@@ -248,6 +344,7 @@ export const mockManifest = {
     {
       id: "010",
       folder: "010",
+      pstFolder: "Calendar",
       emlPath: "010/message.eml",
       from: { name: "Meeting Scheduler", email: "calendar@company.com" },
       to: [{ name: "Alice Johnson", email: "alice@company.com" }],
@@ -277,6 +374,7 @@ export const mockManifest = {
     {
       id: "011",
       folder: "011",
+      pstFolder: "Support/Tickets",
       emlPath: "011/message.eml",
       from: { name: "Support Ticket", email: "support@company.com" },
       to: [{ name: "Customer", email: "customer@example.com" }],
@@ -297,6 +395,7 @@ export const mockManifest = {
     {
       id: "012",
       folder: "012",
+      pstFolder: "Sales/Reports",
       emlPath: "012/message.eml",
       from: { name: "Sales Team", email: "sales@company.com" },
       to: [{ name: "Leadership", email: "leadership@company.com" }],
@@ -334,6 +433,7 @@ export const mockManifest = {
     {
       id: "013",
       folder: "013",
+      pstFolder: "Inbox/Newsletters",
       emlPath: "013/message.eml",
       from: { name: "Marketing Automation", email: "marketing@service.com" },
       to: [{ name: "Subscriber", email: "user@company.com" }],
@@ -354,6 +454,7 @@ export const mockManifest = {
     {
       id: "014",
       folder: "014",
+      pstFolder: "Company Updates/IT",
       emlPath: "014/message.eml",
       from: { name: "IT Department", email: "it@company.com" },
       to: [{ name: "All Staff", email: "staff@company.com" }],
@@ -374,6 +475,7 @@ export const mockManifest = {
     {
       id: "015",
       folder: "015",
+      pstFolder: "Vendors/Procurement",
       emlPath: "015/message.eml",
       from: { name: "Carlos Garcia", email: "carlos@vendor.com" },
       to: [{ name: "Procurement", email: "procurement@company.com" }],

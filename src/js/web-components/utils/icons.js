@@ -81,6 +81,7 @@ import {
   mdiDotsVertical,
   mdiImageOutline,
   mdiForum,
+  mdiFolderOutline,
 } from "@mdi/js";
 
 export const emailIcon = icon(mdiEmail);
@@ -95,3 +96,4 @@ export const arrowLeftIcon = icon(mdiArrowLeft);
 export const dotsVerticalIcon = icon(mdiDotsVertical);
 export const imageIcon = icon(mdiImageOutline);
 export const forumIcon = icon(mdiForum);
+export const folderIcon = icon(mdiFolderOutline);
