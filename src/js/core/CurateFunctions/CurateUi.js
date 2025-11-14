@@ -1,4 +1,9 @@
 ﻿const DEFAULT_DOCK_ICON_CLASS = "mdi-window-restore";
+const MODAL_MOTION_CLASS = "curate-modal-motion";
+const MODAL_MOTION_PANEL_CLASS = "curate-modal-motion-panel";
+const MODAL_MOTION_ACTIVE_CLASS = "curate-modal-motion-active";
+const MODAL_MOTION_EXITING_CLASS = "curate-modal-motion-exit";
+const MODAL_VIEW_TRANSITION_PANEL = "curate-modal-panel";
 const MODAL_STYLE_ID = "curate-modal-enhancements";
 const MODAL_STYLE_CONTENT = `
 .config-modal-header {
@@ -93,6 +98,95 @@ const MODAL_STYLE_CONTENT = `
   font-size: 0.75rem;
   padding: 0 0.35em;
   font-weight: 600;
+}
+.config-modal-container.${MODAL_MOTION_CLASS} {
+  opacity: 0;
+  background-color: rgba(12, 15, 28, 0.35);
+  backdrop-filter: blur(0px) saturate(110%);
+  -webkit-backdrop-filter: blur(0px) saturate(110%);
+  transition:
+    opacity 220ms ease,
+    background-color 320ms ease,
+    backdrop-filter 320ms ease,
+    -webkit-backdrop-filter 320ms ease;
+}
+.config-modal-container.${MODAL_MOTION_CLASS}.${MODAL_MOTION_ACTIVE_CLASS} {
+  opacity: 1;
+  background-color: rgba(12, 15, 28, 0.6);
+  backdrop-filter: blur(8px) saturate(145%);
+  -webkit-backdrop-filter: blur(8px) saturate(145%);
+}
+.config-modal-container.${MODAL_MOTION_CLASS}.${MODAL_MOTION_EXITING_CLASS} {
+  opacity: 0;
+  background-color: rgba(12, 15, 28, 0.25);
+  backdrop-filter: blur(0px) saturate(110%);
+  -webkit-backdrop-filter: blur(0px) saturate(110%);
+}
+.config-modal-content.${MODAL_MOTION_PANEL_CLASS} {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.975);
+  filter: saturate(92%);
+  box-shadow: 0px 12px 34px rgba(9, 9, 16, 0.22),
+    0px 5px 18px rgba(9, 9, 16, 0.16);
+  isolation: isolate;
+  will-change: transform, opacity, filter;
+  view-transition-name: ${MODAL_VIEW_TRANSITION_PANEL};
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    filter 260ms ease,
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.config-modal-content.${MODAL_MOTION_PANEL_CLASS}.${MODAL_MOTION_ACTIVE_CLASS} {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: saturate(100%);
+  box-shadow: 0px 24px 65px rgba(9, 9, 16, 0.35),
+    0px 16px 32px rgba(9, 9, 16, 0.3);
+}
+.config-modal-content.${MODAL_MOTION_PANEL_CLASS}.${MODAL_MOTION_EXITING_CLASS} {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0) scale(0.985);
+  filter: saturate(86%);
+  box-shadow: 0px 10px 28px rgba(9, 9, 16, 0.18),
+    0px 4px 16px rgba(9, 9, 16, 0.16);
+}
+::view-transition-old(${MODAL_VIEW_TRANSITION_PANEL}) {
+  animation: curate-modal-panel-out 260ms cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+::view-transition-new(${MODAL_VIEW_TRANSITION_PANEL}) {
+  animation: curate-modal-panel-in 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes curate-modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.95);
+    filter: saturate(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: saturate(1);
+  }
+}
+@keyframes curate-modal-panel-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: saturate(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+    filter: saturate(0.85);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .config-modal-container.${MODAL_MOTION_CLASS},
+  .config-modal-content.${MODAL_MOTION_PANEL_CLASS} {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 `;
 
@@ -374,6 +468,29 @@ const CurateUi = {
       let dockEntry = null;
       let contentNode = null;
       let escapeHandlerBound = false;
+      let isClosing = false;
+      const prefersReducedMotion = (() => {
+        if (
+          typeof window === "undefined" ||
+          typeof window.matchMedia !== "function"
+        ) {
+          return false;
+        }
+        try {
+          return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        } catch (error) {
+          return false;
+        }
+      })();
+      const canRunMotion = !prefersReducedMotion;
+      const nextFrame =
+        typeof window !== "undefined" &&
+        typeof window.requestAnimationFrame === "function"
+          ? window.requestAnimationFrame.bind(window)
+          : (cb) => setTimeout(cb, 16);
+      const supportsViewTransitions =
+        typeof document !== "undefined" &&
+        typeof document.startViewTransition === "function";
 
       // Define fire method
       function fire() {
@@ -388,6 +505,7 @@ const CurateUi = {
         // Create the container element
         container = document.createElement("div");
         container.classList.add("config-modal-container");
+        container.classList.add(MODAL_MOTION_CLASS);
         container.style.display = "flex";
 
         // Add event listener to close the popup when the user clicks outside of it
@@ -411,6 +529,7 @@ const CurateUi = {
         // Create the content element
         const contentDiv = document.createElement("div");
         contentDiv.classList.add("config-modal-content");
+        contentDiv.classList.add(MODAL_MOTION_PANEL_CLASS);
         contentDiv.setAttribute("tabindex", "-1");
         contentNode = contentDiv;
 
@@ -521,6 +640,7 @@ const CurateUi = {
 
         // Append the container to the document body
         document.body.appendChild(container);
+        playEnterMotion();
 
         // Add keystroke event listener
         container.addEventListener("keyup", function (e) {
@@ -542,28 +662,49 @@ const CurateUi = {
       }
 
       function closePopup() {
-        if (container && container.parentNode) {
-          container.remove();
+        if (!container || isClosing) {
+          return;
         }
 
-        // Clean up event listeners
-        if (escapePopupHandler && escapeHandlerBound) {
-          document.removeEventListener("keyup", escapePopupHandler);
-          escapeHandlerBound = false;
-          escapePopupHandler = null;
+        isClosing = true;
+        const currentContainer = container;
+        const currentContent = contentNode;
+
+        const finalizeClose = () => {
+          if (currentContainer && currentContainer.parentNode) {
+            currentContainer.remove();
+          }
+
+          if (escapePopupHandler && escapeHandlerBound) {
+            document.removeEventListener("keyup", escapePopupHandler);
+            escapeHandlerBound = false;
+            escapePopupHandler = null;
+          }
+
+          if (dockEntry) {
+            dockEntry.remove();
+            dockEntry = null;
+          }
+
+          container = null;
+          contentNode = null;
+          isClosing = false;
+
+          afterClosed();
+        };
+
+        const shouldAnimateClose =
+          canRunMotion &&
+          currentContainer?.isConnected &&
+          currentContainer.style.display !== "none" &&
+          currentContainer.classList.contains(MODAL_MOTION_CLASS);
+
+        if (shouldAnimateClose) {
+          animateCloseTransition(currentContainer, currentContent, finalizeClose);
+          return;
         }
 
-        if (dockEntry) {
-          dockEntry.remove();
-          dockEntry = null;
-        }
-
-        // Reset container reference
-        container = null;
-        contentNode = null;
-
-        // Call afterClosed callback
-        afterClosed();
+        finalizeClose();
       }
 
       function clickAway(e, containerElement) {
@@ -616,6 +757,7 @@ const CurateUi = {
         }
 
         container.style.display = "flex";
+        playEnterMotion();
         contentNode?.focus();
         if (escapePopupHandler && !escapeHandlerBound) {
           document.addEventListener("keyup", escapePopupHandler);
@@ -676,6 +818,142 @@ const CurateUi = {
           dockIconClass = iconClass;
         }
         CurateModalDock.updateIcon(modalId, dockIconClass);
+      }
+
+      function runViewTransition(mutator) {
+        if (!supportsViewTransitions) {
+          mutator();
+          return null;
+        }
+        try {
+          const transition = document.startViewTransition(() => {
+            mutator();
+          });
+          transition.finished.catch(() => {});
+          return transition;
+        } catch (error) {
+          mutator();
+          return null;
+        }
+      }
+
+      function forceMotionRestState(node) {
+        if (!node) {
+          return;
+        }
+        try {
+          void node.offsetWidth;
+        } catch (error) {
+          /* no-op */
+        }
+      }
+
+      function playEnterMotion() {
+        if (!container) {
+          return;
+        }
+
+        container.classList.add(MODAL_MOTION_CLASS);
+        container.classList.remove(MODAL_MOTION_EXITING_CLASS);
+        if (contentNode) {
+          contentNode.classList.add(MODAL_MOTION_PANEL_CLASS);
+          contentNode.classList.remove(MODAL_MOTION_EXITING_CLASS);
+        }
+
+        if (!canRunMotion) {
+          container.classList.add(MODAL_MOTION_ACTIVE_CLASS);
+          contentNode?.classList.add(MODAL_MOTION_ACTIVE_CLASS);
+          return;
+        }
+
+        container.classList.remove(MODAL_MOTION_ACTIVE_CLASS);
+        contentNode?.classList.remove(MODAL_MOTION_ACTIVE_CLASS);
+        forceMotionRestState(container);
+        forceMotionRestState(contentNode);
+
+        nextFrame(() => {
+          if (!container) {
+            return;
+          }
+          runViewTransition(() => {
+            container.classList.add(MODAL_MOTION_ACTIVE_CLASS);
+            contentNode?.classList.add(MODAL_MOTION_ACTIVE_CLASS);
+          });
+        });
+      }
+
+      function animateCloseTransition(containerElement, contentElement, done) {
+        if (!containerElement) {
+          done();
+          return;
+        }
+
+        const applyExitState = () => {
+          containerElement.classList.remove(MODAL_MOTION_ACTIVE_CLASS);
+          contentElement?.classList.remove(MODAL_MOTION_ACTIVE_CLASS);
+          containerElement.classList.add(MODAL_MOTION_EXITING_CLASS);
+          contentElement?.classList.add(MODAL_MOTION_EXITING_CLASS);
+        };
+
+        applyExitState();
+
+        waitForMotionEnd(
+          [contentElement, containerElement],
+          () => {
+            containerElement.classList.remove(MODAL_MOTION_EXITING_CLASS);
+            contentElement?.classList.remove(MODAL_MOTION_EXITING_CLASS);
+            done();
+          },
+          500
+        );
+      }
+
+      function waitForMotionEnd(elements, callback, fallbackMs = 450) {
+        const validElements = elements.filter(
+          (el) => el && typeof el.addEventListener === "function"
+        );
+
+        if (!validElements.length) {
+          callback();
+          return;
+        }
+
+        let finished = false;
+        const completed = new Set();
+
+        let timerId = null;
+
+        const cleanup = () => {
+          if (finished) {
+            return;
+          }
+          finished = true;
+          validElements.forEach((el) => {
+            el.removeEventListener("transitionend", onEnd);
+            el.removeEventListener("animationend", onEnd);
+          });
+          if (timerId !== null) {
+            clearTimeout(timerId);
+          }
+          callback();
+        };
+
+        const onEnd = (event) => {
+          if (finished) {
+            return;
+          }
+          completed.add(event.currentTarget);
+          if (completed.size === validElements.length) {
+            cleanup();
+          }
+        };
+
+        timerId = setTimeout(cleanup, fallbackMs);
+
+        validElements.forEach((el) => {
+          el.addEventListener("transitionend", onEnd);
+          el.addEventListener("animationend", onEnd);
+        });
       }
 
       // Return an object with the fire and close methods
