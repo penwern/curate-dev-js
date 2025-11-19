@@ -1,6 +1,6 @@
 ﻿import { LitElement, html, css } from 'lit';
 import { formatFullDate } from '../utils/dateFormat.js';
-import { chevronUpIcon, chevronDownIcon } from "../../utils/icons.js";
+import { chevronUpIcon, chevronDownIcon, folderIcon } from "../../utils/icons.js";
 
 export class EmailHeader extends LitElement {
   static properties = {
@@ -126,6 +126,24 @@ export class EmailHeader extends LitElement {
       overflow-wrap: anywhere;
     }
 
+    .folder-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .folder-chip svg {
+      width: 18px !important;
+      height: 18px !important;
+      fill: currentColor;
+    }
+
     .code {
       font-family: 'Roboto Mono', 'Courier New', monospace;
       font-size: 12px;
@@ -199,10 +217,19 @@ export class EmailHeader extends LitElement {
     `;
   }
 
+  _getFolderLabel() {
+    if (!this.email) {
+      return null;
+    }
+    return this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || null;
+  }
+
   render() {
     if (!this.email) {
       return html``;
     }
+
+    const folderLabel = this._getFolderLabel();
 
     return html`
       <h1 class="email-subject">${this.email.subject || '(No Subject)'}</h1>
@@ -232,6 +259,16 @@ export class EmailHeader extends LitElement {
         ${this.email.replyTo ? html`
           <span class="label">Reply-To</span>
           <span class="value">${this._formatRecipient(this.email.replyTo)}</span>
+        ` : ''}
+
+        ${folderLabel ? html`
+          <span class="label">Folder</span>
+          <span class="value">
+            <span class="folder-chip" title=${folderLabel}>
+              ${folderIcon}
+              <span>${folderLabel}</span>
+            </span>
+          </span>
         ` : ''}
 
         <span class="label">Message ID</span>

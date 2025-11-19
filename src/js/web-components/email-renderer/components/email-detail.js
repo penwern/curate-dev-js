@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import './email-header.js';
 import './email-body.js';
 import './attachment-list.js';
-import { emailOutlineIcon, chevronDownIcon, chevronRightIcon, attachmentIcon } from "../../utils/icons.js";
+import { emailOutlineIcon, chevronDownIcon, chevronRightIcon, attachmentIcon, folderIcon } from "../../utils/icons.js";
 import { formatEmailDate } from '../utils/dateFormat.js';
 
 export class EmailDetail extends LitElement {
@@ -258,6 +258,24 @@ export class EmailDetail extends LitElement {
       gap: 8px;
     }
 
+    .thread-folder-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .thread-folder-pill svg {
+      width: 16px !important;
+      height: 16px !important;
+      fill: currentColor;
+    }
+
     .thread-chip {
       display: inline-flex;
       align-items: center;
@@ -356,6 +374,21 @@ export class EmailDetail extends LitElement {
     if (email.replyTo) {
       const replyRecipients = Array.isArray(email.replyTo) ? email.replyTo : [email.replyTo];
       addRow('Reply', replyRecipients);
+    }
+
+    if (email.pstFolder || email.pstFolderDisplay) {
+      const folderLabel = email.pstFolderBreadcrumb || email.pstFolderDisplay || email.pstFolder;
+      rows.push(html`
+        <div class="thread-meta-row">
+          <span class="thread-meta-label">Folder</span>
+          <div class="thread-meta-chips">
+            <span class="thread-folder-pill">
+              ${folderIcon}
+              <span>${folderLabel}</span>
+            </span>
+          </div>
+        </div>
+      `);
     }
 
     return rows.length > 0

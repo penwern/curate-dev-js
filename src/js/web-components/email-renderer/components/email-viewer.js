@@ -11,6 +11,7 @@ export class EmailViewer extends LitElement {
   static properties = {
     emails: { type: Array, state: true },
     threads: { type: Object, state: true },
+    folderTree: { type: Array, state: true },
     selectedEmailId: { type: String, state: true },
     selectedEmail: { type: Object, state: true },
     emailBody: { type: Object, state: true },
@@ -25,13 +26,15 @@ export class EmailViewer extends LitElement {
     archiveWorkspace: { type: String, attribute: 'archive-workspace' },
     manifestError: { type: Object, state: true },
     messageLoading: { type: Boolean, state: true },
-    listCollapsed: { type: Boolean, state: true }
+    listCollapsed: { type: Boolean, state: true },
+    selectedFolderPath: { type: String, state: true }
   };
 
   constructor() {
     super();
     this.emails = [];
     this.threads = {};
+    this.folderTree = [];
     this.selectedEmailId = null;
     this.selectedEmail = null;
     this.emailBody = null;
@@ -47,6 +50,7 @@ export class EmailViewer extends LitElement {
     this.manifestError = null;
     this.messageLoading = false;
     this.listCollapsed = false;
+    this.selectedFolderPath = null;
     this._initialArchivePreference = this._detectArchivePreference();
     this._currentArchivePath = undefined;
     this._currentArchiveMode = undefined;
@@ -59,6 +63,7 @@ export class EmailViewer extends LitElement {
     this._handlePointerMove = this._handlePointerMove.bind(this);
     this._stopResize = this._stopResize.bind(this);
     this._handleResizeObserverError = this._handleResizeObserverError.bind(this);
+    this._pstFolderIndex = new Map();
   }
 
   connectedCallback() {
@@ -168,6 +173,10 @@ export class EmailViewer extends LitElement {
       backdrop-filter: blur(22px);
     }
 
+    .pane.allow-overflow {
+      overflow: visible;
+    }
+
     .pane > email-list,
     .pane > email-detail {
       flex: 1;
@@ -191,6 +200,12 @@ export class EmailViewer extends LitElement {
       min-width: 280px;
       max-width: 520px;
       transition: flex-basis 0.2s ease;
+    }
+
+    .email-list-pane.allow-overflow {
+      overflow: visible;
+      position: relative;
+      z-index: 5;
     }
 
     .email-list-pane.is-collapsed {
@@ -606,11 +621,14 @@ export class EmailViewer extends LitElement {
     this.manifestError = null;
     this.emails = [];
     this.threads = {};
+    this.folderTree = [];
     this.selectedEmailId = null;
     this.selectedEmail = null;
     this.emailBody = null;
     this.threadEmails = null;
     this.threadBodies = null;
+    this.selectedFolderPath = null;
+    this._pstFolderIndex = new Map();
 
     try {
       await this._loadManifest();
@@ -716,8 +734,145 @@ export class EmailViewer extends LitElement {
 
   async _loadManifest() {
     const manifest = await getManifest();
-    this.emails = Array.isArray(manifest.emails) ? manifest.emails : [];
+    const folderStructure = this._buildPstFolderStructure(manifest?.pstFolders || {});
+    this._pstFolderIndex = folderStructure.index;
+    this.folderTree = folderStructure.tree;
+
+    this.emails = Array.isArray(manifest.emails)
+      ? this._decorateEmails(manifest.emails, this._pstFolderIndex)
+      : [];
     this.threads = manifest.threads ?? {};
+    this.selectedFolderPath = null;
+  }
+
+  _buildPstFolderStructure(rawFolders) {
+    if (!rawFolders || typeof rawFolders !== 'object') {
+      return { tree: [], index: new Map() };
+    }
+
+    const folderEntries = Object.entries(rawFolders).filter(([key, value]) => value && (value.path || key));
+    if (folderEntries.length === 0) {
+      return { tree: [], index: new Map() };
+    }
+
+    const nodeMap = new Map();
+    const index = new Map();
+
+    const ensureNode = (fullPath, preferredName = null) => {
+      if (!fullPath) {
+        return null;
+      }
+      const path = fullPath.replace(/^\/+|\/+$/g, '');
+      if (!path) {
+        return null;
+      }
+
+      if (nodeMap.has(path)) {
+        const existing = nodeMap.get(path);
+        if (preferredName && !existing._hasExplicitName) {
+          existing.name = preferredName;
+          existing._hasExplicitName = true;
+        }
+        return existing;
+      }
+
+      const segments = path.split('/').filter(Boolean);
+      const name = preferredName || segments[segments.length - 1] || path;
+      const parentPath = segments.length > 1 ? segments.slice(0, -1).join('/') : null;
+
+      const node = {
+        path,
+        name,
+        parentPath,
+        children: [],
+        emailIds: [],
+        _selfEmailIds: [],
+        breadcrumbs: segments
+      };
+      nodeMap.set(path, node);
+      index.set(path, {
+        path,
+        name,
+        breadcrumbs: segments
+      });
+
+      if (parentPath) {
+        const parent = ensureNode(parentPath);
+        if (parent && !parent.children.find((child) => child.path === path)) {
+          parent.children = [...parent.children, node];
+        }
+      }
+
+      return node;
+    };
+
+    for (const [key, folder] of folderEntries) {
+      const path = folder.path || key;
+      const node = ensureNode(path, folder.name);
+      if (!node) {
+        continue;
+      }
+      node._selfEmailIds = Array.isArray(folder.emailIds)
+        ? folder.emailIds.filter(Boolean)
+        : [];
+      node._hasExplicitName = Boolean(folder.name);
+      index.set(node.path, {
+        path: node.path,
+        name: folder.name || node.name,
+        breadcrumbs: node.breadcrumbs
+      });
+    }
+
+    const aggregate = (node) => {
+      const combined = new Set(node._selfEmailIds);
+      node.children = node.children
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+        .map((child) => {
+          const childSet = aggregate(child);
+          child.emailIds = Array.from(childSet);
+          child.emailCount = child.emailIds.length;
+          childSet.forEach((id) => combined.add(id));
+          return child;
+        });
+      node.emailIds = Array.from(combined);
+      node.emailCount = node.emailIds.length;
+      return combined;
+    };
+
+    const roots = [...nodeMap.values()].filter((node) => !node.parentPath);
+    roots.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    roots.forEach((root) => {
+      const aggregateSet = aggregate(root);
+      root.emailIds = Array.from(aggregateSet);
+      root.emailCount = aggregateSet.size;
+    });
+
+    return { tree: roots, index };
+  }
+
+  _decorateEmails(emails, folderIndex) {
+    if (!Array.isArray(emails)) {
+      return [];
+    }
+    const map = folderIndex ?? new Map();
+    return emails.map((email) => {
+      if (!email || !email.pstFolder) {
+        return email;
+      }
+      const folderMeta = map.get(email.pstFolder);
+      const breadcrumbs = folderMeta?.breadcrumbs?.length
+        ? folderMeta.breadcrumbs
+        : email.pstFolder.split('/').filter(Boolean);
+      const displayLabel = folderMeta?.name || breadcrumbs[breadcrumbs.length - 1] || email.pstFolder;
+      const breadcrumbLabel = breadcrumbs.length > 1
+        ? breadcrumbs.join(' › ')
+        : displayLabel;
+      return {
+        ...email,
+        pstFolderDisplay: displayLabel,
+        pstFolderBreadcrumb: breadcrumbLabel
+      };
+    });
   }
 
   _getThreadForEmail(emailId) {
@@ -787,6 +942,32 @@ export class EmailViewer extends LitElement {
 
     if (this.isMobile) {
       this.mobileView = 'detail';
+    }
+  }
+
+  _handleFolderSelected(event) {
+    const detail = event?.detail || {};
+    const nextPath = detail.folderPath || null;
+    this.selectedFolderPath = nextPath;
+
+    if (!nextPath) {
+      return;
+    }
+
+    const allowedIds = Array.isArray(detail.emailIds)
+      ? new Set(detail.emailIds)
+      : null;
+
+    if (this.selectedEmailId && allowedIds && !allowedIds.has(this.selectedEmailId)) {
+      this.selectedEmailId = null;
+      this.selectedEmail = null;
+      this.emailBody = null;
+      this.threadEmails = null;
+      this.threadBodies = null;
+      this.messageLoading = false;
+      if (this.isMobile) {
+        this.mobileView = 'list';
+      }
     }
   }
 
@@ -885,7 +1066,10 @@ export class EmailViewer extends LitElement {
                     .emails=${this.emails}
                     .threads=${this.threads}
                     .selectedId=${this.selectedEmailId}
+                    .folderTree=${this.folderTree}
+                    .selectedFolderPath=${this.selectedFolderPath}
                     @email-selected=${this._handleEmailSelected}
+                    @folder-selected=${this._handleFolderSelected}
                   ></email-list>
                 </div>
               `}

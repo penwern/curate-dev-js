@@ -1,5 +1,6 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
+import { classMap } from 'lit/directives/class-map.js';
 import '@lit-labs/virtualizer';
 import './email-list-item.js';
 import { sortEmails } from '../utils/search.js';
@@ -9,7 +10,8 @@ import {
   chevronUpIcon,
   chevronDownIcon,
   chevronRightIcon,
-  closeIcon
+  closeIcon,
+  folderIcon
 } from "../../utils/icons.js";
 
 export class EmailList extends LitElement {
@@ -17,10 +19,14 @@ export class EmailList extends LitElement {
     emails: { type: Array },
     threads: { type: Object },
     selectedId: { type: String },
+    folderTree: { type: Array },
+    selectedFolderPath: { type: String },
     searchQuery: { type: String, state: true },
     sortBy: { type: String, state: true },
     sortDirection: { type: String, state: true },
-    collapsedThreads: { type: Set, state: true }
+    collapsedThreads: { type: Set, state: true },
+    expandedFolders: { type: Set, state: true },
+    folderPanelOpen: { type: Boolean, state: true }
   };
 
   constructor() {
@@ -28,18 +34,49 @@ export class EmailList extends LitElement {
     this.emails = [];
     this.threads = {};
     this.selectedId = null;
+    this.folderTree = [];
+    this.selectedFolderPath = null;
     this.searchQuery = '';
     this.sortBy = 'date';
     this.sortDirection = 'desc';
     this.collapsedThreads = new Set();
+    this.expandedFolders = new Set();
+    this.folderPanelOpen = false;
     this._searchCache = new Map();
     this._renderGroupItem = this._renderGroupItem.bind(this);
     this._groupKey = this._groupKey.bind(this);
+    this._folderEmailIndex = new Map();
+    this._folderLabelIndex = new Map();
+    this._hasUserFolderToggle = false;
+    this._boundHandleGlobalPointer = (event) => this._handleGlobalPointer(event);
+    this._boundHandleGlobalKeydown = (event) => this._handleGlobalKeydown(event);
+    this._overflowTarget = null;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pointerdown', this._boundHandleGlobalPointer);
+      window.addEventListener('keydown', this._boundHandleGlobalKeydown);
+    }
+  }
+
+  disconnectedCallback() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointerdown', this._boundHandleGlobalPointer);
+      window.removeEventListener('keydown', this._boundHandleGlobalKeydown);
+    }
+    this._setOverflowAllowance(false);
+    super.disconnectedCallback();
   }
 
   updated(changedProperties) {
     if (changedProperties.has('emails')) {
       this._rebuildSearchCache();
+    }
+
+    if (changedProperties.has('folderTree')) {
+      this._rebuildFolderIndex();
     }
   }
 
@@ -77,6 +114,7 @@ export class EmailList extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      position: relative;
     }
 
     .list-summary {
@@ -89,6 +127,282 @@ export class EmailList extends LitElement {
     .summary-highlight {
       color: var(--md-sys-color-primary);
       font-weight: 500;
+    }
+
+    .folder-filter {
+      position: relative;
+    }
+
+    .folder-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      padding: 8px 14px;
+      cursor: pointer;
+      min-width: 160px;
+      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .folder-filter-btn .icon {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+    }
+
+    .folder-filter-btn .icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor;
+    }
+
+    .folder-filter-btn .text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.2;
+    }
+
+    .folder-filter-btn .title {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .folder-filter-btn .subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .folder-filter-btn:hover,
+    .folder-filter-btn:focus-visible {
+      border-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-primary);
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+      outline: none;
+    }
+
+    .folder-filter-btn.is-active {
+      border-color: var(--md-sys-color-primary);
+      background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+      color: var(--md-sys-color-primary);
+    }
+
+    .folder-panel-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 904;
+      width: min(360px, calc(100vw - 48px));
+    }
+
+    .folder-panel {
+      border-radius: 14px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
+      padding: 14px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 18px 36px rgba(12, 18, 32, 0.22);
+      z-index: 904;
+    }
+
+    .folder-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .folder-panel-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .folder-panel-title {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--md-sys-color-on-surface-variant);
+      font-weight: 600;
+    }
+
+    .folder-panel-caption {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .clear-folder-btn {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .clear-folder-btn:hover,
+    .clear-folder-btn:focus-visible {
+      border-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-primary);
+      outline: none;
+    }
+
+    .folder-panel-close {
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .folder-panel-close:hover,
+    .folder-panel-close:focus-visible {
+      background: var(--md-sys-color-surface-variant);
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+    }
+
+    .folder-panel-close .icon svg {
+      width: 18px !important;
+      height: 18px !important;
+      fill: currentColor;
+    }
+
+    .folder-tree {
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 4px;
+    }
+
+    .folder-node {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .folder-row {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 4px;
+      align-items: center;
+    }
+
+    .folder-toggle {
+      border: none;
+      background: transparent;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .folder-toggle:hover,
+    .folder-toggle:focus-visible {
+      background: var(--md-sys-color-surface-variant);
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+    }
+
+    .folder-toggle .icon svg {
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    .folder-toggle.spacer {
+      pointer-events: none;
+    }
+
+    .folder-label {
+      border: none;
+      background: transparent;
+      border-radius: 12px;
+      padding: 6px 10px;
+      padding-left: calc(10px + var(--folder-indent, 0px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--md-sys-color-on-surface);
+      transition: background 0.2s ease, color 0.2s ease;
+      text-align: left;
+    }
+
+    .folder-label:hover,
+    .folder-label:focus-visible {
+      background: var(--md-sys-color-surface-variant);
+      outline: none;
+    }
+
+    .folder-label.is-selected {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-weight: 600;
+    }
+
+    .folder-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .folder-count {
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: color-mix(in srgb, currentColor 15%, transparent);
+      color: inherit;
+    }
+
+    .folder-children {
+      margin-left: 14px;
+      padding-left: 6px;
+      border-left: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 60%, transparent);
+    }
+
+    @media (max-width: 640px) {
+      .folder-panel {
+        max-height: 320px;
+      }
+      .folder-panel-popover {
+        left: 0;
+        right: auto;
+      }
     }
 
     .list-toolbar {
@@ -503,6 +817,241 @@ export class EmailList extends LitElement {
     return count === 1 ? word : `${word}s`;
   }
 
+  _applyFolderFilter(emails) {
+    if (!Array.isArray(emails) || !this.selectedFolderPath) {
+      return emails;
+    }
+    const allowedSet = this._folderEmailIndex.get(this.selectedFolderPath);
+    if (!allowedSet) {
+      return emails;
+    }
+    return emails.filter((email) => allowedSet.has(email.id));
+  }
+
+  _rebuildFolderIndex() {
+    this._folderEmailIndex = new Map();
+    this._folderLabelIndex = new Map();
+    const validPaths = new Set();
+
+    const traverse = (node) => {
+      if (!node || !node.path) {
+        return;
+      }
+      validPaths.add(node.path);
+      const emailIds = Array.isArray(node.emailIds) ? node.emailIds.filter(Boolean) : [];
+      this._folderEmailIndex.set(node.path, new Set(emailIds));
+      const breadcrumbs = Array.isArray(node.breadcrumbs) && node.breadcrumbs.length
+        ? node.breadcrumbs
+        : node.path.split('/').filter(Boolean);
+      this._folderLabelIndex.set(node.path, {
+        short: node.name || breadcrumbs[breadcrumbs.length - 1] || node.path,
+        full: breadcrumbs.length ? breadcrumbs.join(' › ') : (node.name || node.path)
+      });
+      if (Array.isArray(node.children) && node.children.length) {
+        node.children.forEach(traverse);
+      }
+    };
+
+    const roots = Array.isArray(this.folderTree) ? this.folderTree : [];
+    roots.forEach(traverse);
+
+    const cleanedExpanded = new Set(
+      [...this.expandedFolders].filter((path) => validPaths.has(path))
+    );
+
+    if (this.selectedFolderPath && !validPaths.has(this.selectedFolderPath)) {
+      this.selectedFolderPath = null;
+    }
+
+    if (!this._hasUserFolderToggle && cleanedExpanded.size === 0 && roots.length > 0) {
+      roots.forEach((node) => cleanedExpanded.add(node.path));
+    }
+
+    this.expandedFolders = cleanedExpanded;
+    if (roots.length === 0) {
+      this.folderPanelOpen = false;
+      this._setOverflowAllowance(false);
+    }
+  }
+
+  _setOverflowAllowance(enable) {
+    let target = this._overflowTarget;
+    if (!target) {
+      target = this.closest('.email-list-pane');
+      if (!target) {
+        return;
+      }
+      this._overflowTarget = target;
+    }
+    target.classList.toggle('allow-overflow', Boolean(enable));
+  }
+
+  _toggleFolder(path, event) {
+    event?.stopPropagation?.();
+    const updated = new Set(this.expandedFolders);
+    if (updated.has(path)) {
+      updated.delete(path);
+    } else {
+      updated.add(path);
+    }
+    this.expandedFolders = updated;
+    this._hasUserFolderToggle = true;
+  }
+
+  _selectFolder(path) {
+    this._hideFolderPanel();
+    this.dispatchEvent(new CustomEvent('folder-selected', {
+      detail: {
+        folderPath: path,
+        emailIds: path && this._folderEmailIndex.get(path)
+          ? Array.from(this._folderEmailIndex.get(path))
+          : null
+      },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  _clearFolderSelection() {
+    this._hideFolderPanel();
+    this.dispatchEvent(new CustomEvent('folder-selected', {
+      detail: {
+        folderPath: null,
+        emailIds: null
+      },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  _renderFolderNode(node, depth = 0) {
+    if (!node) {
+      return nothing;
+    }
+    const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+    const isExpanded = this.expandedFolders.has(node.path);
+    const isSelected = this.selectedFolderPath === node.path;
+    const indentValue = `${depth * 14}px`;
+
+    return html`
+      <div
+        class="folder-node"
+        role="treeitem"
+        aria-level=${depth + 1}
+        aria-expanded=${hasChildren ? String(isExpanded) : nothing}
+      >
+        <div class="folder-row">
+          ${hasChildren ? html`
+            <button
+              class="folder-toggle"
+              type="button"
+              aria-label="${isExpanded ? 'Collapse' : 'Expand'} ${node.name}"
+              @click=${(event) => this._toggleFolder(node.path, event)}
+            >
+              <span class="icon">${isExpanded ? chevronDownIcon : chevronRightIcon}</span>
+            </button>
+          ` : html`<span class="folder-toggle spacer"></span>`}
+          <button
+            class=${`folder-label ${isSelected ? 'is-selected' : ''}`}
+            type="button"
+            style=${styleMap({ '--folder-indent': indentValue })}
+            title=${this._folderLabelIndex.get(node.path)?.full || node.name}
+            @click=${() => this._selectFolder(node.path)}
+          >
+            <span class="folder-name">${node.name}</span>
+            <span class="folder-count">${node.emailCount ?? 0}</span>
+          </button>
+        </div>
+        ${hasChildren && isExpanded ? html`
+          <div class="folder-children" role="group">
+            ${node.children.map((child) => this._renderFolderNode(child, depth + 1))}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  _renderFolderSection() {
+    const hasFolders = Array.isArray(this.folderTree) && this.folderTree.length > 0;
+    if (!hasFolders) {
+      return nothing;
+    }
+    const selectedLabel = this.selectedFolderPath
+      ? (this._folderLabelIndex.get(this.selectedFolderPath)?.full || this.selectedFolderPath)
+      : null;
+
+    return html`
+      <div class="folder-panel">
+        <div class="folder-panel-header">
+          <div>
+            <p class="folder-panel-title">Folders</p>
+            <p class="folder-panel-caption">
+              ${selectedLabel ? `Viewing ${selectedLabel}` : 'Browse folders captured from the PST archive'}
+            </p>
+          </div>
+          <div class="folder-panel-actions">
+            ${this.selectedFolderPath ? html`
+              <button
+                class="clear-folder-btn"
+                type="button"
+                @click=${this._clearFolderSelection}
+              >
+                Show all
+              </button>
+            ` : nothing}
+            <button
+              class="folder-panel-close"
+              type="button"
+              aria-label="Close folder picker"
+              @click=${this._hideFolderPanel}
+            >
+              <span class="icon">${closeIcon}</span>
+            </button>
+          </div>
+        </div>
+        <div class="folder-tree" role="tree" aria-label="Email folders">
+          ${this.folderTree.map((node) => this._renderFolderNode(node))}
+        </div>
+      </div>
+    `;
+  }
+
+
+  _toggleFolderPanel() {
+    if (!Array.isArray(this.folderTree) || this.folderTree.length === 0) {
+      this.folderPanelOpen = false;
+      return;
+    }
+    const nextState = !this.folderPanelOpen;
+    this.folderPanelOpen = nextState;
+    this._setOverflowAllowance(nextState);
+  }
+
+  _hideFolderPanel() {
+    if (this.folderPanelOpen) {
+      this.folderPanelOpen = false;
+      this._setOverflowAllowance(false);
+    }
+  }
+
+  _handleGlobalPointer(event) {
+    if (!this.folderPanelOpen) {
+      return;
+    }
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    const root = this.renderRoot?.querySelector('.folder-filter');
+    if (root && path.includes(root)) {
+      return;
+    }
+    this._hideFolderPanel();
+  }
+
+  _handleGlobalKeydown(event) {
+    if (event.key === 'Escape' && this.folderPanelOpen) {
+      this._hideFolderPanel();
+    }
+  }
+
   _groupEmailsByThread(filteredEmails) {
     const groups = [];
     const processed = new Set();
@@ -635,17 +1184,27 @@ export class EmailList extends LitElement {
   }
 
   render() {
-    const filtered = this._filterEmails(this.emails, this.searchQuery);
+    const folderScoped = this._applyFolderFilter(this.emails);
+    const filtered = this._filterEmails(folderScoped, this.searchQuery);
     const sorted = sortEmails(filtered, this.sortBy, this.sortDirection);
     const grouped = this._groupEmailsByThread(sorted);
     const visibleCount = sorted.length;
-    const totalCount = this.emails.length;
+    const totalCount = folderScoped.length;
+    const folderLabel = this.selectedFolderPath
+      ? (this._folderLabelIndex.get(this.selectedFolderPath)?.full || this.selectedFolderPath)
+      : null;
+    const hasFolders = Array.isArray(this.folderTree) && this.folderTree.length > 0;
+    const folderButtonClasses = classMap({
+      'folder-filter-btn': true,
+      'is-active': this.folderPanelOpen || Boolean(folderLabel)
+    });
 
     return html`
       <div class="list-header">
         <p class="list-summary">
           Showing ${visibleCount} of ${totalCount} ${this._pluralize('message', totalCount)}
-          ${this.searchQuery ? html`<span class="summary-highlight">- Filtered by "${this.searchQuery}"</span>` : ''}
+          ${folderLabel ? html`<span class="summary-highlight">in ${folderLabel}</span>` : ''}
+          ${this.searchQuery ? html`<span class="summary-highlight">matching "${this.searchQuery}"</span>` : ''}
         </p>
         <div class="list-toolbar">
           <div class="search-bar">
@@ -662,6 +1221,33 @@ export class EmailList extends LitElement {
               </button>
             ` : ''}
           </div>
+
+              ${hasFolders ? html`
+                <div class="folder-filter">
+                  <button
+                    class=${folderButtonClasses}
+                    type="button"
+                aria-haspopup="dialog"
+                aria-expanded=${String(this.folderPanelOpen)}
+                @click=${this._toggleFolderPanel}
+                  >
+                    <span class="icon">${folderIcon}</span>
+                    <span class="text">
+                      <span class="title">Folders</span>
+                      <span class="subtitle">${folderLabel || 'All mail'}</span>
+                    </span>
+                  </button>
+                  ${this.folderPanelOpen ? html`
+                    <div
+                      class="folder-panel-popover"
+                      role="dialog"
+                      aria-label="Choose folder"
+                    >
+                      ${this._renderFolderSection()}
+                    </div>
+                  ` : nothing}
+                </div>
+              ` : nothing}
 
           <div class="sort-controls">
             <span class="sort-label">Sort</span>
@@ -713,9 +1299,3 @@ export class EmailList extends LitElement {
 }
 
 customElements.define('email-list', EmailList);
-
-
-
-
-
-
