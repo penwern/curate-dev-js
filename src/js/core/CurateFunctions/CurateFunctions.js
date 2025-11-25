@@ -4,6 +4,7 @@ import CurateUi from "./CurateUi.js";
 import CurateMetadata from "./CurateMetadata.js";
 import CurateContextualHelp from "./CurateContextualHelp.js";
 import CurateRouter from "./CurateRouter.js";
+import CurateEmail from "./CurateEmail.js";
 import eventDelegator from "./CurateEvents.js";
 export const Curate = (function () {
   const api = CurateApi;
@@ -12,6 +13,7 @@ export const Curate = (function () {
   const metadata = CurateMetadata;
   const contextualHelp = CurateContextualHelp;
   const router = CurateRouter;
+  const email = CurateEmail;
   return {
     api,
     workspaces,
@@ -19,6 +21,7 @@ export const Curate = (function () {
     metadata,
     contextualHelp,
     router,
+    email,
     eventDelegator,
   };
 })();
