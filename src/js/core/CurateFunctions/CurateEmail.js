@@ -1,9 +1,10 @@
+const CurateEmail = {
   /**
-   * Archive processing modal workflow.
-   * Kicks off (or resumes) backend processing for the selected archive and keeps the UI updated.
+   * Launch the archive processing modal for the currently selected MBOX or PST file.
+   * Validates the selection and file type before launching the processing workflow.
    */
-  (function archiveProcessingModalEntry() {
-    const API_BASE_URL = `${window.location.origin}/api/email/api`
+  processArchive: function () {
+    const API_BASE_URL = `${window.location.origin}/api/email/api`;
 
     const selection = window.pydio?._dataModel?._selectedNodes || [];
     if (!selection.length || selection.length > 1) {
@@ -256,4 +257,7 @@
     );
 
     modalInstance.fire();
-  })();
+  }
+};
+
+export default CurateEmail;
