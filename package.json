@@ -22,7 +22,7 @@
     "lodash-es": "^4.17.21",
     "papaparse": "^5.4.1",
     "postal-mime": "^2.5.0",
-    "replaywebpage": "^2.3.14",
+    "replaywebpage": "^2.3.17",
     "spark-md5": "^3.0.2",
     "sweetalert2": "^11.0.20"
   },
