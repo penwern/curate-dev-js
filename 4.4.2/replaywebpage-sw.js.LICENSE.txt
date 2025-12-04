@@ -106,4 +106,4 @@ PERFORMANCE OF THIS SOFTWARE.
 
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
-/*! sw.js (wabac.js 2.23.4) is part of Webrecorder project. Copyright (C) 2020-2025, Webrecorder Software. Licensed under the Affero General Public License v3. */
+/*! sw.js (wabac.js 2.23.11) is part of Webrecorder project. Copyright (C) 2020-2025, Webrecorder Software. Licensed under the Affero General Public License v3. */
