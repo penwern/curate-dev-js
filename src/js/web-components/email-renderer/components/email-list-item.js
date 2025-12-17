@@ -136,6 +136,7 @@ export class EmailListItem extends LitElement {
       gap: 8px;
       font-size: 11px;
       color: var(--md-sys-color-on-surface-variant);
+      max-width: 100%;
     }
 
     .meta-pill {
@@ -147,6 +148,7 @@ export class EmailListItem extends LitElement {
       background: var(--md-sys-color-surface-variant);
       color: var(--md-sys-color-on-surface);
       font-weight: 500;
+      max-width: 100%;
     }
 
     .meta-pill svg {
@@ -158,6 +160,14 @@ export class EmailListItem extends LitElement {
     .meta-pill.folder {
       background: var(--md-sys-color-primary-container);
       color: var(--md-sys-color-on-primary-container);
+      min-width: 0;
+    }
+
+    .meta-pill.folder .folder-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 200px;
     }
   `;
 
@@ -224,9 +234,9 @@ export class EmailListItem extends LitElement {
             <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span>
           ` : ''}
           ${folderLabel ? html`
-            <span class="meta-pill folder">
+            <span class="meta-pill folder" title=${folderLabel}>
               ${folderIcon}
-              <span>${folderLabel}</span>
+              <span class="folder-label">${folderLabel}</span>
             </span>
           ` : ''}
         </div>
