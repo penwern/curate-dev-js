@@ -124,7 +124,9 @@ Curate.eventDelegator.addEventListener(
     const nodes = pydio._dataModel._selectedNodes;
     if (nodes.length === 1) {
       const node = nodes[0];
-      const isMbox = node._label.endsWith(".mbox");
+      const label = node._label || node.Label || node._label || "";
+      const isMbox = typeof label === "string" && label.endsWith(".mbox");
+      const isEml = typeof label === "string" && label.endsWith(".eml");
 
       // Synchronously block the event if it's an mbox file
       if (isMbox) {
@@ -134,6 +136,39 @@ Curate.eventDelegator.addEventListener(
 
         // Then asynchronously check for manifest and show popup
         handleEmailFileAction(node);
+        return false;
+      }
+
+      if (isEml) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const workspaceId =
+          (typeof Curate.workspaces?.getOpenWorkspace === "function" && Curate.workspaces.getOpenWorkspace()) ||
+          (typeof node.getRepositoryId === "function" && node.getRepositoryId()) ||
+          node._repositoryId ||
+          node.Repository;
+
+        const rawPath =
+          (typeof node.getPath === "function" && node.getPath()) ||
+          node.Path ||
+          node._path ||
+          "";
+
+        if (!workspaceId || !rawPath) {
+          console.warn("RenderEmail: Missing workspace or path for single EML viewer.", { workspaceId, rawPath });
+          return false;
+        }
+
+        const archivePath = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+
+        openEmailViewerPage({
+          archiveWorkspace: workspaceId,
+          archivePath,
+          archiveMode: "single-eml"
+        });
+
         return false;
       }
     }

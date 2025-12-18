@@ -415,6 +415,152 @@ async function parseEmlContent(emlText) {
   };
 }
 
+async function parseEmlWithMetadata(emlText) {
+  const parser = new PostalMime();
+  const payload =
+    typeof emlText === 'string'
+      ? new TextEncoder().encode(emlText)
+      : emlText;
+
+  const parsed = await parser.parse(payload);
+  const html = parsed.html || parsed.textAsHtml || '';
+  const text = parsed.text || '';
+
+  const from = parsed.from
+    ? { name: parsed.from.name || '', email: parsed.from.address || '' }
+    : null;
+  const normaliseAddressList = (list) =>
+    Array.isArray(list)
+      ? list.map((item) => ({
+          name: item.name || '',
+          email: item.address || ''
+        })).filter((item) => item.email || item.name)
+      : [];
+
+  const to = normaliseAddressList(parsed.to);
+  const cc = normaliseAddressList(parsed.cc);
+  const bcc = normaliseAddressList(parsed.bcc);
+  const replyToList = normaliseAddressList(parsed.replyTo);
+  const replyTo = replyToList.length > 0 ? replyToList : null;
+
+  const subject = parsed.subject || '(No subject)';
+  let date = null;
+  if (parsed.date) {
+    if (parsed.date instanceof Date) {
+      date = parsed.date.toISOString();
+    } else {
+      const asDate = new Date(parsed.date);
+      if (!Number.isNaN(asDate.getTime())) {
+        date = asDate.toISOString();
+      }
+    }
+  }
+
+  const messageId = parsed.messageId || parsed.headers?.['message-id'] || null;
+  const inReplyTo = parsed.inReplyTo || parsed.headers?.['in-reply-to'] || null;
+  const referencesHeader = parsed.references || parsed.headers?.references || null;
+  const references = Array.isArray(referencesHeader)
+    ? referencesHeader
+    : referencesHeader
+      ? [referencesHeader]
+      : [];
+
+  const rawHtml = html || '';
+  const sanitizedHtml = sanitiseHtml(rawHtml);
+
+  const snippetSource = text || rawHtml.replace(/<[^>]+>/g, ' ');
+  const snippet = snippetSource.replace(/\s+/g, ' ').trim().slice(0, 200);
+
+  const hasExternalImages = /<img[^>]+src=["']https?:/i.test(rawHtml);
+
+  const attachments = Array.isArray(parsed.attachments)
+    ? parsed.attachments.map((att, index) => {
+        const sizeFromContent =
+          att.content && typeof att.content === 'object' && 'byteLength' in att.content
+            ? att.content.byteLength
+            : ArrayBuffer.isView(att.content)
+              ? att.content.byteLength
+              : 0;
+
+        let dataUrl = null;
+        if (att.content) {
+          try {
+            let bytes;
+            if (att.content instanceof ArrayBuffer) {
+              bytes = new Uint8Array(att.content);
+            } else if (ArrayBuffer.isView(att.content)) {
+              bytes = new Uint8Array(att.content.buffer, att.content.byteOffset, att.content.byteLength);
+            } else {
+              bytes = null;
+            }
+
+            if (bytes) {
+              let binary = '';
+              for (let i = 0; i < bytes.byteLength; i += 1) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+              const base64 = typeof btoa === 'function' ? btoa(binary) : null;
+              if (base64) {
+                const mime = att.mimeType || 'application/octet-stream';
+                dataUrl = `data:${mime};base64,${base64}`;
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to create data URL for attachment', error);
+          }
+        }
+
+        const mimeLower = (att.mimeType || '').toLowerCase();
+        const isLikelyInlineImage =
+          mimeLower.startsWith('image/') &&
+          (att.inline === true ||
+            att.related === true ||
+            att.contentId != null ||
+            att.disposition === 'inline');
+        const isInline = Boolean(isLikelyInlineImage);
+
+        return {
+          filename: att.filename || `attachment-${index + 1}`,
+          path: dataUrl,
+          size: att.size || sizeFromContent || 0,
+          mimeType: att.mimeType || 'application/octet-stream',
+          inline: isInline,
+          contentId: att.contentId || null
+        };
+      })
+    : [];
+
+  const hasAttachments = attachments.length > 0;
+
+  return {
+    body: {
+      html: sanitizedHtml,
+      text
+    },
+    emailMeta: {
+      id: messageId || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      folder: null,
+      pstFolder: null,
+      emlPath: null,
+      from,
+      to,
+      cc,
+      bcc,
+      replyTo,
+      subject,
+      date,
+      snippet,
+      messageId,
+      inReplyTo,
+      references,
+      threadId: null,
+      attachments,
+      hasExternalImages,
+      hasAttachments
+    }
+  };
+}
+
 /**
  * Get the email archive manifest
  * @returns {Promise<Object>} Manifest with email metadata
@@ -464,6 +610,41 @@ export async function getEmailBody(emailId) {
 
   emailBodyCache.set(emailId, parsedBody);
   return parsedBody;
+}
+
+/**
+ * Load and parse a single EML file directly from Curate
+ * @param {string} absolutePath - Absolute Curate path to the .eml file
+ * @returns {Promise<{ email: Object, body: { html: string, text: string } }>}
+ */
+export async function getSingleCurateEmail(absolutePath) {
+  if (!absolutePath) {
+    throw new Error('EML path is required to load single email');
+  }
+  const normalisedPath = String(absolutePath).replace(/\\/g, '/');
+  const node = await loadCurateNode(normalisedPath);
+  const { apiClient } = getCurateClients();
+  const content = await callCurateApi(apiClient.getPlainContent, apiClient, node);
+
+  let emlText;
+  if (typeof content === 'string') {
+    emlText = content;
+  } else if (content instanceof Blob) {
+    emlText = await content.text();
+  } else if (content && typeof content === 'object' && 'text' in content && typeof content.text === 'function') {
+    emlText = await content.text();
+  } else {
+    emlText = content != null ? String(content) : '';
+  }
+
+  const { emailMeta, body } = await parseEmlWithMetadata(emlText);
+  return {
+    email: {
+      ...emailMeta,
+      emlPath: normalisedPath
+    },
+    body
+  };
 }
 
 /**

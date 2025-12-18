@@ -180,6 +180,21 @@ export class EmailBody extends LitElement {
 
     for (const match of matches) {
       const contentId = match[1];
+      const attachment = (this.attachments || []).find((item) => {
+        if (!item || !item.inline) {
+          return false;
+        }
+        if (!item.contentId) {
+          return false;
+        }
+        return item.contentId.replace(/[<>]/g, '').trim() === contentId.replace(/[<>]/g, '').trim();
+      });
+
+      if (attachment && typeof attachment.path === 'string' && (attachment.path.startsWith('blob:') || attachment.path.startsWith('data:'))) {
+        result = result.replace(match[0], `src="${attachment.path}"`);
+        continue;
+      }
+
       const blobUrl = await resolveInlineImage(contentId, this.attachments);
       if (blobUrl) {
         result = result.replace(match[0], `src="${blobUrl}"`);
