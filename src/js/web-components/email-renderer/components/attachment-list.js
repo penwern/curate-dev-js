@@ -117,7 +117,12 @@ export class AttachmentList extends LitElement {
 
   async _download(attachment) {
     try {
-      const url = await getAttachment(attachment.path);
+      let url = null;
+      if (attachment && typeof attachment.path === 'string' && (attachment.path.startsWith('blob:') || attachment.path.startsWith('data:'))) {
+        url = attachment.path;
+      } else {
+        url = await getAttachment(attachment.path);
+      }
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = attachment.filename;

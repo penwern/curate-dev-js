@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
 import '@material/web/progress/circular-progress.js';
-import { getManifest, getEmailBody, setArchiveBasePath } from '../data/dataService.js';
+import { getManifest, getEmailBody, setArchiveBasePath, getSingleCurateEmail } from '../data/dataService.js';
 import './email-list.js';
 import './email-detail.js';
 import { chevronLeftIcon, chevronRightIcon } from '../../utils/icons.js';
@@ -615,7 +615,12 @@ export class EmailViewer extends LitElement {
   }
 
   async _refreshManifest() {
-    this._applyArchivePath();
+    const isSingleEmailMode = (this.archiveMode || '').toString().toLowerCase() === 'single-eml';
+
+    if (!isSingleEmailMode) {
+      this._applyArchivePath();
+    }
+
     this.messageLoading = false;
     this.loading = true;
     this.manifestError = null;
@@ -631,10 +636,14 @@ export class EmailViewer extends LitElement {
     this._pstFolderIndex = new Map();
 
     try {
-      await this._loadManifest();
+      if (isSingleEmailMode) {
+        await this._loadSingleEmail();
+      } else {
+        await this._loadManifest();
+      }
       this._hasInitialArchiveLoad = true;
     } catch (error) {
-      console.error('Failed to load email manifest:', error);
+      console.error('Failed to load email data:', error);
       this.manifestError = error instanceof Error ? error : new Error(String(error));
     } finally {
       this.loading = false;
@@ -742,6 +751,29 @@ export class EmailViewer extends LitElement {
       ? this._decorateEmails(manifest.emails, this._pstFolderIndex)
       : [];
     this.threads = manifest.threads ?? {};
+    this.selectedFolderPath = null;
+  }
+
+  async _loadSingleEmail() {
+    const path = (this.archivePath ?? '').toString().trim();
+    if (!path) {
+      throw new Error('No EML path provided for single email mode.');
+    }
+
+    if (!this._isCurateEnvironment()) {
+      throw new Error('Single EML viewing is only supported in Curate environment.');
+    }
+
+    const { email, body } = await getSingleCurateEmail(path);
+
+    this.emails = [email];
+    this.threads = {};
+    this.folderTree = [];
+    this.selectedEmailId = email.id;
+    this.selectedEmail = email;
+    this.emailBody = body;
+    this.threadEmails = null;
+    this.threadBodies = null;
     this.selectedFolderPath = null;
   }
 
@@ -1002,6 +1034,8 @@ export class EmailViewer extends LitElement {
   }
 
   render() {
+    const isSingleEmailMode = (this.archiveMode || '').toString().toLowerCase() === 'single-eml';
+
     const listPaneClasses = classMap({
       pane: true,
       'email-list-pane': true,
@@ -1048,61 +1082,63 @@ export class EmailViewer extends LitElement {
 
         ${!this.loading && !this.manifestError ? html`
           <div class="viewer-shell">
-            <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
-              ${this.listCollapsed ? html`
-                <button
-                  class="expand-toggle"
-                  type="button"
-                  @click=${this._expandList}
-                  aria-label="Expand email list" aria-expanded="false"
-                  title="Expand email list"
-                >
-                  <span class="icon">${chevronRightIcon}</span>
-                  <span class="label">Emails</span>
-                </button>
-              ` : html`
-                <div class="list-shell">
-                  <email-list
-                    .emails=${this.emails}
-                    .threads=${this.threads}
-                    .selectedId=${this.selectedEmailId}
-                    .folderTree=${this.folderTree}
-                    .selectedFolderPath=${this.selectedFolderPath}
-                    @email-selected=${this._handleEmailSelected}
-                    @folder-selected=${this._handleFolderSelected}
-                  ></email-list>
-                </div>
-              `}
-            </section>
+            ${!isSingleEmailMode ? html`
+              <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
+                ${this.listCollapsed ? html`
+                  <button
+                    class="expand-toggle"
+                    type="button"
+                    @click=${this._expandList}
+                    aria-label="Expand email list" aria-expanded="false"
+                    title="Expand email list"
+                  >
+                    <span class="icon">${chevronRightIcon}</span>
+                    <span class="label">Emails</span>
+                  </button>
+                ` : html`
+                  <div class="list-shell">
+                    <email-list
+                      .emails=${this.emails}
+                      .threads=${this.threads}
+                      .selectedId=${this.selectedEmailId}
+                      .folderTree=${this.folderTree}
+                      .selectedFolderPath=${this.selectedFolderPath}
+                      @email-selected=${this._handleEmailSelected}
+                      @folder-selected=${this._handleFolderSelected}
+                    ></email-list>
+                  </div>
+                `}
+              </section>
 
-            <div
-              class=${classMap({
-                'pane-divider': true,
-                'is-hidden': this.isMobile || this.listCollapsed
-              })}
-              role="separator"
-              aria-label="Resize email list"
-              aria-orientation="vertical"
-              aria-valuemin=${this._minListWidth}
-              aria-valuemax=${this._maxListWidth}
-              aria-valuenow=${Math.round(this.listWidth)}
-              tabindex="0"
-              @pointerdown=${this._startResize}
-              @keydown=${this._handleDividerKeydown}
-            >
-              <span class="divider-grip" aria-hidden="true"></span>
-              ${!this.listCollapsed ? html`
-                <button
-                  class="collapse-handle"
-                  type="button"
-                  aria-label="Collapse email list" aria-expanded="true"
-                  title="Collapse email list"
-                  @click=${this._collapseList}
-                >
-                  <span class="icon">${chevronLeftIcon}</span>
-                </button>
-              ` : ''}
-            </div>
+              <div
+                class=${classMap({
+                  'pane-divider': true,
+                  'is-hidden': this.isMobile || this.listCollapsed
+                })}
+                role="separator"
+                aria-label="Resize email list"
+                aria-orientation="vertical"
+                aria-valuemin=${this._minListWidth}
+                aria-valuemax=${this._maxListWidth}
+                aria-valuenow=${Math.round(this.listWidth)}
+                tabindex="0"
+                @pointerdown=${this._startResize}
+                @keydown=${this._handleDividerKeydown}
+              >
+                <span class="divider-grip" aria-hidden="true"></span>
+                ${!this.listCollapsed ? html`
+                  <button
+                    class="collapse-handle"
+                    type="button"
+                    aria-label="Collapse email list" aria-expanded="true"
+                    title="Collapse email list"
+                    @click=${this._collapseList}
+                  >
+                    <span class="icon">${chevronLeftIcon}</span>
+                  </button>
+                ` : ''}
+              </div>
+            ` : ''}
 
             <section class=${detailPaneClasses}>
               ${this.messageLoading ? html`
