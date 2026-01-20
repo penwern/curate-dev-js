@@ -225,6 +225,7 @@ class AsFlatList extends LitElement {
   }
 
   _handlePageChange(e) {
+    e.stopPropagation();
     this.dispatchEvent(
       new CustomEvent("page-change", {
         detail: e.detail,
