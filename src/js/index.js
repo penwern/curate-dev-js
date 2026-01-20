@@ -1,6 +1,7 @@
 // IMPORTANT: RouteProtection must be imported FIRST to intercept Pydio redirects
 import "../js/core/RouteProtection.js";
 import "../js/core/CurateFunctions/CurateFunctions.js";
+import "../js/core/validation/index.js";
 
 // IMPORTANT: Import web components BEFORE custom-pages to prevent race conditions
 // Custom routes may use these components, so they must be defined first
@@ -19,6 +20,7 @@ import "./web-components/pure-integration-ui/main.js";
 import "./web-components/calm-integration-ui/main.js";
 import "./web-components/archive-processing/archive-processing-status.js";
 import "./web-components/email-renderer/components/email-viewer.js";
+import "./web-components/archivesspace-browser/archivesspace-browser.js";   
 
 // Now safe to import custom pages which use the components above
 import "./custom-pages/index.js";
