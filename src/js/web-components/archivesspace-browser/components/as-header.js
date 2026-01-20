@@ -528,6 +528,7 @@ class AsHeader extends LitElement {
   }
 
   _forwardEvent(e) {
+    e.stopPropagation();
     this.dispatchEvent(new CustomEvent(e.type, { detail: e.detail, bubbles: true, composed: true }));
   }
 }
