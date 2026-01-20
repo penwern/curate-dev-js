@@ -1,7 +1,8 @@
 const getMetadataHierarchies = (schema) => {
     const metadataHierarchies = {
         "ISAD(G)": {},
-        "DC": {}
+        "DC": {},
+        "ArchivesSpace": {}
     };
     metadataHierarchies["DC"] = {
         fields: [
@@ -83,6 +84,42 @@ const getMetadataHierarchies = (schema) => {
                     "archivists note",
                     "rules or conventions",
                     "date(s) of descriptions"
+                ]
+            }
+        ]
+    };
+
+    metadataHierarchies["ArchivesSpace"] = {
+        sections: [
+            {
+                title: "Core Digital Object",
+                fields: [
+                    "digital_object_title",
+                    "digital_object_level",
+                    "digital_object_type",
+                    "digital_object_component_id",
+                    "publish"
+                ]
+            },
+            {
+                title: "Dates",
+                fields: [
+                    "date_label",
+                    "date_type",
+                    "date_begin",
+                    "date_end",
+                    "date_expression"
+                ]
+            },
+            {
+                title: "Extents",
+                fields: [
+                    "extent_number",
+                    "extent_type",
+                    "extent_portion",
+                    "extent_container_summary",
+                    "extent_physical_details",
+                    "extent_dimensions"
                 ]
             }
         ]

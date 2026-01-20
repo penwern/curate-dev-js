@@ -119,7 +119,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules\/(?!(@material\/web|lit)\/).*/,
+          exclude: /node_modules\/(?!(@material\/web|lit|vest)\/).*/,
           use: {
             loader: "babel-loader",
             options: {
@@ -185,6 +185,17 @@ module.exports = (env, argv) => {
           port: 6900,
           protocol: 'ws', // Use ws:// for local development
           pathname: '/ws',
+        },
+        overlay: {
+          errors: true,
+          warnings: false,
+          runtimeErrors: (error) => {
+            // Ignore benign ResizeObserver errors that occur during Lit component updates
+            if (error.message && error.message.includes('ResizeObserver loop')) {
+              return false;
+            }
+            return true;
+          },
         },
       },
     },

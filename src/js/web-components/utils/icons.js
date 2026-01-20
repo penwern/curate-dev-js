@@ -18,6 +18,7 @@ import {
   mdiChevronRight,
   mdiChevronDown,
   mdiChevronLeft,
+  mdiChevronUp,
   mdiCheckCircle,
   mdiSitemap,
   mdiPencil,
@@ -26,6 +27,25 @@ import {
   mdiLockOutline,
   mdiBlockHelper,
   mdiCached,
+  mdiEmail,
+  mdiEmailOutline,
+  mdiAttachment,
+  mdiDownload,
+  mdiSort,
+  mdiFilterOutline,
+  mdiClose,
+  mdiArrowLeft,
+  mdiDotsVertical,
+  mdiImageOutline,
+  mdiForum,
+  mdiFolderOutline,
+  mdiFileDocumentOutline,
+  mdiFileTree,
+  mdiMapMarker,
+  mdiDatabase,
+  mdiLayers,
+  mdiUnfoldMoreHorizontal,
+  mdiUnfoldLessHorizontal,
 } from "@mdi/js";
 
 // A helper to wrap the SVG path data in an <svg> tag
@@ -54,46 +74,43 @@ export const alertCircleIcon = icon(mdiAlertCircleOutline);
 export const chevronRightIcon = icon(mdiChevronRight);
 export const chevronDownIcon = icon(mdiChevronDown);
 export const chevronLeftIcon = icon(mdiChevronLeft);
+export const chevronUpIcon = icon(mdiChevronUp);
 export const checkCircleFilledIcon = icon(mdiCheckCircle);
-export const sitemapIcon = icon(mdiSitemap);
+export const sitemapIcon = icon(mdiSitemap, "icon");
 export const pencilIcon = icon(mdiPencil);
 export const linkVariantOffIcon = icon(mdiLinkVariantOff);
+export const linkOffIcon = icon(mdiLinkVariantOff); // Alias for new naming convention
 export const checkboxBlankCircleIcon = icon(mdiCheckboxBlankCircleOutline);
+export const unmappedStatusIcon = icon(mdiCheckboxBlankCircleOutline); // Alias for new naming convention
 export const lockIcon = icon(mdiLockOutline);
 export const blockHelperIcon = icon(mdiBlockHelper);
-export const cachedIcon = icon(mdiCached);
 export const blockIcon = icon(mdiBlockHelper);
+export const cachedIcon = icon(mdiCached);
+export const cacheIcon = icon(mdiCached, "icon"); // Alias for new naming convention
 
-//need to sort out icons, in future import icon handler 
-// and then just import mdi icons directly in components 
-// and wrap with icon. Then they can be named whatever.
-// Email viewer icons (added for mbox viewer)
-import {
-  mdiEmail,
-  mdiEmailOutline,
-  mdiAttachment,
-  mdiDownload,
-  mdiSort,
-  mdiFilterOutline,
-  mdiChevronUp,
-  mdiClose,
-  mdiArrowLeft,
-  mdiDotsVertical,
-  mdiImageOutline,
-  mdiForum,
-  mdiFolderOutline,
-} from "@mdi/js";
-
+// Email viewer icons
 export const emailIcon = icon(mdiEmail);
 export const emailOutlineIcon = icon(mdiEmailOutline);
 export const attachmentIcon = icon(mdiAttachment);
 export const downloadIcon = icon(mdiDownload);
 export const sortIcon = icon(mdiSort, "icon");
 export const filterIcon = icon(mdiFilterOutline, "icon");
-export const chevronUpIcon = icon(mdiChevronUp);
 export const closeIcon = icon(mdiClose);
 export const arrowLeftIcon = icon(mdiArrowLeft);
 export const dotsVerticalIcon = icon(mdiDotsVertical);
 export const imageIcon = icon(mdiImageOutline);
 export const forumIcon = icon(mdiForum);
 export const folderIcon = icon(mdiFolderOutline);
+
+// New icons from updated version
+export const documentIcon = icon(mdiFileDocumentOutline);
+export const hierarchyIcon = icon(mdiFileTree);
+export const pinIcon = icon(mdiMapMarker);
+export const databaseIcon = icon(mdiDatabase);
+export const layersIcon = icon(mdiLayers);
+export const expandAllIcon = icon(mdiUnfoldMoreHorizontal);
+export const collapseAllIcon = icon(mdiUnfoldLessHorizontal);
+
+//need to sort out icons, in future import icon handler 
+// and then just import mdi icons directly in components 
+// and wrap with icon. Then they can be named whatever.
