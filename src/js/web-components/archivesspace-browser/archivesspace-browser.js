@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from "lit";
 import { map } from "lit/directives/map.js";
-import debounce from "lodash/debounce";
+import debounce from "lodash-es/debounce";
 
 // Import child components
 import "./components/as-header.js";
