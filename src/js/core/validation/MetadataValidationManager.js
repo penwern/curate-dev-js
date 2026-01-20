@@ -168,6 +168,36 @@ class MetadataValidationManager {
     this._lastSaveButtonSearchAt = 0;
   }
 
+  clearValidationErrors() {
+    if (typeof document === "undefined") {
+      this.errors.clear();
+      return;
+    }
+
+    // Remove inline error elements we injected.
+    document
+      .querySelectorAll(".curate-validation-error")
+      .forEach((el) => el.remove());
+
+    // Clear aria flags and described-by references to our error ids.
+    document
+      .querySelectorAll('[aria-describedby*="curate-validation-error-"]')
+      .forEach((el) => {
+        el.removeAttribute("aria-invalid");
+        const describedBy = el.getAttribute("aria-describedby");
+        if (!describedBy) return;
+        const next = describedBy
+          .split(/\s+/)
+          .filter((id) => id && !id.startsWith("curate-validation-error-"))
+          .join(" ");
+        if (next) el.setAttribute("aria-describedby", next);
+        else el.removeAttribute("aria-describedby");
+      });
+
+    this.errors.clear();
+    this._updateSaveIndicator();
+  }
+
   _ensureContext() {
     const nextKey = getSelectedNodeUuid() || "unknown";
     if (this._contextKey === null) {
@@ -175,11 +205,11 @@ class MetadataValidationManager {
       return;
     }
     if (this._contextKey !== nextKey) {
+      this.clearValidationErrors();
       this._contextKey = nextKey;
       this._lastObservedValues.clear();
       this._touchedFields.clear();
       this._cachedValues.clear();
-      this.errors.clear();
       this._updateSaveIndicator();
     }
   }
@@ -278,6 +308,7 @@ class MetadataValidationManager {
   }
 
   detach() {
+    this.clearValidationErrors();
     this._handlerIds.forEach((id) => this._delegator.removeEventListener(id));
     this._handlerIds = [];
     if (this._timer) {
