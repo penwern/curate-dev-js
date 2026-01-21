@@ -216,6 +216,18 @@ function observeSessionForLimiter(store, session) {
 }
 
 const handleDropEvent = async (e) => {
+  const dataTransfer = e.dataTransfer;
+  const transferTypes = Array.from(dataTransfer?.types || []);
+  const hasFilePayload =
+    transferTypes.includes('Files') ||
+    (dataTransfer?.files && dataTransfer.files.length > 0) ||
+    (dataTransfer?.items &&
+      Array.from(dataTransfer.items).some((item) => item.kind === 'file'));
+
+  if (!hasFilePayload) {
+    return;
+  }
+
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
