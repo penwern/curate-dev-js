@@ -96,6 +96,7 @@ class ArchivespaceBrowser extends LitElement {
     // Action panel state
     detailLevelMode: { state: true },
     perFileMode: { state: true },
+    preserveStructure: { state: true },
     createFoldersLoading: { state: true },
     createFoldersFeedback: { state: true },
 
@@ -290,6 +291,7 @@ class ArchivespaceBrowser extends LitElement {
     // Action panel state
     this.detailLevelMode = "per-file";
     this.perFileMode = "components";
+    this.preserveStructure = false;
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
 
@@ -808,11 +810,13 @@ class ArchivespaceBrowser extends LitElement {
             .selectedRecordIds=${this.selectedRecordIds}
             .detailLevelMode=${this.detailLevelMode}
             .perFileMode=${this.perFileMode}
+            .preserveStructure=${this.preserveStructure}
             .createFoldersLoading=${this.createFoldersLoading}
             .createFoldersFeedback=${this.createFoldersFeedback}
             .searchQuery=${this.searchQuery}
             @detail-level-change=${this._handleDetailLevelChange}
             @per-file-mode-change=${this._handlePerFileModeChange}
+            @preserve-structure-change=${this._handlePreserveStructureChange}
             @clear-selection=${this._handleClearSelection}
             @navigate-selection=${this._handleNavigateSelection}
             @action-click=${this._handleActionClick}
@@ -844,11 +848,13 @@ class ArchivespaceBrowser extends LitElement {
           .selectedRecordIds=${this.selectedRecordIds}
           .detailLevelMode=${this.detailLevelMode}
           .perFileMode=${this.perFileMode}
+          .preserveStructure=${this.preserveStructure}
           .createFoldersLoading=${this.createFoldersLoading}
           .createFoldersFeedback=${this.createFoldersFeedback}
           .searchQuery=${this.searchQuery}
           @detail-level-change=${this._handleDetailLevelChange}
           @per-file-mode-change=${this._handlePerFileModeChange}
+          @preserve-structure-change=${this._handlePreserveStructureChange}
           @clear-selection=${this._handleClearSelection}
           @navigate-selection=${this._handleNavigateSelection}
           @action-click=${this._handleActionClick}
@@ -1240,11 +1246,22 @@ class ArchivespaceBrowser extends LitElement {
 
   _handleDetailLevelChange(e) {
     this.detailLevelMode = e.detail?.value || "per-file";
+    if (this.detailLevelMode !== "per-file") {
+      this.preserveStructure = false;
+    }
   }
 
   _handlePerFileModeChange(e) {
     if (this.detailLevelMode !== "per-file") return;
     this.perFileMode = e.detail?.value || "components";
+    if (this.perFileMode !== "components") {
+      this.preserveStructure = false;
+    }
+  }
+
+  _handlePreserveStructureChange(e) {
+    const value = Boolean(e.detail?.value);
+    this.preserveStructure = value;
   }
 
   _handleClearSelection() {
@@ -1325,6 +1342,8 @@ class ArchivespaceBrowser extends LitElement {
           ? "as_records"
           : "as_components"
         : null;
+    const shouldPreserveStructure =
+      detailLevel === "per_file" && perFileMode === "as_components";
 
     const folders = selectedIds
       .map((id) => {
@@ -1342,6 +1361,9 @@ class ArchivespaceBrowser extends LitElement {
         };
         if (perFileMode) {
           folder.per_file_mode = perFileMode;
+        }
+        if (shouldPreserveStructure) {
+          folder.preserve_structure = Boolean(this.preserveStructure);
         }
         return folder;
       })

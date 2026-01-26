@@ -5,6 +5,7 @@ import "@material/web/button/outlined-button.js";
 import "@material/web/button/text-button.js";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/radio/radio.js";
+import "@material/web/checkbox/checkbox.js";
 import "@material/web/icon/icon.js";
 import "../../utils/penwern-spinner.js";
 import {
@@ -15,6 +16,7 @@ import {
   pinIcon,
   checkCircleIcon,
   alertCircleIcon,
+  helpCircleIcon,
 } from "../../utils/icons.js";
 import { highlightText } from "../utils/search-helpers.js";
 
@@ -28,6 +30,7 @@ class AsDetailPanel extends LitElement {
     selectedRecordIds: { type: Array },
     detailLevelMode: { type: String },
     perFileMode: { type: String },
+    preserveStructure: { type: Boolean },
     createFoldersLoading: { type: Boolean },
     createFoldersFeedback: { type: Object },
     searchQuery: { type: String },
@@ -328,6 +331,9 @@ class AsDetailPanel extends LitElement {
     }
 
     .radio-group-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
@@ -352,6 +358,35 @@ class AsDetailPanel extends LitElement {
 
     .radio-option md-radio[disabled] {
       opacity: 0.5;
+    }
+
+    .help-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: help;
+      opacity: 0.8;
+    }
+
+    .help-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .checkbox-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .checkbox-helper {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-top: 4px;
     }
 
     .multi-action-note {
@@ -403,6 +438,7 @@ class AsDetailPanel extends LitElement {
     this.selectedRecordIds = [];
     this.detailLevelMode = "per-file";
     this.perFileMode = "components";
+    this.preserveStructure = false;
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
     this.searchQuery = "";
@@ -452,6 +488,7 @@ class AsDetailPanel extends LitElement {
 
     const hasMultipleSelection = this.selectedRecordIds?.length > 1;
     const isPerFile = this.detailLevelMode === "per-file";
+    const showStructureOption = isPerFile && this.perFileMode === "components";
 
     // Determine which content to highlight based on search
     const titleContent = this.searchQuery
@@ -555,19 +592,48 @@ class AsDetailPanel extends LitElement {
         <div class="actions">
           <div class="action-settings">
             <div class="radio-group">
-              <div class="radio-group-label">File Detail Level</div>
+              <div class="radio-group-label">
+                File Detail Level
+                ${this._renderHelpIcon(
+                  "Choose whether to create one record in ArchivesSpace representing the AIP, or one for each file in the AIP."
+                )}
+              </div>
               <div class="radio-options">
                 ${this._renderDetailLevelOption("per-file", "Per file")}
                 ${this._renderDetailLevelOption("per-aip", "Per AIP")}
               </div>
             </div>
             <div class="radio-group">
-              <div class="radio-group-label">Per file handling</div>
+              <div class="radio-group-label">
+                Per file handling
+                ${this._renderHelpIcon(
+                  "When per file, choose whether to create digital objects as components or records."
+                )}
+              </div>
               <div class="radio-options">
                 ${this._renderPerFileOption("components", "As components", !isPerFile)}
                 ${this._renderPerFileOption("records", "As records", !isPerFile)}
               </div>
             </div>
+            ${showStructureOption
+              ? html`
+                  <div class="radio-group">
+                    <div class="radio-group-label">
+                      Structural representation
+                      ${this._renderHelpIcon(
+                        "Preserve component hierarchy when creating ArchivesSpace records."
+                      )}
+                    </div>
+                    <label class="checkbox-option">
+                      <md-checkbox
+                        ?checked=${this.preserveStructure}
+                        @change=${this._handlePreserveStructureChange}
+                      ></md-checkbox>
+                      <span>Preserve structure</span>
+                    </label>
+                  </div>
+                `
+              : nothing}
           </div>
           <div class="actions">
             <md-filled-button
@@ -779,6 +845,25 @@ class AsDetailPanel extends LitElement {
     if (!value) return;
     this.dispatchEvent(
       new CustomEvent("per-file-mode-change", {
+        detail: { value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  _renderHelpIcon(text) {
+    return html`
+      <span class="help-icon" title=${text} aria-label=${text}>
+        ${helpCircleIcon}
+      </span>
+    `;
+  }
+
+  _handlePreserveStructureChange(e) {
+    const value = Boolean(e.target?.checked);
+    this.dispatchEvent(
+      new CustomEvent("preserve-structure-change", {
         detail: { value },
         bubbles: true,
         composed: true,
