@@ -4,6 +4,38 @@ import "@material/web/button/text-button.js";
 import "@material/web/button/filled-button.js";
 import { Curate } from "../../core/CurateFunctions/CurateFunctions";
 
+function getReplayWebBaseUrl() {
+  const base = document.querySelector("base");
+  const baseHref = base ? base.getAttribute("href") : null;
+  if (baseHref) {
+    return new URL(baseHref, document.baseURI).toString();
+  }
+
+  if (typeof globalThis !== "undefined" && globalThis.src) {
+    return new URL(".", globalThis.src).toString();
+  }
+
+  if (typeof __webpack_require__ !== "undefined" && __webpack_require__.p) {
+    return new URL(__webpack_require__.p, window.location.href).toString();
+  }
+
+  if (document.currentScript && document.currentScript.src) {
+    return new URL(".", document.currentScript.src).toString();
+  }
+
+  const { origin, pathname } = window.location;
+  const versionedMatch = pathname.match(/^(.*\/@latest\/|.*\/\d+\.\d+\.\d+\/)/);
+  if (versionedMatch) {
+    return `${origin}${versionedMatch[0]}`;
+  }
+
+  return `${origin}/`;
+}
+
+function getReplayWebUrl(path) {
+  return new URL(path, getReplayWebBaseUrl()).toString();
+}
+
 export class WarcOptionsModal extends LitElement {
   static properties = {
     fileUrl: { type: String },
@@ -147,7 +179,7 @@ export class WarcOptionsModal extends LitElement {
             viewerWrapper.innerHTML = `<replay-web-page 
               source="${this.fileUrl}" 
               url="${this.startingUrl}"
-              replayBase="/workers/" 
+              replayBase="${getReplayWebUrl("workers/")}" 
               embed="default"
               style="width: 100%; height: 100%; display: block; border-radius: inherit;">
             </replay-web-page>`;

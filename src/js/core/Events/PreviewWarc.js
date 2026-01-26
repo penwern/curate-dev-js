@@ -1,4 +1,64 @@
 // Shared function to handle WARC file detection and viewing
+function getReplayWebBaseUrl() {
+  console.log("ReplayWeb base resolver: starting");
+  const base = document.querySelector("base");
+  const baseHref = base ? base.getAttribute("href") : null;
+  if (baseHref && baseHref !== "/") {
+    console.log("ReplayWeb base resolver: using <base>", baseHref);
+    return new URL(baseHref, document.baseURI).toString();
+  }
+  if (baseHref === "/") {
+    console.log("ReplayWeb base resolver: ignoring <base> '/'");
+  }
+
+  if (typeof globalThis !== "undefined" && globalThis.src) {
+    console.log("ReplayWeb base resolver: using global src", globalThis.src);
+    return new URL(".", globalThis.src).toString();
+  }
+
+  if (typeof __webpack_require__ !== "undefined" && __webpack_require__.p) {
+    console.log("ReplayWeb base resolver: using webpack public path", __webpack_require__.p);
+    return new URL(__webpack_require__.p, window.location.href).toString();
+  }
+
+  if (document.currentScript && document.currentScript.src) {
+    console.log("ReplayWeb base resolver: using currentScript", document.currentScript.src);
+    return new URL(".", document.currentScript.src).toString();
+  }
+
+  const { origin, pathname } = window.location;
+  const versionedMatch = pathname.match(/^(.*\/@latest\/|.*\/\d+\.\d+\.\d+\/)/);
+  if (versionedMatch) {
+    console.log("ReplayWeb base resolver: using versioned path", versionedMatch[0]);
+    return `${origin}${versionedMatch[0]}`;
+  }
+
+  console.log("ReplayWeb base resolver: using origin root", origin);
+  return `${origin}/`;
+}
+
+function getReplayWebUrl(path) {
+  return new URL(path, getReplayWebBaseUrl()).toString();
+}
+
+async function ensureReplayWebPageLoaded() {
+  if (window.replayWebPageLoaded) {
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src = getReplayWebUrl("replaywebpage-ui.js");
+
+  await new Promise((resolve, reject) => {
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+
+  await customElements.whenDefined("replay-web-page");
+  window.replayWebPageLoaded = true;
+}
+
 function handleWarcFileAction(node) {
   console.log("Checking node for WARC compatibility:", node);
 
@@ -20,6 +80,7 @@ function handleWarcFileAction(node) {
   (async () => {
     try {
       const fileUrl = await PydioApi._PydioClient.buildPresignedGetUrl(node);
+      await ensureReplayWebPageLoaded();
 
       if (isWaczFile) {
         // Skip options for WACZ files - go straight to viewer
@@ -63,7 +124,7 @@ function handleWarcFileAction(node) {
                 viewerWrapper.innerHTML = `<replay-web-page
                       source="${fileUrl}"
                       url=""
-                      replayBase="/workers/"
+                      replayBase="${getReplayWebUrl("workers/")}"
                       embed="default"
                       style="width: 100%; height: 100%; display: block; border-radius: inherit;">
                     </replay-web-page>`;

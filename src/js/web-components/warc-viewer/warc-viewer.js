@@ -3,6 +3,38 @@ import "@material/web/iconbutton/icon-button.js";
 import "@material/web/icon/icon.js";
 import "@material/web/progress/circular-progress.js";
 
+function getReplayWebBaseUrl() {
+  const base = document.querySelector("base");
+  const baseHref = base ? base.getAttribute("href") : null;
+  if (baseHref) {
+    return new URL(baseHref, document.baseURI).toString();
+  }
+
+  if (typeof globalThis !== "undefined" && globalThis.src) {
+    return new URL(".", globalThis.src).toString();
+  }
+
+  if (typeof __webpack_require__ !== "undefined" && __webpack_require__.p) {
+    return new URL(__webpack_require__.p, window.location.href).toString();
+  }
+
+  if (document.currentScript && document.currentScript.src) {
+    return new URL(".", document.currentScript.src).toString();
+  }
+
+  const { origin, pathname } = window.location;
+  const versionedMatch = pathname.match(/^(.*\/@latest\/|.*\/\d+\.\d+\.\d+\/)/);
+  if (versionedMatch) {
+    return `${origin}${versionedMatch[0]}`;
+  }
+
+  return `${origin}/`;
+}
+
+function getReplayWebUrl(path) {
+  return new URL(path, getReplayWebBaseUrl()).toString();
+}
+
 export class WarcViewerModal extends LitElement {
   static properties = {
     fileUrl: { type: String },
@@ -125,7 +157,7 @@ export class WarcViewerModal extends LitElement {
             source=${this.fileUrl}
             url=${this.startingUrl}
             embed="default"
-            replayBase="/workers/"
+            replayBase=${getReplayWebUrl("workers/")}
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
               : "display: block;"}
@@ -137,6 +169,7 @@ export class WarcViewerModal extends LitElement {
   }
 
   firstUpdated() {
+    console.log("warc-viewer: firstUpdated");
     this.loadReplayWebPage();
   }
 
@@ -144,6 +177,8 @@ export class WarcViewerModal extends LitElement {
     console.log("=== Loading ReplayWeb.page ===");
     console.log("File URL:", this.fileUrl);
     console.log("Starting URL:", this.startingUrl);
+    console.log("replayWebPageLoaded:", window.replayWebPageLoaded);
+    console.log("component connected:", this.isConnected);
 
     if (window.replayWebPageLoaded) {
       console.log("ReplayWeb.page already loaded");
@@ -154,7 +189,8 @@ export class WarcViewerModal extends LitElement {
     try {
       // Load the bundled replaywebpage UI from the copied file
       const script = document.createElement("script");
-      script.src = "/replaywebpage-ui.js";
+      script.src = getReplayWebUrl("replaywebpage-ui.js");
+      console.log("Injecting replaywebpage UI script:", script.src);
 
       await new Promise((resolve, reject) => {
         script.onload = resolve;
