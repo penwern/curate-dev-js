@@ -7,6 +7,7 @@
 import { registerPureIntegrationRoute } from './pure-integration.js';
 import { registerCalmIntegrationRoute } from './calm-integration.js';
 import { registerEmailViewerRoute } from './email-viewer.js';
+import { registerWarcViewerRoute } from './warc-viewer.js';
 import { registerDemoRoutes } from './demo-routes.js';
 
 /**
@@ -18,6 +19,7 @@ export function registerAllRoutes() {
   registerPureIntegrationRoute();
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
+  registerWarcViewerRoute();
 
   // Demo routes (optional - could be conditionally loaded)
   registerDemoRoutes();
@@ -32,6 +34,7 @@ export function registerProductionRoutes() {
   registerPureIntegrationRoute();
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
+  registerWarcViewerRoute();
 
   console.log('Production routes have been registered');
 }

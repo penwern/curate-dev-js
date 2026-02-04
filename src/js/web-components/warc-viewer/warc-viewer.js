@@ -123,9 +123,8 @@ export class WarcViewerModal extends LitElement {
 
           <replay-web-page
             source=${this.fileUrl}
-            url=${this.startingUrl}
-            embed="default"
-            replayBase="/workers/"
+            replaybase="/workers/"
+            newwindowbase=${window.location.origin + "/"}
             style=${this.isLoading || this.errorMessage
               ? "display: none;"
               : "display: block;"}
