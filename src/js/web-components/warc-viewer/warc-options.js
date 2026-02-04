@@ -2,7 +2,7 @@ import { LitElement, html, css } from "lit";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/button/text-button.js";
 import "@material/web/button/filled-button.js";
-import { Curate } from "../../core/CurateFunctions/CurateFunctions";
+import { openWarcViewerPage } from "../../custom-pages/routes/warc-viewer.js";
 
 export class WarcOptionsModal extends LitElement {
   static properties = {
@@ -97,69 +97,12 @@ export class WarcOptionsModal extends LitElement {
   }
 
   handleOpenViewer() {
-    console.log("Opening viewer with:", {
+    // Close the current modal
+    this.closeSelf();
+    openWarcViewerPage({
       fileUrl: this.fileUrl,
       startingUrl: this.startingUrl,
     });
-
-    // Close the current modal
-    this.closeSelf();
-
-    // Create the viewer modal using the callback approach
-    const viewerModal = Curate.ui.modals.curatePopup(
-      {
-        title: "Preview Web-Archive",
-      },
-      {
-        afterLoaded: (container) => {
-          // Style the popup for maximum size
-          const modalContent = container.querySelector(".config-modal-content");
-          if (modalContent) {
-            modalContent.style.width = "95vw";
-            modalContent.style.height = "90vh";
-            modalContent.style.maxWidth = "1400px";
-            modalContent.style.maxHeight = "900px";
-            modalContent.style.padding = "16px";
-          }
-
-          // Find the main content container and update it
-          const mainContent = container.querySelector(
-            ".config-main-options-container"
-          );
-          if (mainContent) {
-            // Style the main content to take full space
-            mainContent.style.height = "100%";
-            mainContent.style.display = "flex";
-            mainContent.style.flexDirection = "column";
-
-            // Create wrapper with border radius
-            const viewerWrapper = document.createElement("div");
-            viewerWrapper.style.cssText = `
-              flex: 1;
-              border-radius: 12px;
-              overflow: hidden;
-              border: 1px solid var(--md-sys-color-outline-variant);
-              background: var(--md-sys-color-surface);
-            `;
-
-            // Clear existing content and add the replay component inside wrapper
-            mainContent.innerHTML = "";
-            viewerWrapper.innerHTML = `<replay-web-page 
-              source="${this.fileUrl}" 
-              url="${this.startingUrl}"
-              replayBase="/workers/" 
-              embed="default"
-              style="width: 100%; height: 100%; display: block; border-radius: inherit;">
-            </replay-web-page>`;
-
-            mainContent.appendChild(viewerWrapper);
-          }
-        },
-      }
-    );
-
-    // Fire the viewer modal
-    viewerModal.fire();
   }
 
   setFileInfo(fileUrl, fileName) {

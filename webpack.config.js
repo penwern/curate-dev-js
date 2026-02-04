@@ -177,6 +177,7 @@ module.exports = (env, argv) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
         'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
       },
       allowedHosts: 'all', // Allow connections from any host
       client: {
