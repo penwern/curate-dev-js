@@ -6,6 +6,7 @@ import "@material/web/button/text-button.js";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/radio/radio.js";
 import "@material/web/icon/icon.js";
+import "@material/web/textfield/outlined-text-field.js";
 import "../../utils/penwern-spinner.js";
 import {
   chevronLeftIcon,
@@ -28,6 +29,8 @@ class AsDetailPanel extends LitElement {
     selectedRecordIds: { type: Array },
     detailLevelMode: { type: String },
     perFileMode: { type: String },
+    containerType: { type: String },
+    folderName: { type: String },
     createFoldersLoading: { type: Boolean },
     createFoldersFeedback: { type: Object },
     searchQuery: { type: String },
@@ -354,9 +357,35 @@ class AsDetailPanel extends LitElement {
       opacity: 0.5;
     }
 
+    .text-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .folder-name-field {
+      width: 100%;
+      --md-outlined-text-field-top-space: 6px;
+      --md-outlined-text-field-bottom-space: 6px;
+      --md-outlined-text-field-leading-space: 10px;
+      --md-outlined-text-field-trailing-space: 10px;
+      --md-outlined-field-top-space: 6px;
+      --md-outlined-field-bottom-space: 6px;
+      --md-outlined-field-leading-space: 10px;
+      --md-outlined-field-trailing-space: 10px;
+    }
+
     .multi-action-note {
       font-size: 12px;
       margin-bottom: 6px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .selection-guard {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
     }
 
@@ -403,6 +432,8 @@ class AsDetailPanel extends LitElement {
     this.selectedRecordIds = [];
     this.detailLevelMode = "per-file";
     this.perFileMode = "components";
+    this.containerType = "digital_object";
+    this.folderName = "";
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
     this.searchQuery = "";
@@ -452,6 +483,9 @@ class AsDetailPanel extends LitElement {
 
     const hasMultipleSelection = this.selectedRecordIds?.length > 1;
     const isPerFile = this.detailLevelMode === "per-file";
+    const containerType = this.containerType || "digital_object";
+    const showFolderName = containerType === "archival_object";
+    const requiresSingleSelection = showFolderName && hasMultipleSelection;
 
     // Determine which content to highlight based on search
     const titleContent = this.searchQuery
@@ -555,6 +589,26 @@ class AsDetailPanel extends LitElement {
         <div class="actions">
           <div class="action-settings">
             <div class="radio-group">
+              <div class="radio-group-label">Container Type</div>
+              <div class="radio-options">
+                ${this._renderContainerTypeOption("digital_object", "Digital Object")}
+                ${this._renderContainerTypeOption("archival_object", "Archival Object")}
+              </div>
+            </div>
+            ${showFolderName
+              ? html`
+                  <div class="text-field-group">
+                    <md-outlined-text-field
+                      class="folder-name-field"
+                      label="Folder name"
+                      placeholder="Title"
+                      .value=${this.folderName || ""}
+                      @input=${this._handleFolderNameInput}
+                    ></md-outlined-text-field>
+                  </div>
+                `
+              : nothing}
+            <div class="radio-group">
               <div class="radio-group-label">File Detail Level</div>
               <div class="radio-options">
                 ${this._renderDetailLevelOption("per-file", "Per file")}
@@ -569,10 +623,20 @@ class AsDetailPanel extends LitElement {
               </div>
             </div>
           </div>
+          ${requiresSingleSelection
+            ? html`
+                <div class="selection-guard">
+                  <span>Archival Object mode requires a single record.</span>
+                  <md-text-button @click=${this._handleKeepActiveOnly}>
+                    Keep active only
+                  </md-text-button>
+                </div>
+              `
+            : nothing}
           <div class="actions">
             <md-filled-button
               class="create-folders-button"
-              ?disabled=${this.createFoldersLoading}
+              ?disabled=${this.createFoldersLoading || requiresSingleSelection}
               @click=${() => this._handleAction("create-folders")}
             >
               ${this.createFoldersLoading
@@ -714,6 +778,21 @@ class AsDetailPanel extends LitElement {
     `;
   }
 
+  _renderContainerTypeOption(value, label) {
+    const current = this.containerType || "digital_object";
+    return html`
+      <label class="radio-option">
+        <md-radio
+          name="container-type"
+          value=${value}
+          ?checked=${current === value}
+          @change=${this._handleContainerTypeChange}
+        ></md-radio>
+        <span>${label}</span>
+      </label>
+    `;
+  }
+
   _renderPerFileOption(value, label, disabled = false) {
     return html`
       <label class="radio-option">
@@ -780,6 +859,38 @@ class AsDetailPanel extends LitElement {
     this.dispatchEvent(
       new CustomEvent("per-file-mode-change", {
         detail: { value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  _handleContainerTypeChange(e) {
+    const value = e.target?.value;
+    if (!value) return;
+    this.dispatchEvent(
+      new CustomEvent("container-type-change", {
+        detail: { value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  _handleFolderNameInput(e) {
+    const value = e.target?.value ?? "";
+    this.dispatchEvent(
+      new CustomEvent("folder-name-change", {
+        detail: { value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  _handleKeepActiveOnly() {
+    this.dispatchEvent(
+      new CustomEvent("keep-active-selection", {
         bubbles: true,
         composed: true,
       })
