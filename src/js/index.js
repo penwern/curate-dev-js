@@ -5,7 +5,7 @@ import "../js/core/validation/index.js";
 
 // IMPORTANT: Import web components BEFORE custom-pages to prevent race conditions
 // Custom routes may use these components, so they must be defined first
-import "../js/web-components/atom-search.js";
+import "../js/web-components/atom-search/atom-search.js";
 import "../js/web-components/atom-connector.js";
 import "../js/web-components/dip-slug-resolver.js";
 import "../js/web-components/contextual-help.js";
