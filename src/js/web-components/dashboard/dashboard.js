@@ -3,7 +3,6 @@
 //TODO - small bug with custom router, if Im on a custom route then navigate to a new url it appends
 //  the custom route to it which breaks the navigation, eg when going from reports dashboard to settings.
 // this doesnt happen if I go from eg dash to a workspace. weird. might be tolerable.
-//TODO - clearer feedback in dash for users who dont have permission to view certain data.
 //TODO - need to add exporting tools
 //TODO - talk to the chaps about the strategy for format reporting, is database access possible
 //TODO - when I deleted stuff in deletions tab, the list didnt update properly until refreshed.
