@@ -46,6 +46,19 @@ import {
   mdiLayers,
   mdiUnfoldMoreHorizontal,
   mdiUnfoldLessHorizontal,
+  // New icons from older version
+  mdiHarddisk,
+  mdiDeleteClock,
+  mdiEyeOutline,
+  mdiRefresh,
+  mdiChartBar,
+  mdiChartDonut,
+  mdiCalendarRange,
+  mdiFileMultiple,
+  mdiCloudUpload,
+  mdiAccount,
+  mdiArrowUp,
+  mdiArrowDown,
 } from "@mdi/js";
 
 // A helper to wrap the SVG path data in an <svg> tag
@@ -102,8 +115,9 @@ export const imageIcon = icon(mdiImageOutline);
 export const forumIcon = icon(mdiForum);
 export const folderIcon = icon(mdiFolderOutline);
 
-// New icons from updated version
+// File / document icons
 export const documentIcon = icon(mdiFileDocumentOutline);
+export const fileDocIcon = icon(mdiFileDocumentOutline); // Alias from older version
 export const hierarchyIcon = icon(mdiFileTree);
 export const pinIcon = icon(mdiMapMarker);
 export const databaseIcon = icon(mdiDatabase);
@@ -111,6 +125,20 @@ export const layersIcon = icon(mdiLayers);
 export const expandAllIcon = icon(mdiUnfoldMoreHorizontal);
 export const collapseAllIcon = icon(mdiUnfoldLessHorizontal);
 
-//need to sort out icons, in future import icon handler 
-// and then just import mdi icons directly in components 
+// New icons from older version
+export const harddiskIcon = icon(mdiHarddisk);
+export const deleteClockIcon = icon(mdiDeleteClock);
+export const eyeIcon = icon(mdiEyeOutline);
+export const refreshIcon = icon(mdiRefresh);
+export const chartBarIcon = icon(mdiChartBar);
+export const chartDonutIcon = icon(mdiChartDonut);
+export const calendarRangeIcon = icon(mdiCalendarRange);
+export const fileMultipleIcon = icon(mdiFileMultiple);
+export const cloudUploadIcon = icon(mdiCloudUpload);
+export const accountIcon = icon(mdiAccount);
+export const arrowUpIcon = icon(mdiArrowUp);
+export const arrowDownIcon = icon(mdiArrowDown);
+
+//need to sort out icons, in future import icon handler
+// and then just import mdi icons directly in components
 // and wrap with icon. Then they can be named whatever.

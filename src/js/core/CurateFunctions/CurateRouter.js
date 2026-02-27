@@ -512,51 +512,63 @@ const CurateRouter = (function () {
   }
 
   function createPageHeader(title) {
+    // Outer wrapper provides spacing around the bar
     const header = document.createElement('div');
     header.className = 'curate-router-header';
     header.style.cssText = `
+      padding: 8px 6px;
+      flex-shrink: 0;
+    `;
+
+    // Rounded bar — the visible element
+    const bar = document.createElement('div');
+    bar.style.cssText = `
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--md-sys-color-outline, #c4c7c5);
-      background: var(--md-sys-color-surface-variant, #fdfcff);
+      padding: 6px 6px 6px 14px;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--md-sys-color-primary) 11%, var(--md-sys-color-surface));
     `;
 
-    const titleElement = document.createElement('h1');
+    const titleElement = document.createElement('span');
     titleElement.textContent = title;
     titleElement.style.cssText = `
       margin: 0;
-      color: var(--md-sys-color-on-background, #1d1b20);
-      font-size: 28px;
-      font-weight: 400;
+      color: var(--md-sys-color-on-surface, #1c1b1f);
+      font-size: 16px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     `;
 
-    // Create close button
     const closeButton = document.createElement('button');
     closeButton.textContent = 'Close';
     closeButton.addEventListener('click', closeAndReturnToUnderlying);
     closeButton.style.cssText = `
-      background: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
+      background: var(--md-sys-color-secondary, #625b71);
+      color: var(--md-sys-color-on-secondary, #ffffff);
       border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
+      border-radius: 20px;
+      padding: 5px 8px;
       font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
       cursor: pointer;
       transition: opacity 0.2s;
     `;
 
     closeButton.addEventListener('mouseenter', () => {
-      closeButton.style.opacity = '0.8';
+      closeButton.style.opacity = '0.85';
     });
     closeButton.addEventListener('mouseleave', () => {
       closeButton.style.opacity = '1';
     });
 
-    header.appendChild(titleElement);
-    header.appendChild(closeButton);
+    bar.appendChild(titleElement);
+    bar.appendChild(closeButton);
+    header.appendChild(bar);
 
     return header;
   }
