@@ -9,6 +9,7 @@ import {
   formatNumber,
 } from "../client.js";
 import { cloudUploadIcon, chartLineIcon } from "../../utils/icons.js";
+import { fetchAllAuditLogs } from "../utils/export-utils.js";
 
 const UPLOAD_MSG_ID = "22";
 
@@ -348,6 +349,57 @@ class IngestionPanel extends LitElement {
 
   _onPageChanged(e) {
     this._loadTable(e.detail.page);
+  }
+
+  /**
+   * Returns all ingestion data structured for export.
+   * Fetches ALL matching records (bypasses pagination).
+   */
+  async getExportData() {
+    const pathToLabel = this._buildPathToLabel();
+    const query = this._buildTableQuery();
+
+    const [allLogs, yearRes, monthRes] = await Promise.all([
+      fetchAllAuditLogs(getAuditLogs, query),
+      getAuditChartData(UPLOAD_MSG_ID, "Y", Math.floor(Date.now() / 1000)),
+      getAuditChartData(UPLOAD_MSG_ID, "M", Math.floor(Date.now() / 1000)),
+    ]);
+
+    // Compute from fresh API data so this works on detached elements (global export)
+    const totalUploads = (yearRes.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0);
+    const thisMonth = (monthRes.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0);
+
+    const summary = [
+      { Metric: "Total Uploads (Last 12 Months)", Value: totalUploads },
+      { Metric: "This Month", Value: thisMonth },
+      { Metric: "Workspace Filter", Value: this.selectedWorkspace || "All Workspaces" },
+      { Metric: "Date From", Value: this._dateFrom || "—" },
+      { Metric: "Date To", Value: this._dateTo || "—" },
+      { Metric: "Hide AIP Uploads", Value: this._hideAipUploads ? "Yes" : "No" },
+    ];
+
+    const records = allLogs.map((log) => {
+      const path = log.NodePath ?? "";
+      const parts = path.split("/");
+      const name = parts.pop() || "Unknown";
+      const dsRoot = parts[0] ?? "";
+      const sizeBytes = parseInt(log.TransferSize ?? "0", 10);
+      return {
+        "File Name": name,
+        Workspace: pathToLabel.get(dsRoot) ?? dsRoot,
+        "Uploaded By": log.UserName ?? "",
+        "Size (Bytes)": sizeBytes,
+        "Size (Formatted)": formatBytes(sizeBytes),
+        Date: log.Ts ? new Date(log.Ts * 1000).toISOString() : "",
+        Path: path,
+      };
+    });
+
+    const timeSeries = (yearRes.Results ?? [])
+      .filter((r) => r.Name)
+      .map((r) => ({ Period: r.Name, "Upload Count": r.Count ?? 0 }));
+
+    return { summary, records, timeSeries };
   }
 
   _formatUploadDate(ts) {

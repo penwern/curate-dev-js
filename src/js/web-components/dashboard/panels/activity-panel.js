@@ -4,6 +4,7 @@ import "../components/chart-card.js";
 import "../components/data-table.js";
 import { getAuditChartData, getAuditLogs, formatNumber } from "../client.js";
 import { historyIcon, chartLineIcon } from "../../utils/icons.js";
+import { fetchAllAuditLogs } from "../utils/export-utils.js";
 
 const MSG_IDS = ["11", "13", "19", "20", "21", "22", "75", "77"];
 
@@ -338,6 +339,72 @@ class ActivityPanel extends LitElement {
       workspace: wsLabel,
       date: log.Ts ?? 0,
     };
+  }
+
+  /**
+   * Returns all activity data structured for export.
+   * Fetches ALL matching log records (bypasses pagination).
+   */
+  async getExportData() {
+    const pathToLabel = this._buildPathToLabel();
+    const query = this._buildQuery();
+
+    const [allLogs, yearResults, monthResults] = await Promise.all([
+      fetchAllAuditLogs(getAuditLogs, query),
+      Promise.all(MSG_IDS.map((id) => getAuditChartData(id, "Y", Math.floor(Date.now() / 1000)))),
+      Promise.all(MSG_IDS.map((id) => getAuditChartData(id, "M", Math.floor(Date.now() / 1000)))),
+    ]);
+
+    const totalYear = yearResults.reduce(
+      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0), 0,
+    );
+    const totalMonth = monthResults.reduce(
+      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0), 0,
+    );
+
+    const summary = [
+      { Metric: "Total Activities (Last 12 Months)", Value: totalYear },
+      { Metric: "This Month", Value: totalMonth },
+      { Metric: "Workspace Filter", Value: this.selectedWorkspace || "All Workspaces" },
+      { Metric: "Activity Type Filter", Value: this._typeFilter || "All Types" },
+    ];
+
+    const log = allLogs.map((rawLog) => {
+      const mapped = this._mapLog(rawLog, pathToLabel);
+      return {
+        "Activity Type": mapped.typeLabel,
+        User: mapped.actor,
+        Item: mapped.object,
+        Workspace: mapped.workspace,
+        Date: rawLog.Ts ? new Date(rawLog.Ts * 1000).toISOString() : "",
+      };
+    });
+
+    // Aggregate by type for the "by type" sheet
+    const typeTotals = {};
+    for (let i = 0; i < MSG_IDS.length; i++) {
+      const count = (yearResults[i].Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0);
+      if (count === 0) continue;
+      const label = ACTIVITY_TYPES[MSG_IDS[i]]?.label ?? MSG_IDS[i];
+      typeTotals[label] = (typeTotals[label] ?? 0) + count;
+    }
+    const byType = Object.entries(typeTotals)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, count]) => ({ "Activity Type": type, Count: count }));
+
+    // Time series (merged across all types) for annual view
+    const merged = {};
+    for (const res of yearResults) {
+      for (const { Name, Count } of (res.Results ?? []).filter((r) => r.Name)) {
+        merged[Name] = (merged[Name] ?? 0) + (Count ?? 0);
+      }
+    }
+    const timeSeries = Object.entries(merged).map(([period, count]) => ({
+      Period: period,
+      "Total Events": count,
+    }));
+
+    return { summary, log, byType, timeSeries };
   }
 
   _formatDate(ts) {

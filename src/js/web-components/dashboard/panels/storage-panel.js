@@ -166,6 +166,53 @@ class StoragePanel extends LitElement {
     }
   }
 
+  /**
+   * Returns all storage data structured for export.
+   */
+  async getExportData() {
+    // Build workspace stats inline — works on detached elements (global export)
+    let wsDetails = this._wsDetails;
+    if (!wsDetails.length && this.workspaces.length) {
+      const pathToLabel = new Map();
+      for (const ws of this.workspaces) {
+        for (const rn of Object.values(ws.RootNodes ?? {})) {
+          const dsPath = rn.Path?.replace(/\/$/, "") ?? "";
+          if (dsPath) pathToLabel.set(dsPath, ws.Label ?? dsPath);
+        }
+      }
+      const res = await listRootStats();
+      wsDetails = (res.Children ?? [])
+        .filter((c) => pathToLabel.has(c.Path))
+        .map((c) => ({
+          slug: c.Path,
+          label: pathToLabel.get(c.Path),
+          size: parseInt(c.Size ?? "0", 10),
+          children: parseInt(c.MetaStore?.RecursiveCount ?? "0", 10),
+        }))
+        .sort((a, b) => b.size - a.size);
+    }
+
+    const totalSize = wsDetails.reduce((s, r) => s + r.size, 0);
+
+    const summary = [
+      { Metric: "Total Storage", Value: formatBytes(totalSize) },
+      { Metric: "Total Storage (Bytes)", Value: totalSize },
+      { Metric: "Workspaces with Content", Value: wsDetails.length },
+      { Metric: "Largest Workspace", Value: wsDetails[0]?.label ?? "—" },
+      { Metric: "Largest Workspace Size", Value: formatBytes(wsDetails[0]?.size ?? 0) },
+    ];
+
+    const workspaces = wsDetails.map((ws) => ({
+      Workspace: ws.label,
+      "Size (Bytes)": ws.size,
+      "Size (Formatted)": formatBytes(ws.size),
+      "File Count": ws.children,
+      "% of Total": totalSize > 0 ? ((ws.size / totalSize) * 100).toFixed(1) + "%" : "0%",
+    }));
+
+    return { summary, workspaces };
+  }
+
   _rebuildCharts(results, vibrantHues) {
     this._barData = {
       labels: results.map((r) => r.label),

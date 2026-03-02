@@ -25,7 +25,8 @@
     "replaywebpage": "^2.3.17",
     "spark-md5": "^3.0.2",
     "sweetalert2": "^11.0.20",
-    "vest": "^5.4.6"
+    "vest": "^5.4.6",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.24.3",

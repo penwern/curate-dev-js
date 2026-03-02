@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import Papa from 'papaparse';
 import Chart from 'chart.js/auto';
 import SparkMD5 from 'spark-md5';
+import * as XLSX from 'xlsx';
 
 // Make libraries available globally for legacy code that expects them
 window.he = he;
@@ -13,6 +14,7 @@ window.Swal = Swal;
 window.Papa = Papa;
 window.Chart = Chart;
 window.SparkMD5 = SparkMD5;
+window.XLSX = XLSX;
 
 // Note: replaywebpage needs special handling - check where it's used
 // and import it properly in those specific modules

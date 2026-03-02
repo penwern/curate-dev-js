@@ -3,11 +3,11 @@
 //TODO - small bug with custom router, if Im on a custom route then navigate to a new url it appends
 //  the custom route to it which breaks the navigation, eg when going from reports dashboard to settings.
 // this doesnt happen if I go from eg dash to a workspace. weird. might be tolerable.
-//TODO - need to add exporting tools
 //TODO - talk to the chaps about the strategy for format reporting, is database access possible
 //TODO - when I deleted stuff in deletions tab, the list didnt update properly until refreshed.
 import { LitElement, html, css } from "lit";
 import "./components/workspace-filter.js";
+import "./components/export-button.js";
 import "./panels/file-overview-panel.js";
 import "./panels/ingestion-panel.js";
 import "./panels/storage-panel.js";
@@ -16,6 +16,7 @@ import "./panels/activity-panel.js";
 import { getWorkspaces, invalidateCache, currentUserCanViewDashboard } from "./client.js";
 import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClockIcon, eyeIcon } from "../utils/icons.js";
 import "../utils/penwern-spinner.js";
+import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fileMultipleIcon" },
@@ -44,6 +45,7 @@ class Dashboard extends LitElement {
     _refreshing: { state: true },
     _mounted: { state: true },
     _hasPermission: { state: true },
+    _exportLoading: { state: true },
   };
 
   static styles = css`
@@ -77,8 +79,6 @@ class Dashboard extends LitElement {
     }
 
     .tab-bar-inner {
-      max-width: var(--dash-max-width);
-      margin: 0 auto;
       padding: 0 var(--dash-gutter);
       display: flex;
       align-items: center;
@@ -193,8 +193,6 @@ class Dashboard extends LitElement {
     }
 
     .content-inner {
-      max-width: var(--dash-max-width);
-      margin: 0 auto;
       padding: var(--dash-gutter);
     }
 
@@ -267,6 +265,7 @@ class Dashboard extends LitElement {
     this._refreshing = false;
     this._mounted = false;
     this._hasPermission = false;
+    this._exportLoading = false;
   }
 
   connectedCallback() {
@@ -319,6 +318,176 @@ class Dashboard extends LitElement {
 
   get _wsFilterEnabled() {
     return WS_FILTER_TABS.has(this._activeTab);
+  }
+
+  get _exportFormats() {
+    switch (this._activeTab) {
+      case "overview":
+        return [
+          { value: "xlsx", label: "Excel (.xlsx) — All Panels" },
+          { value: "json", label: "JSON — All Panels" },
+        ];
+      case "ingestion":
+        return [
+          { value: "csv", label: "CSV — Upload Records" },
+          { value: "xlsx", label: "Excel (.xlsx) — All Data" },
+          { value: "json", label: "JSON — All Data" },
+        ];
+      case "storage":
+        return [
+          { value: "csv", label: "CSV — Workspace Storage" },
+          { value: "xlsx", label: "Excel (.xlsx) — All Data" },
+          { value: "json", label: "JSON — All Data" },
+        ];
+      case "deletions":
+        return [
+          { value: "csv", label: "CSV — Recycle Bin" },
+          { value: "xlsx", label: "Excel (.xlsx) — All Data" },
+          { value: "json", label: "JSON — All Data" },
+        ];
+      case "activity":
+        return [
+          { value: "csv", label: "CSV — Activity Log" },
+          { value: "xlsx", label: "Excel (.xlsx) — All Data" },
+          { value: "json", label: "JSON — All Data" },
+        ];
+      default:
+        return [];
+    }
+  }
+
+  async _handleExport(e) {
+    const { format } = e.detail;
+    this._exportLoading = true;
+    try {
+      if (this._activeTab === "overview") {
+        await this._doGlobalExport(format);
+      } else {
+        await this._doTabExport(this._activeTab, format);
+      }
+    } catch (err) {
+      console.error("Dashboard export error:", err);
+    } finally {
+      this._exportLoading = false;
+    }
+  }
+
+  async _doTabExport(tab, format) {
+    const tagMap = {
+      ingestion: "ingestion-panel",
+      storage: "storage-panel",
+      deletions: "deletions-panel",
+      activity: "activity-panel",
+    };
+    const tagName = tagMap[tab];
+    if (!tagName) return;
+
+    // Use existing DOM element if available; else create a detached instance with filters set
+    let el = this.shadowRoot.querySelector(tagName);
+    if (!el) {
+      el = document.createElement(tagName);
+      el.workspaces = this._workspaces;
+      el.selectedWorkspace = this._selectedWorkspace;
+    }
+
+    const data = await el.getExportData();
+    const filters = { workspace: this._selectedWorkspace || undefined };
+
+    if (tab === "ingestion") {
+      if (format === "csv") exportToCsv(buildFilename("ingestion", "csv", filters), data.records);
+      else if (format === "json") exportToJson(buildFilename("ingestion", "json", filters), data);
+      else if (format === "xlsx") exportToXlsx(buildFilename("ingestion", "xlsx", filters), [
+        { name: "Summary", rows: data.summary },
+        { name: "Upload Records", rows: data.records },
+        { name: "Time Series (Annual)", rows: data.timeSeries },
+      ]);
+    } else if (tab === "storage") {
+      if (format === "csv") exportToCsv(buildFilename("storage", "csv", filters), data.workspaces);
+      else if (format === "json") exportToJson(buildFilename("storage", "json", filters), data);
+      else if (format === "xlsx") exportToXlsx(buildFilename("storage", "xlsx", filters), [
+        { name: "Summary", rows: data.summary },
+        { name: "Workspace Storage", rows: data.workspaces },
+      ]);
+    } else if (tab === "deletions") {
+      if (format === "csv") exportToCsv(buildFilename("deletions", "csv", filters), data.recycleBin);
+      else if (format === "json") exportToJson(buildFilename("deletions", "json", filters), data);
+      else if (format === "xlsx") exportToXlsx(buildFilename("deletions", "xlsx", filters), [
+        { name: "Summary", rows: data.summary },
+        { name: "Recycle Bin", rows: data.recycleBin },
+        { name: "Deletion History", rows: data.history },
+      ]);
+    } else if (tab === "activity") {
+      if (format === "csv") exportToCsv(buildFilename("activity", "csv", filters), data.log);
+      else if (format === "json") exportToJson(buildFilename("activity", "json", filters), data);
+      else if (format === "xlsx") exportToXlsx(buildFilename("activity", "xlsx", filters), [
+        { name: "Summary", rows: data.summary },
+        { name: "Activity Log", rows: data.log },
+        { name: "By Type", rows: data.byType },
+        { name: "Time Series (Annual)", rows: data.timeSeries },
+      ]);
+    }
+  }
+
+  /**
+   * Gathers data from all five panels and exports as a multi-sheet XLSX or JSON.
+   * Each panel's getExportData() handles its own data fetching.
+   */
+  async _doGlobalExport(format) {
+    // Use existing DOM element if available; otherwise create a detached instance
+    // with workspaces set so getExportData() can make its own API calls.
+    const getPanelData = (tagName, extraProps = {}) => {
+      const existing = this.shadowRoot.querySelector(tagName);
+      if (existing) return existing.getExportData();
+      const el = document.createElement(tagName);
+      el.workspaces = this._workspaces;
+      Object.assign(el, extraProps);
+      return el.getExportData();
+    };
+
+    const [overview, ingestion, storage, deletions, activity] = await Promise.all([
+      getPanelData("file-overview-panel"),
+      getPanelData("ingestion-panel"),
+      getPanelData("storage-panel"),
+      getPanelData("deletions-panel"),
+      getPanelData("activity-panel"),
+    ]);
+
+    if (format === "xlsx") {
+      const sheets = [
+        {
+          name: "Summary",
+          rows: [
+            ...(overview?.summary ?? [{ Metric: "Overview data unavailable", Value: "" }]),
+            { Metric: "", Value: "" },
+            ...(ingestion?.summary?.map((r) => ({ ...r, Metric: "Ingestion — " + r.Metric })) ?? []),
+            { Metric: "", Value: "" },
+            ...(storage?.summary?.map((r) => ({ ...r, Metric: "Storage — " + r.Metric })) ?? []),
+            { Metric: "", Value: "" },
+            ...(deletions?.summary?.map((r) => ({ ...r, Metric: "Deletions — " + r.Metric })) ?? []),
+            { Metric: "", Value: "" },
+            ...(activity?.summary?.map((r) => ({ ...r, Metric: "Activity — " + r.Metric })) ?? []),
+          ],
+        },
+        { name: "Overview — File Types", rows: overview?.filesByType ?? [] },
+        { name: "Overview — By Workspace", rows: overview?.storageByWorkspace ?? [] },
+        { name: "Ingestion — Uploads", rows: ingestion?.records ?? [] },
+        { name: "Ingestion — Time Series", rows: ingestion?.timeSeries ?? [] },
+        { name: "Storage — Workspaces", rows: storage?.workspaces ?? [] },
+        { name: "Deletions — Recycle Bin", rows: deletions?.recycleBin ?? [] },
+        { name: "Deletions — History", rows: deletions?.history ?? [] },
+        { name: "Activity — Log", rows: activity?.log ?? [] },
+        { name: "Activity — By Type", rows: activity?.byType ?? [] },
+      ];
+      exportToXlsx(buildFilename("full-report", "xlsx"), sheets);
+    } else if (format === "json") {
+      exportToJson(buildFilename("full-report", "json"), {
+        overview,
+        ingestion,
+        storage,
+        deletions,
+        activity,
+      });
+    }
   }
 
   _renderPanel() {
@@ -385,6 +554,12 @@ class Dashboard extends LitElement {
               ?disabled=${!this._wsFilterEnabled}
               @workspace-changed=${this._onWorkspaceChanged}
             ></workspace-filter>
+            <export-button
+              .label=${this._activeTab === "overview" ? "Export Report" : "Export"}
+              .formats=${this._exportFormats}
+              .loading=${this._exportLoading}
+              @export-format-selected=${this._handleExport}
+            ></export-button>
             <button
               class="refresh-btn"
               @click=${this._onRefresh}

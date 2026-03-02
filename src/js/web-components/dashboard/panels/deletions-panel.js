@@ -19,6 +19,7 @@ import {
   restartIcon,
   alertCircleIcon,
 } from "../../utils/icons.js";
+import { fetchAllAuditLogs } from "../utils/export-utils.js";
 
 class DeletionsPanel extends LitElement {
   static properties = {
@@ -546,6 +547,7 @@ class DeletionsPanel extends LitElement {
       border-radius: 16px;
       overflow: hidden;
     }
+
   `;
 
   constructor() {
@@ -805,6 +807,88 @@ class DeletionsPanel extends LitElement {
     } finally {
       this._actionInProgress = false;
     }
+  }
+
+  // ── Export ────────────────────────────────────────────────────────────────
+
+  /**
+   * Returns all deletions data structured for export.
+   * Uses already-loaded recycle bin data and fetches complete deletion history.
+   */
+  async getExportData() {
+    // If recycle bin hasn't loaded yet (e.g. called from global export on detached element),
+    // fetch fresh data from the API using current filter state.
+    let tableRows = this._tableRows;
+    if (!tableRows.length && this.workspaces.length) {
+      const targets = this.selectedWorkspace
+        ? this.workspaces.filter((ws) => (ws.Slug ?? ws.UUID) === this.selectedWorkspace)
+        : this.workspaces;
+
+      const allNodeArrays = await Promise.all(
+        targets.map(async (ws) => {
+          const slug = ws.Slug ?? ws.UUID ?? "";
+          const label = ws.Label ?? slug;
+          try {
+            const res = await getRecycleBin(slug, 200, 0);
+            return (res.Nodes ?? [])
+              .filter((n) => !n.Path?.endsWith("/recycle_bin"))
+              .map((node) => {
+                const path = node.Path ?? "";
+                const parts = path.split("/").filter(Boolean);
+                return {
+                  name: parts[parts.length - 1] ?? "Unknown",
+                  workspace: label,
+                  path,
+                  size: parseInt(node.Size ?? "0", 10),
+                  mtime: node.MTime ? parseInt(node.MTime, 10) : 0,
+                  type: node.Type === "COLLECTION" ? "Folder" : "File",
+                  requester: "",
+                  requesterTs: null,
+                };
+              });
+          } catch {
+            return [];
+          }
+        }),
+      );
+      tableRows = allNodeArrays.flat().sort((a, b) => b.mtime - a.mtime);
+    }
+
+    const totalDeleted = tableRows.length;
+    const totalDeletedSize = tableRows.reduce((s, r) => s + r.size, 0);
+
+    const summary = [
+      { Metric: "Soft-Deleted Items", Value: totalDeleted },
+      { Metric: "Recoverable Storage", Value: formatBytes(totalDeletedSize) },
+      { Metric: "Recoverable Storage (Bytes)", Value: totalDeletedSize },
+      { Metric: "Workspace Filter", Value: this.selectedWorkspace || "All Workspaces" },
+    ];
+
+    const recycleBin = tableRows.map((row) => ({
+      Name: row.name,
+      Type: row.type,
+      Workspace: row.workspace,
+      "Size (Bytes)": row.size,
+      "Size (Formatted)": formatBytes(row.size),
+      "In Bin Since": row.mtime ? new Date(row.mtime * 1000).toISOString() : "",
+      "Deleted By": row.requester || "Unknown",
+      Path: row.path,
+    }));
+
+    const historyLogs = await fetchAllAuditLogs(getAuditLogs, "+MsgId:19");
+    const history = historyLogs.map((log) => {
+      const path = log.NodePath ?? "";
+      const parts = path.split("/").filter(Boolean);
+      return {
+        Date: log.Ts ? new Date(log.Ts * 1000).toISOString() : "",
+        User: log.UserName ?? "",
+        Item: parts.length > 0 ? parts[parts.length - 1] : path,
+        Workspace: parts[0] ?? "",
+        Path: path,
+      };
+    });
+
+    return { summary, recycleBin, history };
   }
 
   // ── Render helpers ────────────────────────────────────────────────────────

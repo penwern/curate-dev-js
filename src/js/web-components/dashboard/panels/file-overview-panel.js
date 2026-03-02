@@ -58,6 +58,9 @@ class FileOverviewPanel extends LitElement {
     this._typeData = null;
     this._workspaceData = null;
     this._fileCountData = null;
+    // Cached workspace stats for export (set during _loadStats)
+    this._wsStats = [];
+    this._groupCounts = {};
   }
 
   connectedCallback() {
@@ -80,6 +83,8 @@ class FileOverviewPanel extends LitElement {
     this._statsLoading = true;
     try {
       const wsStats = await this._loadWorkspaceStats();
+
+      this._wsStats = wsStats;
 
       if (wsStats.length > 0) {
         const style = getComputedStyle(document.documentElement);
@@ -142,6 +147,7 @@ class FileOverviewPanel extends LitElement {
     this._typesLoading = true;
     try {
       const groupCounts = await this._loadTypeBreakdown();
+      this._groupCounts = groupCounts;
 
       const typeLabels = [];
       const typeCounts = [];
@@ -235,6 +241,48 @@ class FileOverviewPanel extends LitElement {
       console.error("Failed to load root stats:", err);
       return [];
     }
+  }
+
+  /**
+   * Returns all overview data structured for export.
+   * Called by individual panel exports and by the dashboard "Export Report".
+   */
+  async getExportData() {
+    // Fall back to fresh API calls so this works on detached elements (global export)
+    const wsStats = this._wsStats.length ? this._wsStats : await this._loadWorkspaceStats();
+    const groupCounts = Object.keys(this._groupCounts).length ? this._groupCounts : await this._loadTypeBreakdown();
+
+    // Compute totals from wsStats so summary is correct even before _loadStats has run
+    let totalFiles = 0;
+    let totalSize = 0;
+    for (const ws of wsStats) {
+      if (ws.node) {
+        totalFiles += parseInt(ws.node.MetaStore?.RecursiveCount ?? "0", 10);
+        totalSize += parseInt(ws.node.Size ?? "0", 10);
+      }
+    }
+
+    const summary = [
+      { Metric: "Total Files", Value: totalFiles },
+      { Metric: "Total Storage", Value: formatBytes(totalSize) },
+      { Metric: "Total Storage (Bytes)", Value: totalSize },
+      { Metric: "Workspaces", Value: this.workspaces.length },
+    ];
+
+    const filesByType = Object.entries(groupCounts)
+      .filter(([, count]) => count > 0)
+      .map(([type, count]) => ({ "File Type": type, Count: count }));
+
+    const storageByWorkspace = wsStats
+      .filter((ws) => ws.node)
+      .map((ws) => ({
+        Workspace: ws.label,
+        "Size (Bytes)": parseInt(ws.node.Size ?? "0", 10),
+        "Size (Formatted)": formatBytes(parseInt(ws.node.Size ?? "0", 10)),
+        "File Count": parseInt(ws.node.MetaStore?.RecursiveCount ?? "0", 10),
+      }));
+
+    return { summary, filesByType, storageByWorkspace };
   }
 
   render() {
