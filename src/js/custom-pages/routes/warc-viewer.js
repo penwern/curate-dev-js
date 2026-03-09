@@ -15,7 +15,17 @@ function loadReplayUi() {
     replayUiLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = REPLAY_UI_SRC;
-      script.onload = resolve;
+      script.onload = () => {
+        // register-service-worker (used internally by replay-web-page) wraps all
+        // SW registration in a waitWindowLoad promise that resolves on window 'load'.
+        // Since ui.js is loaded dynamically after page load, that event has already
+        // fired and the promise never resolves, leaving replay-web-page blank.
+        // Dispatching a synthetic load event here unblocks it.
+        if (document.readyState === "complete") {
+          window.dispatchEvent(new Event("load"));
+        }
+        resolve();
+      };
       script.onerror = reject;
       document.head.appendChild(script);
     })
