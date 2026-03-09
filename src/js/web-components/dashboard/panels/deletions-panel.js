@@ -39,6 +39,7 @@ class DeletionsPanel extends LitElement {
     _actionError: { state: true },
     _confirmDelete: { state: true },
     _requesterLoading: { state: true },
+    _ageBinData: { state: true },
   };
 
   static styles = css`
@@ -569,6 +570,7 @@ class DeletionsPanel extends LitElement {
     this._actionError = "";
     this._confirmDelete = false;
     this._requesterLoading = false;
+    this._ageBinData = null;
   }
 
   connectedCallback() {
@@ -578,6 +580,9 @@ class DeletionsPanel extends LitElement {
   }
 
   updated(changed) {
+    if (changed.has("_tableRows")) {
+      this._rebuildAgeChart();
+    }
     if (changed.has("selectedWorkspace") && changed.get("selectedWorkspace") !== undefined) {
       this._selected = new Set();
       this._confirmDelete = false;
@@ -725,6 +730,47 @@ class DeletionsPanel extends LitElement {
     }
   }
 
+  // ── Age distribution ──────────────────────────────────────────────────────
+
+  _rebuildAgeChart() {
+    if (!this._tableRows.length) {
+      this._ageBinData = null;
+      return;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const bins = [
+      { label: "< 7 days",    max: 7 * 86400,   count: 0 },
+      { label: "7–30 days",   max: 30 * 86400,  count: 0 },
+      { label: "1–3 months",  max: 90 * 86400,  count: 0 },
+      { label: "> 3 months",  max: Infinity,    count: 0 },
+    ];
+
+    for (const row of this._tableRows) {
+      const ts = row.requesterTs || row.mtime;
+      const age = ts ? now - ts : 0;
+      for (const bin of bins) {
+        if (age <= bin.max) { bin.count++; break; }
+      }
+    }
+
+    const style = getComputedStyle(document.documentElement);
+    const errorColor = style.getPropertyValue("--md-sys-color-error").trim() || "#ba1a1a";
+    const colors = [errorColor + "55", errorColor + "88", errorColor + "BB", errorColor];
+
+    this._ageBinData = {
+      labels: bins.map((b) => b.label),
+      datasets: [{
+        label: "Items",
+        data: bins.map((b) => b.count),
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false,
+        barThickness: 28,
+      }],
+    };
+  }
+
   // ── Requester correlation ─────────────────────────────────────────────────
   // MsgId:20 events capture the user who soft-deleted (moved to recycle bin).
   // We correlate by matching the destination filename from the Msg field.
@@ -782,8 +828,11 @@ class DeletionsPanel extends LitElement {
     if (!this._selected.size || this._actionInProgress) return;
     this._actionInProgress = true;
     this._actionError = "";
+    const actioned = new Set(this._selected);
     try {
-      await restoreNodes([...this._selected]);
+      await restoreNodes([...actioned]);
+      this._tableRows = this._tableRows.filter((r) => !actioned.has(r.path));
+      this._selected = new Set();
       invalidateCache();
       await this._loadData();
     } catch (err) {
@@ -798,8 +847,11 @@ class DeletionsPanel extends LitElement {
     this._actionInProgress = true;
     this._confirmDelete = false;
     this._actionError = "";
+    const actioned = new Set(this._selected);
     try {
-      await deleteNodes([...this._selected], true);
+      await deleteNodes([...actioned], true);
+      this._tableRows = this._tableRows.filter((r) => !actioned.has(r.path));
+      this._selected = new Set();
       invalidateCache();
       await this._loadData();
     } catch (err) {
@@ -870,7 +922,7 @@ class DeletionsPanel extends LitElement {
       Workspace: row.workspace,
       "Size (Bytes)": row.size,
       "Size (Formatted)": formatBytes(row.size),
-      "In Bin Since": row.mtime ? new Date(row.mtime * 1000).toISOString() : "",
+      "In Bin Since": (row.requesterTs || row.mtime) ? new Date((row.requesterTs || row.mtime) * 1000).toISOString() : "",
       "Deleted By": row.requester || "Unknown",
       Path: row.path,
     }));
@@ -1065,7 +1117,7 @@ class DeletionsPanel extends LitElement {
                 </td>
                 <td>${row.workspace}</td>
                 <td>${formatBytes(row.size)}</td>
-                <td>${formatDate(row.mtime)}</td>
+                <td>${formatDate(row.requesterTs || row.mtime)}</td>
                 <td>${this._renderRequester(row)}</td>
               </tr>
             `)}
@@ -1110,6 +1162,21 @@ class DeletionsPanel extends LitElement {
             plugins: {
               legend: { display: false },
               tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} items` } },
+            },
+            scales: { x: { ticks: { precision: 0 } } },
+          }}
+        ></chart-card>
+        <chart-card
+          heading="Time in Recycle Bin"
+          type="bar"
+          .data=${this._ageBinData}
+          .loading=${this._recycleBinLoading}
+          .height=${Math.max(200, (this.workspaces.length || 3) * 40)}
+          .options=${{
+            indexAxis: "y",
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} item${ctx.raw !== 1 ? "s" : ""}` } },
             },
             scales: { x: { ticks: { precision: 0 } } },
           }}

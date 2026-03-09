@@ -1,13 +1,14 @@
 import { LitElement, html, css } from "lit";
 import "../components/stat-card.js";
 import "../components/chart-card.js";
-import { listRootStats, formatBytes, formatNumber } from "../client.js";
+import { listRootStats, getStorageHistory, formatBytes, formatNumber } from "../client.js";
 import { harddiskIcon, folderIcon } from "../../utils/icons.js";
 
 class StoragePanel extends LitElement {
   static properties = {
     workspaces: { type: Array },
     selectedWorkspace: { type: String },
+    storageReportingUrl: { type: String },
     _statsLoading: { state: true },
     _chartsLoading: { state: true },
     _totalSize: { state: true },
@@ -16,6 +17,11 @@ class StoragePanel extends LitElement {
     _barData: { state: true },
     _doughnutData: { state: true },
     _wsDetails: { state: true },
+    _historyLoading: { state: true },
+    _historyData: { state: true },
+    _bucket: { state: true },
+    _rangeKey: { state: true },
+    _historyView: { state: true },
   };
 
   static styles = css`
@@ -73,6 +79,58 @@ class StoragePanel extends LitElement {
       border-radius: 3px;
       transition: width 0.4s ease;
     }
+    .history-section {
+      margin-top: 24px;
+    }
+    .history-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .history-controls select {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 6px;
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      cursor: pointer;
+      outline: none;
+    }
+    .history-controls select:focus {
+      border-color: var(--md-sys-color-primary);
+    }
+    .history-controls .ctrl-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--md-sys-color-outline-variant);
+      margin: 0 2px;
+    }
+    .toggle-group {
+      display: flex;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .toggle-btn {
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 12px;
+      border: none;
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .toggle-btn.active {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+    }
+    .toggle-btn + .toggle-btn {
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+    }
     .section-heading {
       font-size: 14px;
       font-weight: 500;
@@ -94,6 +152,7 @@ class StoragePanel extends LitElement {
     super();
     this.workspaces = [];
     this.selectedWorkspace = "";
+    this.storageReportingUrl = "";
     this._statsLoading = true;
     this._chartsLoading = true;
     this._totalSize = 0;
@@ -103,6 +162,13 @@ class StoragePanel extends LitElement {
     this._doughnutData = null;
     this._wsDetails = [];
     this._loadGen = 0;
+    this._historyLoading = false;
+    this._historyData = null;
+    this._bucket = "day";
+    this._rangeKey = "30d";
+    this._historyView = "total";
+    this._historyGen = 0;
+    this._rawHistorySeries = null;
   }
 
   connectedCallback() {
@@ -113,6 +179,15 @@ class StoragePanel extends LitElement {
   updated(changed) {
     if (changed.has("workspaces") && this.workspaces.length) {
       this._loadData();
+    }
+    if (changed.has("storageReportingUrl") && this.storageReportingUrl) {
+      this._loadHistory();
+    }
+    if ((changed.has("_bucket") || changed.has("_rangeKey")) && this.storageReportingUrl) {
+      this._loadHistory();
+    }
+    if (changed.has("_historyView") && this._rawHistorySeries) {
+      this._rebuildHistoryChart();
     }
   }
 
@@ -213,6 +288,91 @@ class StoragePanel extends LitElement {
     return { summary, workspaces };
   }
 
+  async _loadHistory() {
+    if (!this.storageReportingUrl) return;
+    const gen = ++this._historyGen;
+    this._historyLoading = true;
+    this._historyData = null;
+
+    const now = Math.floor(Date.now() / 1000);
+    const offsets = { "30d": 30 * 86400, "6m": 180 * 86400, "1y": 365 * 86400 };
+    const from = now - (offsets[this._rangeKey] ?? 30 * 86400);
+
+    try {
+      const res = await getStorageHistory(this.storageReportingUrl, {
+        bucket: this._bucket,
+        from,
+        to: now,
+      });
+      if (gen !== this._historyGen) return;
+      this._rawHistorySeries = res.series ?? [];
+      this._rebuildHistoryChart();
+    } catch (err) {
+      console.error("StoragePanel history load error:", err);
+    } finally {
+      if (gen === this._historyGen) this._historyLoading = false;
+    }
+  }
+
+  _rebuildHistoryChart() {
+    const series = this._rawHistorySeries;
+    if (!series || !series.length) {
+      this._historyData = null;
+      return;
+    }
+
+    const style = getComputedStyle(document.documentElement);
+    const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
+    const vibrantHues = [primary, "#4285f4", "#34a853", "#fbbc04", "#ea4335", "#9334e6", "#e8710a", "#00acc1"];
+
+    if (this._historyView === "total") {
+      const bucketMap = new Map();
+      for (const ds of series) {
+        for (const point of ds.data) {
+          bucketMap.set(point.bucket, (bucketMap.get(point.bucket) ?? 0) + point.bytes);
+        }
+      }
+      const sorted = [...bucketMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      this._historyData = {
+        labels: sorted.map(([b]) => b),
+        datasets: [{
+          label: "Total Storage",
+          data: sorted.map(([, v]) => v),
+          borderColor: primary,
+          backgroundColor: primary + "22",
+          fill: true,
+          tension: 0.3,
+          pointRadius: sorted.length > 60 ? 0 : 3,
+          pointHoverRadius: 4,
+        }],
+      };
+    } else {
+      const allBuckets = new Set();
+      for (const ds of series) {
+        for (const point of ds.data) allBuckets.add(point.bucket);
+      }
+      const labels = [...allBuckets].sort((a, b) => a.localeCompare(b));
+      this._historyData = {
+        labels,
+        datasets: series.map((ds, i) => {
+          const dataMap = new Map(ds.data.map((p) => [p.bucket, p.bytes]));
+          const color = vibrantHues[i % vibrantHues.length];
+          return {
+            label: ds.datasource,
+            data: labels.map((l) => dataMap.get(l) ?? null),
+            borderColor: color,
+            backgroundColor: color + "22",
+            fill: false,
+            tension: 0.3,
+            pointRadius: labels.length > 60 ? 0 : 3,
+            pointHoverRadius: 4,
+            spanGaps: true,
+          };
+        }),
+      };
+    }
+  }
+
   _rebuildCharts(results, vibrantHues) {
     this._barData = {
       labels: results.map((r) => r.label),
@@ -275,7 +435,7 @@ class StoragePanel extends LitElement {
           type="bar"
           .data=${this._barData}
           .loading=${this._chartsLoading}
-          .height=${Math.max(200, this._wsDetails.length * 40)}
+          .height=${300}
           .options=${{
             indexAxis: "y",
             plugins: {
@@ -328,6 +488,60 @@ class StoragePanel extends LitElement {
       <div class="note">
         Storage allowance information is not currently available from the API. Totals shown represent current usage only.
       </div>
+
+      ${this.storageReportingUrl ? html`
+        <div class="history-section">
+          <chart-card
+            heading="Storage Over Time"
+            type="line"
+            .data=${this._historyData}
+            .loading=${this._historyLoading}
+            .height=${280}
+            .options=${{
+              plugins: {
+                legend: { display: this._historyView === "datasource", position: "bottom" },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`,
+                  },
+                },
+              },
+              scales: {
+                x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+                y: { ticks: { callback: (v) => formatBytes(v) } },
+              },
+            }}
+          >
+            <div slot="actions" class="history-controls">
+              <select
+                @change=${(e) => { this._bucket = e.target.value; }}
+              >
+                <option value="day" ?selected=${this._bucket === "day"}>Day</option>
+                <option value="week" ?selected=${this._bucket === "week"}>Week</option>
+                <option value="month" ?selected=${this._bucket === "month"}>Month</option>
+              </select>
+              <select
+                @change=${(e) => { this._rangeKey = e.target.value; }}
+              >
+                <option value="30d" ?selected=${this._rangeKey === "30d"}>Last 30 days</option>
+                <option value="6m" ?selected=${this._rangeKey === "6m"}>Last 6 months</option>
+                <option value="1y" ?selected=${this._rangeKey === "1y"}>Last year</option>
+              </select>
+              <div class="ctrl-sep"></div>
+              <div class="toggle-group">
+                <button
+                  class="toggle-btn ${this._historyView === "total" ? "active" : ""}"
+                  @click=${() => { this._historyView = "total"; }}
+                >Total</button>
+                <button
+                  class="toggle-btn ${this._historyView === "datasource" ? "active" : ""}"
+                  @click=${() => { this._historyView = "datasource"; }}
+                >Per datasource</button>
+              </div>
+            </div>
+          </chart-card>
+        </div>
+      ` : html``}
     `;
   }
 }

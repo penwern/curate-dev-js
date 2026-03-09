@@ -13,10 +13,19 @@ import "./panels/ingestion-panel.js";
 import "./panels/storage-panel.js";
 import "./panels/deletions-panel.js";
 import "./panels/activity-panel.js";
+import "./panels/formats-panel.js";
 import { getWorkspaces, invalidateCache, currentUserCanViewDashboard } from "./client.js";
-import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClockIcon, eyeIcon } from "../utils/icons.js";
+import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClockIcon, eyeIcon, chartDonutIcon } from "../utils/icons.js";
 import "../utils/penwern-spinner.js";
 import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
+
+// URL of the curate-storage-reporting API service.
+// Edit this to match your deployment (e.g. "https://storage-api.example.com").
+const STORAGE_REPORTING_URL = "http://localhost:8000";
+
+// URL of the cells-db-tests MIME/format reporting API service.
+// Edit this to match your deployment (e.g. "https://format-api.example.com").
+const FORMAT_REPORTING_URL = "http://localhost:8000";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fileMultipleIcon" },
@@ -24,6 +33,7 @@ const TABS = [
   { id: "storage", label: "Storage", icon: "harddiskIcon" },
   { id: "deletions", label: "Deletions", icon: "deleteClockIcon" },
   { id: "activity", label: "Activity", icon: "eyeIcon" },
+  { id: "formats", label: "Formats", icon: "chartDonutIcon" },
 ];
 
 const TAB_ICONS = {
@@ -32,6 +42,7 @@ const TAB_ICONS = {
   harddiskIcon,
   deleteClockIcon,
   eyeIcon,
+  chartDonutIcon,
 };
 
 const WS_FILTER_TABS = new Set(["ingestion", "deletions", "activity"]);
@@ -351,6 +362,12 @@ class Dashboard extends LitElement {
           { value: "xlsx", label: "Excel (.xlsx) — All Data" },
           { value: "json", label: "JSON — All Data" },
         ];
+      case "formats":
+        return [
+          { value: "csv", label: "CSV — Format Breakdown" },
+          { value: "xlsx", label: "Excel (.xlsx) — All Data" },
+          { value: "json", label: "JSON — All Data" },
+        ];
       default:
         return [];
     }
@@ -378,6 +395,7 @@ class Dashboard extends LitElement {
       storage: "storage-panel",
       deletions: "deletions-panel",
       activity: "activity-panel",
+      formats: "formats-panel",
     };
     const tagName = tagMap[tab];
     if (!tagName) return;
@@ -388,6 +406,7 @@ class Dashboard extends LitElement {
       el = document.createElement(tagName);
       el.workspaces = this._workspaces;
       el.selectedWorkspace = this._selectedWorkspace;
+      if (tab === "formats") el.formatReportingUrl = FORMAT_REPORTING_URL;
     }
 
     const data = await el.getExportData();
@@ -424,6 +443,14 @@ class Dashboard extends LitElement {
         { name: "Activity Log", rows: data.log },
         { name: "By Type", rows: data.byType },
         { name: "Time Series (Annual)", rows: data.timeSeries },
+      ]);
+    } else if (tab === "formats") {
+      if (format === "csv") exportToCsv(buildFilename("formats", "csv"), data.formats);
+      else if (format === "json") exportToJson(buildFilename("formats", "json"), data);
+      else if (format === "xlsx") exportToXlsx(buildFilename("formats", "xlsx"), [
+        { name: "Summary", rows: data.summary },
+        { name: "Format Breakdown", rows: data.formats },
+        { name: "By Datasource", rows: data.byDatasource },
       ]);
     }
   }
@@ -496,6 +523,7 @@ class Dashboard extends LitElement {
         return html`
           <file-overview-panel
             .workspaces=${this._workspaces}
+            .formatReportingUrl=${FORMAT_REPORTING_URL}
           ></file-overview-panel>
         `;
       case "ingestion":
@@ -509,6 +537,7 @@ class Dashboard extends LitElement {
         return html`
           <storage-panel
             .workspaces=${this._workspaces}
+            .storageReportingUrl=${STORAGE_REPORTING_URL}
           ></storage-panel>
         `;
       case "deletions":
@@ -524,6 +553,12 @@ class Dashboard extends LitElement {
             .workspaces=${this._workspaces}
             .selectedWorkspace=${this._selectedWorkspace}
           ></activity-panel>
+        `;
+      case "formats":
+        return html`
+          <formats-panel
+            .formatReportingUrl=${FORMAT_REPORTING_URL}
+          ></formats-panel>
         `;
       default:
         return html``;

@@ -281,6 +281,102 @@ export async function restoreNodes(paths) {
   });
 }
 
+// ─── Format / MIME Reporting API ─────────────────────────────────────────────
+// Calls the cells-db-tests FastAPI service. baseUrl is the full origin,
+// e.g. "http://localhost:8000".
+
+async function formatApiCall(baseUrl, path) {
+  const token = await getToken();
+  const headers = { Accept: "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${baseUrl}${path}`, { headers });
+  if (!res.ok) throw new Error(`Format API ${res.status}: ${res.statusText} — ${path}`);
+  return res.json();
+}
+
+export async function getFormatSnapshot(baseUrl) {
+  return formatApiCall(baseUrl, "/snapshots/latest");
+}
+
+export async function getMimeBreakdown(baseUrl, datasource = null) {
+  const path = datasource
+    ? `/mime-breakdown/latest/${encodeURIComponent(datasource)}`
+    : "/mime-breakdown/latest";
+  return formatApiCall(baseUrl, path);
+}
+
+export async function getMimeTimeseries(baseUrl, { metric = "file_count", datasource, mimeOrExt, from, to } = {}) {
+  const params = new URLSearchParams({ metric });
+  if (datasource) params.set("datasource", datasource);
+  if (mimeOrExt) params.set("mime_or_ext", mimeOrExt);
+  if (from) params.set("from_snapshot_at", from);
+  if (to) params.set("to_snapshot_at", to);
+  return formatApiCall(baseUrl, `/timeseries/chart?${params}`);
+}
+
+export async function getMimeTimeseriesByDatasource(baseUrl, { metric = "file_count", mimeOrExt, from, to } = {}) {
+  const params = new URLSearchParams({ metric });
+  if (mimeOrExt) params.set("mime_or_ext", mimeOrExt);
+  if (from) params.set("from_snapshot_at", from);
+  if (to) params.set("to_snapshot_at", to);
+  return formatApiCall(baseUrl, `/timeseries/chart/by-datasource?${params}`);
+}
+
+/**
+ * Maps a mime_or_ext string (e.g. "image/png" or "ext:pdf") to a broad
+ * file-type category matching the FILE_TYPE_GROUPS keys.
+ */
+export function categorizeMime(mimeOrExt) {
+  if (!mimeOrExt) return "Other";
+  if (mimeOrExt.startsWith("ext:")) {
+    const ext = mimeOrExt.slice(4).toLowerCase();
+    for (const [group, { extensions }] of Object.entries(FILE_TYPE_GROUPS)) {
+      if (extensions.includes(ext)) return group;
+    }
+    return "Other";
+  }
+  const m = mimeOrExt.split(";")[0].trim().toLowerCase();
+  if (m === "application/pdf") return "PDF";
+  if (m.startsWith("image/")) return "Images";
+  if (m.startsWith("audio/")) return "Audio";
+  if (m.startsWith("video/")) return "Video";
+  if (m === "text/csv" || m === "text/tab-separated-values") return "Spreadsheets";
+  if (m.startsWith("text/")) return "Documents";
+  if (m.includes("wordprocessing") || m === "application/msword" || m === "application/rtf") return "Documents";
+  if (m.includes(".sheet") || m.includes("spreadsheet") || m.includes("excel") || m === "application/vnd.ms-excel") return "Spreadsheets";
+  if (m.includes("presentation") || m === "application/vnd.ms-powerpoint") return "Presentations";
+  if (["application/zip", "application/x-rar-compressed", "application/x-7z-compressed",
+       "application/x-tar", "application/gzip", "application/x-bzip2", "application/x-xz"].includes(m)) return "Archives";
+  return "Other";
+}
+
+// ─── Storage Reporting API ────────────────────────────────────────────────────
+// These call a separate service (not the Curate /a/ path). baseUrl is the
+// full origin + optional prefix, e.g. "http://localhost:8000".
+
+async function storageApiCall(baseUrl, path) {
+  const token = await getToken();
+  const headers = { Accept: "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${baseUrl}${path}`, { headers });
+  if (!res.ok) throw new Error(`Storage API ${res.status}: ${res.statusText} — ${path}`);
+  return res.json();
+}
+
+export async function getStorageDatasources(baseUrl) {
+  return storageApiCall(baseUrl, "/api/datasources");
+}
+
+export async function getStorageHistory(baseUrl, { bucket = "day", from, to, datasource } = {}) {
+  const params = new URLSearchParams({ bucket });
+  if (from != null) params.set("from", String(from));
+  if (to != null) params.set("to", String(to));
+  if (datasource) params.set("datasource", datasource);
+  return storageApiCall(baseUrl, `/api/storage/history?${params}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function configure({ basePath, token } = {}) {
   if (basePath !== undefined) window.CURATE_API_BASE = basePath;
   if (token !== undefined) window.CURATE_API_TOKEN = token;

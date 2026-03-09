@@ -3,6 +3,8 @@ import "../components/stat-card.js";
 import "../components/chart-card.js";
 import {
   countByExtensions,
+  getMimeBreakdown,
+  categorizeMime,
   listRootStats,
   formatBytes,
   formatNumber,
@@ -13,6 +15,7 @@ import { fileMultipleIcon, harddiskIcon, folderIcon } from "../../utils/icons.js
 class FileOverviewPanel extends LitElement {
   static properties = {
     workspaces: { type: Array },
+    formatReportingUrl: { type: String },
     _statsLoading: { state: true },
     _typesLoading: { state: true },
     _totalFiles: { state: true },
@@ -51,6 +54,7 @@ class FileOverviewPanel extends LitElement {
   constructor() {
     super();
     this.workspaces = [];
+    this.formatReportingUrl = "";
     this._statsLoading = true;
     this._typesLoading = true;
     this._totalFiles = 0;
@@ -69,7 +73,7 @@ class FileOverviewPanel extends LitElement {
   }
 
   updated(changed) {
-    if (changed.has("workspaces")) {
+    if (changed.has("workspaces") || changed.has("formatReportingUrl")) {
       this._loadData();
     }
   }
@@ -146,7 +150,9 @@ class FileOverviewPanel extends LitElement {
   async _loadTypes() {
     this._typesLoading = true;
     try {
-      const groupCounts = await this._loadTypeBreakdown();
+      const groupCounts = this.formatReportingUrl
+        ? await this._loadTypeBreakdownFromMimeApi()
+        : await this._loadTypeBreakdown();
       this._groupCounts = groupCounts;
 
       const typeLabels = [];
@@ -215,6 +221,16 @@ class FileOverviewPanel extends LitElement {
     return groupCounts;
   }
 
+  async _loadTypeBreakdownFromMimeApi() {
+    const res = await getMimeBreakdown(this.formatReportingUrl);
+    const groupCounts = {};
+    for (const item of res.items ?? []) {
+      const group = categorizeMime(item.mime_or_ext);
+      groupCounts[group] = (groupCounts[group] ?? 0) + item.file_count;
+    }
+    return groupCounts;
+  }
+
   async _loadWorkspaceStats() {
     if (!this.workspaces.length) return [];
     try {
@@ -250,7 +266,11 @@ class FileOverviewPanel extends LitElement {
   async getExportData() {
     // Fall back to fresh API calls so this works on detached elements (global export)
     const wsStats = this._wsStats.length ? this._wsStats : await this._loadWorkspaceStats();
-    const groupCounts = Object.keys(this._groupCounts).length ? this._groupCounts : await this._loadTypeBreakdown();
+    const groupCounts = Object.keys(this._groupCounts).length
+      ? this._groupCounts
+      : this.formatReportingUrl
+        ? await this._loadTypeBreakdownFromMimeApi()
+        : await this._loadTypeBreakdown();
 
     // Compute totals from wsStats so summary is correct even before _loadStats has run
     let totalFiles = 0;
