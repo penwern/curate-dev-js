@@ -21,7 +21,7 @@ import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/
 
 // URL of the curate-storage-reporting API service.
 // Edit this to match your deployment (e.g. "https://storage-api.example.com").
-const STORAGE_REPORTING_URL = "http://localhost:8000";
+const STORAGE_REPORTING_URL = "http://localhost:8001";
 
 // URL of the cells-db-tests MIME/format reporting API service.
 // Edit this to match your deployment (e.g. "https://format-api.example.com").
@@ -92,17 +92,26 @@ class Dashboard extends LitElement {
     .tab-bar-inner {
       padding: 0 var(--dash-gutter);
       display: flex;
+      align-items: stretch;
+    }
+
+    .tab-scroll {
+      display: flex;
       align-items: center;
       gap: 2px;
-      position: relative;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .tab-scroll::-webkit-scrollbar { display: none; }
 
     .tab {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 14px 20px;
+      gap: 6px;
+      padding: 12px 14px;
       border: none;
       background: transparent;
       font-family: "DM Sans", "Roboto", sans-serif;
@@ -119,8 +128,8 @@ class Dashboard extends LitElement {
       content: "";
       position: absolute;
       bottom: 0;
-      left: 16px;
-      right: 16px;
+      left: 10px;
+      right: 10px;
       height: 2.5px;
       border-radius: 2px 2px 0 0;
       background: transparent;
@@ -147,14 +156,10 @@ class Dashboard extends LitElement {
     }
 
     .tab svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       fill: currentColor;
       flex-shrink: 0;
-    }
-
-    .tab-spacer {
-      flex: 1;
     }
 
     .tab-actions {
@@ -162,6 +167,7 @@ class Dashboard extends LitElement {
       align-items: center;
       gap: 12px;
       flex-shrink: 0;
+      padding-left: 16px;
     }
 
     .refresh-btn {
@@ -190,8 +196,10 @@ class Dashboard extends LitElement {
     }
 
     @media (max-width: 640px) {
-      .tab { padding: 14px 12px; }
+      .tab-bar-inner { padding: 0 12px; }
+      .tab { padding: 10px 10px; }
       .tab-label { display: none; }
+      .tab-actions { gap: 8px; padding-left: 8px; }
     }
 
     /* ─── Content Area ─── */
@@ -406,6 +414,7 @@ class Dashboard extends LitElement {
       el = document.createElement(tagName);
       el.workspaces = this._workspaces;
       el.selectedWorkspace = this._selectedWorkspace;
+      if (tab === "storage") el.storageReportingUrl = STORAGE_REPORTING_URL;
       if (tab === "formats") el.formatReportingUrl = FORMAT_REPORTING_URL;
     }
 
@@ -426,6 +435,7 @@ class Dashboard extends LitElement {
       else if (format === "xlsx") exportToXlsx(buildFilename("storage", "xlsx", filters), [
         { name: "Summary", rows: data.summary },
         { name: "Workspace Storage", rows: data.workspaces },
+        { name: "Storage History", rows: data.history ?? [] },
       ]);
     } else if (tab === "deletions") {
       if (format === "csv") exportToCsv(buildFilename("deletions", "csv", filters), data.recycleBin);
@@ -456,7 +466,7 @@ class Dashboard extends LitElement {
   }
 
   /**
-   * Gathers data from all five panels and exports as a multi-sheet XLSX or JSON.
+   * Gathers data from all panels and exports as a multi-sheet XLSX or JSON.
    * Each panel's getExportData() handles its own data fetching.
    */
   async _doGlobalExport(format) {
@@ -471,12 +481,13 @@ class Dashboard extends LitElement {
       return el.getExportData();
     };
 
-    const [overview, ingestion, storage, deletions, activity] = await Promise.all([
+    const [overview, ingestion, storage, deletions, activity, formats] = await Promise.all([
       getPanelData("file-overview-panel"),
       getPanelData("ingestion-panel"),
-      getPanelData("storage-panel"),
+      getPanelData("storage-panel", { storageReportingUrl: STORAGE_REPORTING_URL }),
       getPanelData("deletions-panel"),
       getPanelData("activity-panel"),
+      getPanelData("formats-panel", { formatReportingUrl: FORMAT_REPORTING_URL }),
     ]);
 
     if (format === "xlsx") {
@@ -493,6 +504,8 @@ class Dashboard extends LitElement {
             ...(deletions?.summary?.map((r) => ({ ...r, Metric: "Deletions — " + r.Metric })) ?? []),
             { Metric: "", Value: "" },
             ...(activity?.summary?.map((r) => ({ ...r, Metric: "Activity — " + r.Metric })) ?? []),
+            { Metric: "", Value: "" },
+            ...(formats?.summary?.map((r) => ({ ...r, Metric: "Formats — " + r.Metric })) ?? []),
           ],
         },
         { name: "Overview — File Types", rows: overview?.filesByType ?? [] },
@@ -500,10 +513,13 @@ class Dashboard extends LitElement {
         { name: "Ingestion — Uploads", rows: ingestion?.records ?? [] },
         { name: "Ingestion — Time Series", rows: ingestion?.timeSeries ?? [] },
         { name: "Storage — Workspaces", rows: storage?.workspaces ?? [] },
+        { name: "Storage — History", rows: storage?.history ?? [] },
         { name: "Deletions — Recycle Bin", rows: deletions?.recycleBin ?? [] },
         { name: "Deletions — History", rows: deletions?.history ?? [] },
         { name: "Activity — Log", rows: activity?.log ?? [] },
         { name: "Activity — By Type", rows: activity?.byType ?? [] },
+        { name: "Formats — Breakdown", rows: formats?.formats ?? [] },
+        { name: "Formats — By Datasource", rows: formats?.byDatasource ?? [] },
       ];
       exportToXlsx(buildFilename("full-report", "xlsx"), sheets);
     } else if (format === "json") {
@@ -513,6 +529,7 @@ class Dashboard extends LitElement {
         storage,
         deletions,
         activity,
+        formats,
       });
     }
   }
@@ -569,18 +586,19 @@ class Dashboard extends LitElement {
     return html`
       <nav class="tab-bar">
         <div class="tab-bar-inner">
-          ${TABS.map(
-            (tab) => html`
-              <button
-                class="tab ${this._activeTab === tab.id ? "active" : ""}"
-                @click=${() => this._onTabClick(tab.id)}
-              >
-                ${TAB_ICONS[tab.icon]}
-                <span class="tab-label">${tab.label}</span>
-              </button>
-            `,
-          )}
-          <span class="tab-spacer"></span>
+          <div class="tab-scroll">
+            ${TABS.map(
+              (tab) => html`
+                <button
+                  class="tab ${this._activeTab === tab.id ? "active" : ""}"
+                  @click=${() => this._onTabClick(tab.id)}
+                >
+                  ${TAB_ICONS[tab.icon]}
+                  <span class="tab-label">${tab.label}</span>
+                </button>
+              `,
+            )}
+          </div>
           <div class="tab-actions">
             <workspace-filter
               .workspaces=${this._workspaces}

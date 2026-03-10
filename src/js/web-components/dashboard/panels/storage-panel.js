@@ -285,7 +285,40 @@ class StoragePanel extends LitElement {
       "% of Total": totalSize > 0 ? ((ws.size / totalSize) * 100).toFixed(1) + "%" : "0%",
     }));
 
-    return { summary, workspaces };
+    // Include storage history if available
+    let history = [];
+    if (this._rawHistorySeries && this._rawHistorySeries.length) {
+      for (const ds of this._rawHistorySeries) {
+        for (const point of ds.data) {
+          history.push({
+            Datasource: ds.datasource,
+            "Date (Bucket)": point.bucket,
+            "Size (Bytes)": point.bytes,
+            "Size (Formatted)": formatBytes(point.bytes),
+          });
+        }
+      }
+    } else if (this.storageReportingUrl) {
+      try {
+        const now = Math.floor(Date.now() / 1000);
+        const from = now - 365 * 86400;
+        const res = await getStorageHistory(this.storageReportingUrl, { bucket: "day", from, to: now });
+        for (const ds of (res.series ?? [])) {
+          for (const point of ds.data) {
+            history.push({
+              Datasource: ds.datasource,
+              "Date (Bucket)": point.bucket,
+              "Size (Bytes)": point.bytes,
+              "Size (Formatted)": formatBytes(point.bytes),
+            });
+          }
+        }
+      } catch (err) {
+        console.error("StoragePanel getExportData history error:", err);
+      }
+    }
+
+    return { summary, workspaces, history };
   }
 
   async _loadHistory() {

@@ -322,6 +322,14 @@ export async function getMimeTimeseriesByDatasource(baseUrl, { metric = "file_co
   return formatApiCall(baseUrl, `/timeseries/chart/by-datasource?${params}`);
 }
 
+export async function getMimeTimeseriesByFormat(baseUrl, { metric = "file_count", datasource, from, to } = {}) {
+  const params = new URLSearchParams({ metric });
+  if (datasource) params.set("datasource", datasource);
+  if (from) params.set("from_snapshot_at", from);
+  if (to) params.set("to_snapshot_at", to);
+  return formatApiCall(baseUrl, `/timeseries/chart/by-format?${params}`);
+}
+
 /**
  * Maps a mime_or_ext string (e.g. "image/png" or "ext:pdf") to a broad
  * file-type category matching the FILE_TYPE_GROUPS keys.

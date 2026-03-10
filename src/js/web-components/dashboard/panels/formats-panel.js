@@ -4,7 +4,7 @@ import "../components/chart-card.js";
 import {
   getFormatSnapshot,
   getMimeBreakdown,
-  getMimeTimeseries,
+  getMimeTimeseriesByFormat,
   getMimeTimeseriesByDatasource,
   categorizeMime,
   formatBytes,
@@ -35,6 +35,9 @@ class FormatsPanel extends LitElement {
     _tsMetric: { state: true },
     _tsRange: { state: true },
     _tsView: { state: true },
+    _tsTopN: { state: true },
+    _tsFilter: { state: true },
+    _tsRawSeries: { state: true },
   };
 
   static styles = css`
@@ -176,6 +179,19 @@ class FormatsPanel extends LitElement {
     }
     .ts-controls select:focus { border-color: var(--md-sys-color-primary); }
 
+    .ts-filter-input {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 6px;
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+      width: 160px;
+    }
+    .ts-filter-input:focus { border-color: var(--md-sys-color-primary); }
+
     .ctrl-sep {
       width: 1px;
       height: 16px;
@@ -251,7 +267,10 @@ class FormatsPanel extends LitElement {
     this._tsData = null;
     this._tsMetric = "file_count";
     this._tsRange = "30d";
-    this._tsView = "combined";
+    this._tsView = "format";
+    this._tsTopN = 5;
+    this._tsFilter = "";
+    this._tsRawSeries = [];
     this._tsGen = 0;
   }
 
@@ -269,6 +288,9 @@ class FormatsPanel extends LitElement {
       this.formatReportingUrl
     ) {
       this._loadTimeseries();
+    }
+    if (changed.has("_tsTopN") || changed.has("_tsFilter")) {
+      this._rebuildTsData();
     }
   }
 
@@ -341,6 +363,7 @@ class FormatsPanel extends LitElement {
     const gen = ++this._tsGen;
     this._tsLoading = true;
     this._tsData = null;
+    this._tsRawSeries = [];
 
     const now = new Date();
     const days = { "30d": 30, "6m": 180, "1y": 365 }[this._tsRange] ?? 30;
@@ -348,26 +371,15 @@ class FormatsPanel extends LitElement {
     const to = now.toISOString();
 
     try {
-      if (this._tsView === "combined") {
-        const res = await getMimeTimeseries(this.formatReportingUrl, { metric: this._tsMetric, from, to });
+      if (this._tsView === "format") {
+        const res = await getMimeTimeseriesByFormat(this.formatReportingUrl, { metric: this._tsMetric, from, to });
         if (gen !== this._tsGen) return;
-        const style = getComputedStyle(document.documentElement);
-        const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
-        this._tsData = res.points?.length
-          ? {
-              labels: res.points.map((p) => this._fmtTs(p.snapshot_at)),
-              datasets: [{
-                label: this._metricLabel,
-                data: res.points.map((p) => p.value),
-                borderColor: primary,
-                backgroundColor: primary + "22",
-                fill: true,
-                tension: 0.3,
-                pointRadius: res.points.length > 60 ? 0 : 3,
-                pointHoverRadius: 4,
-              }],
-            }
-          : null;
+
+        this._tsRawSeries = (res.series ?? []).map((s) => ({
+          mime: s.mime_or_ext,
+          points: s.points ?? [],
+        }));
+        this._rebuildTsData();
       } else {
         const res = await getMimeTimeseriesByDatasource(this.formatReportingUrl, { metric: this._tsMetric, from, to });
         if (gen !== this._tsGen) return;
@@ -403,6 +415,44 @@ class FormatsPanel extends LitElement {
     }
   }
 
+  get _filteredSeries() {
+    if (!this._tsRawSeries.length) return [];
+    const q = this._tsFilter.trim().toLowerCase();
+    if (q) {
+      return this._tsRawSeries.filter((s) => s.mime.toLowerCase().includes(q));
+    }
+    return this._tsRawSeries.slice(0, this._tsTopN);
+  }
+
+  _rebuildTsData() {
+    const filtered = this._filteredSeries;
+    if (!filtered.length) { this._tsData = null; return; }
+
+    const allTs = new Set();
+    for (const s of filtered) s.points.forEach((p) => allTs.add(p.snapshot_at));
+    const sortedTs = [...allTs].sort((a, b) => a.localeCompare(b));
+    if (!sortedTs.length) { this._tsData = null; return; }
+
+    this._tsData = {
+      labels: sortedTs.map((t) => this._fmtTs(t)),
+      datasets: filtered.map((s, i) => {
+        const map = new Map(s.points.map((p) => [p.snapshot_at, p.value]));
+        const color = PALETTE[i % PALETTE.length];
+        return {
+          label: s.mime,
+          data: sortedTs.map((t) => map.get(t) ?? null),
+          borderColor: color,
+          backgroundColor: color + "22",
+          fill: false,
+          tension: 0.3,
+          pointRadius: sortedTs.length > 60 ? 0 : 3,
+          pointHoverRadius: 4,
+          spanGaps: true,
+        };
+      }),
+    };
+  }
+
   _fmtTs(iso) {
     try {
       return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
@@ -421,8 +471,12 @@ class FormatsPanel extends LitElement {
 
     if (!items.length && this.formatReportingUrl) {
       try {
-        const res = await getMimeBreakdown(this.formatReportingUrl);
-        items = res.items ?? [];
+        const [breakdownRes, snapshotRes] = await Promise.all([
+          getMimeBreakdown(this.formatReportingUrl),
+          getFormatSnapshot(this.formatReportingUrl).catch(() => null),
+        ]);
+        items = breakdownRes.items ?? [];
+        if (snapshotRes?.snapshot_at) this._snapshotAt = snapshotRes.snapshot_at;
         const byFormat = new Map();
         for (const item of items) {
           const ex = byFormat.get(item.mime_or_ext) ?? { file_count: 0, total_bytes: 0, no_mime_count: 0 };
@@ -591,7 +645,7 @@ class FormatsPanel extends LitElement {
         .height=${280}
         .options=${{
           plugins: {
-            legend: { display: this._tsView === "datasource", position: "bottom" },
+            legend: { display: true, position: "bottom" },
             tooltip: {
               callbacks: {
                 label: (ctx) => this._tsMetric === "total_bytes"
@@ -626,14 +680,32 @@ class FormatsPanel extends LitElement {
           <div class="ctrl-sep"></div>
           <div class="toggle-group">
             <button
-              class="toggle-btn ${this._tsView === "combined" ? "active" : ""}"
-              @click=${() => { this._tsView = "combined"; }}
-            >Combined</button>
+              class="toggle-btn ${this._tsView === "format" ? "active" : ""}"
+              @click=${() => { this._tsView = "format"; }}
+            >By format</button>
             <button
               class="toggle-btn ${this._tsView === "datasource" ? "active" : ""}"
               @click=${() => { this._tsView = "datasource"; }}
             >Per datasource</button>
           </div>
+          ${this._tsView === "format" ? html`
+            <div class="ctrl-sep"></div>
+            <input
+              class="ts-filter-input"
+              type="search"
+              placeholder="Filter formats…"
+              .value=${this._tsFilter}
+              @input=${(e) => { this._tsFilter = e.target.value; }}
+            />
+            ${!this._tsFilter.trim() ? html`
+              <select @change=${(e) => { this._tsTopN = Number(e.target.value); }}>
+                <option value="5"  ?selected=${this._tsTopN === 5}>Top 5</option>
+                <option value="10" ?selected=${this._tsTopN === 10}>Top 10</option>
+                <option value="20" ?selected=${this._tsTopN === 20}>Top 20</option>
+                <option value="9999" ?selected=${this._tsTopN === 9999}>All</option>
+              </select>
+            ` : ""}
+          ` : ""}
         </div>
       </chart-card>
     `;
