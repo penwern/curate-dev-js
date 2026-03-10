@@ -96,6 +96,8 @@ class ArchivespaceBrowser extends LitElement {
     // Action panel state
     detailLevelMode: { state: true },
     perFileMode: { state: true },
+    containerType: { state: true },
+    folderName: { state: true },
     createFoldersLoading: { state: true },
     createFoldersFeedback: { state: true },
 
@@ -290,6 +292,8 @@ class ArchivespaceBrowser extends LitElement {
     // Action panel state
     this.detailLevelMode = "per-file";
     this.perFileMode = "components";
+    this.containerType = "digital_object";
+    this.folderName = "";
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
 
@@ -808,11 +812,16 @@ class ArchivespaceBrowser extends LitElement {
             .selectedRecordIds=${this.selectedRecordIds}
             .detailLevelMode=${this.detailLevelMode}
             .perFileMode=${this.perFileMode}
+            .containerType=${this.containerType}
+            .folderName=${this.folderName}
             .createFoldersLoading=${this.createFoldersLoading}
             .createFoldersFeedback=${this.createFoldersFeedback}
             .searchQuery=${this.searchQuery}
             @detail-level-change=${this._handleDetailLevelChange}
             @per-file-mode-change=${this._handlePerFileModeChange}
+            @container-type-change=${this._handleContainerTypeChange}
+            @folder-name-change=${this._handleFolderNameChange}
+            @keep-active-selection=${this._handleKeepActiveSelection}
             @clear-selection=${this._handleClearSelection}
             @navigate-selection=${this._handleNavigateSelection}
             @action-click=${this._handleActionClick}
@@ -844,11 +853,16 @@ class ArchivespaceBrowser extends LitElement {
           .selectedRecordIds=${this.selectedRecordIds}
           .detailLevelMode=${this.detailLevelMode}
           .perFileMode=${this.perFileMode}
+          .containerType=${this.containerType}
+          .folderName=${this.folderName}
           .createFoldersLoading=${this.createFoldersLoading}
           .createFoldersFeedback=${this.createFoldersFeedback}
           .searchQuery=${this.searchQuery}
           @detail-level-change=${this._handleDetailLevelChange}
           @per-file-mode-change=${this._handlePerFileModeChange}
+          @container-type-change=${this._handleContainerTypeChange}
+          @folder-name-change=${this._handleFolderNameChange}
+          @keep-active-selection=${this._handleKeepActiveSelection}
           @clear-selection=${this._handleClearSelection}
           @navigate-selection=${this._handleNavigateSelection}
           @action-click=${this._handleActionClick}
@@ -1247,6 +1261,24 @@ class ArchivespaceBrowser extends LitElement {
     this.perFileMode = e.detail?.value || "components";
   }
 
+  _handleContainerTypeChange(e) {
+    const value = e.detail?.value;
+    this.containerType = value === "archival_object" ? "archival_object" : "digital_object";
+  }
+
+  _handleFolderNameChange(e) {
+    this.folderName = e.detail?.value ?? "";
+  }
+
+  _handleKeepActiveSelection() {
+    const selected = Array.isArray(this.selectedRecordIds) ? this.selectedRecordIds : [];
+    if (selected.length <= 1) return;
+    const activeId = this.selectedNodeId || selected[0];
+    if (!activeId) return;
+    this.selectedRecordIds = [activeId];
+    this.selectedNodeId = activeId;
+  }
+
   _handleClearSelection() {
     this.selectedRecordIds = [];
   }
@@ -1318,6 +1350,14 @@ class ArchivespaceBrowser extends LitElement {
       return;
     }
 
+    if (this.containerType === "archival_object" && selectedIds.length > 1) {
+      this._setCreateFoldersFeedback(
+        "error",
+        "Archival Object mode requires a single selected record."
+      );
+      return;
+    }
+
     const detailLevel = (this.detailLevelMode || "per-file").replace(/-/g, "_");
     const perFileMode =
       detailLevel === "per_file"
@@ -1325,6 +1365,10 @@ class ArchivespaceBrowser extends LitElement {
           ? "as_records"
           : "as_components"
         : null;
+    const containerType =
+      this.containerType === "archival_object" ? "archival_object" : "digital_object";
+    const customFolderName = (this.folderName || "").trim();
+    const useCustomName = containerType === "archival_object" && customFolderName.length > 0;
 
     const folders = selectedIds
       .map((id) => {
@@ -1333,12 +1377,14 @@ class ArchivespaceBrowser extends LitElement {
           ? this.searchResults.find((res) => res?.uri === id)
           : null;
         const uri = node?.uri || id;
-        const name = node?.title || searchHit?.title || "(Untitled)";
+        const fallbackName = node?.title || searchHit?.title || "(Untitled)";
+        const name = useCustomName ? customFolderName : fallbackName;
         if (!uri) return null;
         const folder = {
           name,
           uri,
           detail_level: detailLevel,
+          container_type: containerType,
         };
         if (perFileMode) {
           folder.per_file_mode = perFileMode;
