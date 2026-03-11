@@ -6,6 +6,7 @@ import CurateContextualHelp from "./CurateContextualHelp.js";
 import CurateRouter from "./CurateRouter.js";
 import CurateEmail from "./CurateEmail.js";
 import eventDelegator from "./CurateEvents.js";
+import CurateInfoPanel from "./CurateInfoPanel.js";
 export const Curate = (function () {
   const api = CurateApi;
   const workspaces = CurateWorkspaces;
@@ -14,6 +15,7 @@ export const Curate = (function () {
   const contextualHelp = CurateContextualHelp;
   const router = CurateRouter;
   const email = CurateEmail;
+  const infoPanel = CurateInfoPanel;
   return {
     api,
     workspaces,
@@ -23,6 +25,7 @@ export const Curate = (function () {
     router,
     email,
     eventDelegator,
+    infoPanel,
   };
 })();
 // Attach Curate to window so it's accessible globally in the browser for tinkering and debugging
