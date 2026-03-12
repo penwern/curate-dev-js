@@ -24,6 +24,7 @@ import "./web-components/archivesspace-browser/archivesspace-browser.js";
 
 // Now safe to import custom pages which use the components above
 import "./custom-pages/index.js";
+import "./info-panel-cards/index.js";
 
 import "../js/core/CustomPreservationConfigs.js";
 import "../js/core/fileInfoModifier.js";
