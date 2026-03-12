@@ -115,15 +115,21 @@ module.exports = (env, argv) => {
         }
       ] : []),
     ],
+    externals: {
+      react: 'React',
+    },
+    resolve: {
+      extensions: ['.js', '.jsx'],
+    },
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(js|jsx)$/,
           exclude: /node_modules\/(?!(@material\/web|lit|vest)\/).*/,
           use: {
             loader: "babel-loader",
             options: {
-              presets: ["@babel/preset-env"],
+              presets: ["@babel/preset-env", ["@babel/preset-react", { runtime: "classic" }]],
               // Add cacheDirectory for faster rebuilds in development
               cacheDirectory: true,
             },
