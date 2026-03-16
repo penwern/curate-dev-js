@@ -115,9 +115,6 @@ module.exports = (env, argv) => {
         }
       ] : []),
     ],
-    externals: {
-      react: 'React',
-    },
     resolve: {
       extensions: ['.js', '.jsx'],
     },
