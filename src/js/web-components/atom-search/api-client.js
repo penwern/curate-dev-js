@@ -4,7 +4,7 @@
  */
 class AtomSearchAPI {
   constructor() {
-    this.searchUrl = `${window.location.protocol}//${window.location.hostname}/api/atom/search`;
+    this.searchUrl = `${window.location.protocol}//${window.location.hostname}/api/v1/atom/search`;
     this.atomUrl = null;
   }
 
@@ -18,8 +18,8 @@ class AtomSearchAPI {
    */
   async getAtomUrl() {
     if (this.atomUrl) return this.atomUrl;
-    const response = await Curate.api.fetchCurate(":6900/atom", "GET");
-    this.atomUrl = response.atom_url;
+    const response = await Curate.api.fetchCurate("/api/v1/atom-configs", "GET");
+    this.atomUrl = response.host;
     return this.atomUrl;
   }
 
