@@ -27,7 +27,7 @@ import "./custom-pages/index.js";
 import "./info-panel-cards/index.js";
 
 import "../js/core/CustomPreservationConfigs.js";
-import "../js/core/fileInfoModifier.js";
+//import "../js/core/fileInfoModifier.js"; // replaced by IngestionInfoCard
 import "../js/core/MetadataHierarchies.js";
 import "../js/core/OAIHarvestClient.js";
 import "../js/core/publicAccessModifier.js";
