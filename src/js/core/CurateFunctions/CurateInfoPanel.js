@@ -10,10 +10,32 @@
  */
 
 const _registry = new Map();
+const _pendingSystemRegs = new Set(); // namespaces whose System.set failed and need retry
 let _rafHandle = null;
 let _observer = null;
 let _observedPanel = null;
 let _savedMarginTop = null;
+
+function _registerWithSystem(namespace) {
+    try {
+        window.System.delete(namespace);
+        const moduleExports = Object.assign({}, window[namespace]);
+        moduleExports.default = window[namespace];
+        window.System.set(namespace, window.System.newModule(moduleExports));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function _flushPendingSystemRegs() {
+    if (_pendingSystemRegs.size === 0 || !window.System) return;
+    for (const namespace of _pendingSystemRegs) {
+        if (_registerWithSystem(namespace)) {
+            _pendingSystemRegs.delete(namespace);
+        }
+    }
+}
 
 function _getPanelContainer() {
     const byId = document.getElementById('info_panel');
@@ -147,6 +169,7 @@ function _startLoop() {
     if (_rafHandle !== null) return;
 
     function loop() {
+        _flushPendingSystemRegs();
         const panel = _getPanelContainer();
         if (panel) {
             if (panel !== _observedPanel) {
@@ -180,13 +203,8 @@ const CurateInfoPanel = {
         }
         window[namespace][name] = component;
 
-        try {
-            window.System.delete(namespace);
-            const moduleExports = Object.assign({}, window[namespace]);
-            moduleExports.default = window[namespace];
-            window.System.set(namespace, window.System.newModule(moduleExports));
-        } catch (e) {
-            console.warn('[CurateInfoPanel] SystemJS registration failed (non-fatal):', e);
+        if (!_registerWithSystem(namespace)) {
+            _pendingSystemRegs.add(namespace);
         }
 
         _registry.set(`${namespace}.${name}`, {

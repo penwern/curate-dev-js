@@ -27,6 +27,14 @@ function ensureHeaderStyles() {
             transform: scale(1);
             opacity: 0.4;
         }
+        .curate-card-header,
+        .curate-card-header * {
+            cursor: default !important;
+        }
+        .curate-card-toggle,
+        .curate-card-toggle * {
+            cursor: pointer !important;
+        }
     `;
 }
 
@@ -108,6 +116,8 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
     const toggleButtonRef = React.useRef(null);
     const pinButtonRef = React.useRef(null);
     const pinWrapperRef = React.useRef(null);
+    const pinTooltipRef = React.useRef(null);
+    const toggleTooltipRef = React.useRef(null);
     const [hovered, setHovered] = React.useState(false);
     const latestRef = React.useRef({ currentPin: null, setColumnPin: null, identifier: null });
 
@@ -125,6 +135,8 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
         const card = marker.closest('.panelCard');
         const header = card?.firstElementChild;
         if (!header) return undefined;
+
+        header.classList.add('curate-card-header');
 
         const onEnter = () => setHovered(true);
         const onLeave = () => setHovered(false);
@@ -145,7 +157,7 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
             if (!wrapper) {
                 wrapper = document.createElement('div');
                 wrapper.setAttribute(`data-curate-${kind}-wrap`, 'true');
-                wrapper.style.color = 'rgb(65, 72, 77)';
+                wrapper.style.color = 'inherit';
                 wrapper.style.paddingRight = '0';
                 wrapper.style.display = 'inline-flex';
                 wrapper.style.alignItems = 'center';
@@ -181,13 +193,55 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
                 const iconWrap = document.createElement('div');
                 const icon = document.createElement('span');
                 icon.setAttribute(iconAttr, 'true');
-                icon.style.cssText = 'color: rgb(65, 72, 77); position: relative; font-size: 18px; display: inline-block; user-select: none; transition: 450ms cubic-bezier(0.23, 1, 0.32, 1);';
+                icon.style.cssText = 'color: inherit; cursor: inherit; position: relative; font-size: 18px; display: inline-block; user-select: none; transition: 450ms cubic-bezier(0.23, 1, 0.32, 1);';
                 iconWrap.appendChild(icon);
                 button.appendChild(iconWrap);
                 wrapper.appendChild(button);
             }
 
-            return { wrapper, button };
+            // Attach tooltip (pin button only)
+            let tooltip = wrapper.querySelector('[data-curate-tooltip]');
+            if (!tooltip && kind === 'pin') {
+                tooltip = document.createElement('div');
+                tooltip.setAttribute('data-curate-tooltip', 'true');
+                tooltip.style.cssText = [
+                    'position:absolute',
+                    'bottom:-30px',
+                    'right:0',
+                    'background:rgba(97,97,97,0.92)',
+                    'color:#fff',
+                    'font-size:10px',
+                    'font-family:Roboto,sans-serif',
+                    'font-weight:500',
+                    'letter-spacing:0.01em',
+                    'line-height:1',
+                    'white-space:nowrap',
+                    'padding:6px 8px',
+                    'border-radius:14px',
+                    'pointer-events:none',
+                    'opacity:0',
+                    'transform:scale(0.85)',
+                    'transform-origin:top center',
+                    'transition:opacity 150ms ease,transform 150ms ease',
+                    'z-index:9999',
+                ].join(';');
+                wrapper.style.position = 'relative';
+                wrapper.appendChild(tooltip);
+                let tooltipTimer = null;
+                button.addEventListener('mouseenter', () => {
+                    tooltipTimer = window.setTimeout(() => {
+                        tooltip.style.opacity = '1';
+                        tooltip.style.transform = 'scale(1)';
+                    }, 500);
+                });
+                button.addEventListener('mouseleave', () => {
+                    window.clearTimeout(tooltipTimer);
+                    tooltip.style.opacity = '0';
+                    tooltip.style.transform = 'scale(0.85)';
+                });
+            }
+
+            return { wrapper, button, tooltip };
         };
 
         const pinParts = createButton('pin', 'data-curate-pin-icon');
@@ -204,6 +258,8 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
         pinWrapperRef.current = pinParts.wrapper;
         pinButtonRef.current = pinButton;
         toggleButtonRef.current = toggleButton;
+        pinTooltipRef.current = pinParts.tooltip;
+        toggleTooltipRef.current = toggleParts.tooltip;
 
         const addRipple = (button) => {
             const size = Math.max(button.clientWidth, button.clientHeight);
@@ -244,11 +300,26 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
             setOpen((prev) => !prev);
         };
 
+        const onHeaderClick = (event) => {
+            // Ignore clicks that landed on our injected button wrappers
+            if (pinParts.wrapper.contains(event.target) || toggleParts.wrapper.contains(event.target)) return;
+            const { currentPin, identifier, setColumnPin } = latestRef.current;
+            if (currentPin && currentPin !== identifier) {
+                setOpen(true);
+                if (setColumnPin && identifier) setColumnPin(identifier);
+                return;
+            }
+            setOpen((prev) => !prev);
+        };
+
         pinButton.addEventListener('mousedown', onPinMouseDown);
         pinButton.addEventListener('click', onPinClick);
         toggleButton.addEventListener('mousedown', onToggleMouseDown);
         toggleButton.addEventListener('click', onToggleClick);
+        header.addEventListener('click', onHeaderClick);
         return () => {
+            header.classList.remove('curate-card-header');
+            header.removeEventListener('click', onHeaderClick);
             pinWrapperRef.current = null;
             pinButtonRef.current = null;
             toggleButtonRef.current = null;
@@ -275,11 +346,14 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
 
         if (toggleButton) {
             const icon = toggleButton.querySelector('[data-curate-icon]');
+            const toggleLabel = open ? `Collapse ${label}` : `Expand ${label}`;
             toggleButton.style.display = isPinnedSelf ? 'none' : 'inline-block';
-            toggleButton.setAttribute('aria-label', open ? `Collapse ${label}` : `Expand ${label}`);
+            toggleButton.setAttribute('aria-label', toggleLabel);
             if (icon) {
                 icon.className = `mdi ${hasOtherPin ? 'mdi-chevron-right' : open ? 'mdi-chevron-up' : 'mdi-chevron-down'}`;
             }
+            const toggleTooltip = toggleTooltipRef.current;
+            if (toggleTooltip) toggleTooltip.textContent = toggleLabel;
         }
 
         if (pinWrapper) {
@@ -288,15 +362,15 @@ function useHeaderControls(markerRef, open, setOpen, label, pinState) {
 
         if (pinButton) {
             const icon = pinButton.querySelector('[data-curate-pin-icon]');
+            const pinLabel = isPinnedSelf ? `Unpin ${label}` : hasOtherPin ? `Pin ${label} instead` : `Attach card (full height)`;
             pinButton.style.opacity = setColumnPin ? '1' : '0.45';
             pinButton.style.cursor = setColumnPin ? 'pointer' : 'default';
-            pinButton.setAttribute(
-                'aria-label',
-                isPinnedSelf ? `Unpin ${label}` : hasOtherPin ? `Pin ${label} instead` : `Pin ${label}`,
-            );
+            pinButton.setAttribute('aria-label', pinLabel);
             if (icon) {
                 icon.className = `mdi ${isPinnedSelf ? 'mdi-pin-off-outline' : hasOtherPin ? 'mdi-chevron-right' : 'mdi-pin-outline'}`;
             }
+            const pinTooltip = pinTooltipRef.current;
+            if (pinTooltip) pinTooltip.textContent = pinLabel;
         }
     }, [hovered, label, open, pinState]);
 }

@@ -1,6 +1,49 @@
 import { useCurateCollapse, useHeaderControls, usePinController } from './CurateCardCollapse.js';
 const React = new Proxy({}, { get: (_, k) => window.React[k] });
 
+// ── Siegfried helpers ─────────────────────────────────────────────────────────
+
+const WARNING_EXPLANATIONS = {
+    'extension mismatch':
+        "The file's extension doesn't match the identified format. It may have been renamed or saved with an incorrect extension.",
+    'match on text only; extension mismatch':
+        "Format was identified from text content only (lower confidence) and the file extension doesn't match either.",
+    'match on text only':
+        "Format identified from text content only — byte-level signatures were not matched. Confidence is lower than a signature-based match.",
+    'filename mismatch':
+        "The filename doesn't match the expected naming pattern for this format.",
+};
+
+function getWarningExplanation(warning) {
+    if (!warning) return null;
+    return WARNING_EXPLANATIONS[warning.toLowerCase()] ?? null;
+}
+
+function humaniseBasis(basis) {
+    if (!basis) return null;
+    const hasContainer = /container name/i.test(basis);
+    const hasByte = /byte match/i.test(basis);
+    const hasText = /text match/i.test(basis);
+    const hasExt = /extension match/i.test(basis);
+    if (hasContainer && hasByte) return 'Container structure + byte signature';
+    if (hasContainer) return 'Container structure';
+    if (hasByte) return 'Byte signature';
+    if (hasText) return 'Text content analysis';
+    if (hasExt) return 'File extension only';
+    return null;
+}
+
+function formatBytes(bytes) {
+    if (bytes == null || bytes === '') return null;
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / k ** i).toFixed(1))} \u202f${sizes[i]}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const STATUS_CFG = {
     ReleaseTag: { label: 'Cleared', sub: 'Released from quarantine', color: '#43A047', icon: 'mdi-shield-check' },
     Released: { label: 'Cleared', sub: 'Released from quarantine', color: '#43A047', icon: 'mdi-shield-check' },
@@ -125,8 +168,22 @@ function IngestionInfoCard(props) {
     const openWs = Curate.workspaces.getOpenWorkspace();
     const status = getStatus(scanTag, openWs, scan1, scan2);
 
-    const pronId = meta.get('files')?.[0]?.matches?.[0]?.id ?? null;
-    const mime = meta.get('mime') || null;
+    // Parse Siegfried metadata if present
+    let sf = null;
+    let sfMatch = null;
+    try {
+        const sfRaw = meta.get('Siegfried');
+        if (sfRaw) {
+            sf = typeof sfRaw === 'string' ? JSON.parse(sfRaw) : sfRaw;
+            sfMatch = sf?.files?.[0]?.matches?.[0] ?? null;
+        }
+    } catch (e) { /* ignore */ }
+
+    const sfFile = sf?.files?.[0] ?? null;
+    const pronId = sfMatch?.id ?? meta.get('files')?.[0]?.matches?.[0]?.id ?? null;
+    const mime = sfMatch?.mime || meta.get('mime') || null;
+    const basisLabel = humaniseBasis(sfMatch?.basis ?? null);
+    const warningExplanation = getWarningExplanation(sfMatch?.warning ?? null);
     const premis = meta.get('Premis') || [];
     const accession = premis.find((event) => event.event_type === 'Accession');
     const accessioned = accession?.event_date_time
@@ -191,49 +248,151 @@ function IngestionInfoCard(props) {
                         </div>
 
                         <SectionHead>File Identification</SectionHead>
-                        <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+                            {sfMatch?.format && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Format</span>
+                                    <span className="infoPanelValue" title={sfMatch.format} style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, textAlign: 'right' }}>{sfMatch.format}</span>
+                                </div>
+                            )}
+
+                            {sfMatch?.version && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Version</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13 }}>{sfMatch.version}</span>
+                                </div>
+                            )}
+
+                            {sfMatch?.class && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Class</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13 }}>{sfMatch.class}</span>
+                                </div>
+                            )}
+
                             {pronId ? (
                                 <div
-                                    className="curate-ing-pronom"
+                                    className="curate-ing-scanrow curate-ing-pronom"
                                     onClick={() => window.open(`https://www.nationalarchives.gov.uk/pronom/${pronId}`)}
                                     title="Open in PRONOM registry"
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        background: 'rgba(128,128,128,0.07)',
-                                        borderRadius: 5,
-                                        padding: '6px 8px',
-                                        cursor: 'pointer',
-                                        transition: 'opacity 0.15s',
-                                    }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px', cursor: 'pointer' }}
                                 >
-                                    <div>
-                                        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#78909C', marginBottom: 2 }}>PRONOM</div>
-                                        <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: '#42A5F5', letterSpacing: '0.04em' }}>{pronId}</div>
-                                    </div>
-                                    <i className="mdi mdi-open-in-new" style={{ fontSize: 14, color: '#42A5F5', opacity: 0.7 }} />
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>PRONOM</span>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                        <span style={{ fontSize: 13, fontWeight: 600, fontFamily: 'monospace', color: '#42A5F5' }}>{pronId}</span>
+                                        <i className="mdi mdi-open-in-new" style={{ fontSize: 12, color: '#42A5F5', opacity: 0.65 }} />
+                                    </span>
                                 </div>
                             ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px' }}>
-                                    <span className="infoPanelLabel" style={{ fontSize: 13 }}>PRONOM ID</span>
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13 }}>PRONOM</span>
                                     <span className="infoPanelValue" style={{ fontSize: 13, fontStyle: 'italic' }}>Not characterised</span>
                                 </div>
                             )}
 
+                            {basisLabel && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Identified by</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13, textAlign: 'right' }}>{basisLabel}</span>
+                                </div>
+                            )}
+
                             {mime && (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '2px 4px' }}>
-                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>MIME</span>
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>MIME type</span>
                                     <span className="infoPanelValue" title={mime} style={{ fontSize: 13, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{mime}</span>
                                 </div>
                             )}
 
+                            {sfFile?.filesize != null && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>File size</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13 }}>{formatBytes(sfFile.filesize)}</span>
+                                </div>
+                            )}
+
+                            {sf?.scandate && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Scan date</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13 }}>
+                                        {new Date(sf.scandate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    </span>
+                                </div>
+                            )}
+
                             {accessioned && (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px' }}>
-                                    <span className="infoPanelLabel" style={{ fontSize: 13 }}>Accessioned</span>
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Accessioned</span>
                                     <span className="infoPanelValue" style={{ fontSize: 13 }}>{accessioned}</span>
                                 </div>
                             )}
+
+                            {sf?.siegfried && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Siegfried</span>
+                                    <span className="infoPanelValue" style={{ fontSize: 13, fontFamily: 'monospace' }}>v{sf.siegfried}</span>
+                                </div>
+                            )}
+
+                            {sf?.identifiers?.[0]?.details && (
+                                <div className="curate-ing-scanrow" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, padding: '3px 4px' }}>
+                                    <span className="infoPanelLabel" style={{ fontSize: 13, flexShrink: 0 }}>Signatures</span>
+                                    <span className="infoPanelLabel" style={{ fontSize: 11, fontFamily: 'monospace', textAlign: 'right', lineHeight: 1.55 }}>
+                                        {sf.identifiers[0].details.split('; ').map((s, i) => <span key={i} style={{ display: 'block' }}>{s}</span>)}
+                                    </span>
+                                </div>
+                            )}
+
+                            {sfMatch?.warning && (
+                                <>
+                                    <div style={{
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        letterSpacing: '0.08em',
+                                        textTransform: 'uppercase',
+                                        color: '#FB8C00',
+                                        padding: '8px 4px 3px',
+                                        opacity: 0.8,
+                                    }}>
+                                        Warnings
+                                    </div>
+                                    <div style={{
+                                        borderRadius: 6,
+                                        padding: '9px 12px',
+                                        background: 'rgba(251,140,0,0.08)',
+                                        borderLeft: `3px solid #FB8C00`,
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: 9,
+                                    }}>
+                                        <i className="mdi mdi-alert-outline" style={{ fontSize: 16, color: '#FB8C00', lineHeight: 1, flexShrink: 0, marginTop: 1 }} />
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: '#FB8C00', lineHeight: 1.2 }}>{sfMatch.warning}</div>
+                                            {warningExplanation && (
+                                                <div className="infoPanelLabel" style={{ fontSize: 13, marginTop: 2, lineHeight: 1.3 }}>{warningExplanation}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {sfFile?.errors && (
+                                <div style={{
+                                    margin: '4px 0 0',
+                                    borderRadius: 6,
+                                    padding: '9px 12px',
+                                    background: 'rgba(229,57,53,0.08)',
+                                    borderLeft: `3px solid #E53935`,
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: 9,
+                                }}>
+                                    <i className="mdi mdi-alert-circle-outline" style={{ fontSize: 16, color: '#E53935', lineHeight: 1, flexShrink: 0, marginTop: 1 }} />
+                                    <div className="infoPanelLabel" style={{ fontSize: 13, lineHeight: 1.3 }}>{sfFile.errors}</div>
+                                </div>
+                            )}
+
                         </div>
                     </>
                 )}
