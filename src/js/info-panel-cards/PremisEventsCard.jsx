@@ -1,6 +1,9 @@
 import { useCurateCollapse, useHeaderControls, usePinController } from './CurateCardCollapse.js';
 const React = new Proxy({}, { get: (_, k) => window.React[k] });
 
+const INITIAL_VISIBLE_EVENTS = 12;
+const LOAD_MORE_STEP = 12;
+
 const EVENT_CFG = {
     'Accession':             { icon: 'mdi-archive-arrow-down',   color: '#66BB6A', short: 'Accessioned'  },
     'Quarantine':            { icon: 'mdi-shield-lock-outline',  color: '#FFA726', short: 'Quarantine'   },
@@ -46,6 +49,16 @@ function processEvents(premis) {
     return result;
 }
 
+function getScrollParent(el) {
+    let current = el?.parentElement || null;
+    while (current) {
+        const { overflowY } = window.getComputedStyle(current);
+        if (overflowY === 'auto' || overflowY === 'scroll') return current;
+        current = current.parentElement;
+    }
+    return document.querySelector('#info_panel .scrollarea-content') || document.querySelector('#info_panel');
+}
+
 let stylesInjected = false;
 function ensureStyles() {
     if (stylesInjected) return;
@@ -77,6 +90,64 @@ function ensureStyles() {
         }
         .curate-premis-event:hover .curate-premis-date {
             opacity: 1 !important;
+        }
+        .curate-premis-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .curate-premis-controls.bottom {
+            margin-top: 12px;
+            margin-bottom: 0;
+            justify-content: center;
+        }
+        .curate-premis-load-more {
+            appearance: none;
+            border: none;
+            background: transparent;
+            color: var(--md-sys-color-primary);
+            border-radius: 999px;
+            padding: 0 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+        }
+        .curate-premis-load-more:hover {
+            background: transparent;
+            color: var(--md-sys-color-on-surface);
+        }
+        .curate-premis-load-more:focus {
+            outline: none;
+            background: transparent;
+            box-shadow: none;
+            color: var(--md-sys-color-on-surface);
+        }
+        .curate-premis-load-more-label {
+            font-family: inherit;
+            line-height: 1.2;
+        }
+        .curate-premis-hidden-count {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        .curate-premis-event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .curate-premis-event-list.with-top-gap {
+            margin-top: 14px;
         }
     `;
     document.head.appendChild(s);
@@ -178,6 +249,7 @@ function PremisEventsCard(props) {
     const storageKey = `FSTemplate.MultiColumn.InfoPanel.cardStatus.${props.namespace}.${props.componentName}.open`;
     const [open, setOpen] = useCurateCollapse(storageKey, true);
     const markerRef = React.useRef(null);
+    const listBottomRef = React.useRef(null);
     const pinState = usePinController(markerRef);
     const isPinnedSelf = !!pinState.identifier && pinState.currentPin === pinState.identifier;
     const effectiveOpen = isPinnedSelf || (open && !pinState.currentPin);
@@ -188,8 +260,46 @@ function PremisEventsCard(props) {
     const raw = node._metadata.get('Premis') || [];
     const events = processEvents(raw);
     const count = raw.length;
+    const [visibleCount, setVisibleCount] = React.useState(() => Math.min(events.length, INITIAL_VISIBLE_EVENTS));
+    const [pendingCollapseScroll, setPendingCollapseScroll] = React.useState(false);
+    const collapsedCount = Math.min(events.length, INITIAL_VISIBLE_EVENTS);
+
+    React.useEffect(() => {
+        setVisibleCount(collapsedCount);
+        setPendingCollapseScroll(false);
+    }, [node, events.length, collapsedCount]);
+
+    React.useEffect(() => {
+        if (!pendingCollapseScroll || visibleCount !== collapsedCount) return;
+        if (!listBottomRef.current) return;
+
+        const target = listBottomRef.current;
+        const scrollParent = getScrollParent(target);
+        if (!scrollParent) {
+            setPendingCollapseScroll(false);
+            return;
+        }
+
+        const parentRect = scrollParent.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const currentTop = scrollParent.scrollTop;
+        const relativeTop = targetRect.top - parentRect.top + currentTop;
+        const nextTop = Math.max(0, relativeTop - scrollParent.clientHeight + 20);
+
+        scrollParent.scrollTo({ top: nextTop, behavior: 'smooth' });
+        setPendingCollapseScroll(false);
+    }, [pendingCollapseScroll, visibleCount, collapsedCount]);
 
     if (!InfoPanelCard || events.length === 0) return null;
+
+    const hiddenCount = Math.max(0, events.length - visibleCount);
+    const visibleEvents = hiddenCount > 0 ? events.slice(-visibleCount) : events;
+    const showMore = () => setVisibleCount((current) => Math.min(events.length, current + LOAD_MORE_STEP));
+    const showFewer = () => {
+        setPendingCollapseScroll(true);
+        setVisibleCount(collapsedCount);
+    };
+    const canCollapse = visibleCount > collapsedCount;
 
     return (
         <InfoPanelCard
@@ -204,15 +314,51 @@ function PremisEventsCard(props) {
                 <span ref={markerRef} style={{ display: 'none' }} />
                 {effectiveOpen && (
                     <div style={{ padding: '10px 16px 0' }}>
-                        {events.map((ev, i) => (
-                            <PremisEvent
-                                key={ev.event_identifier?.event_identifier_value || i}
-                                event={ev}
-                                isLast={i === events.length - 1}
-                                isLatest={i === events.length - 1}
-                                idx={i}
-                            />
-                        ))}
+                        {hiddenCount > 0 && (
+                            <div className="curate-premis-controls">
+                                <button
+                                    type="button"
+                                    className="curate-premis-load-more"
+                                    onClick={showMore}
+                                    aria-label={`Show ${Math.min(LOAD_MORE_STEP, hiddenCount)} earlier preservation events`}
+                                >
+                                    <i className="mdi mdi-chevron-up" style={{ fontSize: 16, lineHeight: 1 }} />
+                                    <span className="curate-premis-load-more-label">
+                                        Show {Math.min(LOAD_MORE_STEP, hiddenCount)} earlier event{Math.min(LOAD_MORE_STEP, hiddenCount) === 1 ? '' : 's'}
+                                    </span>
+                                </button>
+                                <span className="curate-premis-hidden-count">
+                                    {hiddenCount} hidden
+                                </span>
+                            </div>
+                        )}
+                        <div className={`curate-premis-event-list${hiddenCount > 0 ? ' with-top-gap' : ''}`}>
+                            {visibleEvents.map((ev, i) => (
+                                <PremisEvent
+                                    key={ev.event_identifier?.event_identifier_value || i}
+                                    event={ev}
+                                    isLast={i === visibleEvents.length - 1}
+                                    isLatest={i === visibleEvents.length - 1}
+                                    idx={i}
+                                />
+                            ))}
+                            <span ref={listBottomRef} style={{ display: 'block', height: 1 }} />
+                        </div>
+                        {canCollapse && (
+                            <div className="curate-premis-controls bottom">
+                                <button
+                                    type="button"
+                                    className="curate-premis-load-more"
+                                    onClick={showFewer}
+                                    aria-label={`Collapse preservation events to the latest ${Math.min(events.length, INITIAL_VISIBLE_EVENTS)} events`}
+                                >
+                                    <i className="mdi mdi-chevron-down" style={{ fontSize: 16, lineHeight: 1 }} />
+                                    <span className="curate-premis-load-more-label">
+                                        Show fewer
+                                    </span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
