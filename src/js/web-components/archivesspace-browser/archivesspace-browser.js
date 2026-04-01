@@ -14,6 +14,7 @@ import "./components/as-card.js";
 import "./components/as-empty-state.js";
 import "./components/as-pagination.js";
 import "../utils/penwern-spinner.js";
+import {Curate} from "../../core/CurateFunctions/CurateFunctions.js";
 
 // Import utilities
 import {
@@ -44,6 +45,7 @@ import {
 
 // Import icons
 import { databaseIcon, layersIcon, pinIcon } from "../utils/icons.js";
+import CurateApi from "../../core/CurateFunctions/CurateApi.js";
 
 /**
  * Main ArchivesSpace Browser component.
@@ -305,7 +307,7 @@ class ArchivespaceBrowser extends LitElement {
     // API configuration
     this.apiHost = window.origin + "/api/archivesspace";
     this.curateBasePath = "";
-    this.curateParentPath = "/quarantine";
+    this.curateParentPath = "/"+Curate.workspaces.getOpenWorkspace()
 
     // Internal state
     this._visibleTreeRows = [];
@@ -814,6 +816,8 @@ class ArchivespaceBrowser extends LitElement {
             .perFileMode=${this.perFileMode}
             .containerType=${this.containerType}
             .folderName=${this.folderName}
+            .createFoldersDisabled=${this._isFolderCreationDisabled()}
+            .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
             .createFoldersLoading=${this.createFoldersLoading}
             .createFoldersFeedback=${this.createFoldersFeedback}
             .searchQuery=${this.searchQuery}
@@ -855,6 +859,8 @@ class ArchivespaceBrowser extends LitElement {
           .perFileMode=${this.perFileMode}
           .containerType=${this.containerType}
           .folderName=${this.folderName}
+          .createFoldersDisabled=${this._isFolderCreationDisabled()}
+          .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
           .createFoldersLoading=${this.createFoldersLoading}
           .createFoldersFeedback=${this.createFoldersFeedback}
           .searchQuery=${this.searchQuery}
@@ -1343,6 +1349,13 @@ class ArchivespaceBrowser extends LitElement {
 
     if (action !== "create-folders") return;
     if (this.createFoldersLoading) return;
+    if (this._isFolderCreationDisabled()) {
+      this._setCreateFoldersFeedback(
+        "error",
+        this._getFolderCreationDisabledReason()
+      );
+      return;
+    }
 
     const selectedIds = Array.isArray(this.selectedRecordIds) ? this.selectedRecordIds : [];
     if (!selectedIds.length) {
@@ -1442,6 +1455,15 @@ class ArchivespaceBrowser extends LitElement {
       this.searchScope !== "collection" ||
       this.advancedFilters.length > 0
     );
+  }
+
+  _isFolderCreationDisabled() {
+    return Curate.workspaces.getOpenWorkspace?.() === "personal-files";
+  }
+
+  _getFolderCreationDisabledReason() {
+    if (!this._isFolderCreationDisabled()) return "";
+    return "Folder creation is unavailable in the personal-files workspace.";
   }
 
   _getSearchLabel() {
