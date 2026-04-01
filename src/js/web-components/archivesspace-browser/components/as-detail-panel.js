@@ -31,6 +31,8 @@ class AsDetailPanel extends LitElement {
     perFileMode: { type: String },
     containerType: { type: String },
     folderName: { type: String },
+    createFoldersDisabled: { type: Boolean },
+    createFoldersDisabledReason: { type: String },
     createFoldersLoading: { type: Boolean },
     createFoldersFeedback: { type: Object },
     searchQuery: { type: String },
@@ -434,6 +436,8 @@ class AsDetailPanel extends LitElement {
     this.perFileMode = "components";
     this.containerType = "digital_object";
     this.folderName = "";
+    this.createFoldersDisabled = false;
+    this.createFoldersDisabledReason = "";
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
     this.searchQuery = "";
@@ -486,6 +490,7 @@ class AsDetailPanel extends LitElement {
     const containerType = this.containerType || "digital_object";
     const showFolderName = containerType === "archival_object";
     const requiresSingleSelection = showFolderName && hasMultipleSelection;
+    const foldersDisabled = this.createFoldersDisabled || false;
 
     // Determine which content to highlight based on search
     const titleContent = this.searchQuery
@@ -586,6 +591,9 @@ class AsDetailPanel extends LitElement {
               Applies to all ${this.selectedRecordIds.length} selected records.
             </div>`
           : nothing}
+        ${foldersDisabled && this.createFoldersDisabledReason
+          ? html`<div class="multi-action-note">${this.createFoldersDisabledReason}</div>`
+          : nothing}
         <div class="actions">
           <div class="action-settings">
             <div class="radio-group">
@@ -636,7 +644,7 @@ class AsDetailPanel extends LitElement {
           <div class="actions">
             <md-filled-button
               class="create-folders-button"
-              ?disabled=${this.createFoldersLoading || requiresSingleSelection}
+              ?disabled=${this.createFoldersLoading || requiresSingleSelection || foldersDisabled}
               @click=${() => this._handleAction("create-folders")}
             >
               ${this.createFoldersLoading

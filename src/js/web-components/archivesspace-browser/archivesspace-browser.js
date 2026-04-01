@@ -1458,12 +1458,13 @@ class ArchivespaceBrowser extends LitElement {
   }
 
   _isFolderCreationDisabled() {
-    return Curate.workspaces.getOpenWorkspace?.() === "personal-files";
+    const workspace = Curate.workspaces.getOpenWorkspace?.();
+    return workspace === "personal-files" || workspace === "common-files";
   }
 
   _getFolderCreationDisabledReason() {
     if (!this._isFolderCreationDisabled()) return "";
-    return "Folder creation is unavailable in the personal-files workspace.";
+    return "Folder creation is unavailable in the personal-files and common-files workspaces.";
   }
 
   _getSearchLabel() {
