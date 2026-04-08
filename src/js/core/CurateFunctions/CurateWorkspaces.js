@@ -7,7 +7,7 @@ const CurateWorkspaces = {
         if (pydio._dataModel._rootNode._label.toLowerCase() == pydio.user.id.toLowerCase()) {
             return ("personal-files");
         }
-        return (pydio._dataModel._rootNode._label.toLowerCase().replace(/^\d+\.\s*/, ''));
+        return (pydio._dataModel._rootNode._label.toLowerCase().replace(/^\d+\.\s*/, '').replace(" ", "-"));
     }
 };
 export default CurateWorkspaces
