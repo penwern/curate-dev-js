@@ -19,13 +19,9 @@ import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClo
 import "../utils/penwern-spinner.js";
 import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
 
-// URL of the curate-storage-reporting API service.
-// Edit this to match your deployment (e.g. "https://storage-api.example.com").
-const STORAGE_REPORTING_URL = "http://localhost:8001";
-
-// URL of the cells-db-tests MIME/format reporting API service.
-// Edit this to match your deployment (e.g. "https://format-api.example.com").
-const FORMAT_REPORTING_URL = "http://localhost:8000";
+// Storage and format reporting now share the same origin under /api.
+const STORAGE_REPORTING_URL = `${window.location.origin}/api`;
+const FORMAT_REPORTING_URL = `${window.location.origin}/api`;
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fileMultipleIcon" },

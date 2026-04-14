@@ -282,8 +282,8 @@ export async function restoreNodes(paths) {
 }
 
 // ─── Format / MIME Reporting API ─────────────────────────────────────────────
-// Calls the cells-db-tests FastAPI service. baseUrl is the full origin,
-// e.g. "http://localhost:8000".
+// Calls the format reporting service. baseUrl is the shared reporting base,
+// e.g. "https://example.com/api".
 
 async function formatApiCall(baseUrl, path) {
   const token = await getToken();
@@ -359,8 +359,8 @@ export function categorizeMime(mimeOrExt) {
 }
 
 // ─── Storage Reporting API ────────────────────────────────────────────────────
-// These call a separate service (not the Curate /a/ path). baseUrl is the
-// full origin + optional prefix, e.g. "http://localhost:8000".
+// These call the storage reporting service. baseUrl is the shared reporting
+// base, e.g. "https://example.com/api".
 
 async function storageApiCall(baseUrl, path) {
   const token = await getToken();
@@ -372,7 +372,7 @@ async function storageApiCall(baseUrl, path) {
 }
 
 export async function getStorageDatasources(baseUrl) {
-  return storageApiCall(baseUrl, "/api/datasources");
+  return storageApiCall(baseUrl, "/datasources");
 }
 
 export async function getStorageHistory(baseUrl, { bucket = "day", from, to, datasource } = {}) {
@@ -380,7 +380,7 @@ export async function getStorageHistory(baseUrl, { bucket = "day", from, to, dat
   if (from != null) params.set("from", String(from));
   if (to != null) params.set("to", String(to));
   if (datasource) params.set("datasource", datasource);
-  return storageApiCall(baseUrl, `/api/storage/history?${params}`);
+  return storageApiCall(baseUrl, `/storage/history?${params}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
