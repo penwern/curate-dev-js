@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -11,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5 
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -20,18 +22,31 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install  # Install dependencies
+        run: npm install
 
       - name: Build with Webpack
-        run: |
-          npm run build  # Run Webpack to create the build
+        run: npm run build
 
-      - name: Deploy to GitHub Pages (gh-pages)
+      - name: Deploy to latest
+        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
+          destination_dir: latest
+          keep_files: true
+          user_name: "github-actions"
+          user_email: "github-actions@github.com"
+
+      - name: Deploy versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          destination_dir: ${{ github.ref_name }}
+          keep_files: true
           user_name: "github-actions"
           user_email: "github-actions@github.com"
