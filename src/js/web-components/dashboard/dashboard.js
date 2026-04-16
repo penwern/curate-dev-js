@@ -19,9 +19,14 @@ import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClo
 import "../utils/penwern-spinner.js";
 import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
 
-// Storage and format reporting now share the same origin under /api.
-const STORAGE_REPORTING_URL = `${window.location.origin}/api`;
-const FORMAT_REPORTING_URL = `${window.location.origin}/api`;
+// Dashboard reporting services are mounted under dedicated API prefixes.
+// These can be overridden for local testing via:
+//   window.CURATE_STORAGE_REPORTING_URL
+//   window.CURATE_FORMAT_REPORTING_URL
+const STORAGE_REPORTING_URL = window.CURATE_STORAGE_REPORTING_URL
+  ?? `${window.location.origin}/api/dashboard/storage`;
+const FORMAT_REPORTING_URL = window.CURATE_FORMAT_REPORTING_URL
+  ?? `${window.location.origin}/api/dashboard/format`;
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fileMultipleIcon" },

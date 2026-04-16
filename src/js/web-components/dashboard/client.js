@@ -359,8 +359,8 @@ export function categorizeMime(mimeOrExt) {
 }
 
 // ─── Storage Reporting API ────────────────────────────────────────────────────
-// These call the storage reporting service. baseUrl is the shared reporting
-// base, e.g. "https://example.com/api".
+// These call the storage reporting service. baseUrl should point at the
+// storage service root, e.g. "https://example.com/api/dashboard/storage".
 
 async function storageApiCall(baseUrl, path) {
   const token = await getToken();
@@ -380,7 +380,7 @@ export async function getStorageHistory(baseUrl, { bucket = "day", from, to, dat
   if (from != null) params.set("from", String(from));
   if (to != null) params.set("to", String(to));
   if (datasource) params.set("datasource", datasource);
-  return storageApiCall(baseUrl, `/storage/history?${params}`);
+  return storageApiCall(baseUrl, `/history?${params}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
