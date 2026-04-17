@@ -1,6 +1,7 @@
 ﻿import { LitElement, html, css } from 'lit';
 import { formatFullDate } from '../utils/dateFormat.js';
 import { chevronUpIcon, chevronDownIcon, folderIcon } from "../../utils/icons.js";
+import { navigateToEmailFile } from '../data/dataService.js';
 
 export class EmailHeader extends LitElement {
   static properties = {
@@ -152,17 +153,26 @@ export class EmailHeader extends LitElement {
       overflow-wrap: anywhere;
     }
 
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
     .metadata-toggle {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      align-self: flex-start;
       border-radius: 999px;
       border: 1px solid var(--md-sys-color-outline-variant);
       background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface-variant);
-      padding: 8px 16px;
+      padding: 0 16px;
+      height: 32px;
+      box-sizing: border-box;
       font-size: 12px;
+      line-height: 1;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -181,8 +191,8 @@ export class EmailHeader extends LitElement {
     }
 
     .metadata-toggle .icon svg {
-      width: 18px !important;
-      height: 18px !important;
+      width: 14px !important;
+      height: 14px !important;
       fill: currentColor;
     }
 
@@ -275,14 +285,23 @@ export class EmailHeader extends LitElement {
         <span class="value code">${this.email.messageId || 'Unavailable'}</span>
       </div>
 
-      <button
-        class="metadata-toggle"
-        @click=${() => this.showFullHeaders = !this.showFullHeaders}
-        type="button"
-      >
-        ${this.showFullHeaders ? 'Hide headers' : 'Show headers'}
-        <span class="icon">${this.showFullHeaders ? chevronUpIcon : chevronDownIcon}</span>
-      </button>
+      <div class="header-actions">
+        <button
+          class="metadata-toggle"
+          @click=${() => this.showFullHeaders = !this.showFullHeaders}
+          type="button"
+        >
+          ${this.showFullHeaders ? 'Hide headers' : 'Show headers'}
+          <span class="icon">${this.showFullHeaders ? chevronUpIcon : chevronDownIcon}</span>
+        </button>
+        ${this.email.emlPath && typeof pydio !== 'undefined' ? html`
+          <button
+            class="metadata-toggle"
+            type="button"
+            @click=${() => navigateToEmailFile(this.email.emlPath)}
+          >Show in files</button>
+        ` : ''}
+      </div>
 
       ${this.showFullHeaders ? html`
         <pre class="full-headers">${JSON.stringify(this.email.headers || {

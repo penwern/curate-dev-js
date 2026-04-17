@@ -648,6 +648,21 @@ export async function getSingleCurateEmail(absolutePath) {
 }
 
 /**
+ * Navigate to the email's .eml file in the Pydio Cells file browser.
+ * No-op outside of a Curate environment.
+ * @param {string} emlPath - Relative emlPath from the email manifest entry
+ */
+export async function navigateToEmailFile(emlPath) {
+  if (getArchiveMode() !== 'curate' || typeof pydio === 'undefined' || typeof pydio.goTo !== 'function') {
+    return;
+  }
+  const basePath = resolveCurateBasePath();
+  const fullPath = joinArchivePath(basePath, emlPath);
+  const node = await loadCurateNode(fullPath);
+  pydio.goTo(node);
+}
+
+/**
  * Delete an email from the archive
  * @param {string} folder - The bucket folder label from the email's manifest entry
  * @param {string} emailId - The email's ID within that folder
