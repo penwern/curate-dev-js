@@ -97,7 +97,32 @@ const CurateRouter = (function () {
       setTimeout(urlChangeListener, 10);
     };
 
-    // Listen for window resize to reposition custom pages
+    // Reposition on any change to desktop-container's bounds (sidebar toggles,
+    // panel resizes, etc.) — window.resize alone misses DOM-driven layout shifts.
+    const observeDesktopContainer = () => {
+      const desktopContainer = document.querySelector('.desktop-container');
+      if (desktopContainer) {
+        new ResizeObserver(() => {
+          if (currentPage && currentPage.container && currentPage.container.element) {
+            repositionCurrentPage();
+          }
+        }).observe(desktopContainer);
+      }
+    };
+
+    if (document.querySelector('.desktop-container')) {
+      observeDesktopContainer();
+    } else {
+      // Container not in DOM yet — wait for it
+      new MutationObserver((_, observer) => {
+        if (document.querySelector('.desktop-container')) {
+          observer.disconnect();
+          observeDesktopContainer();
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Keep window.resize as a fallback for browsers without ResizeObserver
     window.addEventListener('resize', () => {
       if (currentPage && currentPage.container && currentPage.container.element) {
         repositionCurrentPage();
