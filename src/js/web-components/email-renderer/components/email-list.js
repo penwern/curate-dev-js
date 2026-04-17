@@ -21,6 +21,7 @@ export class EmailList extends LitElement {
     selectedId: { type: String },
     folderTree: { type: Array },
     selectedFolderPath: { type: String },
+    canDelete: { type: Boolean },
     searchQuery: { type: String, state: true },
     sortBy: { type: String, state: true },
     sortDirection: { type: String, state: true },
@@ -36,6 +37,7 @@ export class EmailList extends LitElement {
     this.selectedId = null;
     this.folderTree = [];
     this.selectedFolderPath = null;
+    this.canDelete = false;
     this.searchQuery = '';
     this.sortBy = 'date';
     this.sortDirection = 'desc';
@@ -1116,6 +1118,7 @@ export class EmailList extends LitElement {
             .threadCount=${1}
             .isInThread=${false}
             .threadIndex=${0}
+            .canDelete=${this.canDelete}
             @email-selected=${this._handleSelection}
           ></email-list-item>
         </div>
@@ -1152,6 +1155,7 @@ export class EmailList extends LitElement {
                 .isInThread=${true}
                 .threadIndex=${index}
                 .isCollapsedPreview=${group.collapsed}
+                .canDelete=${this.canDelete}
                 @email-selected=${this._handleSelection}
               ></email-list-item>
             `)}

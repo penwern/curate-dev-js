@@ -648,6 +648,38 @@ export async function getSingleCurateEmail(absolutePath) {
 }
 
 /**
+ * Delete an email from the archive
+ * @param {string} folder - The bucket folder label from the email's manifest entry
+ * @param {string} emailId - The email's ID within that folder
+ * @returns {Promise<Object>} The deleted stub with deleted: true
+ */
+export async function deleteEmail(folder, emailId) {
+  if (!folder || !emailId) {
+    throw new Error('folder and emailId are required to delete an email');
+  }
+
+  let archivePath;
+  if (getArchiveMode() === 'curate') {
+    const basePath = resolveCurateBasePath();
+    const workspace = Curate.workspaces.getOpenWorkspace()
+    archivePath = `cells://${workspace}/${basePath.replace(/^\/+/, '')}`;
+  } else {
+    archivePath = resolveHttpBasePath();
+  }
+
+  const url = `http://localhost:8001/api/archives/emails/${encodeURIComponent(folder)}/${encodeURIComponent(emailId)}`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ archivePath })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete email: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
  * Get attachment blob URL for download/display
  * @param {string} attachmentPath - Path to attachment
  * @returns {Promise<string>} Blob URL

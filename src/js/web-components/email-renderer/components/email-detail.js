@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import './email-header.js';
 import './email-body.js';
 import './attachment-list.js';
-import { emailOutlineIcon, chevronDownIcon, chevronRightIcon, attachmentIcon, folderIcon } from "../../utils/icons.js";
+import { emailOutlineIcon, chevronDownIcon, chevronRightIcon, attachmentIcon, folderIcon, deleteIcon } from "../../utils/icons.js";
 import { formatEmailDate } from '../utils/dateFormat.js';
 
 export class EmailDetail extends LitElement {
@@ -12,7 +12,10 @@ export class EmailDetail extends LitElement {
     threadEmails: { type: Array },
     threadBodies: { type: Object },
     selectedEmailId: { type: String },
-    collapsedMessages: { type: Set, state: true }
+    canDelete: { type: Boolean },
+    collapsedMessages: { type: Set, state: true },
+    _confirmingDeleteId: { type: String, state: true },
+    _deleteInProgress: { type: Boolean, state: true }
   };
 
   constructor() {
@@ -22,7 +25,10 @@ export class EmailDetail extends LitElement {
     this.threadEmails = null;
     this.threadBodies = null;
     this.selectedEmailId = null;
+    this.canDelete = false;
     this.collapsedMessages = new Set();
+    this._confirmingDeleteId = null;
+    this._deleteInProgress = false;
     this._lastHighlightedId = null;
   }
 
@@ -285,8 +291,137 @@ export class EmailDetail extends LitElement {
       color: var(--md-sys-color-on-surface);
       font-size: 12px;
       font-weight: 500;
-    }attachment-list {
+    }
+
+    attachment-list {
       margin-top: 4px;
+    }
+
+    .delete-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    .delete-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .delete-btn .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    .delete-btn .icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor;
+    }
+
+    .delete-btn:hover {
+      border-color: var(--md-sys-color-error);
+      color: var(--md-sys-color-error);
+      background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);
+    }
+
+    .delete-btn:focus-visible {
+      outline: 2px solid var(--md-sys-color-error);
+      outline-offset: 2px;
+    }
+
+    .delete-confirm-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: var(--md-sys-color-error);
+      color: var(--md-sys-color-on-error);
+      transition: opacity 0.2s ease;
+    }
+
+    .delete-confirm-btn:hover {
+      opacity: 0.88;
+    }
+
+    .delete-confirm-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .delete-cancel-btn {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .delete-cancel-btn:hover {
+      border-color: var(--md-sys-color-outline);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .delete-confirm-label {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-weight: 500;
+    }
+
+    .deleted-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--md-sys-color-surface-variant) 60%, transparent);
+      border: 1px dashed var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 13px;
+      font-style: italic;
+      opacity: 0.75;
+    }
+
+    .deleted-placeholder .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .deleted-placeholder .icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor;
     }
 
     @media (max-width: 900px) {
@@ -310,6 +445,63 @@ export class EmailDetail extends LitElement {
       }
     }
   `;
+
+  _requestDelete(emailId) {
+    this._confirmingDeleteId = emailId;
+  }
+
+  _cancelDelete() {
+    this._confirmingDeleteId = null;
+  }
+
+  _confirmDelete(email) {
+    this._deleteInProgress = true;
+    this.dispatchEvent(new CustomEvent('email-delete-request', {
+      detail: { emailId: email.id, folder: email.folder },
+      bubbles: true,
+      composed: true
+    }));
+    this._confirmingDeleteId = null;
+    this._deleteInProgress = false;
+  }
+
+  _renderDeleteAction(email) {
+    if (!this.canDelete || email.deleted) {
+      return null;
+    }
+    const isConfirming = this._confirmingDeleteId === email.id;
+    if (isConfirming) {
+      return html`
+        <div class="delete-action">
+          <span class="delete-confirm-label">Permanently delete this email?</span>
+          <button
+            class="delete-confirm-btn"
+            type="button"
+            ?disabled=${this._deleteInProgress}
+            @click=${() => this._confirmDelete(email)}
+          >Delete</button>
+          <button
+            class="delete-cancel-btn"
+            type="button"
+            @click=${this._cancelDelete}
+          >Cancel</button>
+        </div>
+      `;
+    }
+    return html`
+      <div class="delete-action">
+        <button
+          class="delete-btn"
+          type="button"
+          title="Delete this email"
+          @click=${() => this._requestDelete(email.id)}
+        >
+          <span class="icon">${deleteIcon}</span>
+          Delete
+        </button>
+      </div>
+    `;
+  }
 
   _toggleMessageCollapse(emailId) {
     const updated = new Set(this.collapsedMessages);
@@ -469,6 +661,22 @@ export class EmailDetail extends LitElement {
               const isCollapsed = this.collapsedMessages.has(threadEmail.id);
               const isFirst = index === 0;
 
+              if (threadEmail.deleted) {
+                return html`
+                  <article
+                    class="thread-message"
+                    data-thread-message=${threadEmail.id}
+                  >
+                    <div class="thread-message-body">
+                      <div class="deleted-placeholder">
+                        <span class="icon">${deleteIcon}</span>
+                        This email has been permanently removed.
+                      </div>
+                    </div>
+                  </article>
+                `;
+              }
+
               if (isCollapsed) {
                 return html`
                   <article
@@ -510,6 +718,7 @@ export class EmailDetail extends LitElement {
                         .attachments=${threadEmail.attachments || []}
                         .hasExternalImages=${threadEmail.hasExternalImages || false}
                       ></email-body>
+                      ${this._renderDeleteAction(threadEmail)}
                     </div>
                   ` : html`
                     <button class="message-toggle" type="button" @click=${() => this._toggleMessageCollapse(threadEmail.id)}>
@@ -536,11 +745,25 @@ export class EmailDetail extends LitElement {
                         .attachments=${threadEmail.attachments || []}
                         .hasExternalImages=${threadEmail.hasExternalImages || false}
                       ></email-body>
+                      ${this._renderDeleteAction(threadEmail)}
                     </div>
                   `}
                 </article>
               `;
             })}
+          </div>
+        </div>
+      `;
+    }
+
+    if (this.email.deleted) {
+      return html`
+        <div class="email-content">
+          <div class="email-card">
+            <div class="deleted-placeholder">
+              <span class="icon">${deleteIcon}</span>
+              This email has been permanently removed.
+            </div>
           </div>
         </div>
       `;
@@ -563,6 +786,7 @@ export class EmailDetail extends LitElement {
             .attachments=${this.email.attachments || []}
             .hasExternalImages=${this.email.hasExternalImages || false}
           ></email-body>
+          ${this._renderDeleteAction(this.email)}
         </div>
       </div>
     `;

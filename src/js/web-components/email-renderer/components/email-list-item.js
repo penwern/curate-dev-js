@@ -1,7 +1,7 @@
 ﻿import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { formatEmailDate } from '../utils/dateFormat.js';
-import { attachmentIcon, forumIcon, folderIcon } from "../../utils/icons.js";
+import { attachmentIcon, forumIcon, folderIcon, deleteIcon } from "../../utils/icons.js";
 
 export class EmailListItem extends LitElement {
   static properties = {
@@ -10,7 +10,9 @@ export class EmailListItem extends LitElement {
     threadCount: { type: Number },
     isInThread: { type: Boolean },
     threadIndex: { type: Number },
-    isCollapsedPreview: { type: Boolean }
+    isCollapsedPreview: { type: Boolean },
+    canDelete: { type: Boolean },
+    _confirming: { type: Boolean, state: true }
   };
 
   constructor() {
@@ -21,6 +23,8 @@ export class EmailListItem extends LitElement {
     this.isInThread = false;
     this.threadIndex = 0;
     this.isCollapsedPreview = false;
+    this.canDelete = false;
+    this._confirming = false;
   }
 
   static styles = css`
@@ -169,7 +173,153 @@ export class EmailListItem extends LitElement {
       white-space: nowrap;
       max-width: 200px;
     }
+
+    .item-delete-btn {
+      flex-shrink: 0;
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+
+    .item-delete-btn .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .item-delete-btn .icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor;
+    }
+
+    .email-item:hover .item-delete-btn,
+    .email-item:focus-within .item-delete-btn,
+    .item-delete-btn:focus-visible {
+      opacity: 1;
+    }
+
+    .item-delete-btn:hover {
+      background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent);
+      color: var(--md-sys-color-error);
+    }
+
+    .item-delete-btn:focus-visible {
+      outline: 2px solid var(--md-sys-color-error);
+      outline-offset: 2px;
+    }
+
+    .item-confirm-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      padding-top: 4px;
+    }
+
+    .item-confirm-label {
+      font-size: 11px;
+      color: var(--md-sys-color-on-surface-variant);
+      flex: 1 1 100%;
+    }
+
+    .item-confirm-yes {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: var(--md-sys-color-error);
+      color: var(--md-sys-color-on-error);
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .item-confirm-yes:hover {
+      opacity: 0.88;
+    }
+
+    .item-confirm-no {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .item-confirm-no:hover {
+      border-color: var(--md-sys-color-outline);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .email-item.deleted {
+      opacity: 0.5;
+      cursor: default;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--md-sys-color-surface-variant) 40%, transparent);
+    }
+
+    .deleted-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .deleted-label .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    .deleted-label .icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor;
+    }
   `;
+
+  _handleDeleteClick(event) {
+    event.stopPropagation();
+    this._confirming = true;
+  }
+
+  _handleConfirmDelete(event) {
+    event.stopPropagation();
+    this._confirming = false;
+    this.dispatchEvent(new CustomEvent('email-delete-request', {
+      detail: { emailId: this.email.id, folder: this.email.folder },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  _handleCancelDelete(event) {
+    event.stopPropagation();
+    this._confirming = false;
+  }
 
   _handleClick() {
     this._emitSelection();
@@ -195,6 +345,22 @@ export class EmailListItem extends LitElement {
       return html``;
     }
 
+    if (this.email.deleted) {
+      const classes = {
+        'email-item': true,
+        deleted: true,
+        thread: this.isInThread
+      };
+      return html`
+        <article class=${classMap(classes)} role="listitem" aria-label="Deleted email">
+          <span class="deleted-label">
+            <span class="icon">${deleteIcon}</span>
+            This email has been permanently removed.
+          </span>
+        </article>
+      `;
+    }
+
     const classes = {
       'email-item': true,
       selected: this.selected,
@@ -218,6 +384,16 @@ export class EmailListItem extends LitElement {
         <div class="item-header">
           <span class="sender">${sender}</span>
           <span class="timestamp">${formatEmailDate(this.email.date)}</span>
+          ${this.canDelete ? html`
+            <button
+              class="item-delete-btn"
+              type="button"
+              title="Delete this email"
+              @click=${this._handleDeleteClick}
+            >
+              <span class="icon">${deleteIcon}</span>
+            </button>
+          ` : ''}
         </div>
         <div class="item-subject">
           <span class="subject">${subject}</span>
@@ -240,6 +416,13 @@ export class EmailListItem extends LitElement {
             </span>
           ` : ''}
         </div>
+        ${this._confirming ? html`
+          <div class="item-confirm-row" @click=${(e) => e.stopPropagation()}>
+            <span class="item-confirm-label">Permanently delete?</span>
+            <button class="item-confirm-yes" type="button" @click=${this._handleConfirmDelete}>Delete</button>
+            <button class="item-confirm-no" type="button" @click=${this._handleCancelDelete}>Cancel</button>
+          </div>
+        ` : ''}
       </article>
     `;
   }

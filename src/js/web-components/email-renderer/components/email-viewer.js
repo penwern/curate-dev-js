@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
 import '@material/web/progress/circular-progress.js';
-import { getManifest, getEmailBody, setArchiveBasePath, getSingleCurateEmail } from '../data/dataService.js';
+import { getManifest, getEmailBody, setArchiveBasePath, getSingleCurateEmail, deleteEmail } from '../data/dataService.js';
 import './email-list.js';
 import './email-detail.js';
 import { chevronLeftIcon, chevronRightIcon } from '../../utils/icons.js';
@@ -752,6 +752,7 @@ export class EmailViewer extends LitElement {
       : [];
     this.threads = manifest.threads ?? {};
     this.selectedFolderPath = null;
+
   }
 
   async _loadSingleEmail() {
@@ -1003,6 +1004,44 @@ export class EmailViewer extends LitElement {
     }
   }
 
+  async _handleEmailDeleteRequest(event) {
+    const { emailId, folder } = event.detail || {};
+    if (!emailId || !folder) {
+      return;
+    }
+
+    let stub;
+    try {
+      stub = await deleteEmail(folder, emailId);
+    } catch (error) {
+      console.error('Failed to delete email:', error);
+      return;
+    }
+
+    // Replace the email in the list with the returned stub
+    this.emails = this.emails.map((email) =>
+      email.id === emailId ? { ...email, ...stub } : email
+    );
+
+    // Update selectedEmail if it was the deleted one
+    if (this.selectedEmail?.id === emailId) {
+      this.selectedEmail = { ...this.selectedEmail, ...stub };
+      this.emailBody = null;
+    }
+
+    // Update threadEmails if the deleted email was in the current thread
+    if (this.threadEmails) {
+      this.threadEmails = this.threadEmails.map((email) =>
+        email.id === emailId ? { ...email, ...stub } : email
+      );
+      if (this.threadBodies) {
+        const updated = { ...this.threadBodies };
+        delete updated[emailId];
+        this.threadBodies = updated;
+      }
+    }
+  }
+
   _handleBackToList() {
     this.mobileView = 'list';
   }
@@ -1031,6 +1070,11 @@ export class EmailViewer extends LitElement {
       event.stopImmediatePropagation?.();
       event.preventDefault?.();
     }
+  }
+
+  _canDelete() {
+    const isSingleEmailMode = (this.archiveMode || '').toString().toLowerCase() === 'single-eml';
+    return !isSingleEmailMode;
   }
 
   render() {
@@ -1103,8 +1147,10 @@ export class EmailViewer extends LitElement {
                       .selectedId=${this.selectedEmailId}
                       .folderTree=${this.folderTree}
                       .selectedFolderPath=${this.selectedFolderPath}
+                      .canDelete=${this._canDelete()}
                       @email-selected=${this._handleEmailSelected}
                       @folder-selected=${this._handleFolderSelected}
+                      @email-delete-request=${this._handleEmailDeleteRequest}
                     ></email-list>
                   </div>
                 `}
@@ -1158,6 +1204,8 @@ export class EmailViewer extends LitElement {
                 .threadEmails=${this.threadEmails}
                 .threadBodies=${this.threadBodies}
                 .selectedEmailId=${this.selectedEmailId}
+                .canDelete=${this._canDelete()}
+                @email-delete-request=${this._handleEmailDeleteRequest}
               ></email-detail>
             </section>
           </div>
