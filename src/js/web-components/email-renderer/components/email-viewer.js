@@ -87,6 +87,8 @@ export class EmailViewer extends LitElement {
     }
 
     window.addEventListener('error', this._handleResizeObserverError, { capture: true });
+    this._hostResizeObserver = new ResizeObserver(() => this.requestUpdate());
+    this._hostResizeObserver.observe(this);
   }
 
   disconnectedCallback() {
@@ -100,6 +102,7 @@ export class EmailViewer extends LitElement {
     window.removeEventListener('pointermove', this._handlePointerMove);
     window.removeEventListener('pointerup', this._stopResize);
     window.removeEventListener('error', this._handleResizeObserverError, { capture: true });
+    this._hostResizeObserver?.disconnect();
     super.disconnectedCallback();
   }
 
