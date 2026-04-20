@@ -9,6 +9,7 @@ import { registerCalmIntegrationRoute } from './calm-integration.js';
 import { registerEmailViewerRoute } from './email-viewer.js';
 import { registerWarcViewerRoute } from './warc-viewer.js';
 import { registerDemoRoutes } from './demo-routes.js';
+import { registerDashboardRoute } from './dashboard.js';
 
 /**
  * Register all production routes
@@ -20,6 +21,7 @@ export function registerAllRoutes() {
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
   registerWarcViewerRoute();
+  registerDashboardRoute();
 
   // Demo routes (optional - could be conditionally loaded)
   registerDemoRoutes();
@@ -35,6 +37,7 @@ export function registerProductionRoutes() {
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
   registerWarcViewerRoute();
+  registerDashboardRoute();
 
   console.log('Production routes have been registered');
 }
