@@ -102,6 +102,7 @@ class ArchivespaceBrowser extends LitElement {
     folderName: { state: true },
     createFoldersLoading: { state: true },
     createFoldersFeedback: { state: true },
+    preserveStructure: { state: true },
 
     // Data
     repositories: { state: true },
@@ -298,6 +299,7 @@ class ArchivespaceBrowser extends LitElement {
     this.folderName = "";
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
+    this.preserveStructure = false;
 
     // Data
     this.repositories = [];
@@ -305,7 +307,8 @@ class ArchivespaceBrowser extends LitElement {
     this.archiveData = [];
 
     // API configuration
-    this.apiHost = window.origin + "/api/archivesspace";
+    //this.apiHost = window.origin + "/api/archivesspace";
+    this.apiHost = "http://localhost:8000";
     this.curateBasePath = "";
     this.curateParentPath = "/"+Curate.workspaces.getOpenWorkspace()
 
@@ -363,11 +366,51 @@ class ArchivespaceBrowser extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    ArchivespaceBrowser._injectModalStyles();
     document.addEventListener("click", this._boundDocumentClick);
     this._loadRepositoriesFromApi();
     if (this.resourceId && this.repositoryId) {
       this._loadRootTreeFromApi();
     }
+  }
+
+  static _modalStylesInjected = false;
+
+  static _injectModalStyles() {
+    if (ArchivespaceBrowser._modalStylesInjected) return;
+    ArchivespaceBrowser._modalStylesInjected = true;
+    const style = document.createElement("style");
+    style.id = "archivesspace-browser-modal-styles";
+    style.textContent = `
+      .config-modal-content:has(archivesspace-browser) {
+        width: 96vw;
+        max-width: 96vw;
+        height: 90vh;
+        max-height: 90vh;
+        overflow: hidden;
+        flex-direction: column;
+        flex-wrap: nowrap;
+      }
+      .config-modal-content:has(archivesspace-browser) .config-main-options-container {
+        display: block !important;
+        width: 100%;
+        max-height: none !important;
+        overflow: hidden;
+        margin: 0 !important;
+        flex: 1 1 0;
+        min-height: 0;
+      }
+      .config-modal-content:has(archivesspace-browser) .config-main-options-container > div {
+        width: 100%;
+        height: 100%;
+      }
+      .config-modal-content:has(archivesspace-browser) archivesspace-browser {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   disconnectedCallback() {
@@ -820,6 +863,7 @@ class ArchivespaceBrowser extends LitElement {
             .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
             .createFoldersLoading=${this.createFoldersLoading}
             .createFoldersFeedback=${this.createFoldersFeedback}
+            .preserveStructure=${this.preserveStructure}
             .searchQuery=${this.searchQuery}
             @detail-level-change=${this._handleDetailLevelChange}
             @per-file-mode-change=${this._handlePerFileModeChange}
@@ -828,6 +872,7 @@ class ArchivespaceBrowser extends LitElement {
             @keep-active-selection=${this._handleKeepActiveSelection}
             @clear-selection=${this._handleClearSelection}
             @navigate-selection=${this._handleNavigateSelection}
+            @preserve-structure-change=${this._handlePreserveStructureChange}
             @action-click=${this._handleActionClick}
           ></as-detail-panel>
         `;
@@ -863,6 +908,7 @@ class ArchivespaceBrowser extends LitElement {
           .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
           .createFoldersLoading=${this.createFoldersLoading}
           .createFoldersFeedback=${this.createFoldersFeedback}
+          .preserveStructure=${this.preserveStructure}
           .searchQuery=${this.searchQuery}
           @detail-level-change=${this._handleDetailLevelChange}
           @per-file-mode-change=${this._handlePerFileModeChange}
@@ -871,6 +917,7 @@ class ArchivespaceBrowser extends LitElement {
           @keep-active-selection=${this._handleKeepActiveSelection}
           @clear-selection=${this._handleClearSelection}
           @navigate-selection=${this._handleNavigateSelection}
+          @preserve-structure-change=${this._handlePreserveStructureChange}
           @action-click=${this._handleActionClick}
         ></as-detail-panel>
       `;
@@ -1260,11 +1307,21 @@ class ArchivespaceBrowser extends LitElement {
 
   _handleDetailLevelChange(e) {
     this.detailLevelMode = e.detail?.value || "per-file";
+    if (this.detailLevelMode !== "per-file") {
+      this.preserveStructure = false;
+    }
   }
 
   _handlePerFileModeChange(e) {
     if (this.detailLevelMode !== "per-file") return;
     this.perFileMode = e.detail?.value || "components";
+    if (this.perFileMode !== "components") {
+      this.preserveStructure = false;
+    }
+  }
+
+  _handlePreserveStructureChange(e) {
+    this.preserveStructure = e.detail?.value ?? false;
   }
 
   _handleContainerTypeChange(e) {
@@ -1401,6 +1458,9 @@ class ArchivespaceBrowser extends LitElement {
         };
         if (perFileMode) {
           folder.per_file_mode = perFileMode;
+        }
+        if (perFileMode === "as_components" && this.preserveStructure) {
+          folder.preserve_structure = true;
         }
         return folder;
       })

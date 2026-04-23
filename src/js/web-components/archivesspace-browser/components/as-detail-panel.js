@@ -5,6 +5,7 @@ import "@material/web/button/outlined-button.js";
 import "@material/web/button/text-button.js";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/radio/radio.js";
+import "@material/web/switch/switch.js";
 import "@material/web/icon/icon.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "../../utils/penwern-spinner.js";
@@ -35,6 +36,7 @@ class AsDetailPanel extends LitElement {
     createFoldersDisabledReason: { type: String },
     createFoldersLoading: { type: Boolean },
     createFoldersFeedback: { type: Object },
+    preserveStructure: { type: Boolean },
     searchQuery: { type: String },
     isSearchResult: { type: Boolean },
   };
@@ -359,6 +361,23 @@ class AsDetailPanel extends LitElement {
       opacity: 0.5;
     }
 
+    .toggle-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-option md-switch {
+      --md-switch-track-height: 20px;
+      --md-switch-track-width: 36px;
+      --md-switch-handle-height: 14px;
+      --md-switch-handle-width: 14px;
+    }
+
     .text-field-group {
       display: flex;
       flex-direction: column;
@@ -440,6 +459,7 @@ class AsDetailPanel extends LitElement {
     this.createFoldersDisabledReason = "";
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
+    this.preserveStructure = false;
     this.searchQuery = "";
     this.isSearchResult = false;
   }
@@ -630,6 +650,20 @@ class AsDetailPanel extends LitElement {
                 ${this._renderPerFileOption("records", "As records", !isPerFile)}
               </div>
             </div>
+            ${isPerFile && this.perFileMode === "components"
+              ? html`
+                  <div class="radio-group">
+                    <div class="radio-group-label">Structure</div>
+                    <label class="toggle-option">
+                      <md-switch
+                        ?selected=${this.preserveStructure}
+                        @change=${this._handlePreserveStructureChange}
+                      ></md-switch>
+                      <span>Preserve structure</span>
+                    </label>
+                  </div>
+                `
+              : nothing}
           </div>
           ${requiresSingleSelection
             ? html`
@@ -867,6 +901,16 @@ class AsDetailPanel extends LitElement {
     this.dispatchEvent(
       new CustomEvent("per-file-mode-change", {
         detail: { value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  _handlePreserveStructureChange(e) {
+    this.dispatchEvent(
+      new CustomEvent("preserve-structure-change", {
+        detail: { value: e.target.selected },
         bubbles: true,
         composed: true,
       })
