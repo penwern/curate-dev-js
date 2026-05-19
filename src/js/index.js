@@ -14,6 +14,7 @@ import "./web-components/calm-harvest-interface.js";
 import "./web-components/preservation-configs-menu/preservation-configs-menu.js";
 import "./web-components/preservation-go-configs-menu/preservation-go-configs-menu.js";
 import "./web-components/atom-go-credentials-menu/atom-go-credentials-menu.js";
+import "./web-components/atom-config-readonly/atom-config-readonly.js";
 import "./web-components/warc-viewer/warc-viewer.js";
 import "./web-components/warc-viewer/warc-options.js";
 import "./web-components/pure-integration-ui/main.js";

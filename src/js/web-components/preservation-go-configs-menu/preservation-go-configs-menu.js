@@ -306,6 +306,18 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   openAtomConfig() {
+    if (window.curateAtomReadonly === true) {
+      Curate.ui.modals.curatePopup(
+        { title: "AtoM Configuration" },
+        {
+          afterLoaded: (c) => {
+            const el = document.createElement("atom-config-readonly");
+            c.querySelector(".config-main-options-container").appendChild(el);
+          },
+        }
+      ).fire();
+      return;
+    }
     Curate.ui.modals.curatePopup({
       title: "AtoM Configuration",
       message: "AtoM Configuration would open here",
