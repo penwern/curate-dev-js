@@ -3,6 +3,7 @@
 A comprehensive JavaScript library for extending Curate/Pydio Cells with advanced functionality including metadata management, UI components, preservation workflows, and external integrations.
 
 ## Version
+
 Current version: **4.4.2**
 
 ## Overview
@@ -19,6 +20,7 @@ This library provides a modular set of JavaScript extensions that enhance the Cu
 ## Installation
 
 ### Prerequisites
+
 - Node.js (version 14 or higher)
 - npm or yarn package manager
 - Curate/Pydio Cells instance
@@ -26,22 +28,26 @@ This library provides a modular set of JavaScript extensions that enhance the Cu
 ### Build from Source
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/your-org/curate-dev-js.git
 cd curate-dev-js
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Build the project:
+
 ```bash
 npm run build
 ```
 
 This creates:
+
 - `dist/{version}/main_{version}.js` - Versioned build
 - `dist/@latest/main.js` - Latest build for easy deployment
 
@@ -68,50 +74,58 @@ When creating routes that use web components, **always make your route handler a
 
 ```javascript
 export function registerMyFeatureRoute() {
-  Curate.router.addRoute('/my-feature', async (container) => {
-    // CRITICAL: Wait for custom element to be defined
-    // This prevents race conditions on page refresh
-    await customElements.whenDefined('my-custom-element');
+  Curate.router.addRoute(
+    "/my-feature",
+    async (container) => {
+      // CRITICAL: Wait for custom element to be defined
+      // This prevents race conditions on page refresh
+      await customElements.whenDefined("my-custom-element");
 
-    // Now safe to create the element
-    const element = document.createElement('my-custom-element');
-    container.appendChild(element);
+      // Now safe to create the element
+      const element = document.createElement("my-custom-element");
+      container.appendChild(element);
 
-    return () => element.remove();
-  }, {
-    title: 'My Feature',
-    showHeader: true
-  });
+      return () => element.remove();
+    },
+    {
+      title: "My Feature",
+      showHeader: true,
+    },
+  );
 }
 ```
 
 **Why this is necessary:**
+
 - On page refresh, the router may initialize before web component registration completes
 - Without `await customElements.whenDefined()`, the element may not render
 - This race condition is timing-dependent (dev tools open = slower = works; dev tools closed = faster = fails)
 
-See [_route-template.js](src/js/custom-pages/routes/_route-template.js) for complete examples.
+See [\_route-template.js](src/js/custom-pages/routes/_route-template.js) for complete examples.
 
 ### UI Components
 
 ```javascript
 // Create a modal popup
-const popup = new Curate.ui.modals.curatePopup({
-  title: "Confirmation",
-  message: "Are you sure you want to proceed?",
-  type: "warning",
-  buttonType: "okCancel"
-}, {
-  afterLoaded: (popup) => {
-    console.log('Popup loaded');
+const popup = new Curate.ui.modals.curatePopup(
+  {
+    title: "Confirmation",
+    message: "Are you sure you want to proceed?",
+    type: "warning",
+    buttonType: "okCancel",
   },
-  onOk: () => {
-    console.log('User confirmed');
+  {
+    afterLoaded: (popup) => {
+      console.log("Popup loaded");
+    },
+    onOk: () => {
+      console.log("User confirmed");
+    },
+    onCancel: () => {
+      console.log("User cancelled");
+    },
   },
-  onCancel: () => {
-    console.log('User cancelled');
-  }
-});
+);
 
 popup.fire();
 ```
@@ -125,12 +139,13 @@ The Curate library includes a powerful event delegation system that allows you t
 ```javascript
 // Add a delegated click handler
 const handlerId = Curate.eventDelegator.addEventListener(
-  '.my-button',      // CSS selector
-  'click',           // Event type
-  function(event) {  // Handler function
-    console.log('Button clicked:', this);
+  ".my-button", // CSS selector
+  "click", // Event type
+  function (event) {
+    // Handler function
+    console.log("Button clicked:", this);
     // 'this' refers to the matched element
-  }
+  },
 );
 
 // Later, remove the specific handler
@@ -140,6 +155,7 @@ Curate.eventDelegator.removeEventListener(handlerId);
 #### API Methods
 
 **addEventListener(selector, type, callback, options)**
+
 - `selector` (string) - CSS selector to match elements
 - `type` (string) - Event type (e.g., 'click', 'mousedown', 'input')
 - `callback` (function) - Event handler function (receives event object, `this` is the matched element)
@@ -149,54 +165,54 @@ Curate.eventDelegator.removeEventListener(handlerId);
 - Returns: Handler ID for later removal
 
 **removeEventListener(handlerId)**
+
 - `handlerId` (number) - ID returned by addEventListener
 - Returns: `true` if handler was found and removed
 
 **removeEventListeners(selector, type)**
+
 - Removes all handlers matching a specific selector and event type
 - Returns: Number of handlers removed
 
 **removeAllEventListeners()**
+
 - Removes all delegated event listeners
 
 **getHandlerCount()**
+
 - Returns: Total number of active handlers
 
 #### Examples
 
 ```javascript
 // Simple click handler
-const id = Curate.eventDelegator.addEventListener(
-  '.delete-btn',
-  'click',
-  (e) => {
-    e.preventDefault();
-    console.log('Delete clicked');
-  }
-);
+const id = Curate.eventDelegator.addEventListener(".delete-btn", "click", (e) => {
+  e.preventDefault();
+  console.log("Delete clicked");
+});
 
 // One-time handler that auto-removes after first trigger
 Curate.eventDelegator.addEventListener(
-  '.welcome-message',
-  'click',
-  function() {
-    console.log('First click only!');
+  ".welcome-message",
+  "click",
+  function () {
+    console.log("First click only!");
   },
-  { once: true }
+  { once: true },
 );
 
 // Capture phase handler
 Curate.eventDelegator.addEventListener(
   'input[type="text"]',
-  'focus',
-  function() {
+  "focus",
+  function () {
     this.select(); // Select all text on focus
   },
-  { capture: true }
+  { capture: true },
 );
 
 // Remove all handlers for a specific selector/event
-const removed = Curate.eventDelegator.removeEventListeners('.my-button', 'click');
+const removed = Curate.eventDelegator.removeEventListeners(".my-button", "click");
 console.log(`Removed ${removed} handlers`);
 ```
 

@@ -5,10 +5,10 @@
       const langCode = user.preferences.get("lang");
       // if user language is set, set it to html element
       if (langCode) {
-        document.documentElement.setAttribute('lang', langCode);
+        document.documentElement.setAttribute("lang", langCode);
       }
     } catch (error) {
-      console.warn('Failed to set HTML lang attribute:', error);
+      console.warn("Failed to set HTML lang attribute:", error);
       // Optionally set a fallback language
       // document.documentElement.setAttribute('lang', 'en');
     }

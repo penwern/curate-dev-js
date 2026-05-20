@@ -290,8 +290,7 @@ class AsTreeNode extends LitElement {
   render() {
     if (!this.node) return nothing;
 
-    const hasKnownChildren =
-      Array.isArray(this.node.children) && this.node.children.length > 0;
+    const hasKnownChildren = Array.isArray(this.node.children) && this.node.children.length > 0;
     const isExpandable = this.node.has_children || hasKnownChildren;
     const indentStyles = styleMap({ "--depth": this.depth });
 
@@ -306,11 +305,7 @@ class AsTreeNode extends LitElement {
         : this.node.title;
 
     return html`
-      <div
-        class="${nodeClasses.join(" ")}"
-        style=${indentStyles}
-        @click=${this._handleSelect}
-      >
+      <div class="${nodeClasses.join(" ")}" style=${indentStyles} @click=${this._handleSelect}>
         <div class="node-row-1">
           <div class="node-indent">
             ${isExpandable
@@ -334,9 +329,7 @@ class AsTreeNode extends LitElement {
         <div class="node-row-2">
           <div class="node-meta">
             ${this._renderStatusBadge(this.node.status, this.node.statusType)}
-            ${this.node.extent
-              ? html`<div class="meta-chip">${this.node.extent}</div>`
-              : nothing}
+            ${this.node.extent ? html`<div class="meta-chip">${this.node.extent}</div>` : nothing}
             ${this.node.location
               ? html`<div class="meta-chip">
                   <span class="chip-icon">${pinIcon}</span>
@@ -368,9 +361,7 @@ class AsTreeNode extends LitElement {
                 </div>
               `
             : nothing}
-          ${this.isLoading
-            ? html`<penwern-spinner size="32"></penwern-spinner>`
-            : nothing}
+          ${this.isLoading ? html`<penwern-spinner size="32"></penwern-spinner>` : nothing}
         </div>
       </div>
     `;
@@ -403,9 +394,7 @@ class AsTreeNode extends LitElement {
 
     return html`
       <span class="status-badge ${statusType || "neutral"}">
-        ${statusIcon
-          ? html`<span class="status-icon">${statusIcon}</span>`
-          : nothing}
+        ${statusIcon ? html`<span class="status-icon">${statusIcon}</span>` : nothing}
         ${status || "Available"}
       </span>
     `;
@@ -413,7 +402,7 @@ class AsTreeNode extends LitElement {
 
   _handleSelect(e) {
     // Ignore clicks on the checkbox or its children
-    if (e.target.closest('md-checkbox')) {
+    if (e.target.closest("md-checkbox")) {
       return;
     }
 
@@ -422,7 +411,7 @@ class AsTreeNode extends LitElement {
         detail: { nodeId: this.node.id },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -434,7 +423,7 @@ class AsTreeNode extends LitElement {
           detail: { nodeId: this.node.id },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     } else {
       this.dispatchEvent(
@@ -442,7 +431,7 @@ class AsTreeNode extends LitElement {
           detail: { nodeId: this.node.id, node: this.node },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
   }
@@ -456,10 +445,10 @@ class AsTreeNode extends LitElement {
         detail: { nodeId: this.node.id },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
 
-    console.log('[TreeNode] record-toggle event dispatched');
+    console.log("[TreeNode] record-toggle event dispatched");
   }
 
   _handleExpandBranch(e) {
@@ -469,7 +458,7 @@ class AsTreeNode extends LitElement {
         detail: { node: this.node },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -480,7 +469,7 @@ class AsTreeNode extends LitElement {
         detail: { node: this.node },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

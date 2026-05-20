@@ -11,14 +11,14 @@ const MSG_IDS = ["11", "13", "19", "20", "21", "22", "75", "77"];
 const BASE_QUERY = "MsgId:11 MsgId:13 MsgId:19 MsgId:20 MsgId:21 MsgId:22 MsgId:75 MsgId:77";
 
 const ACTIVITY_TYPES = {
-  "11": { label: "Create", color: "#006d43" },
-  "13": { label: "Access", color: "#006689" },
-  "19": { label: "Delete", color: "#ba1a1a" },
-  "20": { label: "Move", color: "#7e5700" },
-  "21": { label: "Access", color: "#006689" },
-  "22": { label: "Upload", color: "#0e5cb7" },
-  "75": { label: "Share", color: "#4e616d" },
-  "77": { label: "Share Modified", color: "#605a7d" },
+  11: { label: "Create", color: "#006d43" },
+  13: { label: "Access", color: "#006689" },
+  19: { label: "Delete", color: "#ba1a1a" },
+  20: { label: "Move", color: "#7e5700" },
+  21: { label: "Access", color: "#006689" },
+  22: { label: "Upload", color: "#0e5cb7" },
+  75: { label: "Share", color: "#4e616d" },
+  77: { label: "Share Modified", color: "#605a7d" },
 };
 
 const TYPE_FILTER_OPTIONS = [
@@ -60,7 +60,9 @@ class ActivityPanel extends LitElement {
   };
 
   static styles = css`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -102,7 +104,9 @@ class ActivityPanel extends LitElement {
       gap: 16px;
       margin-bottom: 24px;
     }
-    .table-section { margin-top: 8px; }
+    .table-section {
+      margin-top: 8px;
+    }
     .table-header {
       display: flex;
       align-items: center;
@@ -129,7 +133,9 @@ class ActivityPanel extends LitElement {
       border-color: var(--md-sys-color-primary);
     }
     @media (max-width: 768px) {
-      .charts-row { grid-template-columns: 1fr; }
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
     }
   `;
 
@@ -226,7 +232,8 @@ class ActivityPanel extends LitElement {
 
     const style = getComputedStyle(document.documentElement);
     const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
-    const primaryContainer = style.getPropertyValue("--md-sys-color-primary-container").trim() || "#c3e8ff";
+    const primaryContainer =
+      style.getPropertyValue("--md-sys-color-primary-container").trim() || "#c3e8ff";
 
     this._timelineData = {
       labels: entries.map(([name]) => name),
@@ -356,10 +363,12 @@ class ActivityPanel extends LitElement {
     ]);
 
     const totalYear = yearResults.reduce(
-      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0), 0,
+      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0),
+      0,
     );
     const totalMonth = monthResults.reduce(
-      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0), 0,
+      (sum, res) => sum + (res.Results ?? []).reduce((s, r) => s + (r.Count ?? 0), 0),
+      0,
     );
 
     const summary = [
@@ -505,7 +514,11 @@ class ActivityPanel extends LitElement {
           <select
             class="type-filter"
             .value=${this._typeFilter}
-            @change=${(e) => { this._typeFilter = e.target.value; this._tablePage = 0; this._loadTable(0); }}
+            @change=${(e) => {
+              this._typeFilter = e.target.value;
+              this._tablePage = 0;
+              this._loadTable(0);
+            }}
           >
             ${TYPE_FILTER_OPTIONS.map((o) => html`<option value=${o.label}>${o.label}</option>`)}
           </select>

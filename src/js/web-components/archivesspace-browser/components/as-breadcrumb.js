@@ -86,10 +86,7 @@ class AsBreadcrumb extends LitElement {
         <div class="breadcrumb-item">
           ${idx < this.crumbs.length - 1
             ? html`
-                <button
-                  class="breadcrumb-link"
-                  @click=${() => this._handleNavigate(idx)}
-                >
+                <button class="breadcrumb-link" @click=${() => this._handleNavigate(idx)}>
                   ${crumb.label}
                 </button>
               `
@@ -111,7 +108,7 @@ class AsBreadcrumb extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

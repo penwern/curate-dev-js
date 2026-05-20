@@ -15,7 +15,15 @@ import "./panels/deletions-panel.js";
 import "./panels/activity-panel.js";
 import "./panels/formats-panel.js";
 import { getWorkspaces, invalidateCache, currentUserCanViewDashboard } from "./client.js";
-import { refreshIcon, fileMultipleIcon, cloudUploadIcon, harddiskIcon, deleteClockIcon, eyeIcon, chartDonutIcon } from "../utils/icons.js";
+import {
+  refreshIcon,
+  fileMultipleIcon,
+  cloudUploadIcon,
+  harddiskIcon,
+  deleteClockIcon,
+  eyeIcon,
+  chartDonutIcon,
+} from "../utils/icons.js";
 import "../utils/penwern-spinner.js";
 import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
 
@@ -23,10 +31,10 @@ import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/
 // These can be overridden for local testing via:
 //   window.CURATE_STORAGE_REPORTING_URL
 //   window.CURATE_FORMAT_REPORTING_URL
-const STORAGE_REPORTING_URL = window.CURATE_STORAGE_REPORTING_URL
-  ?? `${window.location.origin}/api/dashboard/storage`;
-const FORMAT_REPORTING_URL = window.CURATE_FORMAT_REPORTING_URL
-  ?? `${window.location.origin}/api/dashboard/format`;
+const STORAGE_REPORTING_URL =
+  window.CURATE_STORAGE_REPORTING_URL ?? `${window.location.origin}/api/dashboard/storage`;
+const FORMAT_REPORTING_URL =
+  window.CURATE_FORMAT_REPORTING_URL ?? `${window.location.origin}/api/dashboard/format`;
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fileMultipleIcon" },
@@ -61,7 +69,7 @@ class Dashboard extends LitElement {
   };
 
   static styles = css`
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+    @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap");
 
     :host {
       display: flex;
@@ -79,7 +87,6 @@ class Dashboard extends LitElement {
     *::after {
       box-sizing: border-box;
     }
-
 
     /* ─── Tab Navigation ─── */
     .tab-bar {
@@ -105,7 +112,9 @@ class Dashboard extends LitElement {
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .tab-scroll::-webkit-scrollbar { display: none; }
+    .tab-scroll::-webkit-scrollbar {
+      display: none;
+    }
 
     .tab {
       position: relative;
@@ -134,7 +143,9 @@ class Dashboard extends LitElement {
       height: 2.5px;
       border-radius: 2px 2px 0 0;
       background: transparent;
-      transition: background 0.25s ease, transform 0.25s ease;
+      transition:
+        background 0.25s ease,
+        transform 0.25s ease;
       transform: scaleX(0);
     }
 
@@ -197,10 +208,19 @@ class Dashboard extends LitElement {
     }
 
     @media (max-width: 640px) {
-      .tab-bar-inner { padding: 0 12px; }
-      .tab { padding: 10px 10px; }
-      .tab-label { display: none; }
-      .tab-actions { gap: 8px; padding-left: 8px; }
+      .tab-bar-inner {
+        padding: 0 12px;
+      }
+      .tab {
+        padding: 10px 10px;
+      }
+      .tab-label {
+        display: none;
+      }
+      .tab-actions {
+        gap: 8px;
+        padding-left: 8px;
+      }
     }
 
     /* ─── Content Area ─── */
@@ -301,9 +321,7 @@ class Dashboard extends LitElement {
     this._wsLoading = true;
     try {
       const all = await getWorkspaces();
-      this._workspaces = all.filter(
-        (ws) => ws.Scope === "ADMIN" && ws.Slug !== "personal-files",
-      );
+      this._workspaces = all.filter((ws) => ws.Scope === "ADMIN" && ws.Slug !== "personal-files");
     } catch (err) {
       console.error("Failed to load workspaces:", err);
       this._workspaces = [];
@@ -425,44 +443,50 @@ class Dashboard extends LitElement {
     if (tab === "ingestion") {
       if (format === "csv") exportToCsv(buildFilename("ingestion", "csv", filters), data.records);
       else if (format === "json") exportToJson(buildFilename("ingestion", "json", filters), data);
-      else if (format === "xlsx") exportToXlsx(buildFilename("ingestion", "xlsx", filters), [
-        { name: "Summary", rows: data.summary },
-        { name: "Upload Records", rows: data.records },
-        { name: "Time Series (Annual)", rows: data.timeSeries },
-      ]);
+      else if (format === "xlsx")
+        exportToXlsx(buildFilename("ingestion", "xlsx", filters), [
+          { name: "Summary", rows: data.summary },
+          { name: "Upload Records", rows: data.records },
+          { name: "Time Series (Annual)", rows: data.timeSeries },
+        ]);
     } else if (tab === "storage") {
       if (format === "csv") exportToCsv(buildFilename("storage", "csv", filters), data.workspaces);
       else if (format === "json") exportToJson(buildFilename("storage", "json", filters), data);
-      else if (format === "xlsx") exportToXlsx(buildFilename("storage", "xlsx", filters), [
-        { name: "Summary", rows: data.summary },
-        { name: "Workspace Storage", rows: data.workspaces },
-        { name: "Storage History", rows: data.history ?? [] },
-      ]);
+      else if (format === "xlsx")
+        exportToXlsx(buildFilename("storage", "xlsx", filters), [
+          { name: "Summary", rows: data.summary },
+          { name: "Workspace Storage", rows: data.workspaces },
+          { name: "Storage History", rows: data.history ?? [] },
+        ]);
     } else if (tab === "deletions") {
-      if (format === "csv") exportToCsv(buildFilename("deletions", "csv", filters), data.recycleBin);
+      if (format === "csv")
+        exportToCsv(buildFilename("deletions", "csv", filters), data.recycleBin);
       else if (format === "json") exportToJson(buildFilename("deletions", "json", filters), data);
-      else if (format === "xlsx") exportToXlsx(buildFilename("deletions", "xlsx", filters), [
-        { name: "Summary", rows: data.summary },
-        { name: "Recycle Bin", rows: data.recycleBin },
-        { name: "Deletion History", rows: data.history },
-      ]);
+      else if (format === "xlsx")
+        exportToXlsx(buildFilename("deletions", "xlsx", filters), [
+          { name: "Summary", rows: data.summary },
+          { name: "Recycle Bin", rows: data.recycleBin },
+          { name: "Deletion History", rows: data.history },
+        ]);
     } else if (tab === "activity") {
       if (format === "csv") exportToCsv(buildFilename("activity", "csv", filters), data.log);
       else if (format === "json") exportToJson(buildFilename("activity", "json", filters), data);
-      else if (format === "xlsx") exportToXlsx(buildFilename("activity", "xlsx", filters), [
-        { name: "Summary", rows: data.summary },
-        { name: "Activity Log", rows: data.log },
-        { name: "By Type", rows: data.byType },
-        { name: "Time Series (Annual)", rows: data.timeSeries },
-      ]);
+      else if (format === "xlsx")
+        exportToXlsx(buildFilename("activity", "xlsx", filters), [
+          { name: "Summary", rows: data.summary },
+          { name: "Activity Log", rows: data.log },
+          { name: "By Type", rows: data.byType },
+          { name: "Time Series (Annual)", rows: data.timeSeries },
+        ]);
     } else if (tab === "formats") {
       if (format === "csv") exportToCsv(buildFilename("formats", "csv"), data.formats);
       else if (format === "json") exportToJson(buildFilename("formats", "json"), data);
-      else if (format === "xlsx") exportToXlsx(buildFilename("formats", "xlsx"), [
-        { name: "Summary", rows: data.summary },
-        { name: "Format Breakdown", rows: data.formats },
-        { name: "By Datasource", rows: data.byDatasource },
-      ]);
+      else if (format === "xlsx")
+        exportToXlsx(buildFilename("formats", "xlsx"), [
+          { name: "Summary", rows: data.summary },
+          { name: "Format Breakdown", rows: data.formats },
+          { name: "By Datasource", rows: data.byDatasource },
+        ]);
     }
   }
 
@@ -498,11 +522,13 @@ class Dashboard extends LitElement {
           rows: [
             ...(overview?.summary ?? [{ Metric: "Overview data unavailable", Value: "" }]),
             { Metric: "", Value: "" },
-            ...(ingestion?.summary?.map((r) => ({ ...r, Metric: "Ingestion — " + r.Metric })) ?? []),
+            ...(ingestion?.summary?.map((r) => ({ ...r, Metric: "Ingestion — " + r.Metric })) ??
+              []),
             { Metric: "", Value: "" },
             ...(storage?.summary?.map((r) => ({ ...r, Metric: "Storage — " + r.Metric })) ?? []),
             { Metric: "", Value: "" },
-            ...(deletions?.summary?.map((r) => ({ ...r, Metric: "Deletions — " + r.Metric })) ?? []),
+            ...(deletions?.summary?.map((r) => ({ ...r, Metric: "Deletions — " + r.Metric })) ??
+              []),
             { Metric: "", Value: "" },
             ...(activity?.summary?.map((r) => ({ ...r, Metric: "Activity — " + r.Metric })) ?? []),
             { Metric: "", Value: "" },
@@ -573,11 +599,7 @@ class Dashboard extends LitElement {
           ></activity-panel>
         `;
       case "formats":
-        return html`
-          <formats-panel
-            .formatReportingUrl=${FORMAT_REPORTING_URL}
-          ></formats-panel>
-        `;
+        return html` <formats-panel .formatReportingUrl=${FORMAT_REPORTING_URL}></formats-panel> `;
       default:
         return html``;
     }
@@ -632,9 +654,7 @@ class Dashboard extends LitElement {
         ${this._hasPermission
           ? html`
               <div class="content-inner">
-                <div class="panel-container" .key=${this._activeTab}>
-                  ${this._renderPanel()}
-                </div>
+                <div class="panel-container" .key=${this._activeTab}>${this._renderPanel()}</div>
               </div>
             `
           : html`
@@ -642,8 +662,8 @@ class Dashboard extends LitElement {
                 ${eyeIcon}
                 <p class="permission-gate-title">Access restricted</p>
                 <p class="permission-gate-body">
-                  You don't have permission to view dashboard data.
-                  Contact your administrator if you believe this is an error.
+                  You don't have permission to view dashboard data. Contact your administrator if
+                  you believe this is an error.
                 </p>
               </div>
             `}

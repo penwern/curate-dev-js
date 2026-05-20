@@ -1,11 +1,16 @@
-import { LitElement, html, css } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
-import { classMap } from 'lit/directives/class-map.js';
-import '@material/web/progress/circular-progress.js';
-import { getManifest, getEmailBody, setArchiveBasePath, getSingleCurateEmail } from '../data/dataService.js';
-import './email-list.js';
-import './email-detail.js';
-import { chevronLeftIcon, chevronRightIcon } from '../../utils/icons.js';
+import { LitElement, html, css } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+import { classMap } from "lit/directives/class-map.js";
+import "@material/web/progress/circular-progress.js";
+import {
+  getManifest,
+  getEmailBody,
+  setArchiveBasePath,
+  getSingleCurateEmail,
+} from "../data/dataService.js";
+import "./email-list.js";
+import "./email-detail.js";
+import { chevronLeftIcon, chevronRightIcon } from "../../utils/icons.js";
 
 export class EmailViewer extends LitElement {
   static properties = {
@@ -21,13 +26,13 @@ export class EmailViewer extends LitElement {
     listWidth: { type: Number, state: true },
     isMobile: { type: Boolean, state: true },
     mobileView: { type: String, state: true },
-    archivePath: { type: String, attribute: 'archive-path' },
-    archiveMode: { type: String, attribute: 'archive-mode' },
-    archiveWorkspace: { type: String, attribute: 'archive-workspace' },
+    archivePath: { type: String, attribute: "archive-path" },
+    archiveMode: { type: String, attribute: "archive-mode" },
+    archiveWorkspace: { type: String, attribute: "archive-workspace" },
     manifestError: { type: Object, state: true },
     messageLoading: { type: Boolean, state: true },
     listCollapsed: { type: Boolean, state: true },
-    selectedFolderPath: { type: String, state: true }
+    selectedFolderPath: { type: String, state: true },
   };
 
   constructor() {
@@ -43,9 +48,9 @@ export class EmailViewer extends LitElement {
     this.loading = true;
     this.listWidth = 32;
     this.isMobile = false;
-    this.mobileView = 'list';
+    this.mobileView = "list";
     this.archivePath = undefined;
-    this.archiveMode = 'auto';
+    this.archiveMode = "auto";
     this.archiveWorkspace = undefined;
     this.manifestError = null;
     this.messageLoading = false;
@@ -68,38 +73,41 @@ export class EmailViewer extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        this._mediaQuery = window.matchMedia('(max-width: 768px)');
+        this._mediaQuery = window.matchMedia("(max-width: 768px)");
         if (this._mediaQuery.addEventListener) {
-          this._mediaQuery.addEventListener('change', this._onViewportChange);
+          this._mediaQuery.addEventListener("change", this._onViewportChange);
         } else if (this._mediaQuery.addListener) {
           this._mediaQuery.addListener(this._onViewportChange);
         }
         this._onViewportChange(this._mediaQuery);
       } catch (error) {
-        console.warn('Media query listener unavailable:', error);
+        console.warn("Media query listener unavailable:", error);
       }
     }
 
-    if ((this.archivePath === undefined || this.archivePath === null || this.archivePath === '') && this._initialArchivePreference) {
+    if (
+      (this.archivePath === undefined || this.archivePath === null || this.archivePath === "") &&
+      this._initialArchivePreference
+    ) {
       this.archivePath = this._initialArchivePreference;
     }
 
-    window.addEventListener('error', this._handleResizeObserverError, { capture: true });
+    window.addEventListener("error", this._handleResizeObserverError, { capture: true });
   }
 
   disconnectedCallback() {
     if (this._mediaQuery) {
       if (this._mediaQuery.removeEventListener) {
-        this._mediaQuery.removeEventListener('change', this._onViewportChange);
+        this._mediaQuery.removeEventListener("change", this._onViewportChange);
       } else if (this._mediaQuery.removeListener) {
         this._mediaQuery.removeListener(this._onViewportChange);
       }
     }
-    window.removeEventListener('pointermove', this._handlePointerMove);
-    window.removeEventListener('pointerup', this._stopResize);
-    window.removeEventListener('error', this._handleResizeObserverError, { capture: true });
+    window.removeEventListener("pointermove", this._handlePointerMove);
+    window.removeEventListener("pointerup", this._stopResize);
+    window.removeEventListener("error", this._handleResizeObserverError, { capture: true });
     super.disconnectedCallback();
   }
 
@@ -108,25 +116,25 @@ export class EmailViewer extends LitElement {
   }
 
   updated(changedProperties) {
-    if (changedProperties.has('archivePath')) {
-      const previous = changedProperties.get('archivePath');
-      const current = this.archivePath ?? '';
-      if (current !== (previous ?? '')) {
+    if (changedProperties.has("archivePath")) {
+      const previous = changedProperties.get("archivePath");
+      const current = this.archivePath ?? "";
+      if (current !== (previous ?? "")) {
         if (previous !== undefined || this._hasInitialArchiveLoad) {
           this._refreshManifest();
         }
       }
     }
 
-    if (changedProperties.has('archiveMode') || changedProperties.has('archiveWorkspace')) {
-      const modeChanged = changedProperties.has('archiveMode');
-      const workspaceChanged = changedProperties.has('archiveWorkspace');
-      const previousMode = changedProperties.get('archiveMode');
-      const previousWorkspace = changedProperties.get('archiveWorkspace');
+    if (changedProperties.has("archiveMode") || changedProperties.has("archiveWorkspace")) {
+      const modeChanged = changedProperties.has("archiveMode");
+      const workspaceChanged = changedProperties.has("archiveWorkspace");
+      const previousMode = changedProperties.get("archiveMode");
+      const previousWorkspace = changedProperties.get("archiveWorkspace");
 
       const hasMeaningfulChange =
-        (modeChanged && (previousMode ?? '') !== (this.archiveMode ?? '')) ||
-        (workspaceChanged && (previousWorkspace ?? '') !== (this.archiveWorkspace ?? ''));
+        (modeChanged && (previousMode ?? "") !== (this.archiveMode ?? "")) ||
+        (workspaceChanged && (previousWorkspace ?? "") !== (this.archiveWorkspace ?? ""));
 
       if (hasMeaningfulChange && this._currentArchivePath !== undefined) {
         this._refreshManifest();
@@ -238,7 +246,9 @@ export class EmailViewer extends LitElement {
       text-transform: uppercase;
       font-size: 9px;
       font-weight: 600;
-      transition: transform 0.2s ease, color 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        color 0.2s ease;
     }
 
     .email-list-pane.is-collapsed .expand-toggle:hover {
@@ -328,7 +338,9 @@ export class EmailViewer extends LitElement {
       color: var(--md-sys-color-on-surface-variant);
       cursor: pointer;
       padding: 0;
-      transition: color 0.2s ease, transform 0.2s ease;
+      transition:
+        color 0.2s ease,
+        transform 0.2s ease;
     }
 
     .collapse-handle:hover {
@@ -527,53 +539,55 @@ export class EmailViewer extends LitElement {
   `;
 
   _detectArchivePreference() {
-    if (typeof window === 'undefined') {
-      return '';
+    if (typeof window === "undefined") {
+      return "";
     }
     const params = new URLSearchParams(window.location.search);
-    const queryPath = params.get('archive');
-    const globalPath = window.__CURATE_ARCHIVE_BASE ?? window.__CURATE_ARCHIVE_PATH ?? '';
-    return (queryPath || globalPath || '').toString();
+    const queryPath = params.get("archive");
+    const globalPath = window.__CURATE_ARCHIVE_BASE ?? window.__CURATE_ARCHIVE_PATH ?? "";
+    return (queryPath || globalPath || "").toString();
   }
 
   _isCurateEnvironment() {
-    return typeof window !== 'undefined' &&
-      typeof window.Curate !== 'undefined' &&
-      typeof window.pydio !== 'undefined' &&
-      Boolean(window.pydio?.ApiClient);
+    return (
+      typeof window !== "undefined" &&
+      typeof window.Curate !== "undefined" &&
+      typeof window.pydio !== "undefined" &&
+      Boolean(window.pydio?.ApiClient)
+    );
   }
 
   _extractWorkspaceSlug(workspace) {
     if (!workspace) {
       return null;
     }
-    if (typeof workspace === 'string') {
+    if (typeof workspace === "string") {
       return workspace;
     }
-    const candidateKeys = ['slug', 'id', 'uuid', 'workspaceSlug', 'WorkspaceSlug', 'name'];
+    const candidateKeys = ["slug", "id", "uuid", "workspaceSlug", "WorkspaceSlug", "name"];
     for (const key of candidateKeys) {
       if (workspace[key]) {
         return workspace[key];
       }
     }
-    if (typeof workspace.getSlug === 'function') {
+    if (typeof workspace.getSlug === "function") {
       return workspace.getSlug();
     }
-    if (typeof workspace.getId === 'function') {
+    if (typeof workspace.getId === "function") {
       return workspace.getId();
     }
     return null;
   }
 
   _resolveArchiveMode() {
-    const mode = (this.archiveMode || '').toLowerCase();
-    if (mode === 'curate') {
-      return 'curate';
+    const mode = (this.archiveMode || "").toLowerCase();
+    if (mode === "curate") {
+      return "curate";
     }
-    if (mode === 'http' || mode === 'local') {
-      return 'http';
+    if (mode === "http" || mode === "local") {
+      return "http";
     }
-    return this._isCurateEnvironment() ? 'curate' : 'http';
+    return this._isCurateEnvironment() ? "curate" : "http";
   }
 
   _resolveArchiveWorkspace() {
@@ -587,13 +601,13 @@ export class EmailViewer extends LitElement {
       const workspace = window.Curate?.workspaces?.getOpenWorkspace?.();
       return this._extractWorkspaceSlug(workspace);
     } catch (error) {
-      console.warn('Unable to detect Curate workspace automatically:', error);
+      console.warn("Unable to detect Curate workspace automatically:", error);
       return null;
     }
   }
 
   _applyArchivePath() {
-    const path = (this.archivePath ?? '').toString().trim();
+    const path = (this.archivePath ?? "").toString().trim();
     const mode = this._resolveArchiveMode();
     const workspace = this._resolveArchiveWorkspace();
     const workspaceKey = workspace ?? null;
@@ -607,7 +621,7 @@ export class EmailViewer extends LitElement {
     setArchiveBasePath({
       mode,
       basePath: path,
-      workspace: workspace ?? undefined
+      workspace: workspace ?? undefined,
     });
     this._currentArchivePath = path;
     this._currentArchiveMode = mode;
@@ -615,7 +629,7 @@ export class EmailViewer extends LitElement {
   }
 
   async _refreshManifest() {
-    const isSingleEmailMode = (this.archiveMode || '').toString().toLowerCase() === 'single-eml';
+    const isSingleEmailMode = (this.archiveMode || "").toString().toLowerCase() === "single-eml";
 
     if (!isSingleEmailMode) {
       this._applyArchivePath();
@@ -643,7 +657,7 @@ export class EmailViewer extends LitElement {
       }
       this._hasInitialArchiveLoad = true;
     } catch (error) {
-      console.error('Failed to load email data:', error);
+      console.error("Failed to load email data:", error);
       this.manifestError = error instanceof Error ? error : new Error(String(error));
     } finally {
       this.loading = false;
@@ -655,16 +669,17 @@ export class EmailViewer extends LitElement {
   }
 
   _onViewportChange(event) {
-    const matches = typeof event.matches === 'boolean' ? event.matches : event.currentTarget?.matches;
+    const matches =
+      typeof event.matches === "boolean" ? event.matches : event.currentTarget?.matches;
     if (matches === undefined) {
       return;
     }
     this.isMobile = matches;
     if (matches) {
-      this.mobileView = this.selectedEmailId ? 'detail' : 'list';
+      this.mobileView = this.selectedEmailId ? "detail" : "list";
       this.listCollapsed = false;
     } else {
-      this.mobileView = 'list';
+      this.mobileView = "list";
     }
   }
 
@@ -676,19 +691,19 @@ export class EmailViewer extends LitElement {
     if (this.isMobile || this.listCollapsed) {
       return;
     }
-    if (event.target && event.target.closest('button.collapse-handle')) {
+    if (event.target && event.target.closest("button.collapse-handle")) {
       return;
     }
     this.isDragging = true;
-    const container = this.renderRoot?.querySelector('.viewer-shell');
+    const container = this.renderRoot?.querySelector(".viewer-shell");
     if (container) {
       this._containerRect = container.getBoundingClientRect();
     }
     this._dividerPointerId = event.pointerId;
     event.preventDefault();
     event.currentTarget?.setPointerCapture?.(event.pointerId);
-    window.addEventListener('pointermove', this._handlePointerMove);
-    window.addEventListener('pointerup', this._stopResize);
+    window.addEventListener("pointermove", this._handlePointerMove);
+    window.addEventListener("pointerup", this._stopResize);
   }
 
   _handlePointerMove(event) {
@@ -706,12 +721,12 @@ export class EmailViewer extends LitElement {
     }
     this.isDragging = false;
     if (this._dividerPointerId !== undefined) {
-      const divider = this.renderRoot?.querySelector('.pane-divider');
+      const divider = this.renderRoot?.querySelector(".pane-divider");
       divider?.releasePointerCapture?.(this._dividerPointerId);
       this._dividerPointerId = undefined;
     }
-    window.removeEventListener('pointermove', this._handlePointerMove);
-    window.removeEventListener('pointerup', this._stopResize);
+    window.removeEventListener("pointermove", this._handlePointerMove);
+    window.removeEventListener("pointerup", this._stopResize);
     this._containerRect = null;
   }
 
@@ -720,19 +735,19 @@ export class EmailViewer extends LitElement {
       return;
     }
     switch (event.key) {
-      case 'ArrowLeft':
+      case "ArrowLeft":
         this.listWidth = this._clampListWidth(this.listWidth - 2);
         event.preventDefault();
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         this.listWidth = this._clampListWidth(this.listWidth + 2);
         event.preventDefault();
         break;
-      case 'Home':
+      case "Home":
         this.listWidth = this._minListWidth;
         event.preventDefault();
         break;
-      case 'End':
+      case "End":
         this.listWidth = this._maxListWidth;
         event.preventDefault();
         break;
@@ -755,13 +770,13 @@ export class EmailViewer extends LitElement {
   }
 
   async _loadSingleEmail() {
-    const path = (this.archivePath ?? '').toString().trim();
+    const path = (this.archivePath ?? "").toString().trim();
     if (!path) {
-      throw new Error('No EML path provided for single email mode.');
+      throw new Error("No EML path provided for single email mode.");
     }
 
     if (!this._isCurateEnvironment()) {
-      throw new Error('Single EML viewing is only supported in Curate environment.');
+      throw new Error("Single EML viewing is only supported in Curate environment.");
     }
 
     const { email, body } = await getSingleCurateEmail(path);
@@ -778,11 +793,13 @@ export class EmailViewer extends LitElement {
   }
 
   _buildPstFolderStructure(rawFolders) {
-    if (!rawFolders || typeof rawFolders !== 'object') {
+    if (!rawFolders || typeof rawFolders !== "object") {
       return { tree: [], index: new Map() };
     }
 
-    const folderEntries = Object.entries(rawFolders).filter(([key, value]) => value && (value.path || key));
+    const folderEntries = Object.entries(rawFolders).filter(
+      ([key, value]) => value && (value.path || key),
+    );
     if (folderEntries.length === 0) {
       return { tree: [], index: new Map() };
     }
@@ -794,7 +811,7 @@ export class EmailViewer extends LitElement {
       if (!fullPath) {
         return null;
       }
-      const path = fullPath.replace(/^\/+|\/+$/g, '');
+      const path = fullPath.replace(/^\/+|\/+$/g, "");
       if (!path) {
         return null;
       }
@@ -808,9 +825,9 @@ export class EmailViewer extends LitElement {
         return existing;
       }
 
-      const segments = path.split('/').filter(Boolean);
+      const segments = path.split("/").filter(Boolean);
       const name = preferredName || segments[segments.length - 1] || path;
-      const parentPath = segments.length > 1 ? segments.slice(0, -1).join('/') : null;
+      const parentPath = segments.length > 1 ? segments.slice(0, -1).join("/") : null;
 
       const node = {
         path,
@@ -819,13 +836,13 @@ export class EmailViewer extends LitElement {
         children: [],
         emailIds: [],
         _selfEmailIds: [],
-        breadcrumbs: segments
+        breadcrumbs: segments,
       };
       nodeMap.set(path, node);
       index.set(path, {
         path,
         name,
-        breadcrumbs: segments
+        breadcrumbs: segments,
       });
 
       if (parentPath) {
@@ -844,21 +861,19 @@ export class EmailViewer extends LitElement {
       if (!node) {
         continue;
       }
-      node._selfEmailIds = Array.isArray(folder.emailIds)
-        ? folder.emailIds.filter(Boolean)
-        : [];
+      node._selfEmailIds = Array.isArray(folder.emailIds) ? folder.emailIds.filter(Boolean) : [];
       node._hasExplicitName = Boolean(folder.name);
       index.set(node.path, {
         path: node.path,
         name: folder.name || node.name,
-        breadcrumbs: node.breadcrumbs
+        breadcrumbs: node.breadcrumbs,
       });
     }
 
     const aggregate = (node) => {
       const combined = new Set(node._selfEmailIds);
       node.children = node.children
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
         .map((child) => {
           const childSet = aggregate(child);
           child.emailIds = Array.from(childSet);
@@ -872,7 +887,7 @@ export class EmailViewer extends LitElement {
     };
 
     const roots = [...nodeMap.values()].filter((node) => !node.parentPath);
-    roots.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    roots.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
     roots.forEach((root) => {
       const aggregateSet = aggregate(root);
       root.emailIds = Array.from(aggregateSet);
@@ -894,15 +909,14 @@ export class EmailViewer extends LitElement {
       const folderMeta = map.get(email.pstFolder);
       const breadcrumbs = folderMeta?.breadcrumbs?.length
         ? folderMeta.breadcrumbs
-        : email.pstFolder.split('/').filter(Boolean);
-      const displayLabel = folderMeta?.name || breadcrumbs[breadcrumbs.length - 1] || email.pstFolder;
-      const breadcrumbLabel = breadcrumbs.length > 1
-        ? breadcrumbs.join(' › ')
-        : displayLabel;
+        : email.pstFolder.split("/").filter(Boolean);
+      const displayLabel =
+        folderMeta?.name || breadcrumbs[breadcrumbs.length - 1] || email.pstFolder;
+      const breadcrumbLabel = breadcrumbs.length > 1 ? breadcrumbs.join(" › ") : displayLabel;
       return {
         ...email,
         pstFolderDisplay: displayLabel,
-        pstFolderBreadcrumb: breadcrumbLabel
+        pstFolderBreadcrumb: breadcrumbLabel,
       };
     });
   }
@@ -948,7 +962,7 @@ export class EmailViewer extends LitElement {
             threadBodies[email.id] = await getEmailBody(email.id);
           } catch (error) {
             console.error(`Failed to load email body for ${email.id}:`, error);
-            threadBodies[email.id] = { html: '', text: 'Failed to load email content' };
+            threadBodies[email.id] = { html: "", text: "Failed to load email content" };
           }
         }
 
@@ -961,10 +975,10 @@ export class EmailViewer extends LitElement {
         try {
           this.emailBody = await getEmailBody(emailId);
         } catch (error) {
-          console.error('Failed to load email body:', error);
+          console.error("Failed to load email body:", error);
           this.emailBody = {
-            html: '',
-            text: 'Failed to load email content'
+            html: "",
+            text: "Failed to load email content",
           };
         }
       }
@@ -973,7 +987,7 @@ export class EmailViewer extends LitElement {
     }
 
     if (this.isMobile) {
-      this.mobileView = 'detail';
+      this.mobileView = "detail";
     }
   }
 
@@ -986,9 +1000,7 @@ export class EmailViewer extends LitElement {
       return;
     }
 
-    const allowedIds = Array.isArray(detail.emailIds)
-      ? new Set(detail.emailIds)
-      : null;
+    const allowedIds = Array.isArray(detail.emailIds) ? new Set(detail.emailIds) : null;
 
     if (this.selectedEmailId && allowedIds && !allowedIds.has(this.selectedEmailId)) {
       this.selectedEmailId = null;
@@ -998,13 +1010,13 @@ export class EmailViewer extends LitElement {
       this.threadBodies = null;
       this.messageLoading = false;
       if (this.isMobile) {
-        this.mobileView = 'list';
+        this.mobileView = "list";
       }
     }
   }
 
   _handleBackToList() {
-    this.mobileView = 'list';
+    this.mobileView = "list";
   }
 
   _collapseList() {
@@ -1020,41 +1032,44 @@ export class EmailViewer extends LitElement {
       return;
     }
     this.listCollapsed = false;
-    if (typeof this._previousListWidth === 'number') {
-      this.listWidth = Math.min(this._maxListWidth, Math.max(this._minListWidth, this._previousListWidth || this.listWidth));
+    if (typeof this._previousListWidth === "number") {
+      this.listWidth = Math.min(
+        this._maxListWidth,
+        Math.max(this._minListWidth, this._previousListWidth || this.listWidth),
+      );
     }
   }
 
   _handleResizeObserverError(event) {
-    const message = event?.message || event?.error?.message || '';
-    if (typeof message === 'string' && message.includes('ResizeObserver loop completed')) {
+    const message = event?.message || event?.error?.message || "";
+    if (typeof message === "string" && message.includes("ResizeObserver loop completed")) {
       event.stopImmediatePropagation?.();
       event.preventDefault?.();
     }
   }
 
   render() {
-    const isSingleEmailMode = (this.archiveMode || '').toString().toLowerCase() === 'single-eml';
+    const isSingleEmailMode = (this.archiveMode || "").toString().toLowerCase() === "single-eml";
 
     const listPaneClasses = classMap({
       pane: true,
-      'email-list-pane': true,
-      'is-hidden': this.isMobile && this.mobileView === 'detail',
-      'is-collapsed': this.listCollapsed
+      "email-list-pane": true,
+      "is-hidden": this.isMobile && this.mobileView === "detail",
+      "is-collapsed": this.listCollapsed,
     });
 
     const detailPaneClasses = classMap({
       pane: true,
-      'email-detail-pane': true,
-      'is-hidden': this.isMobile && this.mobileView !== 'detail'
+      "email-detail-pane": true,
+      "is-hidden": this.isMobile && this.mobileView !== "detail",
     });
 
     const listPaneStyles = {};
     if (!this.isMobile) {
       if (this.listCollapsed) {
-        listPaneStyles.flexBasis = '36px';
-        listPaneStyles.minWidth = '36px';
-        listPaneStyles.maxWidth = '36px';
+        listPaneStyles.flexBasis = "36px";
+        listPaneStyles.minWidth = "36px";
+        listPaneStyles.maxWidth = "36px";
       } else {
         listPaneStyles.flexBasis = `${this.listWidth}%`;
         delete listPaneStyles.minWidth;
@@ -1064,107 +1079,128 @@ export class EmailViewer extends LitElement {
 
     return html`
       <div class="viewer-page">
-        ${this.loading && !this.manifestError ? html`
-          <div class="viewer-shell">
-            <div class="loading-state">Loading emails...</div>
-          </div>
-        ` : ''}
-
-        ${!this.loading && this.manifestError ? html`
-          <div class="error-state">
-            <div class="error-card">
-              <h2 class="error-title">Unable to load archive</h2>
-              <p class="error-message">${this.manifestError.message || 'An unexpected error occurred while reading the archive.'}</p>
-              <button class="retry-btn" type="button" @click=${this._retryLoad}>Retry</button>
-            </div>
-          </div>
-        ` : ''}
-
-        ${!this.loading && !this.manifestError ? html`
-          <div class="viewer-shell">
-            ${!isSingleEmailMode ? html`
-              <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
-                ${this.listCollapsed ? html`
-                  <button
-                    class="expand-toggle"
-                    type="button"
-                    @click=${this._expandList}
-                    aria-label="Expand email list" aria-expanded="false"
-                    title="Expand email list"
-                  >
-                    <span class="icon">${chevronRightIcon}</span>
-                    <span class="label">Emails</span>
-                  </button>
-                ` : html`
-                  <div class="list-shell">
-                    <email-list
-                      .emails=${this.emails}
-                      .threads=${this.threads}
-                      .selectedId=${this.selectedEmailId}
-                      .folderTree=${this.folderTree}
-                      .selectedFolderPath=${this.selectedFolderPath}
-                      @email-selected=${this._handleEmailSelected}
-                      @folder-selected=${this._handleFolderSelected}
-                    ></email-list>
-                  </div>
-                `}
-              </section>
-
-              <div
-                class=${classMap({
-                  'pane-divider': true,
-                  'is-hidden': this.isMobile || this.listCollapsed
-                })}
-                role="separator"
-                aria-label="Resize email list"
-                aria-orientation="vertical"
-                aria-valuemin=${this._minListWidth}
-                aria-valuemax=${this._maxListWidth}
-                aria-valuenow=${Math.round(this.listWidth)}
-                tabindex="0"
-                @pointerdown=${this._startResize}
-                @keydown=${this._handleDividerKeydown}
-              >
-                <span class="divider-grip" aria-hidden="true"></span>
-                ${!this.listCollapsed ? html`
-                  <button
-                    class="collapse-handle"
-                    type="button"
-                    aria-label="Collapse email list" aria-expanded="true"
-                    title="Collapse email list"
-                    @click=${this._collapseList}
-                  >
-                    <span class="icon">${chevronLeftIcon}</span>
-                  </button>
-                ` : ''}
+        ${this.loading && !this.manifestError
+          ? html`
+              <div class="viewer-shell">
+                <div class="loading-state">Loading emails...</div>
               </div>
-            ` : ''}
+            `
+          : ""}
+        ${!this.loading && this.manifestError
+          ? html`
+              <div class="error-state">
+                <div class="error-card">
+                  <h2 class="error-title">Unable to load archive</h2>
+                  <p class="error-message">
+                    ${this.manifestError.message ||
+                    "An unexpected error occurred while reading the archive."}
+                  </p>
+                  <button class="retry-btn" type="button" @click=${this._retryLoad}>Retry</button>
+                </div>
+              </div>
+            `
+          : ""}
+        ${!this.loading && !this.manifestError
+          ? html`
+              <div class="viewer-shell">
+                ${!isSingleEmailMode
+                  ? html`
+                      <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
+                        ${this.listCollapsed
+                          ? html`
+                              <button
+                                class="expand-toggle"
+                                type="button"
+                                @click=${this._expandList}
+                                aria-label="Expand email list"
+                                aria-expanded="false"
+                                title="Expand email list"
+                              >
+                                <span class="icon">${chevronRightIcon}</span>
+                                <span class="label">Emails</span>
+                              </button>
+                            `
+                          : html`
+                              <div class="list-shell">
+                                <email-list
+                                  .emails=${this.emails}
+                                  .threads=${this.threads}
+                                  .selectedId=${this.selectedEmailId}
+                                  .folderTree=${this.folderTree}
+                                  .selectedFolderPath=${this.selectedFolderPath}
+                                  @email-selected=${this._handleEmailSelected}
+                                  @folder-selected=${this._handleFolderSelected}
+                                ></email-list>
+                              </div>
+                            `}
+                      </section>
 
-            <section class=${detailPaneClasses}>
-              ${this.messageLoading ? html`
-                <div class="message-loading-overlay" aria-live="polite" aria-busy="true">
-                  <md-circular-progress indeterminate></md-circular-progress>
-                </div>
-              ` : ''}
-              ${this.isMobile ? html`
-                <div class="mobile-controls">
-                  <button class="mobile-back" @click=${this._handleBackToList}>Back</button>
-                  <div class="mobile-title">${this.selectedEmail?.subject || 'Email details'}</div>
-                </div>
-              ` : ''}
-              <email-detail
-                .email=${this.selectedEmail}
-                .emailBody=${this.emailBody}
-                .threadEmails=${this.threadEmails}
-                .threadBodies=${this.threadBodies}
-                .selectedEmailId=${this.selectedEmailId}
-              ></email-detail>
-            </section>
-          </div>
-        ` : ''}
+                      <div
+                        class=${classMap({
+                          "pane-divider": true,
+                          "is-hidden": this.isMobile || this.listCollapsed,
+                        })}
+                        role="separator"
+                        aria-label="Resize email list"
+                        aria-orientation="vertical"
+                        aria-valuemin=${this._minListWidth}
+                        aria-valuemax=${this._maxListWidth}
+                        aria-valuenow=${Math.round(this.listWidth)}
+                        tabindex="0"
+                        @pointerdown=${this._startResize}
+                        @keydown=${this._handleDividerKeydown}
+                      >
+                        <span class="divider-grip" aria-hidden="true"></span>
+                        ${!this.listCollapsed
+                          ? html`
+                              <button
+                                class="collapse-handle"
+                                type="button"
+                                aria-label="Collapse email list"
+                                aria-expanded="true"
+                                title="Collapse email list"
+                                @click=${this._collapseList}
+                              >
+                                <span class="icon">${chevronLeftIcon}</span>
+                              </button>
+                            `
+                          : ""}
+                      </div>
+                    `
+                  : ""}
+
+                <section class=${detailPaneClasses}>
+                  ${this.messageLoading
+                    ? html`
+                        <div class="message-loading-overlay" aria-live="polite" aria-busy="true">
+                          <md-circular-progress indeterminate></md-circular-progress>
+                        </div>
+                      `
+                    : ""}
+                  ${this.isMobile
+                    ? html`
+                        <div class="mobile-controls">
+                          <button class="mobile-back" @click=${this._handleBackToList}>Back</button>
+                          <div class="mobile-title">
+                            ${this.selectedEmail?.subject || "Email details"}
+                          </div>
+                        </div>
+                      `
+                    : ""}
+                  <email-detail
+                    .email=${this.selectedEmail}
+                    .emailBody=${this.emailBody}
+                    .threadEmails=${this.threadEmails}
+                    .threadBodies=${this.threadBodies}
+                    .selectedEmailId=${this.selectedEmailId}
+                  ></email-detail>
+                </section>
+              </div>
+            `
+          : ""}
       </div>
     `;
   }
 }
 
-customElements.define('email-viewer', EmailViewer);
+customElements.define("email-viewer", EmailViewer);

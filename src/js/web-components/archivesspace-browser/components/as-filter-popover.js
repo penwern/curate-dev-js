@@ -278,15 +278,11 @@ class AsFilterPopover extends LitElement {
   _renderPopover() {
     return html`
       <div class="filter-popover">
-        ${this._renderLevelFilterGroup()}
-        ${this._renderStatusFilterGroup()}
+        ${this._renderLevelFilterGroup()} ${this._renderStatusFilterGroup()}
         ${this.showScopeFilter ? this._renderScopeFilterGroup() : nothing}
         ${this._renderAdvancedFiltersGroup()}
         <div class="filter-actions">
-          <md-text-button
-            ?disabled=${!this._hasActiveFilters()}
-            @click=${this._handleClearAll}
-          >
+          <md-text-button ?disabled=${!this._hasActiveFilters()} @click=${this._handleClearAll}>
             Clear
           </md-text-button>
           <md-filled-button @click=${this._handleClose}>Done</md-filled-button>
@@ -321,7 +317,7 @@ class AsFilterPopover extends LitElement {
                   ${option.helper ? html`<small>${option.helper}</small>` : nothing}
                 </div>
               </label>
-            `
+            `,
           )}
         </div>
       </div>
@@ -352,7 +348,7 @@ class AsFilterPopover extends LitElement {
                   ${option.helper ? html`<small>${option.helper}</small>` : nothing}
                 </div>
               </label>
-            `
+            `,
           )}
         </div>
       </div>
@@ -390,9 +386,7 @@ class AsFilterPopover extends LitElement {
               @change=${this._handleScopeChange}
             ></md-radio>
             <div>
-              <div>
-                Only under ${this.hasSelection ? `"${selectionLabel}"` : "selected node"}
-              </div>
+              <div>Only under ${this.hasSelection ? `"${selectionLabel}"` : "selected node"}</div>
               <small>
                 ${this.hasSelection
                   ? "Search is limited to this node's descendants"
@@ -441,7 +435,7 @@ class AsFilterPopover extends LitElement {
                             ${closeIcon}
                           </button>
                         </div>
-                      `
+                      `,
                     )}
               </div>
               <div class="advanced-filter-input-row">
@@ -478,7 +472,7 @@ class AsFilterPopover extends LitElement {
       new CustomEvent("toggle", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -487,7 +481,7 @@ class AsFilterPopover extends LitElement {
       new CustomEvent("close", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -497,7 +491,7 @@ class AsFilterPopover extends LitElement {
         detail: { level },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -507,7 +501,7 @@ class AsFilterPopover extends LitElement {
         detail: { status },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -518,7 +512,7 @@ class AsFilterPopover extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -535,7 +529,7 @@ class AsFilterPopover extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
 
     if (input) input.value = "";
@@ -547,7 +541,7 @@ class AsFilterPopover extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -563,7 +557,7 @@ class AsFilterPopover extends LitElement {
       new CustomEvent("clear-all", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

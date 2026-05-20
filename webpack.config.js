@@ -5,16 +5,16 @@ const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env, argv) => {
-  const isProduction = argv.mode === 'production';
+  const isProduction = argv.mode === "production";
 
   return {
     entry: "./src/js/index.js",
     cache: {
-      type: 'filesystem',
-      cacheDirectory: path.resolve(__dirname, '.webpack-cache'),
+      type: "filesystem",
+      cacheDirectory: path.resolve(__dirname, ".webpack-cache"),
       buildDependencies: {
         config: [__filename],
-        packageLock: ['./package-lock.json'],
+        packageLock: ["./package-lock.json"],
       },
     },
     output: {
@@ -47,7 +47,7 @@ module.exports = (env, argv) => {
       }),
     ],
     resolve: {
-      extensions: ['.js', '.jsx'],
+      extensions: [".js", ".jsx"],
     },
     module: {
       rules: [
@@ -82,51 +82,51 @@ module.exports = (env, argv) => {
     // Add watchOptions at the top level
     watchOptions: {
       ignored: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/build/**',
-        '**/.git/**',
-        '**/.webpack-cache/**',
-        '**/coverage/**',
-        '**/.vscode/**',
-        '**/.idea/**',
-        '**/logs/**',
-        '**/*.log',
-        '**/tmp/**',
-        '**/temp/**',
-        '**/.claude/**'
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/.git/**",
+        "**/.webpack-cache/**",
+        "**/coverage/**",
+        "**/.vscode/**",
+        "**/.idea/**",
+        "**/logs/**",
+        "**/*.log",
+        "**/tmp/**",
+        "**/temp/**",
+        "**/.claude/**",
       ],
       aggregateTimeout: 300,
-      poll: false
+      poll: false,
     },
     devServer: {
       static: {
-        directory: path.join(__dirname, 'dist'),
+        directory: path.join(__dirname, "dist"),
       },
-      host: '0.0.0.0', // Listen on all network interfaces
+      host: "0.0.0.0", // Listen on all network interfaces
       port: 6900,
       hot: true,
       liveReload: true,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-        'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
-        'Cross-Origin-Resource-Policy': 'cross-origin',
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+        "Cross-Origin-Resource-Policy": "cross-origin",
       },
-      allowedHosts: 'all', // Allow connections from any host
+      allowedHosts: "all", // Allow connections from any host
       client: {
         webSocketURL: {
-          hostname: 'localhost', // Connect to local dev server
+          hostname: "localhost", // Connect to local dev server
           port: 6900,
-          protocol: 'ws', // Use ws:// for local development
-          pathname: '/ws',
+          protocol: "ws", // Use ws:// for local development
+          pathname: "/ws",
         },
         overlay: {
           errors: true,
           warnings: false,
           runtimeErrors: (error) => {
             // Ignore benign ResizeObserver errors that occur during Lit component updates
-            if (error.message && error.message.includes('ResizeObserver loop')) {
+            if (error.message && error.message.includes("ResizeObserver loop")) {
               return false;
             }
             return true;

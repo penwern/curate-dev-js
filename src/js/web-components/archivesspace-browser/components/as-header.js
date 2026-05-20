@@ -106,7 +106,9 @@ class AsHeader extends LitElement {
       border: 1px solid var(--md-sys-color-outline-variant);
       background: var(--md-sys-color-surface);
       height: var(--header-control-height, 36px);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .search-input:focus-within {
@@ -216,7 +218,9 @@ class AsHeader extends LitElement {
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
       height: 100%;
       font-family: inherit;
     }
@@ -440,7 +444,7 @@ class AsHeader extends LitElement {
         detail: { value: e.target.value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -449,7 +453,7 @@ class AsHeader extends LitElement {
       new CustomEvent("search-clear", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -458,7 +462,7 @@ class AsHeader extends LitElement {
       new CustomEvent("search-field-toggle", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -468,7 +472,7 @@ class AsHeader extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -477,7 +481,7 @@ class AsHeader extends LitElement {
       new CustomEvent("filter-toggle", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -486,7 +490,7 @@ class AsHeader extends LitElement {
       new CustomEvent("filter-close", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -495,7 +499,7 @@ class AsHeader extends LitElement {
       new CustomEvent("search-prev", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -504,7 +508,7 @@ class AsHeader extends LitElement {
       new CustomEvent("search-next", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -514,7 +518,7 @@ class AsHeader extends LitElement {
         detail: { mode },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -523,13 +527,15 @@ class AsHeader extends LitElement {
       new CustomEvent("back-to-search", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   _forwardEvent(e) {
     e.stopPropagation();
-    this.dispatchEvent(new CustomEvent(e.type, { detail: e.detail, bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent(e.type, { detail: e.detail, bubbles: true, composed: true }),
+    );
   }
 }
 

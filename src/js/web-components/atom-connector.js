@@ -1,60 +1,61 @@
 class ConnectToAtom extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
-    this.apiKey = '';
-    this.atomUrl = '';
-    this.username = '';
-    this.password = '';
+    this.attachShadow({ mode: "open" });
+    this.apiKey = "";
+    this.atomUrl = "";
+    this.username = "";
+    this.password = "";
     this.retrieveDetails();
     this.render();
   }
 
   async retrieveDetails() {
     try {
-      const response = await Curate.api.fetchCurate('/api/atom', 'GET');
+      const response = await Curate.api.fetchCurate("/api/atom", "GET");
       this.apiKey = response.atom_api_key;
       this.atomUrl = response.atom_url;
       this.username = response.atom_username;
       this.password = response.atom_password;
       this.render(); // Call render after updating the properties
     } catch (error) {
-      console.error('Error retrieving details from Atom:', error);
+      console.error("Error retrieving details from Atom:", error);
     }
   }
 
   saveDetails(e) {
     e.preventDefault();
-    Curate.api.fetchCurate('/api/atom', 'POST', {
-      atom_api_key: this.apiKey,
-      atom_url: this.atomUrl,
-      atom_username: this.username,
-      atom_password: this.password
-    })
-      .then(response => {
-        console.log('Saved Atom details:', response);
+    Curate.api
+      .fetchCurate("/api/atom", "POST", {
+        atom_api_key: this.apiKey,
+        atom_url: this.atomUrl,
+        atom_username: this.username,
+        atom_password: this.password,
       })
-      .catch(error => {
-        console.error('Error saving Atom details:', error);
+      .then((response) => {
+        console.log("Saved Atom details:", response);
+      })
+      .catch((error) => {
+        console.error("Error saving Atom details:", error);
       });
-    if (this.apiKey !== '') {
-      localStorage.setItem('atom_api_key', this.apiKey);
-      console.log('Saving API Key:', this.apiKey);
+    if (this.apiKey !== "") {
+      localStorage.setItem("atom_api_key", this.apiKey);
+      console.log("Saving API Key:", this.apiKey);
     }
 
-    if (this.atomUrl !== '') {
-      localStorage.setItem('atom_url', this.atomUrl);
-      console.log('Saving Atom URL:', this.atomUrl);
+    if (this.atomUrl !== "") {
+      localStorage.setItem("atom_url", this.atomUrl);
+      console.log("Saving Atom URL:", this.atomUrl);
     }
 
-    if (this.username !== '') {
-      localStorage.setItem('atom_username', this.username);
-      console.log('Saving Atom Username:', this.username);
+    if (this.username !== "") {
+      localStorage.setItem("atom_username", this.username);
+      console.log("Saving Atom Username:", this.username);
     }
 
-    if (this.password !== '') {
-      localStorage.setItem('atom_password', this.password);
-      console.log('Saving Atom Password:', this.password);
+    if (this.password !== "") {
+      localStorage.setItem("atom_password", this.password);
+      console.log("Saving Atom Password:", this.password);
     }
 
     this.render();
@@ -77,14 +78,14 @@ class ConnectToAtom extends HTMLElement {
   }
 
   togglePasswordVisibility() {
-    const passwordInput = this.shadowRoot.querySelector('#password');
-    const toggleButton = this.shadowRoot.querySelector('#toggle-password');
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-      toggleButton.textContent = 'Hide';
+    const passwordInput = this.shadowRoot.querySelector("#password");
+    const toggleButton = this.shadowRoot.querySelector("#toggle-password");
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleButton.textContent = "Hide";
     } else {
-      passwordInput.type = 'password';
-      toggleButton.textContent = 'Show';
+      passwordInput.type = "password";
+      toggleButton.textContent = "Show";
     }
   }
 
@@ -180,19 +181,19 @@ class ConnectToAtom extends HTMLElement {
         <div class="details-display">
           <div class="detail-item">
             <span class="label">Current API Key:</span>
-            <span class="value" id="current-api-key">${"*".repeat(this.apiKey?.length) || 'Not Set'}</span>
+            <span class="value" id="current-api-key">${"*".repeat(this.apiKey?.length) || "Not Set"}</span>
           </div>
           <div class="detail-item">
             <span class="label">Current Atom URL:</span>
-            <span class="value" id="current-atom-url">${this.atomUrl || 'Not Set'}</span>
+            <span class="value" id="current-atom-url">${this.atomUrl || "Not Set"}</span>
           </div>
           <div class="detail-item">
             <span class="label">Current Username:</span>
-            <span class="value" id="current-username">${this.username || 'Not Set'}</span>
+            <span class="value" id="current-username">${this.username || "Not Set"}</span>
           </div>
           <div class="detail-item">
             <span class="label">Current Password:</span>
-            <span class="value" id="current-password">${"*".repeat(this.password?.length) || 'Not Set'}</span>
+            <span class="value" id="current-password">${"*".repeat(this.password?.length) || "Not Set"}</span>
           </div>
         </div>
         <form id="details-form">
@@ -218,13 +219,25 @@ class ConnectToAtom extends HTMLElement {
       </div>
     `;
 
-    this.shadowRoot.querySelector('#details-form').addEventListener('submit', (e) => this.saveDetails(e));
-    this.shadowRoot.querySelector('#api-key').addEventListener('input', (e) => this.handleApiKeyChange(e));
-    this.shadowRoot.querySelector('#atom-url').addEventListener('input', (e) => this.handleUrlChange(e));
-    this.shadowRoot.querySelector('#username').addEventListener('input', (e) => this.handleUsernameChange(e));
-    this.shadowRoot.querySelector('#password').addEventListener('input', (e) => this.handlePasswordChange(e));
-    this.shadowRoot.querySelector('#toggle-password').addEventListener('click', () => this.togglePasswordVisibility());
+    this.shadowRoot
+      .querySelector("#details-form")
+      .addEventListener("submit", (e) => this.saveDetails(e));
+    this.shadowRoot
+      .querySelector("#api-key")
+      .addEventListener("input", (e) => this.handleApiKeyChange(e));
+    this.shadowRoot
+      .querySelector("#atom-url")
+      .addEventListener("input", (e) => this.handleUrlChange(e));
+    this.shadowRoot
+      .querySelector("#username")
+      .addEventListener("input", (e) => this.handleUsernameChange(e));
+    this.shadowRoot
+      .querySelector("#password")
+      .addEventListener("input", (e) => this.handlePasswordChange(e));
+    this.shadowRoot
+      .querySelector("#toggle-password")
+      .addEventListener("click", () => this.togglePasswordVisibility());
   }
 }
 
-customElements.define('connect-to-atom', ConnectToAtom);
+customElements.define("connect-to-atom", ConnectToAtom);

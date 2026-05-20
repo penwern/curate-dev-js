@@ -16,33 +16,33 @@ export function formatEmailDate(isoDate) {
 
   // Today: show time
   if (diffDays === 0) {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   }
 
   // Yesterday
   if (diffDays === 1) {
-    return 'Yesterday';
+    return "Yesterday";
   }
 
   // This week: show day name
   if (diffDays < 7) {
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString("en-US", { weekday: "short" });
   }
 
   // This year: show month and day
   if (date.getFullYear() === now.getFullYear()) {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
   // Older: show full date
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -53,14 +53,14 @@ export function formatEmailDate(isoDate) {
  */
 export function formatFullDate(isoDate) {
   const date = new Date(isoDate);
-  return date.toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZoneName: 'short'
+  return date.toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
   });
 }

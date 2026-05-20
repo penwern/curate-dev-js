@@ -123,22 +123,16 @@ class AsCard extends LitElement {
   }
 
   render() {
-    const displayTitle = this.query
-      ? highlightText(this.cardTitle, this.query)
-      : this.cardTitle;
+    const displayTitle = this.query ? highlightText(this.cardTitle, this.query) : this.cardTitle;
     const displayCode = this.query ? highlightText(this.code, this.query) : this.code;
 
     return html`
       <div class="card" @click=${this._handleClick}>
         <div class="card-header">
-          ${this.icon
-            ? html`<span class="card-icon">${this.icon}</span>`
-            : nothing}
+          ${this.icon ? html`<span class="card-icon">${this.icon}</span>` : nothing}
           <div class="card-content">
             <div class="card-title">${displayTitle}</div>
-            ${this.code
-              ? html`<div class="card-code">${displayCode}</div>`
-              : nothing}
+            ${this.code ? html`<div class="card-code">${displayCode}</div>` : nothing}
           </div>
         </div>
         ${this.meta && this.meta.length
@@ -148,12 +142,10 @@ class AsCard extends LitElement {
                   this.meta,
                   (item) => html`
                     <div class="meta-item">
-                      ${item.icon
-                        ? html`<span class="meta-icon">${item.icon}</span>`
-                        : nothing}
+                      ${item.icon ? html`<span class="meta-icon">${item.icon}</span>` : nothing}
                       ${item.label}
                     </div>
-                  `
+                  `,
                 )}
               </div>
             `
@@ -167,7 +159,7 @@ class AsCard extends LitElement {
       new CustomEvent("card-click", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

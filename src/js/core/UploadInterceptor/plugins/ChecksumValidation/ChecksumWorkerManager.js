@@ -2,11 +2,11 @@ class ChecksumWorkerManager {
   constructor(poolSize = 5) {
     this.config = {
       maxWorkers: poolSize,
-      maxTasksPerWorker: 50,        // Recycle worker after N tasks
-      idleTimeoutMs: 30000,         // Cleanup after 30s idle
+      maxTasksPerWorker: 50, // Recycle worker after N tasks
+      idleTimeoutMs: 30000, // Cleanup after 30s idle
       healthCheckIntervalMs: 10000, // Check worker health every 10s
-      taskTimeoutMs: 60000,         // Max time per task
-      maxConsecutiveFailures: 3,    // Stop creating workers after N consecutive failures
+      taskTimeoutMs: 60000, // Max time per task
+      maxConsecutiveFailures: 3, // Stop creating workers after N consecutive failures
     };
 
     // Worker pool with metadata
@@ -31,7 +31,9 @@ class ChecksumWorkerManager {
   createWorker() {
     // Check circuit breaker
     if (this.circuitBreakerTripped) {
-      console.error('ChecksumWorkerManager: Circuit breaker tripped. Too many consecutive worker failures. Not creating new workers.');
+      console.error(
+        "ChecksumWorkerManager: Circuit breaker tripped. Too many consecutive worker failures. Not creating new workers.",
+      );
       return null;
     }
 
@@ -43,7 +45,7 @@ class ChecksumWorkerManager {
         createdAt: Date.now(),
         lastActivity: Date.now(),
         taskCount: 0,
-        status: 'idle', // idle, busy, error
+        status: "idle", // idle, busy, error
         idleTimer: null,
         taskTimer: null,
         failedImmediately: false, // Track if worker failed before first task
@@ -63,11 +65,15 @@ class ChecksumWorkerManager {
 
       return workerId;
     } catch (error) {
-      console.error('ChecksumWorkerManager: Failed to create worker:', error);
+      console.error("ChecksumWorkerManager: Failed to create worker:", error);
       this.consecutiveFailures++;
       if (this.consecutiveFailures >= this.config.maxConsecutiveFailures) {
         this.circuitBreakerTripped = true;
-        console.error('ChecksumWorkerManager: Circuit breaker tripped after', this.consecutiveFailures, 'consecutive failures');
+        console.error(
+          "ChecksumWorkerManager: Circuit breaker tripped after",
+          this.consecutiveFailures,
+          "consecutive failures",
+        );
       }
       return null;
     }
@@ -104,7 +110,7 @@ class ChecksumWorkerManager {
         // Update metadata
         metadata.lastActivity = Date.now();
         metadata.taskCount++;
-        metadata.status = 'idle';
+        metadata.status = "idle";
 
         // Remove from current tasks
         this.currentTasks.delete(workerId);
@@ -128,22 +134,29 @@ class ChecksumWorkerManager {
 
     const workerData = this.workers.get(workerId);
     if (workerData) {
-      workerData.metadata.status = 'error';
+      workerData.metadata.status = "error";
 
       // Check if worker failed immediately (before processing any tasks)
-      const failedImmediately = workerData.metadata.taskCount === 0 && !this.currentTasks.has(workerId);
+      const failedImmediately =
+        workerData.metadata.taskCount === 0 && !this.currentTasks.has(workerId);
       if (failedImmediately) {
         workerData.metadata.failedImmediately = true;
         this.consecutiveFailures++;
 
         if (this.consecutiveFailures >= this.config.maxConsecutiveFailures) {
           this.circuitBreakerTripped = true;
-          console.error(`ChecksumWorkerManager: Circuit breaker tripped after ${this.consecutiveFailures} consecutive immediate worker failures. Rejecting all queued tasks.`);
+          console.error(
+            `ChecksumWorkerManager: Circuit breaker tripped after ${this.consecutiveFailures} consecutive immediate worker failures. Rejecting all queued tasks.`,
+          );
 
           // Reject all queued tasks
           while (this.taskQueue.length > 0) {
             const task = this.taskQueue.shift();
-            task.reject(new Error('ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize. Check worker file path and browser console for errors.'));
+            task.reject(
+              new Error(
+                "ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize. Check worker file path and browser console for errors.",
+              ),
+            );
           }
         }
       }
@@ -151,7 +164,7 @@ class ChecksumWorkerManager {
       // Reject current task if any
       const currentTask = this.currentTasks.get(workerId);
       if (currentTask) {
-        currentTask.reject("Worker error: " + (event.message || 'Unknown error'));
+        currentTask.reject("Worker error: " + (event.message || "Unknown error"));
         this.currentTasks.delete(workerId);
       }
 
@@ -186,11 +199,13 @@ class ChecksumWorkerManager {
 
     // Check if circuit breaker is tripped
     if (this.circuitBreakerTripped) {
-      console.error('ChecksumWorkerManager: Cannot assign task - circuit breaker is tripped');
+      console.error("ChecksumWorkerManager: Cannot assign task - circuit breaker is tripped");
       // Reject the task
       const task = this.taskQueue.shift();
       if (task) {
-        task.reject(new Error('ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize'));
+        task.reject(
+          new Error("ChecksumWorkerManager circuit breaker tripped: Workers failing to initialize"),
+        );
       }
       return;
     }
@@ -198,7 +213,7 @@ class ChecksumWorkerManager {
     // Find idle worker
     let availableWorkerId = null;
     for (const [workerId, { metadata }] of this.workers) {
-      if (metadata.status === 'idle' && !this.currentTasks.has(workerId)) {
+      if (metadata.status === "idle" && !this.currentTasks.has(workerId)) {
         availableWorkerId = workerId;
         break;
       }
@@ -236,14 +251,14 @@ class ChecksumWorkerManager {
     }
 
     // Update metadata
-    metadata.status = 'busy';
+    metadata.status = "busy";
     metadata.lastActivity = Date.now();
     this.currentTasks.set(workerId, task);
 
     // Set task timeout
     metadata.taskTimer = setTimeout(() => {
       console.error(`⏰ ChecksumWorkerManager: Worker ${workerId} task timeout`);
-      this.handleWorkerError(workerId, { message: 'Task timeout' });
+      this.handleWorkerError(workerId, { message: "Task timeout" });
     }, this.config.taskTimeoutMs);
 
     // Get PydioApi values and send to worker
@@ -254,7 +269,7 @@ class ChecksumWorkerManager {
       file: task.file,
       msg: "begin hash",
       multipartThreshold,
-      multipartPartSize
+      multipartPartSize,
     });
 
     // Check if more tasks can be assigned
@@ -354,7 +369,6 @@ class ChecksumWorkerManager {
           this.replaceWorker(workerId);
         }
       }
-
     }, this.config.healthCheckIntervalMs);
   }
 

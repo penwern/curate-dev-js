@@ -132,8 +132,12 @@ class DataTable extends LitElement {
     }
 
     @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
     }
   `;
 
@@ -215,12 +219,16 @@ class DataTable extends LitElement {
               <tr>
                 ${this.columns.map(
                   (col) => html`
-                    <th @click=${this.sortable ? () => this._handleSort(col.field) : null}
-                        style=${this.sortable ? "" : "cursor: default"}>
+                    <th
+                      @click=${this.sortable ? () => this._handleSort(col.field) : null}
+                      style=${this.sortable ? "" : "cursor: default"}
+                    >
                       ${col.label}
                       ${this.sortable
                         ? this.sortField === col.field
-                          ? html`<span class="sort-indicator active">${this.sortDesc ? "▼" : "▲"}</span>`
+                          ? html`<span class="sort-indicator active"
+                              >${this.sortDesc ? "▼" : "▲"}</span
+                            >`
                           : html`<span class="sort-indicator"></span>`
                         : ""}
                     </th>
@@ -248,8 +256,14 @@ class DataTable extends LitElement {
                         <tr>
                           ${this.columns.map(
                             (col) => html`
-                              <td title=${col.format ? col.format(row[col.field], row) : row[col.field] ?? ""}>
-                                ${col.format ? col.format(row[col.field], row) : row[col.field] ?? ""}
+                              <td
+                                title=${col.format
+                                  ? col.format(row[col.field], row)
+                                  : (row[col.field] ?? "")}
+                              >
+                                ${col.format
+                                  ? col.format(row[col.field], row)
+                                  : (row[col.field] ?? "")}
                               </td>
                             `,
                           )}
@@ -267,28 +281,34 @@ class DataTable extends LitElement {
                   <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
                     ${chevronLeftIcon}
                   </md-icon-button>
-                  <md-icon-button ?disabled=${this.rows.length < this.pageSize} @click=${this._nextPage}>
+                  <md-icon-button
+                    ?disabled=${this.rows.length < this.pageSize}
+                    @click=${this._nextPage}
+                  >
                     ${chevronRightIcon}
                   </md-icon-button>
                 </div>
               </div>
             `
           : total > 0
-          ? html`
-              <div class="footer">
-                <span>${startRow}–${endRow} of ${total.toLocaleString()}</span>
-                <div class="page-info">
-                  <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
-                    ${chevronLeftIcon}
-                  </md-icon-button>
-                  <span>Page ${this.page + 1} of ${this._totalPages}</span>
-                  <md-icon-button ?disabled=${this.page >= this._totalPages - 1} @click=${this._nextPage}>
-                    ${chevronRightIcon}
-                  </md-icon-button>
+            ? html`
+                <div class="footer">
+                  <span>${startRow}–${endRow} of ${total.toLocaleString()}</span>
+                  <div class="page-info">
+                    <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
+                      ${chevronLeftIcon}
+                    </md-icon-button>
+                    <span>Page ${this.page + 1} of ${this._totalPages}</span>
+                    <md-icon-button
+                      ?disabled=${this.page >= this._totalPages - 1}
+                      @click=${this._nextPage}
+                    >
+                      ${chevronRightIcon}
+                    </md-icon-button>
+                  </div>
                 </div>
-              </div>
-            `
-          : ""}
+              `
+            : ""}
       </div>
     `;
   }

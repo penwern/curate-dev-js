@@ -161,20 +161,20 @@ class AsDetailPanel extends LitElement {
       letter-spacing: 0.04em;
     }
 
-	    .info-value {
-	      font-size: 14px;
-	      font-weight: 500;
-	      color: var(--md-sys-color-on-surface);
-	      line-height: 1.4;
-	      display: flex;
-	      align-items: center;
-	      gap: 6px;
-	    }
+    .info-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-	    .info-value-text {
-	      flex: 1;
-	      min-width: 0;
-	    }
+    .info-value-text {
+      flex: 1;
+      min-width: 0;
+    }
 
     .info-value md-icon,
     .info-value .value-icon {
@@ -264,67 +264,67 @@ class AsDetailPanel extends LitElement {
       color: var(--md-sys-color-on-error-container);
     }
 
-	    .actions {
-	      display: flex;
-	      flex-direction: column;
-	      gap: 12px;
-	    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-	    .create-folders-button {
-	      min-width: 140px;
-	      justify-content: center;
-	    }
+    .create-folders-button {
+      min-width: 140px;
+      justify-content: center;
+    }
 
-	    .create-folders-spinner {
-	      display: inline-flex;
-	      align-items: center;
-	      justify-content: center;
-	      min-height: 20px;
-	    }
+    .create-folders-spinner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 20px;
+    }
 
-	    .action-feedback {
-	      display: flex;
-	      align-items: center;
-	      gap: 8px;
-	      padding: 10px 12px;
-	      border-radius: 10px;
-	      border: 1px solid var(--md-sys-color-outline-variant);
-	      background: var(--md-sys-color-surface-1);
-	      font-size: 13px;
-	      line-height: 1.35;
-	      margin-top: 12px;
-	    }
+    .action-feedback {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface-1);
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 12px;
+    }
 
-	    .action-feedback.success {
-	      border-color: rgba(0, 109, 67, 0.25);
-	      background: rgba(0, 109, 67, 0.10);
-	      color: #004d2a;
-	    }
+    .action-feedback.success {
+      border-color: rgba(0, 109, 67, 0.25);
+      background: rgba(0, 109, 67, 0.1);
+      color: #004d2a;
+    }
 
-	    .action-feedback.error {
-	      border-color: rgba(179, 38, 30, 0.25);
-	      background: rgba(179, 38, 30, 0.10);
-	      color: #5f110b;
-	    }
+    .action-feedback.error {
+      border-color: rgba(179, 38, 30, 0.25);
+      background: rgba(179, 38, 30, 0.1);
+      color: #5f110b;
+    }
 
-	    .action-feedback .feedback-icon {
-	      display: inline-flex;
-	      align-items: center;
-	      justify-content: center;
-	      color: inherit;
-	    }
+    .action-feedback .feedback-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+    }
 
-	    .action-feedback .feedback-icon svg {
-	      width: 18px;
-	      height: 18px;
-	      fill: currentColor;
-	    }
+    .action-feedback .feedback-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
 
-	    .action-settings {
-	      display: flex;
-	      flex-direction: column;
-	      gap: 16px;
-	    }
+    .action-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
     .radio-group {
       display: flex;
@@ -445,20 +445,12 @@ class AsDetailPanel extends LitElement {
   }
 
   _getCurrentSelectionIndex() {
-    const selected = Array.isArray(this.selectedRecordIds)
-      ? this.selectedRecordIds
-      : [];
+    const selected = Array.isArray(this.selectedRecordIds) ? this.selectedRecordIds : [];
     if (!selected.length) return -1;
 
     const node = this.node || {};
-    const candidates = [
-      node.uri,
-      node.id,
-      node.logicalId,
-      node.record_uri,
-      node.ref,
-    ].filter(
-      (value) => value != null && `${value}`.trim() !== ""
+    const candidates = [node.uri, node.id, node.logicalId, node.record_uri, node.ref].filter(
+      (value) => value != null && `${value}`.trim() !== "",
     );
     if (!candidates.length) return -1;
 
@@ -474,9 +466,7 @@ class AsDetailPanel extends LitElement {
       if (id == null) return false;
       const idString = `${id}`.trim();
       if (!idString) return false;
-      return candidateStrings.some((candidate) =>
-        idString.endsWith(`/${candidate}`)
-      );
+      return candidateStrings.some((candidate) => idString.endsWith(`/${candidate}`));
     });
   }
 
@@ -513,41 +503,41 @@ class AsDetailPanel extends LitElement {
           ${this.isSearchResult ? "Search Result" : "Record Details"}
         </h3>
         <div class="info-grid">
-	          <div class="info-row">
-	            <div class="info-label">Title</div>
-	            <div class="info-value">
-	              <span class="info-value-text">${titleContent}</span>
-	            </div>
-	          </div>
+          <div class="info-row">
+            <div class="info-label">Title</div>
+            <div class="info-value">
+              <span class="info-value-text">${titleContent}</span>
+            </div>
+          </div>
           <div class="info-row">
             <div class="info-label">Status</div>
             <div class="info-value">
               ${this._renderStatusBadge(this.node.status, this.node.statusType)}
             </div>
           </div>
-	          <div class="info-row">
-	            <div class="info-label">Identifier</div>
-	            <div class="info-value">
-	              <span class="info-value-text">${identifierContent}</span>
-	            </div>
-	          </div>
+          <div class="info-row">
+            <div class="info-label">Identifier</div>
+            <div class="info-value">
+              <span class="info-value-text">${identifierContent}</span>
+            </div>
+          </div>
           <div class="info-row">
             <div class="info-label">Type</div>
             <div class="info-value">
               <span class="type-badge ${this.node.type}">${this.node.type}</span>
             </div>
           </div>
-	          ${this.node.location
-	            ? html`
-	                <div class="info-row">
-	                  <div class="info-label">Location</div>
-	                  <div class="info-value">
-	                    <span class="value-icon">${pinIcon}</span>
-	                    <span class="info-value-text">${locationContent}</span>
-	                  </div>
-	                </div>
-	              `
-	            : nothing}
+          ${this.node.location
+            ? html`
+                <div class="info-row">
+                  <div class="info-label">Location</div>
+                  <div class="info-value">
+                    <span class="value-icon">${pinIcon}</span>
+                    <span class="info-value-text">${locationContent}</span>
+                  </div>
+                </div>
+              `
+            : nothing}
           ${this.node.extent
             ? html`
                 <div class="info-row">
@@ -577,7 +567,7 @@ class AsDetailPanel extends LitElement {
               <div class="breadcrumb">
                 ${map(
                   this.breadcrumbs,
-                  (crumb) => html`<span class="breadcrumb-item">${crumb}</span> `
+                  (crumb) => html`<span class="breadcrumb-item">${crumb}</span> `,
                 )}
               </div>
             </div>
@@ -664,8 +654,8 @@ class AsDetailPanel extends LitElement {
                     ${this.createFoldersFeedback.type === "success"
                       ? checkCircleIcon
                       : this.createFoldersFeedback.type === "error"
-                      ? alertCircleIcon
-                      : pinIcon}
+                        ? alertCircleIcon
+                        : pinIcon}
                   </span>
                   <span>${this.createFoldersFeedback.message}</span>
                 </div>
@@ -718,33 +708,24 @@ class AsDetailPanel extends LitElement {
         ${this.selectedRecordIds.length > 1
           ? html`
               <div class="selection-carousel">
-                <md-icon-button
-                  ?disabled=${disablePrev}
-                  @click=${this._handlePrevSelection}
-                >
+                <md-icon-button ?disabled=${disablePrev} @click=${this._handlePrevSelection}>
                   ${chevronLeftIcon}
                 </md-icon-button>
                 <div class="selection-pips">
-                  ${map(
-                    this.selectedRecordIds.slice(startIndex, endIndex),
-                    (id, idx) => {
-                      const globalIndex = startIndex + idx;
-                      return html`
-                        <button
-                          type="button"
-                          class="selection-pip ${globalIndex === safeIndex ? "active" : ""}"
-                          @click=${() => this._handleNavigateSelection(globalIndex)}
-                        >
-                          <span class="visually-hidden">Selected record ${globalIndex + 1}</span>
-                        </button>
-                      `;
-                    }
-                  )}
+                  ${map(this.selectedRecordIds.slice(startIndex, endIndex), (id, idx) => {
+                    const globalIndex = startIndex + idx;
+                    return html`
+                      <button
+                        type="button"
+                        class="selection-pip ${globalIndex === safeIndex ? "active" : ""}"
+                        @click=${() => this._handleNavigateSelection(globalIndex)}
+                      >
+                        <span class="visually-hidden">Selected record ${globalIndex + 1}</span>
+                      </button>
+                    `;
+                  })}
                 </div>
-                <md-icon-button
-                  ?disabled=${disableNext}
-                  @click=${this._handleNextSelection}
-                >
+                <md-icon-button ?disabled=${disableNext} @click=${this._handleNextSelection}>
                   ${chevronRightIcon}
                 </md-icon-button>
               </div>
@@ -764,9 +745,7 @@ class AsDetailPanel extends LitElement {
 
     return html`
       <span class="status-badge ${statusType || "neutral"}">
-        ${statusIcon
-          ? html`<span class="status-icon">${statusIcon}</span>`
-          : nothing}
+        ${statusIcon ? html`<span class="status-icon">${statusIcon}</span>` : nothing}
         ${status || "Available"}
       </span>
     `;
@@ -821,7 +800,7 @@ class AsDetailPanel extends LitElement {
       new CustomEvent("clear-selection", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -845,7 +824,7 @@ class AsDetailPanel extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -857,7 +836,7 @@ class AsDetailPanel extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -869,7 +848,7 @@ class AsDetailPanel extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -881,7 +860,7 @@ class AsDetailPanel extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -892,7 +871,7 @@ class AsDetailPanel extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -901,7 +880,7 @@ class AsDetailPanel extends LitElement {
       new CustomEvent("keep-active-selection", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -911,7 +890,7 @@ class AsDetailPanel extends LitElement {
         detail: { action },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

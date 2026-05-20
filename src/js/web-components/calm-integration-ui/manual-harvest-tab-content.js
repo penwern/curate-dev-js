@@ -60,7 +60,7 @@ class ManualHarvestTabContent extends LitElement {
         detail: { mode },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -83,7 +83,7 @@ class ManualHarvestTabContent extends LitElement {
           detail: e.detail,
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
 
@@ -135,7 +135,7 @@ class ManualHarvestTabContent extends LitElement {
             @toggle-record-selection=${this._relayEvent}
             @run-harvest-selected-records=${this._relayEvent}
           ></calm-manual-harvest-by-search-panel>
-        `
+        `,
       )}
     `;
   }

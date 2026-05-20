@@ -27,7 +27,7 @@ class AnalyticsTabContent extends LitElement {
     this.charts = {};
     this.systemStats = null;
     this.isLoadingStats = false;
-    this.selectedHealthMetric = 'overview';
+    this.selectedHealthMetric = "overview";
   }
 
   static styles = css`
@@ -132,19 +132,14 @@ class AnalyticsTabContent extends LitElement {
 
   _calculateFallbackStats() {
     const totalHarvests = this.recentHarvests?.length || 0;
-    const successfulHarvests =
-      this.recentHarvests?.filter((h) => h.success).length || 0;
-    const totalRecords =
-      this.recentHarvests?.reduce((sum, h) => sum + h.records, 0) || 0;
+    const successfulHarvests = this.recentHarvests?.filter((h) => h.success).length || 0;
+    const totalRecords = this.recentHarvests?.reduce((sum, h) => sum + h.records, 0) || 0;
 
     return {
       total_harvest_jobs: totalHarvests,
       successful_jobs: successfulHarvests,
       total_records_harvested: totalRecords,
-      success_rate:
-        totalHarvests > 0
-          ? Math.round((successfulHarvests / totalHarvests) * 100)
-          : 0,
+      success_rate: totalHarvests > 0 ? Math.round((successfulHarvests / totalHarvests) * 100) : 0,
     };
   }
 
@@ -183,9 +178,7 @@ class AnalyticsTabContent extends LitElement {
     if (!canvas || this.charts.line) return;
 
     const ctx = canvas.getContext("2d");
-    const labels = (this.recentHarvests || [])
-      .map((h) => h.date.split(" ")[0])
-      .reverse();
+    const labels = (this.recentHarvests || []).map((h) => h.date.split(" ")[0]).reverse();
     const data = (this.recentHarvests || []).map((h) => h.records).reverse();
 
     this.charts.line = new Chart(ctx, {
@@ -231,9 +224,7 @@ class AnalyticsTabContent extends LitElement {
     const canvas = this.shadowRoot.querySelector("#statusChart");
     if (!canvas || this.charts.bar) return;
     const ctx = canvas.getContext("2d");
-    const successCount = (this.recentHarvests || []).filter(
-      (h) => h.success
-    ).length;
+    const successCount = (this.recentHarvests || []).filter((h) => h.success).length;
     const failCount = (this.recentHarvests || []).length - successCount;
 
     this.charts.bar = new Chart(ctx, {
@@ -244,10 +235,7 @@ class AnalyticsTabContent extends LitElement {
           {
             label: "Harvest Status",
             data: [successCount, failCount],
-            backgroundColor: [
-              "rgba(52, 211, 153, 0.5)",
-              "rgba(248, 113, 113, 0.5)",
-            ],
+            backgroundColor: ["rgba(52, 211, 153, 0.5)", "rgba(248, 113, 113, 0.5)"],
             borderColor: ["rgba(52, 211, 153, 1)", "rgba(248, 113, 113, 1)"],
             borderWidth: 1,
           },
@@ -326,41 +314,41 @@ class AnalyticsTabContent extends LitElement {
     let chartTitle = "";
 
     switch (this.selectedHealthMetric) {
-      case 'harvest_performance':
+      case "harvest_performance":
         healthData = {
-          'Successful Jobs': stats.successful_jobs || 0,
-          'Failed Jobs': stats.failed_jobs || 0,
-          'Partial Success': stats.partial_success_jobs || 0,
+          "Successful Jobs": stats.successful_jobs || 0,
+          "Failed Jobs": stats.failed_jobs || 0,
+          "Partial Success": stats.partial_success_jobs || 0,
         };
         chartTitle = `Harvest Performance: ${stats.success_rate || 0}% Success Rate`;
         break;
 
-      case 'field_mapping':
+      case "field_mapping":
         healthData = {
-          'Mapped Fields': stats.mapped_fields_count || 0,
-          'Rejected Fields': stats.rejected_fields_count || 0,
-          'Unmapped Fields': stats.unmapped_fields_count || 0,
-          'Blocking Fields': stats.blocking_unmapped_fields_count || 0,
+          "Mapped Fields": stats.mapped_fields_count || 0,
+          "Rejected Fields": stats.rejected_fields_count || 0,
+          "Unmapped Fields": stats.unmapped_fields_count || 0,
+          "Blocking Fields": stats.blocking_unmapped_fields_count || 0,
         };
         chartTitle = `Field Mapping: ${Math.round(stats.field_mapping_completion || 0)}% Complete`;
         break;
 
-      case 'recent_activity':
+      case "recent_activity":
         healthData = {
-          'Recent Jobs': stats.recent_jobs_count || 0,
-          'Recent Records': stats.recent_records_processed || 0,
-          'Recent Successful': stats.recent_successful_records || 0,
-          'Recent Cached': stats.recent_records_cached || 0,
+          "Recent Jobs": stats.recent_jobs_count || 0,
+          "Recent Records": stats.recent_records_processed || 0,
+          "Recent Successful": stats.recent_successful_records || 0,
+          "Recent Cached": stats.recent_records_cached || 0,
         };
         chartTitle = `Recent Activity: ${stats.recent_success_rate || 0}% Success Rate`;
         break;
 
       default: // overview
         healthData = {
-          'Successful Records': stats.successful_records || 0,
-          'Failed Records': stats.failed_records || 0,
-          'Cached Records': stats.cached_records_count || 0,
-          'Total Jobs': stats.total_harvest_jobs || 0,
+          "Successful Records": stats.successful_records || 0,
+          "Failed Records": stats.failed_records || 0,
+          "Cached Records": stats.cached_records_count || 0,
+          "Total Jobs": stats.total_harvest_jobs || 0,
         };
         chartTitle = `System Overview: ${stats.system_health?.harvest_success_rate || stats.success_rate || 0}% Health`;
     }
@@ -376,8 +364,8 @@ class AnalyticsTabContent extends LitElement {
             backgroundColor: [
               "rgba(52, 211, 153, 0.7)", // green
               "rgba(248, 113, 113, 0.7)", // red
-              "rgba(250, 204, 21, 0.7)",  // yellow
-              "rgba(59, 130, 246, 0.7)",  // blue
+              "rgba(250, 204, 21, 0.7)", // yellow
+              "rgba(59, 130, 246, 0.7)", // blue
               "rgba(156, 163, 175, 0.7)", // gray
             ],
             borderColor: [
@@ -400,7 +388,7 @@ class AnalyticsTabContent extends LitElement {
             display: true,
             text: chartTitle,
             color: "var(--md-sys-color-on-surface)",
-          }
+          },
         },
         scales: {
           y: {
@@ -429,14 +417,14 @@ class AnalyticsTabContent extends LitElement {
         detail: { value: e.target.value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   _handleHealthMetricSelect(e) {
     this.selectedHealthMetric = e.target.value;
     // Recreate the health chart with the new metric
-    if (this.selectedChart === 'health') {
+    if (this.selectedChart === "health") {
       this.destroyCharts();
       this.initHealthChart();
     }
@@ -449,11 +437,11 @@ class AnalyticsTabContent extends LitElement {
 
     const stats = this.systemStats || this._calculateFallbackStats();
     const fieldData = {
-      'Mapped': stats.mapped_fields_count || 0,
-      'Rejected': stats.rejected_fields_count || 0,
-      'Unmapped': stats.unmapped_fields_count || 0,
-      'Discovered': stats.discovered_fields_count || 0,
-      'Whitelisted': stats.whitelisted_fields_count || 0,
+      Mapped: stats.mapped_fields_count || 0,
+      Rejected: stats.rejected_fields_count || 0,
+      Unmapped: stats.unmapped_fields_count || 0,
+      Discovered: stats.discovered_fields_count || 0,
+      Whitelisted: stats.whitelisted_fields_count || 0,
     };
 
     this.charts.fields = new Chart(ctx, {
@@ -468,8 +456,8 @@ class AnalyticsTabContent extends LitElement {
               "rgba(52, 211, 153, 0.8)", // green - mapped
               "rgba(248, 113, 113, 0.8)", // red - rejected
               "rgba(156, 163, 175, 0.8)", // gray - unmapped
-              "rgba(59, 130, 246, 0.8)",  // blue - discovered
-              "rgba(250, 204, 21, 0.8)",  // yellow - whitelisted
+              "rgba(59, 130, 246, 0.8)", // blue - discovered
+              "rgba(250, 204, 21, 0.8)", // yellow - whitelisted
             ],
             borderColor: "var(--md-sys-color-surface-1)",
             borderWidth: 2,
@@ -488,7 +476,7 @@ class AnalyticsTabContent extends LitElement {
             display: true,
             text: `Field Mapping Status: ${Math.round(stats.field_mapping_completion || 0)}% Complete`,
             color: "var(--md-sys-color-on-surface)",
-          }
+          },
         },
       },
     });
@@ -532,7 +520,7 @@ class AnalyticsTabContent extends LitElement {
               </md-select-option>
             </md-outlined-select>
             ${when(
-              this.selectedChart === 'health',
+              this.selectedChart === "health",
               () => html`
                 <md-outlined-select
                   label="Health Metric"
@@ -552,7 +540,7 @@ class AnalyticsTabContent extends LitElement {
                     <div slot="headline">Recent Activity</div>
                   </md-select-option>
                 </md-outlined-select>
-              `
+              `,
             )}
           </div>
         </div>
@@ -615,7 +603,9 @@ class AnalyticsTabContent extends LitElement {
           <!-- System Health -->
           <div class="stat-card">
             <h4>Pure API Status</h4>
-            <p class="value" style="font-size: 14px; text-transform: capitalize;">${stats.pure_api_status || 'unknown'}</p>
+            <p class="value" style="font-size: 14px; text-transform: capitalize;">
+              ${stats.pure_api_status || "unknown"}
+            </p>
           </div>
           <div class="stat-card">
             <h4>Blocking Fields</h4>
@@ -626,24 +616,12 @@ class AnalyticsTabContent extends LitElement {
         <div class="chart-wrapper">
           ${when(
             this.selectedChart === "trends",
-            () => html`<canvas id="analyticsChart"></canvas>`
+            () => html`<canvas id="analyticsChart"></canvas>`,
           )}
-          ${when(
-            this.selectedChart === "status",
-            () => html`<canvas id="statusChart"></canvas>`
-          )}
-          ${when(
-            this.selectedChart === "source",
-            () => html`<canvas id="sourceChart"></canvas>`
-          )}
-          ${when(
-            this.selectedChart === "health",
-            () => html`<canvas id="healthChart"></canvas>`
-          )}
-          ${when(
-            this.selectedChart === "fields",
-            () => html`<canvas id="fieldsChart"></canvas>`
-          )}
+          ${when(this.selectedChart === "status", () => html`<canvas id="statusChart"></canvas>`)}
+          ${when(this.selectedChart === "source", () => html`<canvas id="sourceChart"></canvas>`)}
+          ${when(this.selectedChart === "health", () => html`<canvas id="healthChart"></canvas>`)}
+          ${when(this.selectedChart === "fields", () => html`<canvas id="fieldsChart"></canvas>`)}
         </div>
       </div>
     `;

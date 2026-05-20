@@ -1,17 +1,17 @@
 class ContextualHelp extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-    }
-  
-    connectedCallback() {
-      this.render();
-      console.log('connected help');
-      this.updateContent();
-    }
-  
-    render() {
-      this.shadowRoot.innerHTML = `
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    this.render();
+    console.log("connected help");
+    this.updateContent();
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
         <style>
           :host {
             display: block;
@@ -30,30 +30,32 @@ class ContextualHelp extends HTMLElement {
         </style>
         <div class="help-content"></div>
       `;
-    }
-  
-    updateContent() {
-      const context = Curate.contextualHelp.context;
-      const helpContent = this.shadowRoot.querySelector('.help-content');
-      helpContent.textContent = this.getHelpContent(context);
-    }
-  
-    getHelpContent(context) {
-      const { page, lastRightClickedElement, selection } = context;
-      const hasSelection = selection && selection.length > 0;
-      const clickedElementType = lastRightClickedElement ? lastRightClickedElement.tagName.toLowerCase() : null;
-  
-      // Series of switch cases to determine the appropriate help content
-      switch (true) {
-        // Case 1: Has selection
-        case hasSelection:
-          return `You've selected ${selection.length} item(s). This area allows you to perform actions on your selection.`;
-  
-        // Default case when no specific condition is met
-        default:
-          return `You're on the ${page} page. Right-click on elements to see context-specific help.`;
-      }
+  }
+
+  updateContent() {
+    const context = Curate.contextualHelp.context;
+    const helpContent = this.shadowRoot.querySelector(".help-content");
+    helpContent.textContent = this.getHelpContent(context);
+  }
+
+  getHelpContent(context) {
+    const { page, lastRightClickedElement, selection } = context;
+    const hasSelection = selection && selection.length > 0;
+    const clickedElementType = lastRightClickedElement
+      ? lastRightClickedElement.tagName.toLowerCase()
+      : null;
+
+    // Series of switch cases to determine the appropriate help content
+    switch (true) {
+      // Case 1: Has selection
+      case hasSelection:
+        return `You've selected ${selection.length} item(s). This area allows you to perform actions on your selection.`;
+
+      // Default case when no specific condition is met
+      default:
+        return `You're on the ${page} page. Right-click on elements to see context-specific help.`;
     }
   }
-  
-  customElements.define('contextual-help', ContextualHelp);
+}
+
+customElements.define("contextual-help", ContextualHelp);

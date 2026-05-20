@@ -13,9 +13,18 @@ import {
 import { chartDonutIcon, fileMultipleIcon, harddiskIcon } from "../../utils/icons.js";
 
 const PALETTE = [
-  "#4285f4", "#34a853", "#fbbc04", "#ea4335", "#9334e6",
-  "#e8710a", "#00acc1", "#f06292", "#8d6e63", "#78909c",
-  "#26a69a", "#ab47bc",
+  "#4285f4",
+  "#34a853",
+  "#fbbc04",
+  "#ea4335",
+  "#9334e6",
+  "#e8710a",
+  "#00acc1",
+  "#f06292",
+  "#8d6e63",
+  "#78909c",
+  "#26a69a",
+  "#ab47bc",
 ];
 
 class FormatsPanel extends LitElement {
@@ -41,7 +50,9 @@ class FormatsPanel extends LitElement {
   };
 
   static styles = css`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
 
     .stats-grid {
       display: grid;
@@ -58,7 +69,9 @@ class FormatsPanel extends LitElement {
     }
 
     @media (max-width: 768px) {
-      .charts-row { grid-template-columns: 1fr; }
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     .snapshot-badge {
@@ -121,8 +134,12 @@ class FormatsPanel extends LitElement {
       vertical-align: middle;
     }
 
-    .format-table tr:last-child td { border-bottom: none; }
-    .format-table tr:hover td { background: var(--md-sys-color-surface-variant); }
+    .format-table tr:last-child td {
+      border-bottom: none;
+    }
+    .format-table tr:hover td {
+      background: var(--md-sys-color-surface-variant);
+    }
 
     .mime-chip {
       display: inline-block;
@@ -177,7 +194,9 @@ class FormatsPanel extends LitElement {
       cursor: pointer;
       outline: none;
     }
-    .ts-controls select:focus { border-color: var(--md-sys-color-primary); }
+    .ts-controls select:focus {
+      border-color: var(--md-sys-color-primary);
+    }
 
     .ts-filter-input {
       font-family: inherit;
@@ -190,7 +209,9 @@ class FormatsPanel extends LitElement {
       outline: none;
       width: 160px;
     }
-    .ts-filter-input:focus { border-color: var(--md-sys-color-primary); }
+    .ts-filter-input:focus {
+      border-color: var(--md-sys-color-primary);
+    }
 
     .ctrl-sep {
       width: 1px;
@@ -213,14 +234,18 @@ class FormatsPanel extends LitElement {
       background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface-variant);
       cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s;
       white-space: nowrap;
     }
     .toggle-btn.active {
       background: var(--md-sys-color-primary-container);
       color: var(--md-sys-color-on-primary-container);
     }
-    .toggle-btn + .toggle-btn { border-left: 1px solid var(--md-sys-color-outline-variant); }
+    .toggle-btn + .toggle-btn {
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+    }
 
     .not-configured {
       display: flex;
@@ -324,7 +349,11 @@ class FormatsPanel extends LitElement {
   _processBreakdown(items) {
     const byFormat = new Map();
     for (const item of items) {
-      const ex = byFormat.get(item.mime_or_ext) ?? { file_count: 0, total_bytes: 0, no_mime_count: 0 };
+      const ex = byFormat.get(item.mime_or_ext) ?? {
+        file_count: 0,
+        total_bytes: 0,
+        no_mime_count: 0,
+      };
       byFormat.set(item.mime_or_ext, {
         file_count: ex.file_count + item.file_count,
         total_bytes: ex.total_bytes + item.total_bytes,
@@ -372,7 +401,11 @@ class FormatsPanel extends LitElement {
 
     try {
       if (this._tsView === "format") {
-        const res = await getMimeTimeseriesByFormat(this.formatReportingUrl, { metric: this._tsMetric, from, to });
+        const res = await getMimeTimeseriesByFormat(this.formatReportingUrl, {
+          metric: this._tsMetric,
+          from,
+          to,
+        });
         if (gen !== this._tsGen) return;
 
         this._tsRawSeries = (res.series ?? []).map((s) => ({
@@ -381,7 +414,11 @@ class FormatsPanel extends LitElement {
         }));
         this._rebuildTsData();
       } else {
-        const res = await getMimeTimeseriesByDatasource(this.formatReportingUrl, { metric: this._tsMetric, from, to });
+        const res = await getMimeTimeseriesByDatasource(this.formatReportingUrl, {
+          metric: this._tsMetric,
+          from,
+          to,
+        });
         if (gen !== this._tsGen) return;
         const series = res.series ?? [];
         const allTs = new Set();
@@ -426,12 +463,18 @@ class FormatsPanel extends LitElement {
 
   _rebuildTsData() {
     const filtered = this._filteredSeries;
-    if (!filtered.length) { this._tsData = null; return; }
+    if (!filtered.length) {
+      this._tsData = null;
+      return;
+    }
 
     const allTs = new Set();
     for (const s of filtered) s.points.forEach((p) => allTs.add(p.snapshot_at));
     const sortedTs = [...allTs].sort((a, b) => a.localeCompare(b));
-    if (!sortedTs.length) { this._tsData = null; return; }
+    if (!sortedTs.length) {
+      this._tsData = null;
+      return;
+    }
 
     this._tsData = {
       labels: sortedTs.map((t) => this._fmtTs(t)),
@@ -479,7 +522,11 @@ class FormatsPanel extends LitElement {
         if (snapshotRes?.snapshot_at) this._snapshotAt = snapshotRes.snapshot_at;
         const byFormat = new Map();
         for (const item of items) {
-          const ex = byFormat.get(item.mime_or_ext) ?? { file_count: 0, total_bytes: 0, no_mime_count: 0 };
+          const ex = byFormat.get(item.mime_or_ext) ?? {
+            file_count: 0,
+            total_bytes: 0,
+            no_mime_count: 0,
+          };
           byFormat.set(item.mime_or_ext, {
             file_count: ex.file_count + item.file_count,
             total_bytes: ex.total_bytes + item.total_bytes,
@@ -534,8 +581,8 @@ class FormatsPanel extends LitElement {
         <div class="not-configured">
           ${chartDonutIcon}
           <p>
-            Format reporting is not configured. Set <code>FORMAT_REPORTING_URL</code>
-            in <code>dashboard.js</code> to point to your Cells MIME reporting API.
+            Format reporting is not configured. Set <code>FORMAT_REPORTING_URL</code> in
+            <code>dashboard.js</code> to point to your Cells MIME reporting API.
           </p>
         </div>
       `;
@@ -545,7 +592,9 @@ class FormatsPanel extends LitElement {
 
     return html`
       ${this._snapshotAt
-        ? html`<div class="snapshot-badge">Data from snapshot: <span>${new Date(this._snapshotAt).toLocaleString("en-GB")}</span></div>`
+        ? html`<div class="snapshot-badge">
+            Data from snapshot: <span>${new Date(this._snapshotAt).toLocaleString("en-GB")}</span>
+          </div>`
         : ""}
 
       <div class="stats-grid">
@@ -618,19 +667,24 @@ class FormatsPanel extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${this._aggregated.map((row) => html`
-                  <tr>
-                    <td><span class="mime-chip" title="${row.mime}">${row.mime}</span></td>
-                    <td><span class="category-badge">${row.category}</span></td>
-                    <td>${Number(row.file_count).toLocaleString()}</td>
-                    <td>${formatBytes(row.total_bytes)}</td>
-                    <td>
-                      <div class="bar-bg">
-                        <div class="bar-fill" style="width:${(row.file_count / maxFiles) * 100}%"></div>
-                      </div>
-                    </td>
-                  </tr>
-                `)}
+                ${this._aggregated.map(
+                  (row) => html`
+                    <tr>
+                      <td><span class="mime-chip" title="${row.mime}">${row.mime}</span></td>
+                      <td><span class="category-badge">${row.category}</span></td>
+                      <td>${Number(row.file_count).toLocaleString()}</td>
+                      <td>${formatBytes(row.total_bytes)}</td>
+                      <td>
+                        <div class="bar-bg">
+                          <div
+                            class="bar-fill"
+                            style="width:${(row.file_count / maxFiles) * 100}%"
+                          ></div>
+                        </div>
+                      </td>
+                    </tr>
+                  `,
+                )}
               </tbody>
             </table>
           </div>
@@ -648,9 +702,10 @@ class FormatsPanel extends LitElement {
             legend: { display: true, position: "bottom" },
             tooltip: {
               callbacks: {
-                label: (ctx) => this._tsMetric === "total_bytes"
-                  ? ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`
-                  : ` ${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString()} files`,
+                label: (ctx) =>
+                  this._tsMetric === "total_bytes"
+                    ? ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`
+                    : ` ${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString()} files`,
               },
             },
           },
@@ -659,20 +714,31 @@ class FormatsPanel extends LitElement {
             y: {
               beginAtZero: true,
               ticks: {
-                callback: (v) => this._tsMetric === "total_bytes"
-                  ? formatBytes(v)
-                  : Number(v).toLocaleString(),
+                callback: (v) =>
+                  this._tsMetric === "total_bytes" ? formatBytes(v) : Number(v).toLocaleString(),
               },
             },
           },
         }}
       >
         <div slot="actions" class="ts-controls">
-          <select @change=${(e) => { this._tsMetric = e.target.value; }}>
-            <option value="file_count" ?selected=${this._tsMetric === "file_count"}>File Count</option>
-            <option value="total_bytes" ?selected=${this._tsMetric === "total_bytes"}>Total Bytes</option>
+          <select
+            @change=${(e) => {
+              this._tsMetric = e.target.value;
+            }}
+          >
+            <option value="file_count" ?selected=${this._tsMetric === "file_count"}>
+              File Count
+            </option>
+            <option value="total_bytes" ?selected=${this._tsMetric === "total_bytes"}>
+              Total Bytes
+            </option>
           </select>
-          <select @change=${(e) => { this._tsRange = e.target.value; }}>
+          <select
+            @change=${(e) => {
+              this._tsRange = e.target.value;
+            }}
+          >
             <option value="30d" ?selected=${this._tsRange === "30d"}>Last 30 days</option>
             <option value="6m" ?selected=${this._tsRange === "6m"}>Last 6 months</option>
             <option value="1y" ?selected=${this._tsRange === "1y"}>Last year</option>
@@ -681,31 +747,49 @@ class FormatsPanel extends LitElement {
           <div class="toggle-group">
             <button
               class="toggle-btn ${this._tsView === "format" ? "active" : ""}"
-              @click=${() => { this._tsView = "format"; }}
-            >By format</button>
+              @click=${() => {
+                this._tsView = "format";
+              }}
+            >
+              By format
+            </button>
             <button
               class="toggle-btn ${this._tsView === "datasource" ? "active" : ""}"
-              @click=${() => { this._tsView = "datasource"; }}
-            >Per datasource</button>
+              @click=${() => {
+                this._tsView = "datasource";
+              }}
+            >
+              Per datasource
+            </button>
           </div>
-          ${this._tsView === "format" ? html`
-            <div class="ctrl-sep"></div>
-            <input
-              class="ts-filter-input"
-              type="search"
-              placeholder="Filter formats…"
-              .value=${this._tsFilter}
-              @input=${(e) => { this._tsFilter = e.target.value; }}
-            />
-            ${!this._tsFilter.trim() ? html`
-              <select @change=${(e) => { this._tsTopN = Number(e.target.value); }}>
-                <option value="5"  ?selected=${this._tsTopN === 5}>Top 5</option>
-                <option value="10" ?selected=${this._tsTopN === 10}>Top 10</option>
-                <option value="20" ?selected=${this._tsTopN === 20}>Top 20</option>
-                <option value="9999" ?selected=${this._tsTopN === 9999}>All</option>
-              </select>
-            ` : ""}
-          ` : ""}
+          ${this._tsView === "format"
+            ? html`
+                <div class="ctrl-sep"></div>
+                <input
+                  class="ts-filter-input"
+                  type="search"
+                  placeholder="Filter formats…"
+                  .value=${this._tsFilter}
+                  @input=${(e) => {
+                    this._tsFilter = e.target.value;
+                  }}
+                />
+                ${!this._tsFilter.trim()
+                  ? html`
+                      <select
+                        @change=${(e) => {
+                          this._tsTopN = Number(e.target.value);
+                        }}
+                      >
+                        <option value="5" ?selected=${this._tsTopN === 5}>Top 5</option>
+                        <option value="10" ?selected=${this._tsTopN === 10}>Top 10</option>
+                        <option value="20" ?selected=${this._tsTopN === 20}>Top 20</option>
+                        <option value="9999" ?selected=${this._tsTopN === 9999}>All</option>
+                      </select>
+                    `
+                  : ""}
+              `
+            : ""}
         </div>
       </chart-card>
     `;

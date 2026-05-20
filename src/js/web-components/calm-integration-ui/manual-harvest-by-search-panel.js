@@ -146,7 +146,7 @@ class SearchResultsTable extends LitElement {
         detail: { checked: e.target.checked },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -156,17 +156,13 @@ class SearchResultsTable extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   render() {
     if (!this.searchResults || this.searchResults.length === 0) {
-      return html`
-        <div class="no-results">
-          No records found. Try a different search term.
-        </div>
-      `;
+      return html` <div class="no-results">No records found. Try a different search term.</div> `;
     }
 
     return html`
@@ -187,15 +183,13 @@ class SearchResultsTable extends LitElement {
                 aria-labelledby="title-${record.id}-${index}"
               ></md-checkbox>
               <div>
-                <div class="record-title" id="title-${record.id}-${index}">
-                  ${record.title}
-                </div>
+                <div class="record-title" id="title-${record.id}-${index}">${record.title}</div>
                 <div class="record-collection">${record.collection}</div>
               </div>
               <div class="record-meta">${record.id}</div>
               <div class="record-meta">${record.modified}</div>
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -341,9 +335,7 @@ class ManualHarvestBySearchPanel extends LitElement {
   `;
 
   _dispatch(eventName, detail = {}) {
-    this.dispatchEvent(
-      new CustomEvent(eventName, { detail, bubbles: true, composed: true })
-    );
+    this.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true, composed: true }));
   }
 
   _handleSearchInput(e) {
@@ -351,11 +343,7 @@ class ManualHarvestBySearchPanel extends LitElement {
   }
 
   _handleKeyPress(e) {
-    if (
-      e.key === "Enter" &&
-      this.manualSearchTerm.trim() &&
-      !this.isManualSearching
-    ) {
+    if (e.key === "Enter" && this.manualSearchTerm.trim() && !this.isManualSearching) {
       this._runSearch();
     }
   }
@@ -371,15 +359,14 @@ class ManualHarvestBySearchPanel extends LitElement {
 
   render() {
     const selectedCount = this.selectedManualRecords.length;
-    const hasResults =
-      this.manualSearchResults && this.manualSearchResults.length > 0;
+    const hasResults = this.manualSearchResults && this.manualSearchResults.length > 0;
 
     return html`
       <div class="form-section">
         <h3><span>${searchIcon}</span>Find and Select Records</h3>
         <p>
-          Search for records in your CALM database using keywords, titles, or
-          IDs. Then select the records you wish to harvest into Soteria+.
+          Search for records in your CALM database using keywords, titles, or IDs. Then select the
+          records you wish to harvest into Soteria+.
         </p>
 
         <div class="search-input-row">
@@ -395,18 +382,14 @@ class ManualHarvestBySearchPanel extends LitElement {
             @click=${this._runSearch}
             ?disabled=${!this.manualSearchTerm.trim() || this.isManualSearching}
           >
-            <span>
-              ${searchIcon}
-              ${this.isManualSearching ? "Searching..." : "Search"}
-            </span>
+            <span> ${searchIcon} ${this.isManualSearching ? "Searching..." : "Search"} </span>
           </md-filled-button>
         </div>
 
         ${this.manualSearchTerm.trim()
           ? html`
               <div class="search-hint">
-                Press Enter or click Search to find records matching
-                "${this.manualSearchTerm}"
+                Press Enter or click Search to find records matching "${this.manualSearchTerm}"
               </div>
             `
           : ""}
@@ -421,7 +404,7 @@ class ManualHarvestBySearchPanel extends LitElement {
           >
             Searching CALM database...
           </p>
-        `
+        `,
       )}
       ${when(
         hasResults && !this.isManualSearching,
@@ -443,35 +426,24 @@ class ManualHarvestBySearchPanel extends LitElement {
               }}
             ></calm-search-results-table>
           </div>
-        `
+        `,
       )}
       ${when(
         selectedCount > 0,
         () => html`
           <div class="selection-summary-bar">
-            <span>
-              ${selectedCount} record${selectedCount === 1 ? "" : "s"} selected
-            </span>
-            <md-filled-button
-              @click=${this._runHarvest}
-              ?disabled=${this.isManualHarvesting}
-            >
+            <span> ${selectedCount} record${selectedCount === 1 ? "" : "s"} selected </span>
+            <md-filled-button @click=${this._runHarvest} ?disabled=${this.isManualHarvesting}>
               <span>
-                ${playIcon}
-                ${this.isManualHarvesting
-                  ? "Harvesting..."
-                  : "Harvest Selected"}
+                ${playIcon} ${this.isManualHarvesting ? "Harvesting..." : "Harvest Selected"}
               </span>
             </md-filled-button>
           </div>
-        `
+        `,
       )}
     `;
   }
 }
 
-customElements.define(
-  "calm-manual-harvest-by-search-panel",
-  ManualHarvestBySearchPanel
-);
+customElements.define("calm-manual-harvest-by-search-panel", ManualHarvestBySearchPanel);
 export { ManualHarvestBySearchPanel };

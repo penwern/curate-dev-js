@@ -23,7 +23,7 @@ class UploadInterceptor {
    */
   register(plugin) {
     if (!plugin.name) {
-      throw new Error('Plugin must have a name');
+      throw new Error("Plugin must have a name");
     }
 
     if (this.plugins.has(plugin.name)) {
@@ -62,7 +62,7 @@ class UploadInterceptor {
    */
   patchUploadSystem() {
     if (this.isPatched) {
-      console.warn('UploadInterceptor: Upload system already patched');
+      console.warn("UploadInterceptor: Upload system already patched");
       return;
     }
 
@@ -94,7 +94,7 @@ class UploadInterceptor {
     // Override the uploadPresigned method
     UploaderModel.UploadItem.prototype.uploadPresigned = this.createPatchedUploadMethod();
 
-    console.log('UploadInterceptor: Successfully patched upload system');
+    console.log("UploadInterceptor: Successfully patched upload system");
   }
 
   /**
@@ -104,17 +104,17 @@ class UploadInterceptor {
   createPatchedUploadMethod() {
     const self = this;
 
-    return function() {
+    return function () {
       // 'this' refers to the UploaderModel.UploadItem instance
       const uploadItem = this;
 
       // Call beforeUpload hooks first to allow blocking
-      const shouldProceed = self.callPluginHooks('beforeUpload', uploadItem);
+      const shouldProceed = self.callPluginHooks("beforeUpload", uploadItem);
 
       // If any plugin returned false, block the upload
       if (shouldProceed === false) {
-        console.log('UploadInterceptor: Upload blocked by plugin for:', uploadItem._label);
-        return Promise.reject(new Error('Upload blocked by volume checker'));
+        console.log("UploadInterceptor: Upload blocked by plugin for:", uploadItem._label);
+        return Promise.reject(new Error("Upload blocked by volume checker"));
       }
 
       // Execute the original upload logic
@@ -123,7 +123,7 @@ class UploadInterceptor {
       // Create observer to watch for upload status changes
       const observer = (status) => {
         // Call onStatusChange hooks
-        self.callPluginHooks('onStatusChange', uploadItem, status);
+        self.callPluginHooks("onStatusChange", uploadItem, status);
 
         // Handle upload completion
         if (status === "loaded") {
@@ -131,13 +131,13 @@ class UploadInterceptor {
           self.removeObserver(uploadItem, observer);
 
           // Call onUploadComplete hooks
-          self.callPluginHooks('onUploadComplete', uploadItem);
+          self.callPluginHooks("onUploadComplete", uploadItem);
         } else if (status === "error") {
           // Remove observer
           self.removeObserver(uploadItem, observer);
 
           // Call onUploadError hooks
-          self.callPluginHooks('onUploadError', uploadItem);
+          self.callPluginHooks("onUploadError", uploadItem);
         }
       };
 
@@ -157,20 +157,23 @@ class UploadInterceptor {
   callPluginHooks(hookName, ...args) {
     for (const [pluginName, plugin] of this.plugins) {
       try {
-        if (plugin.hooks && typeof plugin.hooks[hookName] === 'function') {
+        if (plugin.hooks && typeof plugin.hooks[hookName] === "function") {
           const result = plugin.hooks[hookName].call(plugin, ...args);
 
           // For beforeUpload hook, if any plugin returns false, block the upload
-          if (hookName === 'beforeUpload' && result === false) {
+          if (hookName === "beforeUpload" && result === false) {
             console.log(`UploadInterceptor: Plugin '${pluginName}' blocked upload`);
             return false;
           }
         }
       } catch (error) {
-        console.error(`UploadInterceptor: Error in plugin '${pluginName}' hook '${hookName}':`, error);
+        console.error(
+          `UploadInterceptor: Error in plugin '${pluginName}' hook '${hookName}':`,
+          error,
+        );
 
         // For beforeUpload, treat errors as blocking
-        if (hookName === 'beforeUpload') {
+        if (hookName === "beforeUpload") {
           console.log(`UploadInterceptor: Plugin '${pluginName}' error treated as block`);
           return false;
         }
@@ -213,7 +216,7 @@ class UploadInterceptor {
     if (this.isPatched && this.originalUploadPresigned) {
       UploaderModel.UploadItem.prototype.uploadPresigned = this.originalUploadPresigned;
       this.isPatched = false;
-      console.log('UploadInterceptor: Unpatched upload system');
+      console.log("UploadInterceptor: Unpatched upload system");
     }
   }
 }

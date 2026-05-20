@@ -5,9 +5,9 @@
  * for Pydio Cells Enterprise.
  */
 
-import { initializeRouter } from './router-init.js';
-import { registerAllRoutes } from './routes/index.js';
-import { Curate } from '../core/CurateFunctions/CurateFunctions.js';
+import { initializeRouter } from "./router-init.js";
+import { registerAllRoutes } from "./routes/index.js";
+import { Curate } from "../core/CurateFunctions/CurateFunctions.js";
 
 /**
  * Initialize all custom pages functionality
@@ -23,16 +23,15 @@ function initCustomPages() {
     // Force route check now that routes are registered
     Curate.router.checkRoute();
 
-    console.log('Custom Pages: Initialization complete');
-
+    console.log("Custom Pages: Initialization complete");
   } catch (error) {
-    console.error('Custom Pages: Initialization failed:', error);
+    console.error("Custom Pages: Initialization failed:", error);
   }
 }
 
 // Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initCustomPages);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCustomPages);
 } else {
   // DOM is already ready
   initCustomPages();

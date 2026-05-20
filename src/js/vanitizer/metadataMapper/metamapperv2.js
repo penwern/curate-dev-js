@@ -31,7 +31,7 @@ class SchemaFieldMapper extends HTMLElement {
         if (sourceList && destList && svg) {
           const maxHeight = Math.max(
             sourceList.getBoundingClientRect().height,
-            destList.getBoundingClientRect().height
+            destList.getBoundingClientRect().height,
           );
 
           container.style.height = `${maxHeight}px`;
@@ -54,13 +54,11 @@ class SchemaFieldMapper extends HTMLElement {
     this._resizeObserver = new ResizeObserver(() => this._renderConnections());
     this._resizeObserver.observe(this);
 
-    this._availableSchemas = await fetch(
-      "http://" + this.baseUrl + "/schema/mappings/"
-    ).then((r) => r.json());
+    this._availableSchemas = await fetch("http://" + this.baseUrl + "/schema/mappings/").then((r) =>
+      r.json(),
+    );
 
-    this._destinationSchemas = await fetch(
-      "http://" + this.baseUrl + "/schema/schemas"
-    )
+    this._destinationSchemas = await fetch("http://" + this.baseUrl + "/schema/schemas")
       .then((r) => r.json())
       .then((r) => r.metadata_schemas);
 
@@ -117,9 +115,7 @@ class SchemaFieldMapper extends HTMLElement {
 
     if (type === "source") {
       if (newValue) {
-        selectedSchema = Object.entries(this._availableSchemas).find(
-          (s) => s[0] === newValue
-        )[1];
+        selectedSchema = Object.entries(this._availableSchemas).find((s) => s[0] === newValue)[1];
         if (selectedSchema) {
           this._sourceSchema = selectedSchema;
           this._sourceFields = [...Object.keys(selectedSchema.mappings)];
@@ -140,9 +136,7 @@ class SchemaFieldMapper extends HTMLElement {
         this._connections = new Map();
       }
     } else if (type === "destination") {
-      selectedSchema = this._destinationSchemas.find(
-        (s) => s.name === newValue
-      );
+      selectedSchema = this._destinationSchemas.find((s) => s.name === newValue);
       if (selectedSchema) {
         this._destinationSchema = selectedSchema;
         nameElement.textContent = selectedSchema.label || "";
@@ -239,8 +233,7 @@ class SchemaFieldMapper extends HTMLElement {
     });
 
     this.shadowRoot.addEventListener("click", (e) => {
-      if (e.target.classList.contains("connection-node"))
-        this._handleNodeClick(e.target);
+      if (e.target.classList.contains("connection-node")) this._handleNodeClick(e.target);
     });
   }
   _getFieldConnections(fieldId) {
@@ -292,9 +285,7 @@ class SchemaFieldMapper extends HTMLElement {
               connections.length > 0
                 ? `
               <div class="connection-menu" data-field="${fieldId}">
-                ${connections.length} connection${
-                    connections.length > 1 ? "s" : ""
-                  }
+                ${connections.length} connection${connections.length > 1 ? "s" : ""}
               </div>
             `
                 : ""
@@ -329,9 +320,7 @@ class SchemaFieldMapper extends HTMLElement {
     // Input change handler for source fields
     sourceContainer.addEventListener("input", (e) => {
       if (e.target.classList.contains("field-input")) {
-        const index = [
-          ...sourceContainer.querySelectorAll(".field-input"),
-        ].indexOf(e.target);
+        const index = [...sourceContainer.querySelectorAll(".field-input")].indexOf(e.target);
         this._sourceFields[index] = e.target.value;
       }
     });
@@ -344,9 +333,7 @@ class SchemaFieldMapper extends HTMLElement {
         const connections = this._getFieldConnections(fieldId);
 
         // Remove any existing dropdowns
-        this.shadowRoot
-          .querySelectorAll(".connection-dropdown")
-          .forEach((d) => d.remove());
+        this.shadowRoot.querySelectorAll(".connection-dropdown").forEach((d) => d.remove());
 
         const dropdown = document.createElement("div");
         dropdown.className = "connection-dropdown";
@@ -357,7 +344,7 @@ class SchemaFieldMapper extends HTMLElement {
             <span>${this._getFieldName(otherField)}</span>
             <span class="disconnect-btn">Disconnect</span>
           </div>
-        `
+        `,
           )
           .join("");
 
@@ -404,10 +391,7 @@ class SchemaFieldMapper extends HTMLElement {
         const sourceNode = isFirstSource ? first : second;
         const destNode = isFirstSource ? second : first;
         console.log("src: ", sourceNode.dataset.field, destNode.dataset.field);
-        this._createConnection(
-          sourceNode.dataset.field,
-          destNode.dataset.field
-        );
+        this._createConnection(sourceNode.dataset.field, destNode.dataset.field);
       }
 
       this._activeNode.classList.remove("active");
@@ -437,7 +421,7 @@ class SchemaFieldMapper extends HTMLElement {
     // Calculate the maximum height needed
     const maxHeight = Math.max(
       sourceList.getBoundingClientRect().height,
-      destList.getBoundingClientRect().height
+      destList.getBoundingClientRect().height,
     );
 
     // Set container and SVG height
@@ -448,13 +432,9 @@ class SchemaFieldMapper extends HTMLElement {
 
     this._connections.forEach(({ source, dest }, connectionId) => {
       console.log("fuucking cuunt asrrrrrrr: ");
-      const sourceNode = this.shadowRoot.querySelector(
-        `[data-field="${source}"].connection-node`
-      );
+      const sourceNode = this.shadowRoot.querySelector(`[data-field="${source}"].connection-node`);
 
-      const destNode = this.shadowRoot.querySelector(
-        `[data-field="${dest}"].connection-node`
-      );
+      const destNode = this.shadowRoot.querySelector(`[data-field="${dest}"].connection-node`);
 
       if (sourceNode && destNode) {
         const sourceRect = sourceNode.getBoundingClientRect();
@@ -467,32 +447,23 @@ class SchemaFieldMapper extends HTMLElement {
         const y2 = destRect.top - svgRect.top + destRect.height / 2;
 
         // Create a group for the connection
-        const group = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "g"
-        );
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         group.classList.add("connection-group");
         group.setAttribute("data-connection-id", connectionId);
 
         // Create the path
-        const path = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "path"
-        );
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.classList.add("connection-line");
 
         // Calculate control points for the curve
         const dx = x2 - x1;
         const midX = x1 + dx / 2;
-        path.setAttribute(
-          "d",
-          `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`
-        );
+        path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`);
 
         // Create the delete button
         const foreignObject = document.createElementNS(
           "http://www.w3.org/2000/svg",
-          "foreignObject"
+          "foreignObject",
         );
         foreignObject.setAttribute("width", "44"); // Increased width
         foreignObject.setAttribute("height", "44"); // Increased height
@@ -555,11 +526,7 @@ class SchemaFieldMapper extends HTMLElement {
     });
   }
 
-  _getDestinationFieldByName(
-    fieldName,
-    fields = this._destinationSchema.fields,
-    parentIndex = ""
-  ) {
+  _getDestinationFieldByName(fieldName, fields = this._destinationSchema.fields, parentIndex = "") {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       const currentIndex = parentIndex ? `${parentIndex}-${i}` : i;
@@ -570,11 +537,7 @@ class SchemaFieldMapper extends HTMLElement {
 
       // If this is a collection, recursively search its fields
       if (field.type === "collection" && field.fields) {
-        const found = this._getDestinationFieldByName(
-          fieldName,
-          field.fields,
-          currentIndex
-        );
+        const found = this._getDestinationFieldByName(fieldName, field.fields, currentIndex);
         if (found) return found;
       }
     }

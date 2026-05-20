@@ -41,15 +41,9 @@ class AsBrowseTabs extends LitElement {
     return html`
       <div class="browse-tabs">
         <md-tabs @change=${this._handleTabChange}>
-          <md-primary-tab ?active=${this.activeTab === "repository"}>
-            Repository
-          </md-primary-tab>
-          <md-primary-tab ?active=${this.activeTab === "collections"}>
-            Collections
-          </md-primary-tab>
-          <md-primary-tab ?active=${this.activeTab === "search"}>
-            Search
-          </md-primary-tab>
+          <md-primary-tab ?active=${this.activeTab === "repository"}> Repository </md-primary-tab>
+          <md-primary-tab ?active=${this.activeTab === "collections"}> Collections </md-primary-tab>
+          <md-primary-tab ?active=${this.activeTab === "search"}> Search </md-primary-tab>
         </md-tabs>
       </div>
     `;
@@ -63,7 +57,7 @@ class AsBrowseTabs extends LitElement {
         detail: { tab: newTab },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

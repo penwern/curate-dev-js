@@ -196,7 +196,7 @@ class AsFilterSummary extends LitElement {
         detail: { level },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -206,7 +206,7 @@ class AsFilterSummary extends LitElement {
         detail: { status },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -215,7 +215,7 @@ class AsFilterSummary extends LitElement {
       new CustomEvent("remove-scope", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -225,7 +225,7 @@ class AsFilterSummary extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -234,7 +234,7 @@ class AsFilterSummary extends LitElement {
       new CustomEvent("clear-all", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

@@ -21,8 +21,8 @@ export async function fetchResourceTreeRoot(apiHost, resourceId, repositoryId) {
   const res = await fetch(
     buildApiUrl(
       apiHost,
-      `/resources/${encodeURIComponent(resourceId)}/tree/root?${params.toString()}`
-    )
+      `/resources/${encodeURIComponent(resourceId)}/tree/root?${params.toString()}`,
+    ),
   );
   if (!res.ok) {
     throw new Error(`Failed to load tree root: ${res.status}`);
@@ -57,9 +57,7 @@ export async function createCurateFolders(apiHost, curateBasePath, parentPath, f
     } catch {
       // ignore
     }
-    throw new Error(
-      `Failed to create folders: ${res.status}${detail ? ` - ${detail}` : ""}`
-    );
+    throw new Error(`Failed to create folders: ${res.status}${detail ? ` - ${detail}` : ""}`);
   }
   return res.json();
 }
@@ -78,8 +76,8 @@ export async function fetchRepositoryResources(apiHost, repositoryId, page, page
   const res = await fetch(
     buildApiUrl(
       apiHost,
-      `/repositories/${encodeURIComponent(repositoryId)}/resources?${params.toString()}`
-    )
+      `/repositories/${encodeURIComponent(repositoryId)}/resources?${params.toString()}`,
+    ),
   );
   if (!res.ok) {
     throw new Error(`Failed to load resources: ${res.status}`);
@@ -92,7 +90,7 @@ export async function fetchResourceTreeChildren(
   resourceId,
   repositoryId,
   parentUri,
-  offset
+  offset,
 ) {
   const params = new URLSearchParams();
   if (repositoryId) {
@@ -105,8 +103,8 @@ export async function fetchResourceTreeChildren(
   const res = await fetch(
     buildApiUrl(
       apiHost,
-      `/resources/${encodeURIComponent(resourceId)}/tree/children?${params.toString()}`
-    )
+      `/resources/${encodeURIComponent(resourceId)}/tree/children?${params.toString()}`,
+    ),
   );
   if (!res.ok) {
     throw new Error(`Failed to load children: ${res.status}`);
@@ -114,14 +112,7 @@ export async function fetchResourceTreeChildren(
   return res.json();
 }
 
-export async function searchGlobal(
-  apiHost,
-  repositoryId,
-  q,
-  page,
-  pageSize,
-  options = {}
-) {
+export async function searchGlobal(apiHost, repositoryId, q, page, pageSize, options = {}) {
   const params = new URLSearchParams();
   if (repositoryId) {
     params.set("repository_id", repositoryId);
@@ -136,12 +127,7 @@ export async function searchGlobal(
     params.set("page_size", String(pageSize));
   }
 
-  const {
-    types,
-    levels,
-    ancestorUris,
-    filterTerms,
-  } = options || {};
+  const { types, levels, ancestorUris, filterTerms } = options || {};
 
   if (Array.isArray(types)) {
     for (const t of types) {
@@ -186,7 +172,7 @@ export async function searchResource(
   q,
   page,
   pageSize,
-  options = {}
+  options = {},
 ) {
   const params = new URLSearchParams();
   if (repositoryId) {
@@ -202,12 +188,7 @@ export async function searchResource(
     params.set("page_size", String(pageSize));
   }
 
-  const {
-    types,
-    levels,
-    ancestorUris,
-    filterTerms,
-  } = options || {};
+  const { types, levels, ancestorUris, filterTerms } = options || {};
 
   if (Array.isArray(types)) {
     for (const t of types) {
@@ -240,8 +221,8 @@ export async function searchResource(
   const res = await fetch(
     buildApiUrl(
       apiHost,
-      `/resources/${encodeURIComponent(resourceId)}/search?${params.toString()}`
-    )
+      `/resources/${encodeURIComponent(resourceId)}/search?${params.toString()}`,
+    ),
   );
   if (!res.ok) {
     throw new Error(`Failed to search resource: ${res.status}`);
@@ -258,10 +239,7 @@ export async function fetchResourcePaths(apiHost, resourceId, repositoryId, node
     params.append("node_id[]", id);
   }
   const res = await fetch(
-    buildApiUrl(
-      apiHost,
-      `/resources/${encodeURIComponent(resourceId)}/path?${params.toString()}`
-    )
+    buildApiUrl(apiHost, `/resources/${encodeURIComponent(resourceId)}/path?${params.toString()}`),
   );
   if (!res.ok) {
     throw new Error(`Failed to resolve paths: ${res.status}`);

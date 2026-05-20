@@ -3,13 +3,7 @@ import { LitElement, html, css } from "lit";
 import { when } from "lit/directives/when.js";
 import ApiService from "./api-service.js";
 
-import {
-  tuneIcon,
-  dbImportIcon,
-  historyIcon,
-  chartLineIcon,
-  sitemapIcon,
-} from "../utils/icons.js";
+import { tuneIcon, dbImportIcon, historyIcon, chartLineIcon, sitemapIcon } from "../utils/icons.js";
 
 // Material Web Components
 import "@material/web/tabs/tabs.js";
@@ -75,9 +69,7 @@ class PureIntegrationInterface extends LitElement {
 
     // Initialize standard properties
     this.activeTab = 0;
-    this.queryFilters = [
-      { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
-    ];
+    this.queryFilters = [{ field: "modified_date", condition: "since", value: "LAST_HARVEST" }];
     this.isEnabled = true;
     this.hasConfig = true;
     this.showVariablesDialog = false;
@@ -337,8 +329,7 @@ class PureIntegrationInterface extends LitElement {
       const response = await this.apiService.getMetadataMappingOverview();
 
       // Set the data exactly as the API returns it (but with Pure field names)
-      this.discoveredFields =
-        response.discovered_pure_fields || response.discovered_fields || [];
+      this.discoveredFields = response.discovered_pure_fields || response.discovered_fields || [];
       this.availableCurateTargets = response.available_curate_targets;
       this.fieldMappings = response.field_mappings;
       this.cachedRecordsCount = response.cached_records_count || 0;
@@ -362,9 +353,7 @@ class PureIntegrationInterface extends LitElement {
         // Valid configuration exists
         this.hasConfig = true;
         // Ensure we always have an array
-        this.queryFilters = Array.isArray(response.criteria_json)
-          ? response.criteria_json
-          : [];
+        this.queryFilters = Array.isArray(response.criteria_json) ? response.criteria_json : [];
         this.isEnabled = response.is_enabled;
       } else {
         // Fallback - treat as no config if response structure is unexpected
@@ -380,9 +369,7 @@ class PureIntegrationInterface extends LitElement {
 
       // Only show error if it's not a "no config found" type error
       if (!error.message.includes("No automated harvest configuration")) {
-        this._showError(
-          `Failed to load automated harvest configuration: ${error.message}`
-        );
+        this._showError(`Failed to load automated harvest configuration: ${error.message}`);
       }
     } finally {
       this.isLoadingConfig = false;
@@ -436,7 +423,7 @@ class PureIntegrationInterface extends LitElement {
       details.push(`Records Cached: ${result.records_cached}`);
     }
 
-    return `Harvest completed successfully!\n\n${details.join('\n')}\n\n${result.message || ''}`;
+    return `Harvest completed successfully!\n\n${details.join("\n")}\n\n${result.message || ""}`;
   }
 
   // Updated Event Handlers with API Integration
@@ -456,14 +443,12 @@ class PureIntegrationInterface extends LitElement {
             // Apply any additional updates (like condition reset)
             ...(additionalUpdates || {}),
           }
-        : filter
+        : filter,
     );
   }
 
   _handleRemoveQueryFilter(e) {
-    this.queryFilters = this.queryFilters.filter(
-      (_, i) => i !== e.detail.index
-    );
+    this.queryFilters = this.queryFilters.filter((_, i) => i !== e.detail.index);
   }
 
   _handleAddQueryFilter() {
@@ -511,25 +496,25 @@ class PureIntegrationInterface extends LitElement {
       this.isManualSearching = true; // Set immediately after guard
       this.manualSearchResults = [];
 
-      const response = await this.apiService.searchPureRecords(
-        this.manualSearchQuery
-      );
+      const response = await this.apiService.searchPureRecords(this.manualSearchQuery);
 
       this.manualSearchResults = response.records.map((record) => {
         const pureRecord = record.pure_record || record;
-        
+
         // Check for electronic versions
-        const hasElectronicVersions = pureRecord.electronicVersions && 
-          pureRecord.electronicVersions.length > 0;
-        
+        const hasElectronicVersions =
+          pureRecord.electronicVersions && pureRecord.electronicVersions.length > 0;
+
         // Check for published status - look for current publication status
-        const currentStatus = pureRecord.publicationStatuses?.find(status => status.current === true);
-        const isPublished = currentStatus?.publicationStatus?.uri?.includes('published') || false;
-        
+        const currentStatus = pureRecord.publicationStatuses?.find(
+          (status) => status.current === true,
+        );
+        const isPublished = currentStatus?.publicationStatus?.uri?.includes("published") || false;
+
         // Format modified date
         const rawModified = pureRecord.modifiedDate || record.modifiedDate || record.Date;
         const modified = rawModified ? this._formatDate(rawModified) : "Unknown";
-        
+
         return {
           id: record.uuid || record.ID,
           title: record.title || pureRecord.title?.value || `Record ${record.uuid || record.ID}`,
@@ -560,7 +545,7 @@ class PureIntegrationInterface extends LitElement {
     // Use record ID instead of index to handle filtered results correctly
     const recordId = e.detail.recordId;
     this.manualSearchResults = this.manualSearchResults.map((r) =>
-      r.id === recordId ? { ...r, selected: !r.selected } : r
+      r.id === recordId ? { ...r, selected: !r.selected } : r,
     );
   }
 
@@ -628,11 +613,11 @@ class PureIntegrationInterface extends LitElement {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "Unknown";
-      
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
     } catch (error) {
       return "Unknown";
@@ -654,9 +639,7 @@ class PureIntegrationInterface extends LitElement {
   }
 
   resetForm() {
-    this.queryFilters = [
-      { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
-    ];
+    this.queryFilters = [{ field: "modified_date", condition: "since", value: "LAST_HARVEST" }];
     this.isEnabled = true;
     this.hasConfig = true; // Reset to having config when resetting to defaults
   }
@@ -675,10 +658,7 @@ class PureIntegrationInterface extends LitElement {
               },
             ];
 
-      await this.apiService.saveAutomatedHarvestConfig(
-        criteriaJson,
-        this.isEnabled
-      );
+      await this.apiService.saveAutomatedHarvestConfig(criteriaJson, this.isEnabled);
 
       // After successful save, mark as having config
       this.hasConfig = true;
@@ -730,10 +710,7 @@ class PureIntegrationInterface extends LitElement {
     try {
       this.isManualHarvesting = true; // Set immediately after guard
 
-      const result = await this.apiService.harvestByIds(
-        ids,
-        "Manual Search Selection"
-      );
+      const result = await this.apiService.harvestByIds(ids, "Manual Search Selection");
 
       this._showSuccess(this._formatHarvestResultMessage(result));
 
@@ -756,10 +733,7 @@ class PureIntegrationInterface extends LitElement {
   render() {
     return html`
       <div class="content-wrapper">
-        <md-tabs
-          @change=${this.handleTabChange}
-          .activeTabIndex=${this.activeTab}
-        >
+        <md-tabs @change=${this.handleTabChange} .activeTabIndex=${this.activeTab}>
           <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
           <md-primary-tab>${historyIcon} History</md-primary-tab>
           <md-primary-tab>${chartLineIcon} Analytics</md-primary-tab>
@@ -779,15 +753,13 @@ class PureIntegrationInterface extends LitElement {
                 .isManualHarvesting=${this.isManualHarvesting}
                 @set-manual-harvest-mode=${this._handleSetManualHarvestMode}
                 @update-manual-ids=${this._handleUpdateManualIds}
-                @update-manual-search-query=${this
-                  ._handleUpdateManualSearchQuery}
+                @update-manual-search-query=${this._handleUpdateManualSearchQuery}
                 @run-manual-search=${this._handleRunManualSearch}
                 @toggle-select-all=${this._handleToggleSelectAll}
                 @toggle-record-selection=${this._handleToggleRecordSelection}
                 @run-harvest-ids=${this._handleRunHarvestIds}
-                @run-harvest-selected-records=${this
-                  ._handleRunHarvestSelectedRecords}
-              ></manual-harvest-tab-content>`
+                @run-harvest-selected-records=${this._handleRunHarvestSelectedRecords}
+              ></manual-harvest-tab-content>`,
           )}
           ${when(
             this.activeTab === 1,
@@ -798,7 +770,7 @@ class PureIntegrationInterface extends LitElement {
                 .isLoading=${this.isLoadingHistory}
                 @toggle-history-expansion=${this._handleToggleHistoryExpansion}
                 @refresh-history=${() => this._refreshHarvestHistory()}
-              ></history-tab-content>`
+              ></history-tab-content>`,
           )}
           ${when(
             this.activeTab === 2,
@@ -808,7 +780,7 @@ class PureIntegrationInterface extends LitElement {
                 .selectedChart=${this.selectedChart}
                 .apiService=${this.apiService}
                 @select-chart-type=${this._handleSelectChartType}
-              ></analytics-tab-content>`
+              ></analytics-tab-content>`,
           )}
           ${when(
             this.activeTab === 3,
@@ -824,22 +796,17 @@ class PureIntegrationInterface extends LitElement {
                 @refresh-cached-count=${this._handleRefreshCachedCount}
                 @show-error=${this._handleShowError}
                 @show-success=${this._handleShowSuccess}
-              ></metadata-mapping-tab-content>`
+              ></metadata-mapping-tab-content>`,
           )}
         </div>
       </div>
 
       <!-- Success Dialog -->
-      <md-dialog
-        ?open=${this.showSuccessDialog}
-        @closed=${() => (this.showSuccessDialog = false)}
-      >
+      <md-dialog ?open=${this.showSuccessDialog} @closed=${() => (this.showSuccessDialog = false)}>
         <div slot="headline">Success</div>
         <div slot="content" style="white-space: pre-line;">${this.successDialogMessage}</div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showSuccessDialog = false)}
-            >Close</md-text-button
-          >
+          <md-text-button @click=${() => (this.showSuccessDialog = false)}>Close</md-text-button>
         </div>
       </md-dialog>
 
@@ -851,8 +818,8 @@ class PureIntegrationInterface extends LitElement {
         <div slot="headline">Dynamic Date Variables</div>
         <div slot="content" class="variables-dialog-content">
           <p>
-            You can use the following dynamic variables in the 'Value' field for
-            any date-based criteria.
+            You can use the following dynamic variables in the 'Value' field for any date-based
+            criteria.
           </p>
           <dl>
             <dt>LAST_HARVEST</dt>
@@ -866,9 +833,7 @@ class PureIntegrationInterface extends LitElement {
           </dl>
         </div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showVariablesDialog = false)}
-            >Got it</md-text-button
-          >
+          <md-text-button @click=${() => (this.showVariablesDialog = false)}>Got it</md-text-button>
         </div>
       </md-dialog>
 

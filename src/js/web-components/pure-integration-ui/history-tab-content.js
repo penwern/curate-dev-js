@@ -72,23 +72,20 @@ class HarvestHistoryItemDetails extends LitElement {
           () => html`
             <dt>Records Cached</dt>
             <dd>${this.harvest.records_cached || 0}</dd>
-          `
+          `,
         )}
         ${when(
           !this.harvest.success,
           () => html`
             <dt>Error Detail</dt>
             <dd class="failed">${this.harvest.error}</dd>
-          `
+          `,
         )}
       </dl>
     `;
   }
 }
-customElements.define(
-  "harvest-history-item-details",
-  HarvestHistoryItemDetails
-);
+customElements.define("harvest-history-item-details", HarvestHistoryItemDetails);
 
 class HarvestHistoryItem extends LitElement {
   static properties = {
@@ -148,7 +145,7 @@ class HarvestHistoryItem extends LitElement {
         detail: { id: this.harvest.id },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -164,9 +161,9 @@ class HarvestHistoryItem extends LitElement {
             <span>
               ${this.harvest.success
                 ? `${this.harvest.records_successful || this.harvest.records || 0} successful`
-                : `Error: ${this.harvest.error}`}${this.harvest.records_cached > 0 
-                  ? `, ${this.harvest.records_cached} cached`
-                  : ''}
+                : `Error: ${this.harvest.error}`}${this.harvest.records_cached > 0
+                ? `, ${this.harvest.records_cached} cached`
+                : ""}
             </span>
             <span>Duration: ${this.harvest.duration}</span>
           </div>
@@ -179,7 +176,7 @@ class HarvestHistoryItem extends LitElement {
           () =>
             html`<harvest-history-item-details
               .harvest=${this.harvest}
-            ></harvest-history-item-details>`
+            ></harvest-history-item-details>`,
         )}
       </div>
     `;
@@ -243,7 +240,7 @@ class HistoryTabContent extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -252,7 +249,7 @@ class HistoryTabContent extends LitElement {
       new CustomEvent("refresh-history", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -270,20 +267,13 @@ class HistoryTabContent extends LitElement {
       return html`
         <div class="history-header">
           <h3>Recent Harvests</h3>
-          <md-outlined-button
-            class="refresh-button"
-            @click=${this._handleRefresh}
-          >
-            ${restartIcon}
-            Refresh
+          <md-outlined-button class="refresh-button" @click=${this._handleRefresh}>
+            ${restartIcon} Refresh
           </md-outlined-button>
         </div>
         <div class="empty-state">
           <h4>No harvest history found</h4>
-          <p>
-            Run your first harvest using the Manual Harvest tab to see results
-            here.
-          </p>
+          <p>Run your first harvest using the Manual Harvest tab to see results here.</p>
         </div>
       `;
     }
@@ -291,12 +281,8 @@ class HistoryTabContent extends LitElement {
     return html`
       <div class="history-header">
         <h3>Recent Harvests (${this.recentHarvests.length})</h3>
-        <md-outlined-button
-          class="refresh-button"
-          @click=${this._handleRefresh}
-        >
-          ${restartIcon}
-          Refresh
+        <md-outlined-button class="refresh-button" @click=${this._handleRefresh}>
+          ${restartIcon} Refresh
         </md-outlined-button>
       </div>
 
@@ -310,7 +296,7 @@ class HistoryTabContent extends LitElement {
               .isExpanded=${this.expandedHistoryId === harvest.id}
               @toggle-item-expansion=${this._handleToggleExpansion}
             ></harvest-history-item>
-          `
+          `,
         )}
       </div>
     `;

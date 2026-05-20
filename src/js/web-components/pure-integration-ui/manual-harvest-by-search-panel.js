@@ -110,16 +110,16 @@ class SearchResultsTable extends LitElement {
 
   _toggleAll(e) {
     // Pass the IDs of currently filtered records so main component can update only those
-    const filteredRecordIds = this.searchResults.map(record => record.id);
+    const filteredRecordIds = this.searchResults.map((record) => record.id);
     this.dispatchEvent(
       new CustomEvent("toggle-select-all-results", {
         detail: {
           checked: e.target.checked,
-          recordIds: filteredRecordIds
+          recordIds: filteredRecordIds,
         },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -131,17 +131,13 @@ class SearchResultsTable extends LitElement {
         detail: { recordId: record.id, index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   render() {
     if (!this.searchResults || this.searchResults.length === 0) {
-      return html`
-        <div class="no-results">
-          No records found. Try a different search term.
-        </div>
-      `;
+      return html` <div class="no-results">No records found. Try a different search term.</div> `;
     }
 
     return html`
@@ -162,15 +158,13 @@ class SearchResultsTable extends LitElement {
                 aria-labelledby="title-${record.id}-${index}"
               ></md-checkbox>
               <div>
-                <div class="record-title" id="title-${record.id}-${index}">
-                  ${record.title}
-                </div>
+                <div class="record-title" id="title-${record.id}-${index}">${record.title}</div>
                 <div class="record-collection">${record.collection}</div>
               </div>
               <div class="record-id" title="${record.id}">${record.id}</div>
               <div class="record-meta">${record.modified}</div>
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -192,7 +186,7 @@ class ManualHarvestBySearchPanel extends LitElement {
   constructor() {
     super();
     this.showFilterWarning = false;
-    this.warningMessage = '';
+    this.warningMessage = "";
     this.filteredResults = [];
   }
 
@@ -211,11 +205,7 @@ class ManualHarvestBySearchPanel extends LitElement {
 
   get areSomeSelected() {
     const selectedCount = this.selectedManualRecords.length;
-    return (
-      this.filteredResults &&
-      selectedCount > 0 &&
-      selectedCount < this.filteredResults.length
-    );
+    return this.filteredResults && selectedCount > 0 && selectedCount < this.filteredResults.length;
   }
 
   _applyFilters() {
@@ -229,7 +219,7 @@ class ManualHarvestBySearchPanel extends LitElement {
 
   updated(changedProperties) {
     super.updated(changedProperties);
-    if (changedProperties.has('manualSearchResults')) {
+    if (changedProperties.has("manualSearchResults")) {
       this._applyFilters();
     }
   }
@@ -344,9 +334,7 @@ class ManualHarvestBySearchPanel extends LitElement {
   `;
 
   _dispatch(eventName, detail = {}) {
-    this.dispatchEvent(
-      new CustomEvent(eventName, { detail, bubbles: true, composed: true })
-    );
+    this.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true, composed: true }));
   }
 
   _handleSearchInput(e) {
@@ -372,7 +360,6 @@ class ManualHarvestBySearchPanel extends LitElement {
     this._dispatch("run-harvest-selected-records");
   }
 
-
   _closeWarningDialog() {
     this.showFilterWarning = false;
   }
@@ -395,18 +382,12 @@ class ManualHarvestBySearchPanel extends LitElement {
           ></md-outlined-text-field>
           <md-filled-button
             @click=${this._runSearch}
-            ?disabled=${!this.manualSearchQuery?.searchString?.trim() ||
-            this.isManualSearching}
+            ?disabled=${!this.manualSearchQuery?.searchString?.trim() || this.isManualSearching}
           >
-            <span>
-              ${searchIcon}
-              ${this.isManualSearching ? "Searching..." : "Search"}
-            </span>
+            <span> ${searchIcon} ${this.isManualSearching ? "Searching..." : "Search"} </span>
           </md-filled-button>
         </div>
-
       </div>
-
 
       ${when(
         this.isManualSearching,
@@ -417,17 +398,16 @@ class ManualHarvestBySearchPanel extends LitElement {
           >
             Searching database...
           </p>
-        `
+        `,
       )}
       ${when(
         hasFilteredResults && !this.isManualSearching,
         () => html`
           <div class="search-results-container">
             <h4 class="results-header">
-              ${hasResults && hasFilteredResults 
+              ${hasResults && hasFilteredResults
                 ? `Showing ${this.filteredResults.length} filtered records`
-                : `Found ${this.filteredResults.length} record${this.filteredResults.length === 1 ? "" : "s"}`
-              }
+                : `Found ${this.filteredResults.length} record${this.filteredResults.length === 1 ? "" : "s"}`}
             </h4>
             <div class="results-container">
               <search-results-table
@@ -443,28 +423,20 @@ class ManualHarvestBySearchPanel extends LitElement {
               ></search-results-table>
             </div>
           </div>
-        `
+        `,
       )}
       ${when(
         selectedCount > 0,
         () => html`
           <div class="selection-summary-bar">
-            <span>
-              ${selectedCount} record${selectedCount === 1 ? "" : "s"} selected
-            </span>
-            <md-filled-button
-              @click=${this._runHarvest}
-              ?disabled=${this.isManualHarvesting}
-            >
+            <span> ${selectedCount} record${selectedCount === 1 ? "" : "s"} selected </span>
+            <md-filled-button @click=${this._runHarvest} ?disabled=${this.isManualHarvesting}>
               <span>
-                ${playIcon}
-                ${this.isManualHarvesting
-                  ? "Harvesting..."
-                  : "Harvest Selected"}
+                ${playIcon} ${this.isManualHarvesting ? "Harvesting..." : "Harvest Selected"}
               </span>
             </md-filled-button>
           </div>
-        `
+        `,
       )}
 
       <!-- Filter Warning Dialog -->
@@ -475,19 +447,14 @@ class ManualHarvestBySearchPanel extends LitElement {
             <div slot="headline">Filter Warning</div>
             <div slot="content">${this.warningMessage}</div>
             <div slot="actions">
-              <md-text-button @click=${this._closeWarningDialog}>
-                Got it
-              </md-text-button>
+              <md-text-button @click=${this._closeWarningDialog}> Got it </md-text-button>
             </div>
           </md-dialog>
-        `
+        `,
       )}
     `;
   }
 }
 
-customElements.define(
-  "manual-harvest-by-search-panel",
-  ManualHarvestBySearchPanel
-);
+customElements.define("manual-harvest-by-search-panel", ManualHarvestBySearchPanel);
 export { ManualHarvestBySearchPanel };

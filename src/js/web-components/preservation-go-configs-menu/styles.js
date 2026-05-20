@@ -42,8 +42,9 @@ export const styles = css`
     padding: 24px;
     background: var(--md-sys-color-secondary-container);
     border-radius: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-                0 4px 8px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      0 4px 8px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
     position: relative;
     overflow: hidden;
@@ -241,16 +242,18 @@ export const styles = css`
     border-radius: 16px;
     padding: 20px;
     cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                background 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      background 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
     animation: slideIn 0.4s ease-out forwards;
     opacity: 0;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-                0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      0 1px 2px rgba(0, 0, 0, 0.24);
     flex-shrink: 0;
   }
 
@@ -273,8 +276,9 @@ export const styles = css`
     background: var(--md-sys-color-secondary-container, #e8def8);
     border-color: var(--md-sys-color-secondary, #625b71);
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15),
-                0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.15),
+      0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   .config-item:hover::before {

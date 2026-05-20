@@ -1,9 +1,15 @@
-import { LitElement, html, css } from 'lit';
-import './email-header.js';
-import './email-body.js';
-import './attachment-list.js';
-import { emailOutlineIcon, chevronDownIcon, chevronRightIcon, attachmentIcon, folderIcon } from "../../utils/icons.js";
-import { formatEmailDate } from '../utils/dateFormat.js';
+import { LitElement, html, css } from "lit";
+import "./email-header.js";
+import "./email-body.js";
+import "./attachment-list.js";
+import {
+  emailOutlineIcon,
+  chevronDownIcon,
+  chevronRightIcon,
+  attachmentIcon,
+  folderIcon,
+} from "../../utils/icons.js";
+import { formatEmailDate } from "../utils/dateFormat.js";
 
 export class EmailDetail extends LitElement {
   static properties = {
@@ -12,7 +18,7 @@ export class EmailDetail extends LitElement {
     threadEmails: { type: Array },
     threadBodies: { type: Object },
     selectedEmailId: { type: String },
-    collapsedMessages: { type: Set, state: true }
+    collapsedMessages: { type: Set, state: true },
   };
 
   constructor() {
@@ -105,7 +111,9 @@ export class EmailDetail extends LitElement {
       border-radius: 18px;
       overflow: hidden;
       background: var(--md-sys-color-surface);
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
     }
 
     .thread-message.highlighted {
@@ -125,7 +133,9 @@ export class EmailDetail extends LitElement {
     }
 
     .thread-message.thread-root .email-card {
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
     }
 
     .thread-message.thread-root.highlighted .email-card {
@@ -285,7 +295,8 @@ export class EmailDetail extends LitElement {
       color: var(--md-sys-color-on-surface);
       font-size: 12px;
       font-weight: 500;
-    }attachment-list {
+    }
+    attachment-list {
       margin-top: 4px;
     }
 
@@ -304,8 +315,8 @@ export class EmailDetail extends LitElement {
 
       .thread-message-body {
         padding: 18px 20px 20px;
-      }      
-      .thread-meta-panel {       
+      }
+      .thread-meta-panel {
         margin: 14px 14px 14px;
       }
     }
@@ -323,18 +334,16 @@ export class EmailDetail extends LitElement {
 
   _formatRecipient(recipient) {
     if (!recipient) {
-      return '';
+      return "";
     }
     if (recipient.name && recipient.email) {
       return `${recipient.name} <${recipient.email}>`;
     }
-    return recipient.email || recipient.name || '';
+    return recipient.email || recipient.name || "";
   }
 
   _renderRecipientChips(recipients) {
-    const safeRecipients = Array.isArray(recipients)
-      ? recipients.filter(Boolean)
-      : [];
+    const safeRecipients = Array.isArray(recipients) ? recipients.filter(Boolean) : [];
 
     if (safeRecipients.length === 0) {
       return null;
@@ -342,7 +351,9 @@ export class EmailDetail extends LitElement {
 
     return html`
       <div class="thread-meta-chips">
-        ${safeRecipients.map(recipient => html`<span class="thread-chip">${this._formatRecipient(recipient)}</span>`)}
+        ${safeRecipients.map(
+          (recipient) => html`<span class="thread-chip">${this._formatRecipient(recipient)}</span>`,
+        )}
       </div>
     `;
   }
@@ -367,13 +378,13 @@ export class EmailDetail extends LitElement {
       `);
     };
 
-    addRow('To', email.to);
-    addRow('Cc', email.cc);
-    addRow('Bcc', email.bcc);
+    addRow("To", email.to);
+    addRow("Cc", email.cc);
+    addRow("Bcc", email.bcc);
 
     if (email.replyTo) {
       const replyRecipients = Array.isArray(email.replyTo) ? email.replyTo : [email.replyTo];
-      addRow('Reply', replyRecipients);
+      addRow("Reply", replyRecipients);
     }
 
     if (email.pstFolder || email.pstFolderDisplay) {
@@ -391,37 +402,42 @@ export class EmailDetail extends LitElement {
       `);
     }
 
-    return rows.length > 0
-      ? html`<div class="thread-meta-panel">${rows}</div>`
-      : null;
+    return rows.length > 0 ? html`<div class="thread-meta-panel">${rows}</div>` : null;
   }
   _formatRecipients(recipients) {
     if (!recipients || recipients.length === 0) {
-      return 'No recipients';
+      return "No recipients";
     }
-    return recipients.map(recipient => recipient.name ? `${recipient.name} <${recipient.email}>` : recipient.email).join(', ');
+    return recipients
+      .map((recipient) =>
+        recipient.name ? `${recipient.name} <${recipient.email}>` : recipient.email,
+      )
+      .join(", ");
   }
 
   _getTextPreview(body) {
     if (!body) {
-      return '';
+      return "";
     }
     if (body.text) {
       return body.text.trim().slice(0, 160);
     }
     if (body.html) {
-      const stripped = body.html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const stripped = body.html
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
       return stripped.slice(0, 160);
     }
-    return '';
+    return "";
   }
 
   updated(changedProperties) {
-    if (changedProperties.has('threadEmails')) {
+    if (changedProperties.has("threadEmails")) {
       this._lastHighlightedId = null;
     }
 
-    if (changedProperties.has('selectedEmailId')) {
+    if (changedProperties.has("selectedEmailId")) {
       this._scrollSelectedMessageIntoView();
     }
   }
@@ -433,10 +449,10 @@ export class EmailDetail extends LitElement {
 
     this.updateComplete.then(() => {
       const target = this.renderRoot?.querySelector(
-        `[data-thread-message="${this.selectedEmailId}"]`
+        `[data-thread-message="${this.selectedEmailId}"]`,
       );
-      if (target && typeof target.scrollIntoView === 'function') {
-        target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (target && typeof target.scrollIntoView === "function") {
+        target.scrollIntoView({ block: "nearest", behavior: "smooth" });
         this._lastHighlightedId = this.selectedEmailId;
       }
     });
@@ -463,7 +479,7 @@ export class EmailDetail extends LitElement {
             ${this.threadEmails.map((threadEmail, index) => {
               const body = this.threadBodies ? this.threadBodies[threadEmail.id] : null;
               const regularAttachments = threadEmail.attachments
-                ? threadEmail.attachments.filter(att => !att.inline)
+                ? threadEmail.attachments.filter((att) => !att.inline)
                 : [];
               const isSelected = threadEmail.id === this.selectedEmailId;
               const isCollapsed = this.collapsedMessages.has(threadEmail.id);
@@ -472,13 +488,19 @@ export class EmailDetail extends LitElement {
               if (isCollapsed) {
                 return html`
                   <article
-                    class="thread-message ${isSelected ? 'highlighted' : ''}"
+                    class="thread-message ${isSelected ? "highlighted" : ""}"
                     data-thread-message=${threadEmail.id}
                   >
-                    <button class="message-toggle" type="button" @click=${() => this._toggleMessageCollapse(threadEmail.id)}>
+                    <button
+                      class="message-toggle"
+                      type="button"
+                      @click=${() => this._toggleMessageCollapse(threadEmail.id)}
+                    >
                       <span class="chevron">${chevronRightIcon}</span>
                       <div class="toggle-content">
-                        <span class="toggle-from">${threadEmail.from.name || threadEmail.from.email}</span>
+                        <span class="toggle-from"
+                          >${threadEmail.from.name || threadEmail.from.email}</span
+                        >
                         <div class="toggle-meta">
                           <span>To: ${this._formatRecipients(threadEmail.to)}</span>
                           <span>${formatEmailDate(threadEmail.date)}</span>
@@ -486,7 +508,9 @@ export class EmailDetail extends LitElement {
                         <div class="toggle-preview">${this._getTextPreview(body)}</div>
                       </div>
                       <div class="toggle-indicators">
-                        ${regularAttachments.length > 0 ? html`<span class="icon">${attachmentIcon}</span>` : ''}
+                        ${regularAttachments.length > 0
+                          ? html`<span class="icon">${attachmentIcon}</span>`
+                          : ""}
                       </div>
                     </button>
                   </article>
@@ -495,49 +519,69 @@ export class EmailDetail extends LitElement {
 
               return html`
                 <article
-                  class="thread-message ${isSelected ? 'highlighted' : ''} ${isFirst ? 'thread-root' : ''}"
+                  class="thread-message ${isSelected ? "highlighted" : ""} ${isFirst
+                    ? "thread-root"
+                    : ""}"
                   data-thread-message=${threadEmail.id}
                 >
-                  ${isFirst ? html`
-                    <div class="email-card">
-                      <email-header .email=${threadEmail}></email-header>
-                      ${regularAttachments.length > 0 ? html`
-                        <attachment-list .attachments=${regularAttachments}></attachment-list>
-                      ` : ''}
-                      <email-body
-                        .htmlContent=${body?.html || ''}
-                        .textContent=${body?.text || ''}
-                        .attachments=${threadEmail.attachments || []}
-                        .hasExternalImages=${threadEmail.hasExternalImages || false}
-                      ></email-body>
-                    </div>
-                  ` : html`
-                    <button class="message-toggle" type="button" @click=${() => this._toggleMessageCollapse(threadEmail.id)}>
-                      <span class="chevron">${chevronDownIcon}</span>
-                      <div class="toggle-content">
-                        <span class="toggle-from">${threadEmail.from.name || threadEmail.from.email}</span>
-                        <div class="toggle-meta">
-                          <span>To: ${this._formatRecipients(threadEmail.to)}</span>
-                          <span>${formatEmailDate(threadEmail.date)}</span>
+                  ${isFirst
+                    ? html`
+                        <div class="email-card">
+                          <email-header .email=${threadEmail}></email-header>
+                          ${regularAttachments.length > 0
+                            ? html`
+                                <attachment-list
+                                  .attachments=${regularAttachments}
+                                ></attachment-list>
+                              `
+                            : ""}
+                          <email-body
+                            .htmlContent=${body?.html || ""}
+                            .textContent=${body?.text || ""}
+                            .attachments=${threadEmail.attachments || []}
+                            .hasExternalImages=${threadEmail.hasExternalImages || false}
+                          ></email-body>
                         </div>
-                      </div>
-                      <div class="toggle-indicators">
-                        ${regularAttachments.length > 0 ? html`<span class="icon">${attachmentIcon}</span>` : ''}
-                      </div>
-                    </button>
-                    ${this._renderThreadMeta(threadEmail)}
-                    <div class="thread-message-body">
-                      ${regularAttachments.length > 0 ? html`
-                        <attachment-list .attachments=${regularAttachments}></attachment-list>
-                      ` : ''}
-                      <email-body
-                        .htmlContent=${body?.html || ''}
-                        .textContent=${body?.text || ''}
-                        .attachments=${threadEmail.attachments || []}
-                        .hasExternalImages=${threadEmail.hasExternalImages || false}
-                      ></email-body>
-                    </div>
-                  `}
+                      `
+                    : html`
+                        <button
+                          class="message-toggle"
+                          type="button"
+                          @click=${() => this._toggleMessageCollapse(threadEmail.id)}
+                        >
+                          <span class="chevron">${chevronDownIcon}</span>
+                          <div class="toggle-content">
+                            <span class="toggle-from"
+                              >${threadEmail.from.name || threadEmail.from.email}</span
+                            >
+                            <div class="toggle-meta">
+                              <span>To: ${this._formatRecipients(threadEmail.to)}</span>
+                              <span>${formatEmailDate(threadEmail.date)}</span>
+                            </div>
+                          </div>
+                          <div class="toggle-indicators">
+                            ${regularAttachments.length > 0
+                              ? html`<span class="icon">${attachmentIcon}</span>`
+                              : ""}
+                          </div>
+                        </button>
+                        ${this._renderThreadMeta(threadEmail)}
+                        <div class="thread-message-body">
+                          ${regularAttachments.length > 0
+                            ? html`
+                                <attachment-list
+                                  .attachments=${regularAttachments}
+                                ></attachment-list>
+                              `
+                            : ""}
+                          <email-body
+                            .htmlContent=${body?.html || ""}
+                            .textContent=${body?.text || ""}
+                            .attachments=${threadEmail.attachments || []}
+                            .hasExternalImages=${threadEmail.hasExternalImages || false}
+                          ></email-body>
+                        </div>
+                      `}
                 </article>
               `;
             })}
@@ -547,19 +591,19 @@ export class EmailDetail extends LitElement {
     }
 
     const regularAttachments = this.email.attachments
-      ? this.email.attachments.filter(att => !att.inline)
+      ? this.email.attachments.filter((att) => !att.inline)
       : [];
 
     return html`
       <div class="email-content">
         <div class="email-card">
           <email-header .email=${this.email}></email-header>
-          ${regularAttachments.length > 0 ? html`
-            <attachment-list .attachments=${regularAttachments}></attachment-list>
-          ` : ''}
+          ${regularAttachments.length > 0
+            ? html` <attachment-list .attachments=${regularAttachments}></attachment-list> `
+            : ""}
           <email-body
-            .htmlContent=${this.emailBody?.html || ''}
-            .textContent=${this.emailBody?.text || ''}
+            .htmlContent=${this.emailBody?.html || ""}
+            .textContent=${this.emailBody?.text || ""}
             .attachments=${this.email.attachments || []}
             .hasExternalImages=${this.email.hasExternalImages || false}
           ></email-body>
@@ -569,4 +613,4 @@ export class EmailDetail extends LitElement {
   }
 }
 
-customElements.define('email-detail', EmailDetail);
+customElements.define("email-detail", EmailDetail);

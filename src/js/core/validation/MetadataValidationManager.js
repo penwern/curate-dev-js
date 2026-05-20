@@ -175,24 +175,20 @@ class MetadataValidationManager {
     }
 
     // Remove inline error elements we injected.
-    document
-      .querySelectorAll(".curate-validation-error")
-      .forEach((el) => el.remove());
+    document.querySelectorAll(".curate-validation-error").forEach((el) => el.remove());
 
     // Clear aria flags and described-by references to our error ids.
-    document
-      .querySelectorAll('[aria-describedby*="curate-validation-error-"]')
-      .forEach((el) => {
-        el.removeAttribute("aria-invalid");
-        const describedBy = el.getAttribute("aria-describedby");
-        if (!describedBy) return;
-        const next = describedBy
-          .split(/\s+/)
-          .filter((id) => id && !id.startsWith("curate-validation-error-"))
-          .join(" ");
-        if (next) el.setAttribute("aria-describedby", next);
-        else el.removeAttribute("aria-describedby");
-      });
+    document.querySelectorAll('[aria-describedby*="curate-validation-error-"]').forEach((el) => {
+      el.removeAttribute("aria-invalid");
+      const describedBy = el.getAttribute("aria-describedby");
+      if (!describedBy) return;
+      const next = describedBy
+        .split(/\s+/)
+        .filter((id) => id && !id.startsWith("curate-validation-error-"))
+        .join(" ");
+      if (next) el.setAttribute("aria-describedby", next);
+      else el.removeAttribute("aria-describedby");
+    });
 
     this.errors.clear();
     this._updateSaveIndicator();
@@ -224,10 +220,7 @@ class MetadataValidationManager {
     if (!validator.watchFields || !(validator.watchFields instanceof Set)) {
       throw new Error("Validator must have a watchFields Set");
     }
-    if (
-      !validator.validatedFields ||
-      !(validator.validatedFields instanceof Set)
-    ) {
+    if (!validator.validatedFields || !(validator.validatedFields instanceof Set)) {
       throw new Error("Validator must have a validatedFields Set");
     }
     if (typeof validator.validate !== "function") {
@@ -255,15 +248,9 @@ class MetadataValidationManager {
       this._scheduleValidation();
     };
 
-    this._handlerIds.push(
-      this._delegator.addEventListener(this._selector, "input", handler)
-    );
-    this._handlerIds.push(
-      this._delegator.addEventListener(this._selector, "change", handler)
-    );
-    this._handlerIds.push(
-      this._delegator.addEventListener(this._selector, "click", handler)
-    );
+    this._handlerIds.push(this._delegator.addEventListener(this._selector, "input", handler));
+    this._handlerIds.push(this._delegator.addEventListener(this._selector, "change", handler));
+    this._handlerIds.push(this._delegator.addEventListener(this._selector, "click", handler));
 
     if (!this._mutationObserver && typeof MutationObserver !== "undefined") {
       this._mutationObserver = new MutationObserver((mutations) => {
@@ -354,32 +341,30 @@ class MetadataValidationManager {
     const values = {};
     const elementsByField = new Map();
 
-    document
-      .querySelectorAll(this._selector)
-      .forEach((element) => {
-        const fieldName = extractFieldNameFromId(element.id);
-        if (!fieldName) return;
+    document.querySelectorAll(this._selector).forEach((element) => {
+      const fieldName = extractFieldNameFromId(element.id);
+      if (!fieldName) return;
 
-        let value = "";
-        if (element.matches("input,select,textarea")) {
-          value = readElementValue(element);
-        } else {
-          value = readMaterialDropdownValue(element);
-        }
+      let value = "";
+      if (element.matches("input,select,textarea")) {
+        value = readElementValue(element);
+      } else {
+        value = readMaterialDropdownValue(element);
+      }
 
-        this._cachedValues.set(fieldName, value);
-        const existing = values[fieldName];
+      this._cachedValues.set(fieldName, value);
+      const existing = values[fieldName];
 
-        if (existing === undefined) {
-          values[fieldName] = value;
-        } else if (!isFilled(existing) && isFilled(value)) {
-          values[fieldName] = value;
-        }
+      if (existing === undefined) {
+        values[fieldName] = value;
+      } else if (!isFilled(existing) && isFilled(value)) {
+        values[fieldName] = value;
+      }
 
-        if (!elementsByField.has(fieldName)) {
-          elementsByField.set(fieldName, element);
-        }
-      });
+      if (!elementsByField.has(fieldName)) {
+        elementsByField.set(fieldName, element);
+      }
+    });
 
     return { values, elementsByField };
   }
@@ -398,7 +383,7 @@ class MetadataValidationManager {
 
     for (const validator of this.validators) {
       const hasAnyKnownField = Array.from(validator.watchFields).some(
-        (f) => presentFields.has(f) || this._cachedValues.has(f)
+        (f) => presentFields.has(f) || this._cachedValues.has(f),
       );
 
       if (!hasAnyKnownField) {
@@ -417,7 +402,7 @@ class MetadataValidationManager {
               presentFields,
               touchedFields: this._touchedFields,
               cachedValues: this._cachedValues,
-            })
+            }),
           );
         } catch (error) {
           console.error(`[CurateValidation] shouldValidate failed for ${validator.id}:`, error);
@@ -557,7 +542,7 @@ class MetadataValidationManager {
           `<li style="margin: 0 0 6px 0; line-height: 1.35;">` +
           `<div style="font-weight: 600;">${escapeHtml(e.field)}</div>` +
           `<div style="margin-top: 2px;">${escapeHtml(e.message)}</div>` +
-          `</li>`
+          `</li>`,
       )
       .join("")}</ul>`;
 
@@ -573,7 +558,7 @@ class MetadataValidationManager {
           minimizable: false,
           id: "curate-metadata-validation-errors",
         },
-        {}
+        {},
       );
       popup.fire();
       return;

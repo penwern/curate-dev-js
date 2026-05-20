@@ -111,9 +111,7 @@ class AtoMSearchInterface extends LitElement {
   }
 
   _updateCriterion(id, field, value) {
-    this.criteria = this.criteria.map((c) =>
-      c.id === id ? { ...c, [field]: value } : c
-    );
+    this.criteria = this.criteria.map((c) => (c.id === id ? { ...c, [field]: value } : c));
   }
 
   // ── Search ──
@@ -125,11 +123,7 @@ class AtoMSearchInterface extends LitElement {
     this.hasSearched = true;
 
     try {
-      const data = await this.api.search(
-        this.criteria,
-        page,
-        this.resultsPerPage
-      );
+      const data = await this.api.search(this.criteria, page, this.resultsPerPage);
       this.results = data.results;
       this.totalResults = data.total;
     } catch (e) {
@@ -157,13 +151,8 @@ class AtoMSearchInterface extends LitElement {
     }
 
     try {
-      await this.api.linkDescription(
-        this.node._metadata.get("uuid"),
-        slug
-      );
-      this.dispatchEvent(
-        new CustomEvent("description-linked", { detail: slug })
-      );
+      await this.api.linkDescription(this.node._metadata.get("uuid"), slug);
+      this.dispatchEvent(new CustomEvent("description-linked", { detail: slug }));
       this.remove();
     } catch (e) {
       console.error("Link error:", e);
@@ -228,9 +217,8 @@ class AtoMSearchInterface extends LitElement {
     return html`
       ${this._renderInfoSection()}
       <div class="search-panel">
-        ${this._renderPanelHeader()} ${this._renderCriteria()}
-        ${this._renderActions()} ${this._renderError()}
-        ${this._renderLoading()} ${this._renderResults()}
+        ${this._renderPanelHeader()} ${this._renderCriteria()} ${this._renderActions()}
+        ${this._renderError()} ${this._renderLoading()} ${this._renderResults()}
         ${this._renderPagination()}
       </div>
     `;
@@ -248,21 +236,20 @@ class AtoMSearchInterface extends LitElement {
         </div>
         <div class="info-body ${this.infoExpanded ? "open" : ""}">
           <p>
-            Search for archival descriptions in your AtoM instance using one or
-            more search criteria. Combine criteria with
-            <span class="info-highlight">AND</span>,
-            <span class="info-highlight">OR</span>, or
+            Search for archival descriptions in your AtoM instance using one or more search
+            criteria. Combine criteria with
+            <span class="info-highlight">AND</span>, <span class="info-highlight">OR</span>, or
             <span class="info-highlight">NOT</span> operators.
           </p>
           <p>
             Once you find the right description, click
-            <span class="info-highlight">Link</span> to associate it with
-            your selected item in Curate.
+            <span class="info-highlight">Link</span> to associate it with your selected item in
+            Curate.
           </p>
           <p>
-            Only the <span class="info-highlight">top-level</span> linked
-            description is used when building your dissemination package. AtoM
-            automatically associates child-level items as descendants.
+            Only the <span class="info-highlight">top-level</span> linked description is used when
+            building your dissemination package. AtoM automatically associates child-level items as
+            descendants.
           </p>
         </div>
       </div>
@@ -271,9 +258,7 @@ class AtoMSearchInterface extends LitElement {
 
   _renderPanelHeader() {
     return html`
-      <div class="panel-title">
-        ${this._svg(mdiDatabaseImport)} Search Descriptions
-      </div>
+      <div class="panel-title">${this._svg(mdiDatabaseImport)} Search Descriptions</div>
     `;
   }
 
@@ -283,10 +268,7 @@ class AtoMSearchInterface extends LitElement {
         ${map(
           this.criteria,
           (criterion, index) => html`
-            <div
-              class="criterion-row"
-              style="animation-delay: ${index * 0.05}s"
-            >
+            <div class="criterion-row" style="animation-delay: ${index * 0.05}s">
               <div class="criterion-number">${index + 1}</div>
 
               ${index > 0
@@ -296,11 +278,7 @@ class AtoMSearchInterface extends LitElement {
                         label="Operator"
                         .value=${criterion.operator}
                         @change=${(e) =>
-                          this._updateCriterion(
-                            criterion.id,
-                            "operator",
-                            e.target.value
-                          )}
+                          this._updateCriterion(criterion.id, "operator", e.target.value)}
                       >
                         ${map(
                           OPERATORS,
@@ -311,7 +289,7 @@ class AtoMSearchInterface extends LitElement {
                             >
                               <div slot="headline">${op.label}</div>
                             </md-select-option>
-                          `
+                          `,
                         )}
                       </md-outlined-select>
                     </div>
@@ -323,12 +301,7 @@ class AtoMSearchInterface extends LitElement {
                   label="Search query"
                   placeholder="Enter search terms..."
                   .value=${criterion.query}
-                  @input=${(e) =>
-                    this._updateCriterion(
-                      criterion.id,
-                      "query",
-                      e.target.value
-                    )}
+                  @input=${(e) => this._updateCriterion(criterion.id, "query", e.target.value)}
                   @keydown=${this._handleSearchKeydown}
                 ></md-outlined-text-field>
               </div>
@@ -337,23 +310,15 @@ class AtoMSearchInterface extends LitElement {
                 <md-outlined-select
                   label="Search field"
                   .value=${criterion.field}
-                  @change=${(e) =>
-                    this._updateCriterion(
-                      criterion.id,
-                      "field",
-                      e.target.value
-                    )}
+                  @change=${(e) => this._updateCriterion(criterion.id, "field", e.target.value)}
                 >
                   ${map(
                     SEARCH_FIELDS,
                     (f) => html`
-                      <md-select-option
-                        value=${f.value}
-                        ?selected=${criterion.field === f.value}
-                      >
+                      <md-select-option value=${f.value} ?selected=${criterion.field === f.value}>
                         <div slot="headline">${f.label}</div>
                       </md-select-option>
-                    `
+                    `,
                   )}
                 </md-outlined-select>
               </div>
@@ -370,7 +335,7 @@ class AtoMSearchInterface extends LitElement {
                   `
                 : nothing}
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -432,26 +397,19 @@ class AtoMSearchInterface extends LitElement {
     return html`
       <div class="results-section">
         <div class="results-header">
-          <div class="results-title">
-            ${this._svg(mdiFileDocumentOutline)} Results
-          </div>
+          <div class="results-title">${this._svg(mdiFileDocumentOutline)} Results</div>
           <div class="results-count">${this.totalResults} found</div>
         </div>
         <div class="results-list">
           ${map(
             this.results,
             (result, index) => html`
-              <div
-                class="result-card"
-                style="animation-delay: ${index * 0.06}s"
-              >
+              <div class="result-card" style="animation-delay: ${index * 0.06}s">
                 <div class="result-content">
                   <div class="result-title">${result.title}</div>
                   <div class="result-meta">
                     ${result.reference_code
-                      ? html`<span class="result-tag tag-ref-code"
-                          >${result.reference_code}</span
-                        >`
+                      ? html`<span class="result-tag tag-ref-code">${result.reference_code}</span>`
                       : nothing}
                     ${result.level_of_description
                       ? html`<span class="result-tag tag-level"
@@ -472,9 +430,7 @@ class AtoMSearchInterface extends LitElement {
                       `
                     : nothing}
                   <div class="result-actions">
-                    <md-filled-button
-                      @click=${() => this._handleLink(result.slug)}
-                    >
+                    <md-filled-button @click=${() => this._handleLink(result.slug)}>
                       ${this._svg(mdiLinkVariant)} Link to this description
                     </md-filled-button>
                   </div>
@@ -483,17 +439,14 @@ class AtoMSearchInterface extends LitElement {
                   ? html`
                       <img
                         class="result-thumbnail"
-                        src="${result.thumbnail_url.replace(
-                          /^http:\/\/[^/]+/,
-                          this.atomUrl
-                        )}"
+                        src="${result.thumbnail_url.replace(/^http:\/\/[^/]+/, this.atomUrl)}"
                         alt="Thumbnail for ${result.title}"
                         loading="lazy"
                       />
                     `
                   : nothing}
               </div>
-            `
+            `,
           )}
         </div>
       </div>
@@ -508,8 +461,7 @@ class AtoMSearchInterface extends LitElement {
     return html`
       <div class="pagination-container">
         <div class="pagination-info">
-          Showing ${this._rangeStart} – ${this._rangeEnd} of
-          ${this.totalResults}
+          Showing ${this._rangeStart} – ${this._rangeEnd} of ${this.totalResults}
         </div>
         <div class="pagination-controls">
           <button
@@ -539,7 +491,7 @@ class AtoMSearchInterface extends LitElement {
                   >
                     ${p}
                   </button>
-                `
+                `,
           )}
 
           <button

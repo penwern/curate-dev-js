@@ -18,7 +18,7 @@ export function highlightText(text, query) {
   return parts.map((part) =>
     part.toLowerCase() === query.toLowerCase()
       ? html`<span class="search-highlight">${part}</span>`
-      : part
+      : part,
   );
 }
 
@@ -104,18 +104,14 @@ export function matchesCollectionSearch(collection, query, field = "all") {
     case "identifier":
       return collection.code?.toLowerCase().includes(q);
     case "subject":
-      return (collection.subjects || []).some((subject) =>
-        subject.toLowerCase().includes(q)
-      );
+      return (collection.subjects || []).some((subject) => subject.toLowerCase().includes(q));
     case "date":
       return collection.dateRange?.toLowerCase().includes(q);
     default:
       return (
         collection.title?.toLowerCase().includes(q) ||
         collection.code?.toLowerCase().includes(q) ||
-        (collection.subjects || []).some((subject) =>
-          subject.toLowerCase().includes(q)
-        )
+        (collection.subjects || []).some((subject) => subject.toLowerCase().includes(q))
       );
   }
 }

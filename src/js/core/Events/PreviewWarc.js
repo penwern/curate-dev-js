@@ -28,18 +28,15 @@ function handleWarcFileAction(node) {
           },
           {
             afterLoaded: (container) => {
-              const mainContent = container.querySelector(
-                ".config-main-options-container"
-              );
+              const mainContent = container.querySelector(".config-main-options-container");
               if (mainContent) {
-                const warcOptions =
-                  document.createElement("warc-options-modal");
+                const warcOptions = document.createElement("warc-options-modal");
                 warcOptions.setFileInfo(fileUrl, fileName);
                 warcOptions.closeSelf = optionsModal.close;
                 mainContent.appendChild(warcOptions);
               }
             },
-          }
+          },
         );
 
         optionsModal.fire();
@@ -68,7 +65,7 @@ Curate.eventDelegator.addEventListener(
       }
     }
   },
-  true
+  true,
 ); // Use capture phase
 
 // Event handler for double-click in main files list
@@ -89,7 +86,7 @@ Curate.eventDelegator.addEventListener(
       }
     }
   },
-  true
+  true,
 ); // Use capture phase
 
 // Event handler for double-click in image gallery (masonry grid)
@@ -110,7 +107,7 @@ Curate.eventDelegator.addEventListener(
       }
     }
   },
-  true
+  true,
 ); // Use capture phase
 
 // Event handler for context menu "Open" clicks
@@ -131,5 +128,5 @@ Curate.eventDelegator.addEventListener(
       }
     }
   },
-  true
+  true,
 ); // Use capture phase

@@ -119,9 +119,7 @@ class PreservationConfigAPI {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `HTTP error while creating config, Status: ${response.status}`
-        );
+        throw new Error(`HTTP error while creating config, Status: ${response.status}`);
       }
 
       console.info("Config created successfully");
@@ -129,7 +127,7 @@ class PreservationConfigAPI {
     } catch (error) {
       console.error("Error creating preservation config:", error);
       this.showErrorModal(
-        "There was an error saving your configuration. Please try again, or contact support if the problem persists."
+        "There was an error saving your configuration. Please try again, or contact support if the problem persists.",
       );
       throw error;
     }
@@ -156,9 +154,7 @@ class PreservationConfigAPI {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `HTTP error while updating config, Status: ${response.status}`
-        );
+        throw new Error(`HTTP error while updating config, Status: ${response.status}`);
       }
 
       if (response.status === 200) {
@@ -168,7 +164,7 @@ class PreservationConfigAPI {
     } catch (error) {
       console.error("Error updating preservation config:", error);
       this.showErrorModal(
-        "There was an error saving your modified configuration. Please try again, or contact support if the problem persists."
+        "There was an error saving your modified configuration. Please try again, or contact support if the problem persists.",
       );
       throw error;
     }
@@ -206,7 +202,7 @@ class PreservationConfigAPI {
     } catch (error) {
       console.error("Error deleting preservation config:", error);
       this.showErrorModal(
-        "There was an error deleting your configuration. Please try again, or contact support if the problem persists."
+        "There was an error deleting your configuration. Please try again, or contact support if the problem persists.",
       );
       throw error;
     }

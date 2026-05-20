@@ -1,5 +1,5 @@
-import eventDelegator from '../CurateFunctions/CurateEvents.js';
-import CurateUi from '../CurateFunctions/CurateUi.js';
+import eventDelegator from "../CurateFunctions/CurateEvents.js";
+import CurateUi from "../CurateFunctions/CurateUi.js";
 
 // Track active uploads count
 let activeUploadsCount = 0;
@@ -15,7 +15,7 @@ function getMaxUploadFiles() {
   } catch (e) {
     configuredLimit = undefined;
   }
-  if (typeof configuredLimit === 'number' && configuredLimit > 0) {
+  if (typeof configuredLimit === "number" && configuredLimit > 0) {
     return configuredLimit;
   }
   return DEFAULT_MAX_UPLOAD_FILES;
@@ -30,14 +30,14 @@ function showUploadLimitModal(fileCount) {
 
   const popup = new CurateUi.modals.curatePopup(
     {
-      title: 'Upload Limit Reached',
-      type: 'warning',
+      title: "Upload Limit Reached",
+      type: "warning",
       message,
-      buttonType: 'close',
+      buttonType: "close",
     },
     {
       afterClosed: () => {},
-    }
+    },
   );
 
   popup.fire();
@@ -117,8 +117,8 @@ function disableFileInUI(relativePath) {
   disabledFiles.add(relativePath);
   const element = document.getElementById(relativePath);
   if (element) {
-    element.style.pointerEvents = 'none';
-    element.style.opacity = '0.6';
+    element.style.pointerEvents = "none";
+    element.style.opacity = "0.6";
   }
 }
 
@@ -127,24 +127,24 @@ function enableFileInUI(relativePath) {
   disabledFiles.delete(relativePath);
   const element = document.getElementById(relativePath);
   if (element) {
-    element.style.pointerEvents = '';
-    element.style.opacity = '';
+    element.style.pointerEvents = "";
+    element.style.opacity = "";
   }
 }
 
 // Reapply disabled state (handles rerenders)
 function reapplyDisabledStates() {
-  disabledFiles.forEach(relativePath => {
+  disabledFiles.forEach((relativePath) => {
     const element = document.getElementById(relativePath);
-    if (element && element.style.pointerEvents !== 'none') {
-      element.style.pointerEvents = 'none';
-      element.style.opacity = '0.6';
+    if (element && element.style.pointerEvents !== "none") {
+      element.style.pointerEvents = "none";
+      element.style.opacity = "0.6";
     }
   });
 }
 
 // Listen for context changes (reload, navigation, etc.)
-if (typeof pydio !== 'undefined') {
+if (typeof pydio !== "undefined") {
   pydio.observe("context_changed", () => {
     if (disabledFiles.size > 0) {
       setTimeout(() => {
@@ -161,31 +161,35 @@ function monitorUploadProgress(store) {
   }
 
   store._sessions.forEach((session) => {
-    session.walk((item) => {
-      const preparedLabel = item.getLabel();
-      const relativePath = '/' + preparedLabel;
-      const status = item.getStatus();
-      
-      // Watch for status changes on this item
-      if (!item._statusObserverAttached) {
-        item._statusObserverAttached = true;
-        
-        item.observe('status', (newStatus) => {
-          if (newStatus === 'loading') {
-            disableFileInUI(relativePath);
-          } else if (newStatus === 'loaded') {
-            enableFileInUI(relativePath);
-          }
-        });
-      }
-      
-      // Handle current state
-      if (status === 'loading') {
-        disableFileInUI(relativePath);
-      } else if (status === 'loaded') {
-        enableFileInUI(relativePath);
-      }
-    }, (item) => true, 'file');
+    session.walk(
+      (item) => {
+        const preparedLabel = item.getLabel();
+        const relativePath = "/" + preparedLabel;
+        const status = item.getStatus();
+
+        // Watch for status changes on this item
+        if (!item._statusObserverAttached) {
+          item._statusObserverAttached = true;
+
+          item.observe("status", (newStatus) => {
+            if (newStatus === "loading") {
+              disableFileInUI(relativePath);
+            } else if (newStatus === "loaded") {
+              enableFileInUI(relativePath);
+            }
+          });
+        }
+
+        // Handle current state
+        if (status === "loading") {
+          disableFileInUI(relativePath);
+        } else if (status === "loaded") {
+          enableFileInUI(relativePath);
+        }
+      },
+      (item) => true,
+      "file",
+    );
   });
 }
 
@@ -199,15 +203,15 @@ function observeSessionForLimiter(store, session) {
   const checkPreparationComplete = () => {
     const status = session.getStatus?.();
 
-    if (status === 'ready' || status === 'loading') {
+    if (status === "ready" || status === "loading") {
       triggerMonitor();
     } else {
       setTimeout(checkPreparationComplete, 100);
     }
   };
 
-  session.observe?.('status', (newStatus) => {
-    if (newStatus === 'ready' || newStatus === 'loading') {
+  session.observe?.("status", (newStatus) => {
+    if (newStatus === "ready" || newStatus === "loading") {
       triggerMonitor();
     }
   });
@@ -219,10 +223,9 @@ const handleDropEvent = async (e) => {
   const dataTransfer = e.dataTransfer;
   const transferTypes = Array.from(dataTransfer?.types || []);
   const hasFilePayload =
-    transferTypes.includes('Files') ||
+    transferTypes.includes("Files") ||
     (dataTransfer?.files && dataTransfer.files.length > 0) ||
-    (dataTransfer?.items &&
-      Array.from(dataTransfer.items).some((item) => item.kind === 'file'));
+    (dataTransfer?.items && Array.from(dataTransfer.items).some((item) => item.kind === "file"));
 
   if (!hasFilePayload) {
     return;
@@ -259,27 +262,23 @@ const handleDropEvent = async (e) => {
 
   const store = await waitForUploadStore();
   if (!store) {
-    console.error('UploadLimiter: Unable to resolve upload store.');
+    console.error("UploadLimiter: Unable to resolve upload store.");
     return;
   }
 
-  store.handleDropEventResults(
-    e.dataTransfer.items,
-    e.dataTransfer.files,
-    targetNode
-  );
+  store.handleDropEventResults(e.dataTransfer.items, e.dataTransfer.files, targetNode);
 
   activeUploadsCount += fileCount;
 };
 
 const handleFileInputChange = (e) => {
-  if (e.target.type === 'file' && e.target.files.length > 0) {
+  if (e.target.type === "file" && e.target.files.length > 0) {
     const fileCount = e.target.files.length;
 
     // Check limit
     if (activeUploadsCount + fileCount > getMaxUploadFiles()) {
       showUploadLimitModal(fileCount);
-      e.target.value = '';
+      e.target.value = "";
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
@@ -290,16 +289,19 @@ const handleFileInputChange = (e) => {
   }
 };
 
-eventDelegator.addEventListener('body', 'drop', handleDropEvent, { capture: true });
-eventDelegator.addEventListener("input[type='file']", 'change', handleFileInputChange, { capture: true });
+eventDelegator.addEventListener("body", "drop", handleDropEvent, { capture: true });
+eventDelegator.addEventListener("input[type='file']", "change", handleFileInputChange, {
+  capture: true,
+});
 
 // Hook into task completion for counting
-if (typeof pydio !== 'undefined') {
+if (typeof pydio !== "undefined") {
   pydio.observe("task_message", (e) => {
-    if (e.TaskUpdated?.JobID === "curate-curation" && 
-        e.TaskUpdated?.Status === "Finished" &&
-        e.TaskUpdated?.TriggerOwner === pydio.user.id) {
-
+    if (
+      e.TaskUpdated?.JobID === "curate-curation" &&
+      e.TaskUpdated?.Status === "Finished" &&
+      e.TaskUpdated?.TriggerOwner === pydio.user.id
+    ) {
       if (activeUploadsCount > 0) {
         activeUploadsCount--;
       }

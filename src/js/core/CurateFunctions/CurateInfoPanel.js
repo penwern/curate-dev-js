@@ -17,218 +17,218 @@ let _observedPanel = null;
 let _savedMarginTop = null;
 
 function _registerWithSystem(namespace) {
-    try {
-        window.System.delete(namespace);
-        const moduleExports = Object.assign({}, window[namespace]);
-        moduleExports.default = window[namespace];
-        window.System.set(namespace, window.System.newModule(moduleExports));
-        return true;
-    } catch (e) {
-        return false;
-    }
+  try {
+    window.System.delete(namespace);
+    const moduleExports = Object.assign({}, window[namespace]);
+    moduleExports.default = window[namespace];
+    window.System.set(namespace, window.System.newModule(moduleExports));
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 function _flushPendingSystemRegs() {
-    if (_pendingSystemRegs.size === 0 || !window.System) return;
-    for (const namespace of _pendingSystemRegs) {
-        if (_registerWithSystem(namespace)) {
-            _pendingSystemRegs.delete(namespace);
-        }
+  if (_pendingSystemRegs.size === 0 || !window.System) return;
+  for (const namespace of _pendingSystemRegs) {
+    if (_registerWithSystem(namespace)) {
+      _pendingSystemRegs.delete(namespace);
     }
+  }
 }
 
 function _getPanelContainer() {
-    const byId = document.getElementById('info_panel');
-    if (byId) return byId;
-    const card = document.querySelector('.panelCard');
-    return card ? card.parentElement : null;
+  const byId = document.getElementById("info_panel");
+  if (byId) return byId;
+  const card = document.querySelector(".panelCard");
+  return card ? card.parentElement : null;
 }
 
 function _getTpHook() {
-    const panel = _getPanelContainer();
-    if (!panel) return null;
+  const panel = _getPanelContainer();
+  if (!panel) return null;
 
-    const fiberKey = Object.keys(panel).find((key) => key.startsWith('__reactFiber'));
-    if (!fiberKey) return null;
+  const fiberKey = Object.keys(panel).find((key) => key.startsWith("__reactFiber"));
+  if (!fiberKey) return null;
 
-    let cur = panel[fiberKey].return;
-    while (cur) {
-        const name = cur.type ? (cur.type.displayName || cur.type.name || null) : null;
-        if (name === 'Tp') {
-            let hook = cur.memoizedState;
-            for (let i = 0; i < 10; i += 1) {
-                if (!hook) return null;
-                hook = hook.next;
-            }
-            if (!hook || !hook.memoizedState || !hook.queue || !hook.queue.dispatch) return null;
-            const state = hook.memoizedState;
-            if (!state.TEMPLATES || !state.DATA) return null;
-            return { state, queue: hook.queue };
-        }
-        cur = cur.return;
+  let cur = panel[fiberKey].return;
+  while (cur) {
+    const name = cur.type ? cur.type.displayName || cur.type.name || null : null;
+    if (name === "Tp") {
+      let hook = cur.memoizedState;
+      for (let i = 0; i < 10; i += 1) {
+        if (!hook) return null;
+        hook = hook.next;
+      }
+      if (!hook || !hook.memoizedState || !hook.queue || !hook.queue.dispatch) return null;
+      const state = hook.memoizedState;
+      if (!state.TEMPLATES || !state.DATA) return null;
+      return { state, queue: hook.queue };
     }
-    return null;
+    cur = cur.return;
+  }
+  return null;
 }
 
 function _getCurrentMimeCategory() {
-    try {
-        const nodes = window.pydio._dataModel._selectedNodes;
-        if (!nodes || nodes.length === 0) return 'ajxp_root_node';
-        if (nodes.length > 1) return 'generic_multiple';
-        const node = nodes[0];
-        if (node.isRoot && node.isRoot()) return 'ajxp_root_node';
-        if (node.isLeaf && node.isLeaf()) return 'generic_file';
-        return 'generic_dir';
-    } catch (e) {
-        return 'generic_file';
-    }
+  try {
+    const nodes = window.pydio._dataModel._selectedNodes;
+    if (!nodes || nodes.length === 0) return "ajxp_root_node";
+    if (nodes.length > 1) return "generic_multiple";
+    const node = nodes[0];
+    if (node.isRoot && node.isRoot()) return "ajxp_root_node";
+    if (node.isLeaf && node.isLeaf()) return "generic_file";
+    return "generic_dir";
+  } catch (e) {
+    return "generic_file";
+  }
 }
 
 function _mergeCards(templates) {
-    const currentMime = _getCurrentMimeCategory();
-    const existingComponents = new Set(templates.map((template) => template.COMPONENT));
-    const toAdd = [];
+  const currentMime = _getCurrentMimeCategory();
+  const existingComponents = new Set(templates.map((template) => template.COMPONENT));
+  const toAdd = [];
 
-    for (const card of _registry.values()) {
-        const key = `${card.namespace}.${card.name}`;
-        if (existingComponents.has(key)) continue;
+  for (const card of _registry.values()) {
+    const key = `${card.namespace}.${card.name}`;
+    if (existingComponents.has(key)) continue;
 
-        const mimes = card.mime || ['generic_file', 'generic_dir'];
-        if (!mimes.includes(currentMime)) continue;
+    const mimes = card.mime || ["generic_file", "generic_dir"];
+    if (!mimes.includes(currentMime)) continue;
 
-        if (card.condition) {
-            try {
-                const nodes = window.pydio._dataModel._selectedNodes;
-                const node = nodes && nodes[0];
-                if (!card.condition(node, nodes)) continue;
-            } catch (e) {
-                continue;
-            }
-        }
-
-        toAdd.push({
-            COMPONENT: key,
-            THEME: card.theme || null,
-            ATTRIBUTES: null,
-            WEIGHT: card.weight !== undefined ? card.weight : 50,
-        });
+    if (card.condition) {
+      try {
+        const nodes = window.pydio._dataModel._selectedNodes;
+        const node = nodes && nodes[0];
+        if (!card.condition(node, nodes)) continue;
+      } catch (e) {
+        continue;
+      }
     }
 
-    if (!toAdd.length) return templates;
+    toAdd.push({
+      COMPONENT: key,
+      THEME: card.theme || null,
+      ATTRIBUTES: null,
+      WEIGHT: card.weight !== undefined ? card.weight : 50,
+    });
+  }
 
-    const result = [...templates];
-    for (const card of toAdd) {
-        const idx = result.findIndex((template) => (template.WEIGHT ?? 0) > card.WEIGHT);
-        if (idx === -1) result.push(card);
-        else result.splice(idx, 0, card);
-    }
-    return result;
+  if (!toAdd.length) return templates;
+
+  const result = [...templates];
+  for (const card of toAdd) {
+    const idx = result.findIndex((template) => (template.WEIGHT ?? 0) > card.WEIGHT);
+    if (idx === -1) result.push(card);
+    else result.splice(idx, 0, card);
+  }
+  return result;
 }
 
 function _getScrollContent() {
-    return document.querySelector('#info_panel .scrollarea-content');
+  return document.querySelector("#info_panel .scrollarea-content");
 }
 
 function _injectCards() {
-    const result = _getTpHook();
-    if (!result) return;
+  const result = _getTpHook();
+  if (!result) return;
 
-    const { state, queue } = result;
-    const merged = _mergeCards(state.TEMPLATES);
-    if (merged === state.TEMPLATES) return;
+  const { state, queue } = result;
+  const merged = _mergeCards(state.TEMPLATES);
+  if (merged === state.TEMPLATES) return;
 
-    queue.dispatch({ TEMPLATES: merged, DATA: state.DATA });
+  queue.dispatch({ TEMPLATES: merged, DATA: state.DATA });
 
-    const content = _getScrollContent();
-    if (content && _savedMarginTop !== null) {
-        content.style.marginTop = _savedMarginTop;
-        queueMicrotask(() => {
-            content.style.marginTop = _savedMarginTop;
-        });
-        requestAnimationFrame(() => {
-            content.style.marginTop = _savedMarginTop;
-        });
-    }
+  const content = _getScrollContent();
+  if (content && _savedMarginTop !== null) {
+    content.style.marginTop = _savedMarginTop;
+    queueMicrotask(() => {
+      content.style.marginTop = _savedMarginTop;
+    });
+    requestAnimationFrame(() => {
+      content.style.marginTop = _savedMarginTop;
+    });
+  }
 }
 
 function _initObserver() {
-    if (_observer) {
-        _observer.disconnect();
-        _observer = null;
-    }
+  if (_observer) {
+    _observer.disconnect();
+    _observer = null;
+  }
 
-    const panel = _getPanelContainer();
-    if (!panel) return;
+  const panel = _getPanelContainer();
+  if (!panel) return;
 
-    _observedPanel = panel;
-    _observer = new MutationObserver(() => _injectCards());
-    _observer.observe(panel, { childList: true, subtree: true });
+  _observedPanel = panel;
+  _observer = new MutationObserver(() => _injectCards());
+  _observer.observe(panel, { childList: true, subtree: true });
 }
 
 function _startLoop() {
-    if (_rafHandle !== null) return;
+  if (_rafHandle !== null) return;
 
-    function loop() {
-        _flushPendingSystemRegs();
-        const panel = _getPanelContainer();
-        if (panel) {
-            if (panel !== _observedPanel) {
-                _initObserver();
-                _injectCards();
-            }
+  function loop() {
+    _flushPendingSystemRegs();
+    const panel = _getPanelContainer();
+    if (panel) {
+      if (panel !== _observedPanel) {
+        _initObserver();
+        _injectCards();
+      }
 
-            const result = _getTpHook();
-            if (result && _mergeCards(result.state.TEMPLATES) === result.state.TEMPLATES) {
-                const content = _getScrollContent();
-                if (content) _savedMarginTop = content.style.marginTop;
-            }
-        }
-        _rafHandle = requestAnimationFrame(loop);
+      const result = _getTpHook();
+      if (result && _mergeCards(result.state.TEMPLATES) === result.state.TEMPLATES) {
+        const content = _getScrollContent();
+        if (content) _savedMarginTop = content.style.marginTop;
+      }
     }
-
     _rafHandle = requestAnimationFrame(loop);
+  }
+
+  _rafHandle = requestAnimationFrame(loop);
 }
 
 const CurateInfoPanel = {
-    registerCard(config) {
-        const { namespace, name, component, mime, condition, weight, theme } = config;
+  registerCard(config) {
+    const { namespace, name, component, mime, condition, weight, theme } = config;
 
-        if (!namespace || !name || !component) {
-            console.error('[CurateInfoPanel] registerCard requires: namespace, name, component');
-            return;
-        }
+    if (!namespace || !name || !component) {
+      console.error("[CurateInfoPanel] registerCard requires: namespace, name, component");
+      return;
+    }
 
-        if (!window[namespace]) {
-            window[namespace] = {};
-        }
-        window[namespace][name] = component;
+    if (!window[namespace]) {
+      window[namespace] = {};
+    }
+    window[namespace][name] = component;
 
-        if (!_registerWithSystem(namespace)) {
-            _pendingSystemRegs.add(namespace);
-        }
+    if (!_registerWithSystem(namespace)) {
+      _pendingSystemRegs.add(namespace);
+    }
 
-        _registry.set(`${namespace}.${name}`, {
-            namespace,
-            name,
-            component,
-            mime: mime || ['generic_file', 'generic_dir'],
-            condition: condition || null,
-            weight: weight !== undefined ? weight : 50,
-            theme: theme || null,
-        });
+    _registry.set(`${namespace}.${name}`, {
+      namespace,
+      name,
+      component,
+      mime: mime || ["generic_file", "generic_dir"],
+      condition: condition || null,
+      weight: weight !== undefined ? weight : 50,
+      theme: theme || null,
+    });
 
-        _initObserver();
-        _startLoop();
-        setTimeout(_injectCards, 0);
-    },
+    _initObserver();
+    _startLoop();
+    setTimeout(_injectCards, 0);
+  },
 
-    getInfoPanelCard() {
-        try {
-            return window.PydioWorkspaces.default.InfoPanelCard;
-        } catch (e) {
-            return null;
-        }
-    },
+  getInfoPanelCard() {
+    try {
+      return window.PydioWorkspaces.default.InfoPanelCard;
+    } catch (e) {
+      return null;
+    }
+  },
 };
 
 export default CurateInfoPanel;

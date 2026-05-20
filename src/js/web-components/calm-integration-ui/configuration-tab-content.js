@@ -107,7 +107,7 @@ class QueryFilterRow extends LitElement {
         },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -117,7 +117,7 @@ class QueryFilterRow extends LitElement {
         detail: { index: this.index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -130,14 +130,10 @@ class QueryFilterRow extends LitElement {
       // Use setTimeout to ensure the DOM is fully updated
       setTimeout(() => {
         const conditionSelect = this.shadowRoot.querySelector(
-          'md-outlined-select[label="Condition"]'
+          'md-outlined-select[label="Condition"]',
         );
-        const fieldSelect = this.shadowRoot.querySelector(
-          'md-outlined-select[label="Field"]'
-        );
-        const valueField = this.shadowRoot.querySelector(
-          'md-outlined-text-field[label="Value"]'
-        );
+        const fieldSelect = this.shadowRoot.querySelector('md-outlined-select[label="Field"]');
+        const valueField = this.shadowRoot.querySelector('md-outlined-text-field[label="Value"]');
 
         if (
           conditionSelect &&
@@ -147,11 +143,7 @@ class QueryFilterRow extends LitElement {
           conditionSelect.value = this.filter.condition;
         }
 
-        if (
-          fieldSelect &&
-          this.filter.field &&
-          fieldSelect.value !== this.filter.field
-        ) {
+        if (fieldSelect && this.filter.field && fieldSelect.value !== this.filter.field) {
           fieldSelect.value = this.filter.field;
         }
 
@@ -171,11 +163,9 @@ class QueryFilterRow extends LitElement {
     // Ensure select elements are properly initialized on first render
     setTimeout(() => {
       const conditionSelect = this.shadowRoot.querySelector(
-        'md-outlined-select[label="Condition"]'
+        'md-outlined-select[label="Condition"]',
       );
-      const fieldSelect = this.shadowRoot.querySelector(
-        'md-outlined-select[label="Field"]'
-      );
+      const fieldSelect = this.shadowRoot.querySelector('md-outlined-select[label="Field"]');
 
       if (conditionSelect && this.filter.condition) {
         conditionSelect.value = this.filter.condition;
@@ -188,9 +178,7 @@ class QueryFilterRow extends LitElement {
   }
 
   render() {
-    const showDateHelp = ["modified_date", "created_date"].includes(
-      this.filter.field
-    );
+    const showDateHelp = ["modified_date", "created_date"].includes(this.filter.field);
 
     return html`
       <div class="filter-row">
@@ -254,10 +242,7 @@ class QueryFilterRow extends LitElement {
 
         ${this.index > 0
           ? html`
-              <md-icon-button
-                @click=${this._removeFilter}
-                title="Remove filter"
-              >
+              <md-icon-button @click=${this._removeFilter} title="Remove filter">
                 ${deleteIcon}
               </md-icon-button>
             `
@@ -439,9 +424,7 @@ class ConfigurationTabContent extends LitElement {
   `;
 
   _dispatch(eventName, detail = {}) {
-    this.dispatchEvent(
-      new CustomEvent(eventName, { detail, bubbles: true, composed: true })
-    );
+    this.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true, composed: true }));
   }
 
   _handleUpdateQueryFilter(e) {
@@ -478,22 +461,20 @@ class ConfigurationTabContent extends LitElement {
       return false;
     }
     return this.queryFilters.some((filter) =>
-      ["modified_date", "created_date"].includes(filter.field)
+      ["modified_date", "created_date"].includes(filter.field),
     );
   }
 
   _hasEmptyValues() {
     // Add safety check for queryFilters
-    const safeQueryFilters = Array.isArray(this.queryFilters)
-      ? this.queryFilters
-      : [];
+    const safeQueryFilters = Array.isArray(this.queryFilters) ? this.queryFilters : [];
 
     return safeQueryFilters.some(
       (filter) =>
         !filter.field ||
         !filter.condition ||
         !filter.value ||
-        filter.value.toString().trim() === ""
+        filter.value.toString().trim() === "",
     );
   }
 
@@ -511,9 +492,7 @@ class ConfigurationTabContent extends LitElement {
 
   render() {
     // Add safety check for queryFilters
-    const safeQueryFilters = Array.isArray(this.queryFilters)
-      ? this.queryFilters
-      : [];
+    const safeQueryFilters = Array.isArray(this.queryFilters) ? this.queryFilters : [];
 
     const hasEmptyValues = this._hasEmptyValues();
     const validationMessage = this._getValidationMessage();
@@ -526,15 +505,13 @@ class ConfigurationTabContent extends LitElement {
               <div class="content">
                 <h4>No Automated Harvest Configuration Found</h4>
                 <p>
-                  Automated harvesting is not currently set up. You need to
-                  create harvest criteria and save your configuration before the
-                  system can automatically harvest records from CALM into
-                  Soteria+.
+                  Automated harvesting is not currently set up. You need to create harvest criteria
+                  and save your configuration before the system can automatically harvest records
+                  from CALM into Soteria+.
                 </p>
                 <p>
-                  <strong>What happens next:</strong> Once you set up your
-                  criteria and save the configuration, the system will run daily
-                  harvests based on your rules.
+                  <strong>What happens next:</strong> Once you set up your criteria and save the
+                  configuration, the system will run daily harvests based on your rules.
                 </p>
                 <div class="action">
                   <md-filled-button @click=${this._handleGetStarted}>
@@ -557,15 +534,11 @@ class ConfigurationTabContent extends LitElement {
           </md-icon-button>
         </h3>
         <p>
-          Define the rules for automatically harvesting records from CALM into
-          Soteria+. The system will run a harvest based on these criteria daily.
+          Define the rules for automatically harvesting records from CALM into Soteria+. The system
+          will run a harvest based on these criteria daily.
         </p>
 
-        <div
-          class="query-builder-group ${!this.hasConfig
-            ? "disabled-overlay"
-            : ""}"
-        >
+        <div class="query-builder-group ${!this.hasConfig ? "disabled-overlay" : ""}">
           ${repeat(
             safeQueryFilters,
             (f, i) => i,
@@ -574,10 +547,9 @@ class ConfigurationTabContent extends LitElement {
                 .filter=${filter}
                 .index=${index}
                 @update-filter-row=${(e) => this._handleUpdateQueryFilter(e)}
-                @remove-filter-row=${(e) =>
-                  this._dispatch("remove-query-filter", e.detail)}
+                @remove-filter-row=${(e) => this._dispatch("remove-query-filter", e.detail)}
               ></query-filter-row>
-            `
+            `,
           )}
           <md-text-button
             @click=${() => this._dispatch("add-query-filter")}
@@ -589,21 +561,17 @@ class ConfigurationTabContent extends LitElement {
           ${this._hasDateFields()
             ? html`
                 <div class="criteria-hint">
-                  💡 Click the help icon above to see available date variables
-                  (LAST_HARVEST, TODAY, etc.)
+                  💡 Click the help icon above to see available date variables (LAST_HARVEST, TODAY,
+                  etc.)
                 </div>
               `
             : ""}
         </div>
       </div>
 
-      
-
       <div class="button-group">
         ${validationMessage
-          ? html`
-              <div class="validation-message">⚠️ ${validationMessage}</div>
-            `
+          ? html` <div class="validation-message">⚠️ ${validationMessage}</div> `
           : ""}
 
         <md-outlined-button
@@ -616,10 +584,7 @@ class ConfigurationTabContent extends LitElement {
           @click=${() => this._dispatch("save-configuration")}
           ?disabled=${this.isLoading || hasEmptyValues}
         >
-          <span
-            >${saveIcon}
-            ${this.isLoading ? "Saving..." : "Save Configuration"}</span
-          >
+          <span>${saveIcon} ${this.isLoading ? "Saving..." : "Save Configuration"}</span>
         </md-filled-button>
       </div>
     `;

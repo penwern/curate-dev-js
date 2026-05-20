@@ -1,4 +1,4 @@
-import { Curate } from '../../core/CurateFunctions/CurateFunctions.js';
+import { Curate } from "../../core/CurateFunctions/CurateFunctions.js";
 
 /**
  * Demo Routes
@@ -6,8 +6,10 @@ import { Curate } from '../../core/CurateFunctions/CurateFunctions.js';
  */
 export function registerDemoRoutes() {
   // Simple demo page
-  Curate.router.addRoute('/demo', (container, { close }) => {
-    container.innerHTML = `
+  Curate.router.addRoute(
+    "/demo",
+    (container, { close }) => {
+      container.innerHTML = `
       <div style="padding: 60px; max-width: 500px; margin: 0 auto; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
           <h1 style="margin: 0 0 20px 0; font-size: 32px; font-weight: 300;">🚀 Curate Router</h1>
@@ -28,12 +30,14 @@ export function registerDemoRoutes() {
       </div>
     `;
 
-    // Style the button on hover
-    const closeBtn = container.querySelector('#close-demo');
-    closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,255,255,0.3)';
-    closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.2)';
-    closeBtn.onclick = close;
-  }, { title: 'Curate Router Demo' });
+      // Style the button on hover
+      const closeBtn = container.querySelector("#close-demo");
+      closeBtn.onmouseover = () => (closeBtn.style.background = "rgba(255,255,255,0.3)");
+      closeBtn.onmouseout = () => (closeBtn.style.background = "rgba(255,255,255,0.2)");
+      closeBtn.onclick = close;
+    },
+    { title: "Curate Router Demo" },
+  );
 
-  console.log('Demo route registered: /custom/demo');
+  console.log("Demo route registered: /custom/demo");
 }

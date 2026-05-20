@@ -25,7 +25,9 @@ class StoragePanel extends LitElement {
   };
 
   static styles = css`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -121,7 +123,9 @@ class StoragePanel extends LitElement {
       background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface-variant);
       cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s;
       white-space: nowrap;
     }
     .toggle-btn.active {
@@ -144,7 +148,9 @@ class StoragePanel extends LitElement {
       margin-top: 16px;
     }
     @media (max-width: 768px) {
-      .charts-row { grid-template-columns: 1fr; }
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
     }
   `;
 
@@ -200,7 +206,16 @@ class StoragePanel extends LitElement {
 
     const style = getComputedStyle(document.documentElement);
     const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
-    const vibrantHues = [primary, "#4285f4", "#34a853", "#fbbc04", "#ea4335", "#9334e6", "#e8710a", "#00acc1"];
+    const vibrantHues = [
+      primary,
+      "#4285f4",
+      "#34a853",
+      "#fbbc04",
+      "#ea4335",
+      "#9334e6",
+      "#e8710a",
+      "#00acc1",
+    ];
 
     try {
       // Build datasource path → workspace label map via RootNodes (same approach as file-overview panel).
@@ -302,8 +317,12 @@ class StoragePanel extends LitElement {
       try {
         const now = Math.floor(Date.now() / 1000);
         const from = now - 365 * 86400;
-        const res = await getStorageHistory(this.storageReportingUrl, { bucket: "day", from, to: now });
-        for (const ds of (res.series ?? [])) {
+        const res = await getStorageHistory(this.storageReportingUrl, {
+          bucket: "day",
+          from,
+          to: now,
+        });
+        for (const ds of res.series ?? []) {
           for (const point of ds.data) {
             history.push({
               Datasource: ds.datasource,
@@ -356,7 +375,16 @@ class StoragePanel extends LitElement {
 
     const style = getComputedStyle(document.documentElement);
     const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
-    const vibrantHues = [primary, "#4285f4", "#34a853", "#fbbc04", "#ea4335", "#9334e6", "#e8710a", "#00acc1"];
+    const vibrantHues = [
+      primary,
+      "#4285f4",
+      "#34a853",
+      "#fbbc04",
+      "#ea4335",
+      "#9334e6",
+      "#e8710a",
+      "#00acc1",
+    ];
 
     if (this._historyView === "total") {
       const bucketMap = new Map();
@@ -368,16 +396,18 @@ class StoragePanel extends LitElement {
       const sorted = [...bucketMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
       this._historyData = {
         labels: sorted.map(([b]) => b),
-        datasets: [{
-          label: "Total Storage",
-          data: sorted.map(([, v]) => v),
-          borderColor: primary,
-          backgroundColor: primary + "22",
-          fill: true,
-          tension: 0.3,
-          pointRadius: sorted.length > 60 ? 0 : 3,
-          pointHoverRadius: 4,
-        }],
+        datasets: [
+          {
+            label: "Total Storage",
+            data: sorted.map(([, v]) => v),
+            borderColor: primary,
+            backgroundColor: primary + "22",
+            fill: true,
+            tension: 0.3,
+            pointRadius: sorted.length > 60 ? 0 : 3,
+            pointHoverRadius: 4,
+          },
+        ],
       };
     } else {
       const allBuckets = new Set();
@@ -409,24 +439,28 @@ class StoragePanel extends LitElement {
   _rebuildCharts(results, vibrantHues) {
     this._barData = {
       labels: results.map((r) => r.label),
-      datasets: [{
-        label: "Storage",
-        data: results.map((r) => r.size),
-        backgroundColor: results.map((_, i) => vibrantHues[i % vibrantHues.length] + "CC"),
-        borderRadius: 6,
-        borderSkipped: false,
-        barThickness: 28,
-      }],
+      datasets: [
+        {
+          label: "Storage",
+          data: results.map((r) => r.size),
+          backgroundColor: results.map((_, i) => vibrantHues[i % vibrantHues.length] + "CC"),
+          borderRadius: 6,
+          borderSkipped: false,
+          barThickness: 28,
+        },
+      ],
     };
 
     this._doughnutData = {
       labels: results.map((r) => r.label),
-      datasets: [{
-        data: results.map((r) => r.size),
-        backgroundColor: results.map((_, i) => vibrantHues[i % vibrantHues.length]),
-        borderWidth: 0,
-        hoverOffset: 4,
-      }],
+      datasets: [
+        {
+          data: results.map((r) => r.size),
+          backgroundColor: results.map((_, i) => vibrantHues[i % vibrantHues.length]),
+          borderWidth: 0,
+          hoverOffset: 4,
+        },
+      ],
     };
   }
 
@@ -519,62 +553,77 @@ class StoragePanel extends LitElement {
       </div>
 
       <div class="note">
-        Storage allowance information is not currently available from the API. Totals shown represent current usage only.
+        Storage allowance information is not currently available from the API. Totals shown
+        represent current usage only.
       </div>
 
-      ${this.storageReportingUrl ? html`
-        <div class="history-section">
-          <chart-card
-            heading="Storage Over Time"
-            type="line"
-            .data=${this._historyData}
-            .loading=${this._historyLoading}
-            .height=${280}
-            .options=${{
-              plugins: {
-                legend: { display: this._historyView === "datasource", position: "bottom" },
-                tooltip: {
-                  callbacks: {
-                    label: (ctx) => ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`,
+      ${this.storageReportingUrl
+        ? html`
+            <div class="history-section">
+              <chart-card
+                heading="Storage Over Time"
+                type="line"
+                .data=${this._historyData}
+                .loading=${this._historyLoading}
+                .height=${280}
+                .options=${{
+                  plugins: {
+                    legend: { display: this._historyView === "datasource", position: "bottom" },
+                    tooltip: {
+                      callbacks: {
+                        label: (ctx) => ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`,
+                      },
+                    },
                   },
-                },
-              },
-              scales: {
-                x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } },
-                y: { ticks: { callback: (v) => formatBytes(v) } },
-              },
-            }}
-          >
-            <div slot="actions" class="history-controls">
-              <select
-                @change=${(e) => { this._bucket = e.target.value; }}
+                  scales: {
+                    x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+                    y: { ticks: { callback: (v) => formatBytes(v) } },
+                  },
+                }}
               >
-                <option value="day" ?selected=${this._bucket === "day"}>Day</option>
-                <option value="week" ?selected=${this._bucket === "week"}>Week</option>
-                <option value="month" ?selected=${this._bucket === "month"}>Month</option>
-              </select>
-              <select
-                @change=${(e) => { this._rangeKey = e.target.value; }}
-              >
-                <option value="30d" ?selected=${this._rangeKey === "30d"}>Last 30 days</option>
-                <option value="6m" ?selected=${this._rangeKey === "6m"}>Last 6 months</option>
-                <option value="1y" ?selected=${this._rangeKey === "1y"}>Last year</option>
-              </select>
-              <div class="ctrl-sep"></div>
-              <div class="toggle-group">
-                <button
-                  class="toggle-btn ${this._historyView === "total" ? "active" : ""}"
-                  @click=${() => { this._historyView = "total"; }}
-                >Total</button>
-                <button
-                  class="toggle-btn ${this._historyView === "datasource" ? "active" : ""}"
-                  @click=${() => { this._historyView = "datasource"; }}
-                >Per datasource</button>
-              </div>
+                <div slot="actions" class="history-controls">
+                  <select
+                    @change=${(e) => {
+                      this._bucket = e.target.value;
+                    }}
+                  >
+                    <option value="day" ?selected=${this._bucket === "day"}>Day</option>
+                    <option value="week" ?selected=${this._bucket === "week"}>Week</option>
+                    <option value="month" ?selected=${this._bucket === "month"}>Month</option>
+                  </select>
+                  <select
+                    @change=${(e) => {
+                      this._rangeKey = e.target.value;
+                    }}
+                  >
+                    <option value="30d" ?selected=${this._rangeKey === "30d"}>Last 30 days</option>
+                    <option value="6m" ?selected=${this._rangeKey === "6m"}>Last 6 months</option>
+                    <option value="1y" ?selected=${this._rangeKey === "1y"}>Last year</option>
+                  </select>
+                  <div class="ctrl-sep"></div>
+                  <div class="toggle-group">
+                    <button
+                      class="toggle-btn ${this._historyView === "total" ? "active" : ""}"
+                      @click=${() => {
+                        this._historyView = "total";
+                      }}
+                    >
+                      Total
+                    </button>
+                    <button
+                      class="toggle-btn ${this._historyView === "datasource" ? "active" : ""}"
+                      @click=${() => {
+                        this._historyView = "datasource";
+                      }}
+                    >
+                      Per datasource
+                    </button>
+                  </div>
+                </div>
+              </chart-card>
             </div>
-          </chart-card>
-        </div>
-      ` : html``}
+          `
+        : html``}
     `;
   }
 }

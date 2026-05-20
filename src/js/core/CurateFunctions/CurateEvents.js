@@ -27,8 +27,7 @@ class EventDelegator {
     const handlerId = this.nextHandlerId++;
 
     // Normalize options (handle boolean for useCapture)
-    const normalizedOptions =
-      typeof options === "boolean" ? { capture: options } : { ...options };
+    const normalizedOptions = typeof options === "boolean" ? { capture: options } : { ...options };
 
     // Ensure we have a document listener for this event type
     this._ensureDocumentListener(type, normalizedOptions.capture);
@@ -103,16 +102,8 @@ class EventDelegator {
   removeAllEventListeners() {
     // Clean up all document listeners
     for (const eventType of this.documentListeners) {
-      document.removeEventListener(
-        eventType,
-        this._getDocumentHandler(eventType),
-        true
-      );
-      document.removeEventListener(
-        eventType,
-        this._getDocumentHandler(eventType),
-        false
-      );
+      document.removeEventListener(eventType, this._getDocumentHandler(eventType), true);
+      document.removeEventListener(eventType, this._getDocumentHandler(eventType), false);
     }
 
     this.handlers.clear();
@@ -177,10 +168,7 @@ class EventDelegator {
             if (options.once) {
               // Find and remove this specific handler
               for (const [handlerId, handler] of handlersMap) {
-                if (
-                  handler.selector === selector &&
-                  handler.callback === callback
-                ) {
+                if (handler.selector === selector && handler.callback === callback) {
                   this.removeEventListener(handlerId);
                   break;
                 }
@@ -206,26 +194,17 @@ class EventDelegator {
     const bubbleKey = `${eventType}-false`;
 
     // Check if we still need listeners for this event type
-    const stillHasHandlers =
-      this.handlers.has(eventType) && this.handlers.get(eventType).size > 0;
+    const stillHasHandlers = this.handlers.has(eventType) && this.handlers.get(eventType).size > 0;
 
     if (!stillHasHandlers) {
       if (this.documentListeners.has(captureKey)) {
-        document.removeEventListener(
-          eventType,
-          this[`_${captureKey}Handler`],
-          true
-        );
+        document.removeEventListener(eventType, this[`_${captureKey}Handler`], true);
         this.documentListeners.delete(captureKey);
         delete this[`_${captureKey}Handler`];
       }
 
       if (this.documentListeners.has(bubbleKey)) {
-        document.removeEventListener(
-          eventType,
-          this[`_${bubbleKey}Handler`],
-          false
-        );
+        document.removeEventListener(eventType, this[`_${bubbleKey}Handler`], false);
         this.documentListeners.delete(bubbleKey);
         delete this[`_${bubbleKey}Handler`];
       }

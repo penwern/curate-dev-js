@@ -9,17 +9,17 @@
  * @returns {Array} Filtered emails
  */
 export function searchEmails(emails, query) {
-  if (!query || query.trim() === '') {
+  if (!query || query.trim() === "") {
     return emails;
   }
 
   const lowerQuery = query.toLowerCase().trim();
 
-  return emails.filter(email => {
-    const fromName = email.from.name?.toLowerCase() || '';
-    const fromEmail = email.from.email?.toLowerCase() || '';
-    const subject = email.subject?.toLowerCase() || '';
-    const snippet = email.snippet?.toLowerCase() || '';
+  return emails.filter((email) => {
+    const fromName = email.from.name?.toLowerCase() || "";
+    const fromEmail = email.from.email?.toLowerCase() || "";
+    const subject = email.subject?.toLowerCase() || "";
+    const snippet = email.snippet?.toLowerCase() || "";
 
     return (
       fromName.includes(lowerQuery) ||
@@ -37,25 +37,25 @@ export function searchEmails(emails, query) {
  * @param {string} direction - Sort direction (asc, desc)
  * @returns {Array} Sorted emails
  */
-export function sortEmails(emails, sortBy = 'date', direction = 'desc') {
+export function sortEmails(emails, sortBy = "date", direction = "desc") {
   const sorted = [...emails].sort((a, b) => {
     let comparison = 0;
 
     switch (sortBy) {
-      case 'date':
+      case "date":
         comparison = new Date(a.date) - new Date(b.date);
         break;
-      case 'from':
+      case "from":
         comparison = (a.from.name || a.from.email).localeCompare(b.from.name || b.from.email);
         break;
-      case 'subject':
+      case "subject":
         comparison = a.subject.localeCompare(b.subject);
         break;
       default:
         comparison = 0;
     }
 
-    return direction === 'desc' ? -comparison : comparison;
+    return direction === "desc" ? -comparison : comparison;
   });
 
   return sorted;

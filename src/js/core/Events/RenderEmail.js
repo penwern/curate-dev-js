@@ -2,7 +2,8 @@ import { mdiOpenInNew, mdiEye } from "@mdi/js";
 import { Curate } from "../CurateFunctions/CurateFunctions";
 import { openEmailViewerPage } from "../../custom-pages/routes/email-viewer.js";
 // Create icon SVG helper (plain HTML strings, not Lit templates)
-const createIconSVG = (path) => `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;display:flex;align-items:center;"><path d="${path}"></path></svg>`;
+const createIconSVG = (path) =>
+  `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;display:flex;align-items:center;"><path d="${path}"></path></svg>`;
 
 // Create icon SVGs
 const openIcon = createIconSVG(mdiOpenInNew);
@@ -31,7 +32,7 @@ const actionPopup = new Curate.ui.modals.curatePopup(
         </div>
       </div>
     `,
-    buttonType: "close"
+    buttonType: "close",
   },
   {
     afterLoaded: (container) => {
@@ -72,7 +73,8 @@ const actionPopup = new Curate.ui.modals.curatePopup(
         }
 
         const workspaceId =
-          (typeof Curate.workspaces?.getOpenWorkspace === "function" && Curate.workspaces.getOpenWorkspace()) ||
+          (typeof Curate.workspaces?.getOpenWorkspace === "function" &&
+            Curate.workspaces.getOpenWorkspace()) ||
           (typeof nodeToRender.getRepositoryId === "function" && nodeToRender.getRepositoryId()) ||
           nodeToRender._repositoryId ||
           nodeToRender.Repository;
@@ -84,7 +86,10 @@ const actionPopup = new Curate.ui.modals.curatePopup(
           "";
 
         if (!workspaceId || !rawPath) {
-          console.warn("RenderEmail: Missing workspace or path for email viewer.", { workspaceId, rawPath });
+          console.warn("RenderEmail: Missing workspace or path for email viewer.", {
+            workspaceId,
+            rawPath,
+          });
           return;
         }
 
@@ -93,15 +98,15 @@ const actionPopup = new Curate.ui.modals.curatePopup(
         openEmailViewerPage({
           archiveWorkspace: workspaceId,
           archivePath,
-          archiveMode: "curate"
+          archiveMode: "curate",
         });
       });
     },
     afterClosed: () => {
       console.log("Popup closed");
       pendingNode = null;
-    }
-  }
+    },
+  },
 );
 
 const handleEmailFileAction = async (node) => {
@@ -145,19 +150,20 @@ Curate.eventDelegator.addEventListener(
         e.stopImmediatePropagation();
 
         const workspaceId =
-          (typeof Curate.workspaces?.getOpenWorkspace === "function" && Curate.workspaces.getOpenWorkspace()) ||
+          (typeof Curate.workspaces?.getOpenWorkspace === "function" &&
+            Curate.workspaces.getOpenWorkspace()) ||
           (typeof node.getRepositoryId === "function" && node.getRepositoryId()) ||
           node._repositoryId ||
           node.Repository;
 
         const rawPath =
-          (typeof node.getPath === "function" && node.getPath()) ||
-          node.Path ||
-          node._path ||
-          "";
+          (typeof node.getPath === "function" && node.getPath()) || node.Path || node._path || "";
 
         if (!workspaceId || !rawPath) {
-          console.warn("RenderEmail: Missing workspace or path for single EML viewer.", { workspaceId, rawPath });
+          console.warn("RenderEmail: Missing workspace or path for single EML viewer.", {
+            workspaceId,
+            rawPath,
+          });
           return false;
         }
 
@@ -166,12 +172,12 @@ Curate.eventDelegator.addEventListener(
         openEmailViewerPage({
           archiveWorkspace: workspaceId,
           archivePath,
-          archiveMode: "single-eml"
+          archiveMode: "single-eml",
         });
 
         return false;
       }
     }
   },
-  true
+  true,
 ); // Use capture phase

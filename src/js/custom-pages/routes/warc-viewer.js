@@ -93,9 +93,7 @@ async function ensureReplayServiceWorker() {
   }
 
   try {
-    const existing = await navigator.serviceWorker.getRegistration(
-      REPLAY_SW_SCOPE
-    );
+    const existing = await navigator.serviceWorker.getRegistration(REPLAY_SW_SCOPE);
     if (existing) {
       await waitForActivation(existing);
       return existing;
@@ -178,7 +176,7 @@ export function registerWarcViewerRoute() {
       title: "Web Archive Viewer",
       showHeader: true,
       allowUrlAccess: false,
-    }
+    },
   );
 }
 

@@ -92,7 +92,7 @@ class AsTreeView extends LitElement {
         new CustomEvent("scroll-near-end", {
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
   }
@@ -103,7 +103,7 @@ class AsTreeView extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -113,7 +113,7 @@ class AsTreeView extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -123,19 +123,19 @@ class AsTreeView extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   _handleRecordToggle(e) {
-    console.log('[TreeView] _handleRecordToggle - re-dispatching event', e.detail);
+    console.log("[TreeView] _handleRecordToggle - re-dispatching event", e.detail);
     e.stopPropagation(); // Stop the original event from bubbling further
     this.dispatchEvent(
       new CustomEvent("record-toggle", {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -145,7 +145,7 @@ class AsTreeView extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -155,7 +155,7 @@ class AsTreeView extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

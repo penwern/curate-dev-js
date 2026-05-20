@@ -2,7 +2,7 @@ async function submitPreservationRequest(configId) {
   const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
   const url = `${window.location.origin}/a/scheduler/hooks/preserve`;
   const paths = pydio._dataModel._selectedNodes.map(
-    (n) => Curate.workspaces.getOpenWorkspace() + n._path
+    (n) => Curate.workspaces.getOpenWorkspace() + n._path,
   );
   const bodyData = JSON.stringify({
     Paths: paths,
@@ -45,9 +45,8 @@ async function submitPreservationRequest(configId) {
 // Stores the configs in sessionStorage under the key "preservationConfigs"
 async function getPreservationConfigs() {
   let url;
-  const endpoint = window.preservationMode === "new-go" 
-    ? "/api/v1/preservation-configs" 
-    : "/api/preservation";
+  const endpoint =
+    window.preservationMode === "new-go" ? "/api/v1/preservation-configs" : "/api/preservation";
   if (window.curateDebug) {
     console.log(`Preservation endpoint: ${endpoint}`);
   }
@@ -91,19 +90,13 @@ function createDivBesideElement(targetElement, content, childItems) {
     c.addEventListener("click", (e) => {
       if (e.target.classList.contains("mdi-star-outline")) {
         console.info("bookmarked!");
-        localStorage.setItem(
-          item.id,
-          JSON.stringify({ name: item.name, bookmarked: true })
-        );
+        localStorage.setItem(item.id, JSON.stringify({ name: item.name, bookmarked: true }));
         e.target.classList.remove("mdi-star-outline");
         e.target.classList.add("mdi-star");
         div.remove();
       } else if (e.target.classList.contains("mdi-star")) {
         console.info("un-bookmarked!");
-        localStorage.setItem(
-          item.id,
-          JSON.stringify({ name: item.name, bookmarked: false })
-        );
+        localStorage.setItem(item.id, JSON.stringify({ name: item.name, bookmarked: false }));
         e.target.classList.remove("mdi-star");
         e.target.classList.add("mdi-star-outline");
         div.remove();
@@ -146,11 +139,9 @@ function createDivBesideElement(targetElement, content, childItems) {
             window.preservationMode === "new-go"
               ? document.createElement("preservation-go-config-manager")
               : document.createElement("preservation-config-manager");
-          popup
-            .querySelector(".config-main-options-container")
-            .appendChild(configsInterface);
+          popup.querySelector(".config-main-options-container").appendChild(configsInterface);
         },
-      }
+      },
     ).fire();
   });
   div.querySelector('[role="menu"]').appendChild(noConfigs);
@@ -208,19 +199,12 @@ function createMenuItem(label, iconClass, fontSize = "16px", padding = "5px") {
   return clone;
 }
 function addPreservationWorkflows(menu) {
-  const savedConfigs = JSON.parse(
-    sessionStorage.getItem("preservationConfigs")
-  );
+  const savedConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs"));
   const standardPreserveKeyw = "Preserve";
   setTimeout(() => {
     for (const a of menu.querySelectorAll("div")) {
       if (a.innerText == standardPreserveKeyw) {
-        const clone = createMenuItem(
-          "Preservation Configs",
-          "mdi-menu-right",
-          "24px",
-          "0px"
-        );
+        const clone = createMenuItem("Preservation Configs", "mdi-menu-right", "24px", "0px");
         menu.insertBefore(clone, a.nextSibling); // Insert the clone underneath the found element
         const placedDiv = document.querySelector("#preservationConfigDropdown");
         const clickCodes = [1, 3];
@@ -229,11 +213,7 @@ function addPreservationWorkflows(menu) {
         placedDiv.addEventListener("click", (e) => {
           const content =
             '<div style="color: var(--md-sys-color-inverse-surface); background-color: transparent; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; box-sizing: border-box; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px; border-radius: 20px; position: fixed; z-index: 2100; opacity: 1; transform: scale(1, 1); transform-origin: left top; max-height: 963px; overflow-y: auto;"><div style="max-height: 100%; overflow-y: auto; transform: scaleX(1); opacity: 1; transform-origin: left top; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div style="opacity: 1; transform: scaleY(1); transform-origin: left top; transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div role="presentation" style="z-index: 1000; position: relative; width: 192px;max-height:10em;"><div role="menu" style="padding: 16px 0px; display: table-cell; user-select: none; width: 192px;"></div></div></div></div></div>';
-          const subMenuDiv = createDivBesideElement(
-            placedDiv,
-            content,
-            savedConfigs
-          ); //create submenu
+          const subMenuDiv = createDivBesideElement(placedDiv, content, savedConfigs); //create submenu
           setTimeout(() => {
             document.addEventListener(
               "mousedown",
@@ -244,14 +224,12 @@ function addPreservationWorkflows(menu) {
                   }
                 }
               },
-              { once: true }
+              { once: true },
             );
           }, 100);
         });
         savedConfigs.forEach((config) => {
-          const bookmark = JSON.parse(
-            localStorage.getItem(config.id.toString()) || "{}"
-          );
+          const bookmark = JSON.parse(localStorage.getItem(config.id.toString()) || "{}");
           if (bookmark && bookmark.bookmarked) {
             const markedConfigDiv = createMenuItem(config.name, "mdi-console");
 
@@ -323,27 +301,20 @@ window.addEventListener("load", (e) => {
       (e) => {
         if (
           document.querySelector('.context-menu [role="menu"]') &&
-          document
-            .querySelector('.context-menu [role="menu"]')
-            .contains(e.target)
+          document.querySelector('.context-menu [role="menu"]').contains(e.target)
         ) {
           return;
         }
         if (!document.querySelector(".main-files-list")) {
           return;
         }
-        if (
-          e.which == 3 &&
-          document.querySelector(".main-files-list").contains(e.target)
-        ) {
+        if (e.which == 3 && document.querySelector(".main-files-list").contains(e.target)) {
           if (
             document.querySelector('.context-menu [role="menu"]') &&
             !document.querySelector("#preservationConfigDropdown")
           ) {
             setTimeout(() => {
-              addPreservationWorkflows(
-                document.querySelector('.context-menu [role="menu"]')
-              );
+              addPreservationWorkflows(document.querySelector('.context-menu [role="menu"]'));
             }, 100);
           } else {
             handleMutations(e);
@@ -356,7 +327,7 @@ window.addEventListener("load", (e) => {
           }, 150);
         }
       },
-      150
+      150,
     );
   });
 });

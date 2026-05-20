@@ -3,12 +3,7 @@ import { LitElement, html, css } from "lit";
 import { when } from "lit/directives/when.js";
 import ApiService from "./api-service.js";
 
-import {
-  dbImportIcon,
-  historyIcon,
-  chartLineIcon,
-  sitemapIcon,
-} from "../utils/icons.js";
+import { dbImportIcon, historyIcon, chartLineIcon, sitemapIcon } from "../utils/icons.js";
 
 // Material Web Components
 import "@material/web/tabs/tabs.js";
@@ -75,9 +70,7 @@ class CalmIntegrationInterface extends LitElement {
 
     // Initialize standard properties
     this.activeTab = 0;
-    this.queryFilters = [
-      { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
-    ];
+    this.queryFilters = [{ field: "modified_date", condition: "since", value: "LAST_HARVEST" }];
     this.hasConfig = true; // Initialize as true, will be updated based on API response
     this.showVariablesDialog = false;
     this.manualHarvestMode = "ids";
@@ -278,21 +271,18 @@ class CalmIntegrationInterface extends LitElement {
           job.type === "automated"
             ? "Automated"
             : job.type === "manual_id"
-            ? "Manual (IDs)"
-            : job.type === "manual_search"
-            ? "Manual (Search)"
-            : (job.type || "Manual");
+              ? "Manual (IDs)"
+              : job.type === "manual_search"
+                ? "Manual (Search)"
+                : job.type || "Manual";
 
-        const isSuccessful =
-          job.status === "success" || job.status === "partial_success";
+        const isSuccessful = job.status === "success" || job.status === "partial_success";
 
         return {
           id: job.job_id,
           date: new Date(job.start_time).toLocaleString("en-GB"),
           status:
-            job.status === "success" || job.status === "partial_success"
-              ? "completed"
-              : job.status,
+            job.status === "success" || job.status === "partial_success" ? "completed" : job.status,
           source: typeLabel,
           attempted: job.records_attempted ?? 0,
           successful: job.records_successful ?? 0,
@@ -301,7 +291,7 @@ class CalmIntegrationInterface extends LitElement {
             ? this._calculateDuration(job.start_time, job.end_time)
             : "In progress",
           success: isSuccessful,
-          error: job.status === "failed" ? (job.summary_message || "") : null,
+          error: job.status === "failed" ? job.summary_message || "" : null,
           summary: job.summary_message || "",
         };
       });
@@ -340,9 +330,7 @@ class CalmIntegrationInterface extends LitElement {
         // Valid configuration exists
         this.hasConfig = true;
         // Ensure we always have an array
-        this.queryFilters = Array.isArray(response.criteria_json)
-          ? response.criteria_json
-          : [];
+        this.queryFilters = Array.isArray(response.criteria_json) ? response.criteria_json : [];
       } else {
         // Fallback - treat as no config if response structure is unexpected
         this.hasConfig = false;
@@ -355,9 +343,7 @@ class CalmIntegrationInterface extends LitElement {
 
       // Only show error if it's not a "no config found" type error
       if (!error.message.includes("No automated harvest configuration")) {
-        this._showError(
-          `Failed to load automated harvest configuration: ${error.message}`
-        );
+        this._showError(`Failed to load automated harvest configuration: ${error.message}`);
       }
     } finally {
       this.isLoadingConfig = false;
@@ -412,14 +398,12 @@ class CalmIntegrationInterface extends LitElement {
             // Apply any additional updates (like condition reset)
             ...(additionalUpdates || {}),
           }
-        : filter
+        : filter,
     );
   }
 
   _handleRemoveQueryFilter(e) {
-    this.queryFilters = this.queryFilters.filter(
-      (_, i) => i !== e.detail.index
-    );
+    this.queryFilters = this.queryFilters.filter((_, i) => i !== e.detail.index);
   }
 
   _handleAddQueryFilter() {
@@ -463,22 +447,21 @@ class CalmIntegrationInterface extends LitElement {
       this.isManualSearching = true; // Set immediately after guard
       this.manualSearchResults = [];
 
-      const response = await this.apiService.searchCalmRecords(
-        this.manualSearchTerm
-      );
+      const response = await this.apiService.searchCalmRecords(this.manualSearchTerm);
 
-      this.manualSearchResults = (response.records || []).filter(r => !r?.already_harvested).map((record) => {
-        // Prefer CALM RefNo (human identifier), fallback to `id` then GUID
-        const chosenId =
-          record?.RefNo || record?.id || record?.RecordID || "";
-        return {
-          id: chosenId,
-          title: record?.Title || `Record ${chosenId}`,
-          collection: "CALM Collection",
-          modified: record?.Date || "Unknown",
-          selected: false,
-        };
-      });
+      this.manualSearchResults = (response.records || [])
+        .filter((r) => !r?.already_harvested)
+        .map((record) => {
+          // Prefer CALM RefNo (human identifier), fallback to `id` then GUID
+          const chosenId = record?.RefNo || record?.id || record?.RecordID || "";
+          return {
+            id: chosenId,
+            title: record?.Title || `Record ${chosenId}`,
+            collection: "CALM Collection",
+            modified: record?.Date || "Unknown",
+            selected: false,
+          };
+        });
     } catch (error) {
       this._showError(`Search failed: ${error.message}`);
     } finally {
@@ -495,7 +478,7 @@ class CalmIntegrationInterface extends LitElement {
 
   _handleToggleRecordSelection(e) {
     this.manualSearchResults = this.manualSearchResults.map((r, i) =>
-      i === e.detail.index ? { ...r, selected: !r.selected } : r
+      i === e.detail.index ? { ...r, selected: !r.selected } : r,
     );
   }
 
@@ -568,9 +551,7 @@ class CalmIntegrationInterface extends LitElement {
   }
 
   resetForm() {
-    this.queryFilters = [
-      { field: "modified_date", condition: "since", value: "LAST_HARVEST" },
-    ];
+    this.queryFilters = [{ field: "modified_date", condition: "since", value: "LAST_HARVEST" }];
     this.hasConfig = true; // Reset to having config when resetting to defaults
   }
 
@@ -590,7 +571,7 @@ class CalmIntegrationInterface extends LitElement {
 
       await this.apiService.saveAutomatedHarvestConfig(
         criteriaJson,
-        true // Automation is always enabled when criteria are saved
+        true, // Automation is always enabled when criteria are saved
       );
 
       // After successful save, mark as having config
@@ -620,7 +601,7 @@ class CalmIntegrationInterface extends LitElement {
 
       this._showSuccess(
         `Harvest job ${result.job_id} started successfully. ` +
-          `${result.records_successful}/${result.records_attempted} records processed.`
+          `${result.records_successful}/${result.records_attempted} records processed.`,
       );
 
       // Clear the input and refresh history
@@ -646,14 +627,11 @@ class CalmIntegrationInterface extends LitElement {
     try {
       this.isManualHarvesting = true; // Set immediately after guard
 
-      const result = await this.apiService.harvestByIds(
-        ids,
-        "Manual Search Selection"
-      );
+      const result = await this.apiService.harvestByIds(ids, "Manual Search Selection");
 
       this._showSuccess(
         `Harvest job ${result.job_id} started successfully. ` +
-          `${result.records_successful}/${result.records_attempted} records processed.`
+          `${result.records_successful}/${result.records_attempted} records processed.`,
       );
 
       this.manualSearchResults = [];
@@ -670,11 +648,8 @@ class CalmIntegrationInterface extends LitElement {
   render() {
     return html`
       <div class="content-wrapper">
-        <md-tabs
-          @change=${this.handleTabChange}
-          .activeTabIndex=${this.activeTab}
-        >
-                    <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
+        <md-tabs @change=${this.handleTabChange} .activeTabIndex=${this.activeTab}>
+          <md-primary-tab>${dbImportIcon} Manual Harvest</md-primary-tab>
           <md-primary-tab>${historyIcon} History</md-primary-tab>
           <md-primary-tab>${chartLineIcon} Analytics</md-primary-tab>
           <md-primary-tab>${sitemapIcon} Mappings</md-primary-tab>
@@ -688,7 +663,8 @@ class CalmIntegrationInterface extends LitElement {
                 </div>
               `
             : ""}
-          ${when(this.activeTab === -1,
+          ${when(
+            this.activeTab === -1,
             () =>
               html`<configuration-tab-content
                 .queryFilters=${this.queryFilters}
@@ -699,7 +675,7 @@ class CalmIntegrationInterface extends LitElement {
                 @add-query-filter=${this._handleAddQueryFilter}
                 @reset-configuration=${this._handleResetConfiguration}
                 @save-configuration=${this._handleSaveConfiguration}
-              ></configuration-tab-content>`
+              ></configuration-tab-content>`,
           )}
           ${when(
             this.activeTab === 0,
@@ -718,9 +694,8 @@ class CalmIntegrationInterface extends LitElement {
                 @toggle-select-all=${this._handleToggleSelectAll}
                 @toggle-record-selection=${this._handleToggleRecordSelection}
                 @run-harvest-ids=${this._handleRunHarvestIds}
-                @run-harvest-selected-records=${this
-                  ._handleRunHarvestSelectedRecords}
-              ></calm-manual-harvest-tab-content>`
+                @run-harvest-selected-records=${this._handleRunHarvestSelectedRecords}
+              ></calm-manual-harvest-tab-content>`,
           )}
           ${when(
             this.activeTab === 1,
@@ -731,7 +706,7 @@ class CalmIntegrationInterface extends LitElement {
                 .isLoading=${this.isLoadingHistory}
                 @toggle-history-expansion=${this._handleToggleHistoryExpansion}
                 @refresh-history=${() => this._refreshHarvestHistory()}
-              ></calm-history-tab-content>`
+              ></calm-history-tab-content>`,
           )}
           ${when(
             this.activeTab === 2,
@@ -741,7 +716,7 @@ class CalmIntegrationInterface extends LitElement {
                 .selectedChart=${this.selectedChart}
                 .apiService=${this.apiService}
                 @select-chart-type=${this._handleSelectChartType}
-              ></calm-analytics-tab-content>`
+              ></calm-analytics-tab-content>`,
           )}
           ${when(
             this.activeTab === 3,
@@ -756,22 +731,17 @@ class CalmIntegrationInterface extends LitElement {
                 @refresh-mapping-data=${this._handleRefreshMappingData}
                 @refresh-cached-count=${this._handleRefreshCachedCount}
                 @show-error=${this._handleShowError}
-              ></calm-metadata-mapping-tab-content>`
+              ></calm-metadata-mapping-tab-content>`,
           )}
         </div>
       </div>
 
       <!-- Success Dialog -->
-      <md-dialog
-        ?open=${this.showSuccessDialog}
-        @closed=${() => (this.showSuccessDialog = false)}
-      >
+      <md-dialog ?open=${this.showSuccessDialog} @closed=${() => (this.showSuccessDialog = false)}>
         <div slot="headline">Success</div>
         <div slot="content">${this.successDialogMessage}</div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showSuccessDialog = false)}
-            >Close</md-text-button
-          >
+          <md-text-button @click=${() => (this.showSuccessDialog = false)}>Close</md-text-button>
         </div>
       </md-dialog>
 
@@ -783,8 +753,8 @@ class CalmIntegrationInterface extends LitElement {
         <div slot="headline">Dynamic Date Variables</div>
         <div slot="content" class="variables-dialog-content">
           <p>
-            You can use the following dynamic variables in the 'Value' field for
-            any date-based criteria.
+            You can use the following dynamic variables in the 'Value' field for any date-based
+            criteria.
           </p>
           <dl>
             <dt>LAST_HARVEST</dt>
@@ -798,9 +768,7 @@ class CalmIntegrationInterface extends LitElement {
           </dl>
         </div>
         <div slot="actions">
-          <md-text-button @click=${() => (this.showVariablesDialog = false)}
-            >Got it</md-text-button
-          >
+          <md-text-button @click=${() => (this.showVariablesDialog = false)}>Got it</md-text-button>
         </div>
       </md-dialog>
 
@@ -821,9 +789,3 @@ class CalmIntegrationInterface extends LitElement {
 
 customElements.define("calm-integration-interface", CalmIntegrationInterface);
 export default CalmIntegrationInterface;
-
-
-
-
-
-
