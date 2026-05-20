@@ -1,0 +1,11 @@
+# Template/placeholder files (intentionally-invalid syntax)
+src/js/custom-pages/routes/_route-template.js
+
+# Build / vendor / generated
+dist/
+node_modules/
+package-lock.json
+
+# Infrastructure / CI configs — out of lint-adoption scope
+*.yml
+*.yaml

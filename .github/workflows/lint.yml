@@ -1,0 +1,12 @@
+name: lint
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+jobs:
+  lint:
+    uses: penwern/penwern-ci/.github/workflows/reusable-lint.yml@v1
+    with:
+      language: js-vanilla
+    secrets:
+      PENWERN_CI_APP_CLIENT_ID: ${{ secrets.PENWERN_CI_APP_CLIENT_ID }}
+      PENWERN_CI_APP_PRIVATE_KEY: ${{ secrets.PENWERN_CI_APP_PRIVATE_KEY }}
