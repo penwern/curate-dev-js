@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 
 const MAX_EXPORT_ROWS = 10000;
 
@@ -9,7 +9,7 @@ const MAX_EXPORT_ROWS = 10000;
  */
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
@@ -23,7 +23,7 @@ export function downloadBlob(blob, filename) {
  */
 export function exportToCsv(filename, rows) {
   const csv = window.Papa.unparse(rows);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   downloadBlob(blob, filename);
 }
 
@@ -34,7 +34,7 @@ export function exportToCsv(filename, rows) {
  */
 export function exportToJson(filename, data) {
   const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const blob = new Blob([json], { type: "application/json;charset=utf-8;" });
   downloadBlob(blob, filename);
 }
 
@@ -61,8 +61,8 @@ export function exportToXlsx(filename, sheets) {
  */
 export function buildFilename(panel, format, filters = {}) {
   const date = new Date().toISOString().slice(0, 10);
-  const wsPart = filters.workspace ? `-${filters.workspace}` : '';
-  const ext = { csv: 'csv', json: 'json', xlsx: 'xlsx' }[format] ?? format;
+  const wsPart = filters.workspace ? `-${filters.workspace}` : "";
+  const ext = { csv: "csv", json: "json", xlsx: "xlsx" }[format] ?? format;
   return `curate-${panel}${wsPart}-${date}.${ext}`;
 }
 

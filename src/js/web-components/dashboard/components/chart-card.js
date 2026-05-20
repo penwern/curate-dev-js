@@ -89,7 +89,8 @@ class ChartCard extends LitElement {
   _defaultOptions() {
     const style = getComputedStyle(document.documentElement);
     const gridColor = "rgba(192, 199, 205, 0.3)";
-    const textColor = style.getPropertyValue("--md-sys-color-on-surface-variant").trim() || "#41484d";
+    const textColor =
+      style.getPropertyValue("--md-sys-color-on-surface-variant").trim() || "#41484d";
 
     return {
       responsive: true,
@@ -117,22 +118,30 @@ class ChartCard extends LitElement {
           boxPadding: 4,
         },
       },
-      scales: this.type === "doughnut" || this.type === "pie" ? {} : {
-        x: {
-          grid: { color: gridColor, drawBorder: false },
-          ticks: { color: textColor, font: { family: "Roboto", size: 11 } },
-        },
-        y: {
-          grid: { color: gridColor, drawBorder: false },
-          ticks: { color: textColor, font: { family: "Roboto", size: 11 } },
-          beginAtZero: true,
-        },
-      },
+      scales:
+        this.type === "doughnut" || this.type === "pie"
+          ? {}
+          : {
+              x: {
+                grid: { color: gridColor, drawBorder: false },
+                ticks: { color: textColor, font: { family: "Roboto", size: 11 } },
+              },
+              y: {
+                grid: { color: gridColor, drawBorder: false },
+                ticks: { color: textColor, font: { family: "Roboto", size: 11 } },
+                beginAtZero: true,
+              },
+            },
     };
   }
 
   updated(changedProps) {
-    if (changedProps.has("data") || changedProps.has("type") || changedProps.has("options") || changedProps.has("loading")) {
+    if (
+      changedProps.has("data") ||
+      changedProps.has("type") ||
+      changedProps.has("options") ||
+      changedProps.has("loading")
+    ) {
       this._updateChart();
     }
   }
@@ -195,9 +204,13 @@ class ChartCard extends LitElement {
         </div>
         <div class="chart-container" style="height:${this.height}px">
           ${this.loading
-            ? html`<div class="loading-container" style="height:${this.height}px"><penwern-spinner size="56"></penwern-spinner></div>`
+            ? html`<div class="loading-container" style="height:${this.height}px">
+                <penwern-spinner size="56"></penwern-spinner>
+              </div>`
             : isEmpty
-              ? html`<div class="empty-state" style="height:${this.height}px">No data available</div>`
+              ? html`<div class="empty-state" style="height:${this.height}px">
+                  No data available
+                </div>`
               : html`<canvas></canvas>`}
         </div>
       </div>

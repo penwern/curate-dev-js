@@ -35,7 +35,7 @@ function applyScripts(scripts) {
       console.error(
         "Failed to load external library: ",
         script.name,
-        "please reload the page or contact your admin if the issue persists."
+        "please reload the page or contact your admin if the issue persists.",
       );
     };
     // Append the <script> element to the <head> section of the document

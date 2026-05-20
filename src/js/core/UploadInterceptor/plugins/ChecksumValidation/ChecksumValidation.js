@@ -46,11 +46,7 @@ function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) 
   if (hasPremis && hasVirusScan) {
     // Both required metadata exist, safe to apply the integrity tag
     console.log(`Premis and virus scan metadata found for ${filePath}, applying integrity tag.`);
-    updateMetaField(
-      node.Uuid,
-      "usermeta-file-integrity",
-      integrityTag
-    );
+    updateMetaField(node.Uuid, "usermeta-file-integrity", integrityTag);
   } else if (retryCount < maxRetries) {
     // Required metadata not yet available, retry after delay
     const missing = [];
@@ -59,7 +55,7 @@ function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) 
     console.log(
       `Waiting for metadata (${missing.join(", ")}) on ${filePath}. Retrying (${
         retryCount + 1
-      }/${maxRetries})...`
+      }/${maxRetries})...`,
     );
     setTimeout(() => {
       waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount + 1);
@@ -67,13 +63,9 @@ function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) 
   } else {
     // Max retries reached, apply tag anyway
     console.warn(
-      `Max retries reached waiting for required metadata on ${filePath}. Applying integrity tag anyway.`
+      `Max retries reached waiting for required metadata on ${filePath}. Applying integrity tag anyway.`,
     );
-    updateMetaField(
-      node.Uuid,
-      "usermeta-file-integrity",
-      integrityTag
-    );
+    updateMetaField(node.Uuid, "usermeta-file-integrity", integrityTag);
   }
 }
 
@@ -109,9 +101,7 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
   // Retry fetching stats a few times if this occurs.
   if (node.Etag === "temporary" && retryCount < maxRetries) {
     console.log(
-      `Checksum temporary for ${filePath}. Retrying (${
-        retryCount + 1
-      }/${maxRetries})...`
+      `Checksum temporary for ${filePath}. Retrying (${retryCount + 1}/${maxRetries})...`,
     );
     setTimeout(() => {
       fetchCurateStats(filePath, expectedChecksum, retryCount + 1);
@@ -120,11 +110,7 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
     // Checksum matches the expected value.
     console.log(`Checksum validation passed for ${filePath}.`);
     // Defer tag writing until Premis metadata exists
-    waitForPremisAndApplyTag(
-      node,
-      filePath,
-      "✓ Integrity verified"
-    );
+    waitForPremisAndApplyTag(node, filePath, "✓ Integrity verified");
   } else {
     // Checksum mismatch, or max retries for 'temporary' reached.
     console.error(
@@ -133,14 +119,10 @@ function validateChecksum(node, expectedChecksum, filePath, retryCount) {
       expectedChecksum,
       "Received:",
       node.Etag,
-      `(Attempt ${retryCount + 1})`
+      `(Attempt ${retryCount + 1})`,
     );
     // Defer tag writing until Premis metadata exists
-    waitForPremisAndApplyTag(
-      node,
-      filePath,
-      "X Integrity compromised"
-    );
+    waitForPremisAndApplyTag(node, filePath, "X Integrity compromised");
   }
 }
 
@@ -183,12 +165,7 @@ async function generateChecksum(uploadItem) {
       const finalChecksumData = await workerManager.generateChecksum(digestBlob);
       finalChecksum = `${finalChecksumData.hash}-${parts}`; // Append part count
 
-      console.log(
-        "Generated multipart checksum:",
-        finalChecksum,
-        "Parts:",
-        parts
-      );
+      console.log("Generated multipart checksum:", finalChecksum, "Parts:", parts);
     } else {
       // Single part checksum calculation for smaller files.
       const checksumData = await workerManager.generateChecksum(uploadItem._file);
@@ -198,12 +175,7 @@ async function generateChecksum(uploadItem) {
 
     return finalChecksum;
   } catch (error) {
-    console.error(
-      "Client-side checksum generation failed:",
-      error,
-      "for file:",
-      uploadItem._label
-    );
+    console.error("Client-side checksum generation failed:", error, "for file:", uploadItem._label);
     throw error;
   }
 }
@@ -222,7 +194,7 @@ function constructFilePath(uploadItem) {
       const pathname = url.pathname;
 
       // Extract everything after /io/
-      const ioIndex = pathname.indexOf('/io/');
+      const ioIndex = pathname.indexOf("/io/");
       if (ioIndex !== -1) {
         const pathAfterIo = pathname.substring(ioIndex + 4); // +4 to skip '/io/'
         // Decode URI components to handle encoded characters
@@ -277,11 +249,10 @@ function constructFilePath(uploadItem) {
 
 // Export the plugin
 export default {
-  name: 'ChecksumValidation',
+  name: "ChecksumValidation",
 
   hooks: {
     onUploadComplete: async (uploadItem) => {
-
       try {
         // Generate checksum for the uploaded file
         const finalChecksum = await generateChecksum(uploadItem);
@@ -297,15 +268,14 @@ export default {
           // Initiate the checksum validation process using the final path.
           fetchCurateStats(filePath, finalChecksum, 0);
         }, delay);
-
       } catch (error) {
         console.error(
           "ChecksumValidation: Failed to process upload:",
           error,
           "for file:",
-          uploadItem._label
+          uploadItem._label,
         );
       }
-    }
-  }
+    },
+  },
 };

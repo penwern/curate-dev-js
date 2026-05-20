@@ -1,5 +1,5 @@
-import PostalMime from 'postal-mime';
-import DOMPurify from 'dompurify';
+import PostalMime from "postal-mime";
+import DOMPurify from "dompurify";
 
 /**
  * Data service abstraction layer that reads processed archive folders.
@@ -11,9 +11,9 @@ import DOMPurify from 'dompurify';
 const absoluteUrlPattern = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 
 const defaultArchiveConfig = {
-  mode: 'http',
-  basePath: '',
-  workspace: null
+  mode: "http",
+  basePath: "",
+  workspace: null,
 };
 
 let archiveConfig = { ...defaultArchiveConfig };
@@ -23,12 +23,12 @@ const emailBodyCache = new Map();
 const attachmentUrlCache = new Map();
 
 const domPurifyInstance =
-  typeof window !== 'undefined'
-    ? (typeof DOMPurify?.sanitize === 'function'
-        ? DOMPurify
-        : typeof DOMPurify === 'function'
-          ? DOMPurify(window)
-          : null)
+  typeof window !== "undefined"
+    ? typeof DOMPurify?.sanitize === "function"
+      ? DOMPurify
+      : typeof DOMPurify === "function"
+        ? DOMPurify(window)
+        : null
     : null;
 
 /**
@@ -42,7 +42,7 @@ export function setArchiveBasePath(input) {
   manifestPromise = null;
   emailBodyCache.clear();
   for (const url of attachmentUrlCache.values()) {
-    if (typeof url === 'string' && url.startsWith('blob:')) {
+    if (typeof url === "string" && url.startsWith("blob:")) {
       URL.revokeObjectURL(url);
     }
   }
@@ -66,88 +66,88 @@ function resolveHttpBasePath() {
     return archiveConfig.basePath;
   }
 
-  if (typeof window === 'undefined') {
-    return '';
+  if (typeof window === "undefined") {
+    return "";
   }
 
-  const globalBase =
-    window.__CURATE_ARCHIVE_BASE ??
-    window.__CURATE_ARCHIVE_PATH ??
-    '';
-  const queryBase = new URLSearchParams(window.location.search).get('archive');
+  const globalBase = window.__CURATE_ARCHIVE_BASE ?? window.__CURATE_ARCHIVE_PATH ?? "";
+  const queryBase = new URLSearchParams(window.location.search).get("archive");
 
   archiveConfig = {
     ...archiveConfig,
-    basePath: normaliseHttpBasePath(queryBase || globalBase || '')
+    basePath: normaliseHttpBasePath(queryBase || globalBase || ""),
   };
 
   return archiveConfig.basePath;
 }
 
 function detectCurateEnvironment() {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return false;
   }
   return Boolean(window.Curate && window.pydio && window.pydio?.ApiClient);
 }
 
 function normaliseArchiveConfig(input) {
-  if (typeof input === 'object' && input !== null && !Array.isArray(input)) {
-    const mode = (input.mode || '').toString().toLowerCase() || (detectCurateEnvironment() ? 'curate' : 'http');
-    const basePath = mode === 'curate'
-      ? normaliseCurateBasePath(input.basePath ?? input.archivePath ?? '')
-      : normaliseHttpBasePath(input.basePath ?? input.archivePath ?? input.path ?? '');
+  if (typeof input === "object" && input !== null && !Array.isArray(input)) {
+    const mode =
+      (input.mode || "").toString().toLowerCase() ||
+      (detectCurateEnvironment() ? "curate" : "http");
+    const basePath =
+      mode === "curate"
+        ? normaliseCurateBasePath(input.basePath ?? input.archivePath ?? "")
+        : normaliseHttpBasePath(input.basePath ?? input.archivePath ?? input.path ?? "");
     return {
-      mode: mode === 'curate' ? 'curate' : 'http',
+      mode: mode === "curate" ? "curate" : "http",
       basePath,
-      workspace: input.workspace ?? input.workspaceId ?? null
+      workspace: input.workspace ?? input.workspaceId ?? null,
     };
   }
 
-  const asString = (input ?? '').toString();
+  const asString = (input ?? "").toString();
   return {
     ...defaultArchiveConfig,
-    basePath: normaliseHttpBasePath(asString)
+    basePath: normaliseHttpBasePath(asString),
   };
 }
 
 function normaliseHttpBasePath(path) {
   if (!path) {
-    return '';
+    return "";
   }
   if (absoluteUrlPattern.test(path)) {
-    return path.endsWith('/') ? path : `${path}/`;
+    return path.endsWith("/") ? path : `${path}/`;
   }
-  const trimmed = String(path).replace(/\\/g, '/').replace(/\/+$/, '');
+  const trimmed = String(path).replace(/\\/g, "/").replace(/\/+$/, "");
   return trimmed;
 }
 
 function normaliseCurateBasePath(path) {
   if (!path) {
-    return '';
+    return "";
   }
-  const normalised = String(path).replace(/\\/g, '/').trim();
-  if (!normalised.startsWith('/')) {
-    return `/${normalised.replace(/^\/+/, '')}`.replace(/\/+$/, '');
+  const normalised = String(path).replace(/\\/g, "/").trim();
+  if (!normalised.startsWith("/")) {
+    return `/${normalised.replace(/^\/+/, "")}`.replace(/\/+$/, "");
   }
-  return normalised.replace(/\/+$/, '');
+  return normalised.replace(/\/+$/, "");
 }
 
 function normaliseRelativePath(path) {
   if (!path) {
-    return '';
+    return "";
   }
-  return String(path).replace(/\\/g, '/').replace(/^\/+/, '');
+  return String(path).replace(/\\/g, "/").replace(/^\/+/, "");
 }
 
 function joinArchivePath(base, relative) {
   if (!base) {
-    return relative || '';
+    return relative || "";
   }
   if (!relative) {
     return base;
   }
-  return `${base.replace(/\/+$/, '')}/${normaliseRelativePath(relative)}`.replace(/\/{2,}/g, '/');
+  return `${base.replace(/\/+$/, "")}/${normaliseRelativePath(relative)}`.replace(/\/{2,}/g, "/");
 }
 
 function buildHttpResourceUrl(relativePath) {
@@ -163,24 +163,26 @@ function buildHttpResourceUrl(relativePath) {
   const normalisedRelative = normaliseRelativePath(relativePath);
 
   if (!base) {
-    return normalisedRelative || 'manifest.json';
+    return normalisedRelative || "manifest.json";
   }
 
   if (absoluteUrlPattern.test(base)) {
-    const baseUrl = base.endsWith('/') ? base : `${base}/`;
+    const baseUrl = base.endsWith("/") ? base : `${base}/`;
     return new URL(normalisedRelative, baseUrl).toString();
   }
 
-  return `${base}/${normalisedRelative}`.replace(/\/{2,}/g, '/');
+  return `${base}/${normalisedRelative}`.replace(/\/{2,}/g, "/");
 }
 
 async function fetchJson(relativePath) {
-  if (getArchiveMode() === 'curate') {
-    const text = await loadCurateText(relativePath || 'manifest.json');
+  if (getArchiveMode() === "curate") {
+    const text = await loadCurateText(relativePath || "manifest.json");
     try {
       return JSON.parse(text);
     } catch (error) {
-      throw new Error(`Failed to parse ${relativePath || 'manifest.json'} as JSON: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to parse ${relativePath || "manifest.json"} as JSON: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -192,7 +194,7 @@ async function fetchJson(relativePath) {
 }
 
 async function fetchText(relativePath) {
-  if (getArchiveMode() === 'curate') {
+  if (getArchiveMode() === "curate") {
     return loadCurateText(relativePath);
   }
 
@@ -204,19 +206,19 @@ async function fetchText(relativePath) {
 }
 
 function inferWorkspaceSlug(workspaceCandidate) {
-  if (!workspaceCandidate || typeof workspaceCandidate !== 'object') {
-    return typeof workspaceCandidate === 'string' ? workspaceCandidate : null;
+  if (!workspaceCandidate || typeof workspaceCandidate !== "object") {
+    return typeof workspaceCandidate === "string" ? workspaceCandidate : null;
   }
-  const possibleKeys = ['slug', 'id', 'uuid', 'workspaceSlug', 'WorkspaceSlug', 'name'];
+  const possibleKeys = ["slug", "id", "uuid", "workspaceSlug", "WorkspaceSlug", "name"];
   for (const key of possibleKeys) {
     if (workspaceCandidate[key]) {
       return workspaceCandidate[key];
     }
   }
-  if (typeof workspaceCandidate.getId === 'function') {
+  if (typeof workspaceCandidate.getId === "function") {
     return workspaceCandidate.getId();
   }
-  if (typeof workspaceCandidate.getSlug === 'function') {
+  if (typeof workspaceCandidate.getSlug === "function") {
     return workspaceCandidate.getSlug();
   }
   return null;
@@ -224,29 +226,30 @@ function inferWorkspaceSlug(workspaceCandidate) {
 
 function resolveCurateBasePath() {
   let basePath = archiveConfig.basePath;
-  if (!basePath && typeof window !== 'undefined') {
-    const globalPath =
-      window.__CURATE_ARCHIVE_PATH ??
-      window.__CURATE_ARCHIVE_BASE ??
-      '';
+  if (!basePath && typeof window !== "undefined") {
+    const globalPath = window.__CURATE_ARCHIVE_PATH ?? window.__CURATE_ARCHIVE_BASE ?? "";
     basePath = normaliseCurateBasePath(globalPath);
   }
 
   if (!basePath) {
-    throw new Error('Curate archive path is not configured.');
+    throw new Error("Curate archive path is not configured.");
   }
 
   const workspace =
     archiveConfig.workspace ??
-    (typeof window !== 'undefined'
+    (typeof window !== "undefined"
       ? inferWorkspaceSlug(window.Curate?.workspaces?.getOpenWorkspace?.())
       : null);
 
-  if (!archiveConfig.basePath || archiveConfig.basePath !== basePath || (workspace && archiveConfig.workspace !== workspace)) {
+  if (
+    !archiveConfig.basePath ||
+    archiveConfig.basePath !== basePath ||
+    (workspace && archiveConfig.workspace !== workspace)
+  ) {
     archiveConfig = {
       ...archiveConfig,
       basePath,
-      workspace: workspace ?? archiveConfig.workspace ?? null
+      workspace: workspace ?? archiveConfig.workspace ?? null,
     };
   }
 
@@ -254,21 +257,21 @@ function resolveCurateBasePath() {
 }
 
 function getCurateClients() {
-  if (typeof window === 'undefined') {
-    throw new Error('Curate SDK is unavailable in the current environment.');
+  if (typeof window === "undefined") {
+    throw new Error("Curate SDK is unavailable in the current environment.");
   }
   const apiClient = window.pydio?.ApiClient;
   const dataModel = window.pydio?._dataModel;
   if (!apiClient || !dataModel) {
-    throw new Error('Curate SDK is not fully initialised.');
+    throw new Error("Curate SDK is not fully initialised.");
   }
   return { apiClient, dataModel };
 }
 
 function callCurateApi(method, context, ...args) {
   return new Promise((resolve, reject) => {
-    if (typeof method !== 'function') {
-      reject(new Error('Curate SDK method is unavailable.'));
+    if (typeof method !== "function") {
+      reject(new Error("Curate SDK method is unavailable."));
       return;
     }
 
@@ -285,15 +288,18 @@ function callCurateApi(method, context, ...args) {
         return;
       }
       settled = true;
-      const normalisedError = error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown Curate SDK error');
+      const normalisedError =
+        error instanceof Error
+          ? error
+          : new Error(typeof error === "string" ? error : "Unknown Curate SDK error");
       reject(normalisedError);
     };
 
     try {
       const maybe = method.call(context, ...args, succeed, fail);
-      if (maybe && typeof maybe.then === 'function') {
+      if (maybe && typeof maybe.then === "function") {
         maybe.then(succeed).catch(fail);
-      } else if (maybe !== undefined && maybe !== null && typeof maybe !== 'boolean' && !settled) {
+      } else if (maybe !== undefined && maybe !== null && typeof maybe !== "boolean" && !settled) {
         succeed(maybe);
       }
     } catch (error) {
@@ -337,21 +343,26 @@ function loadCurateNode(path) {
 
 async function loadCurateText(relativePath) {
   const basePath = resolveCurateBasePath();
-  const targetPath = joinArchivePath(basePath, relativePath || 'manifest.json');
+  const targetPath = joinArchivePath(basePath, relativePath || "manifest.json");
   const node = await loadCurateNode(targetPath);
   const { apiClient } = getCurateClients();
   const content = await callCurateApi(apiClient.getPlainContent, apiClient, node);
 
-  if (typeof content === 'string') {
+  if (typeof content === "string") {
     return content;
   }
   if (content instanceof Blob) {
     return content.text();
   }
-  if (content && typeof content === 'object' && 'text' in content && typeof content.text === 'function') {
+  if (
+    content &&
+    typeof content === "object" &&
+    "text" in content &&
+    typeof content.text === "function"
+  ) {
     return content.text();
   }
-  return content != null ? String(content) : '';
+  return content != null ? String(content) : "";
 }
 
 async function getCurateDownloadInfo(relativePath) {
@@ -360,9 +371,10 @@ async function getCurateDownloadInfo(relativePath) {
   const node = await loadCurateNode(targetPath);
   const { apiClient } = getCurateClients();
   const presignedUrl = await callCurateApi(apiClient.buildPresignedGetUrl, apiClient, node);
-  const url = typeof presignedUrl === 'string'
-    ? presignedUrl
-    : presignedUrl?.url ?? presignedUrl?.signedUrl ?? presignedUrl?.link ?? null;
+  const url =
+    typeof presignedUrl === "string"
+      ? presignedUrl
+      : (presignedUrl?.url ?? presignedUrl?.signedUrl ?? presignedUrl?.link ?? null);
 
   if (!url) {
     throw new Error(`Unable to obtain presigned URL for ${relativePath}.`);
@@ -387,9 +399,9 @@ async function loadCurateBlob(relativePath) {
 
 function sanitiseHtml(html) {
   if (!html) {
-    return '';
+    return "";
   }
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return html;
   }
   if (domPurifyInstance?.sanitize) {
@@ -400,41 +412,37 @@ function sanitiseHtml(html) {
 
 async function parseEmlContent(emlText) {
   const parser = new PostalMime();
-  const payload =
-    typeof emlText === 'string'
-      ? new TextEncoder().encode(emlText)
-      : emlText;
+  const payload = typeof emlText === "string" ? new TextEncoder().encode(emlText) : emlText;
 
   const parsed = await parser.parse(payload);
-  const html = parsed.html || parsed.textAsHtml || '';
-  const text = parsed.text || '';
+  const html = parsed.html || parsed.textAsHtml || "";
+  const text = parsed.text || "";
 
   return {
     html: sanitiseHtml(html),
-    text
+    text,
   };
 }
 
 async function parseEmlWithMetadata(emlText) {
   const parser = new PostalMime();
-  const payload =
-    typeof emlText === 'string'
-      ? new TextEncoder().encode(emlText)
-      : emlText;
+  const payload = typeof emlText === "string" ? new TextEncoder().encode(emlText) : emlText;
 
   const parsed = await parser.parse(payload);
-  const html = parsed.html || parsed.textAsHtml || '';
-  const text = parsed.text || '';
+  const html = parsed.html || parsed.textAsHtml || "";
+  const text = parsed.text || "";
 
   const from = parsed.from
-    ? { name: parsed.from.name || '', email: parsed.from.address || '' }
+    ? { name: parsed.from.name || "", email: parsed.from.address || "" }
     : null;
   const normaliseAddressList = (list) =>
     Array.isArray(list)
-      ? list.map((item) => ({
-          name: item.name || '',
-          email: item.address || ''
-        })).filter((item) => item.email || item.name)
+      ? list
+          .map((item) => ({
+            name: item.name || "",
+            email: item.address || "",
+          }))
+          .filter((item) => item.email || item.name)
       : [];
 
   const to = normaliseAddressList(parsed.to);
@@ -443,7 +451,7 @@ async function parseEmlWithMetadata(emlText) {
   const replyToList = normaliseAddressList(parsed.replyTo);
   const replyTo = replyToList.length > 0 ? replyToList : null;
 
-  const subject = parsed.subject || '(No subject)';
+  const subject = parsed.subject || "(No subject)";
   let date = null;
   if (parsed.date) {
     if (parsed.date instanceof Date) {
@@ -456,8 +464,8 @@ async function parseEmlWithMetadata(emlText) {
     }
   }
 
-  const messageId = parsed.messageId || parsed.headers?.['message-id'] || null;
-  const inReplyTo = parsed.inReplyTo || parsed.headers?.['in-reply-to'] || null;
+  const messageId = parsed.messageId || parsed.headers?.["message-id"] || null;
+  const inReplyTo = parsed.inReplyTo || parsed.headers?.["in-reply-to"] || null;
   const referencesHeader = parsed.references || parsed.headers?.references || null;
   const references = Array.isArray(referencesHeader)
     ? referencesHeader
@@ -465,18 +473,18 @@ async function parseEmlWithMetadata(emlText) {
       ? [referencesHeader]
       : [];
 
-  const rawHtml = html || '';
+  const rawHtml = html || "";
   const sanitizedHtml = sanitiseHtml(rawHtml);
 
-  const snippetSource = text || rawHtml.replace(/<[^>]+>/g, ' ');
-  const snippet = snippetSource.replace(/\s+/g, ' ').trim().slice(0, 200);
+  const snippetSource = text || rawHtml.replace(/<[^>]+>/g, " ");
+  const snippet = snippetSource.replace(/\s+/g, " ").trim().slice(0, 200);
 
   const hasExternalImages = /<img[^>]+src=["']https?:/i.test(rawHtml);
 
   const attachments = Array.isArray(parsed.attachments)
     ? parsed.attachments.map((att, index) => {
         const sizeFromContent =
-          att.content && typeof att.content === 'object' && 'byteLength' in att.content
+          att.content && typeof att.content === "object" && "byteLength" in att.content
             ? att.content.byteLength
             : ArrayBuffer.isView(att.content)
               ? att.content.byteLength
@@ -489,43 +497,47 @@ async function parseEmlWithMetadata(emlText) {
             if (att.content instanceof ArrayBuffer) {
               bytes = new Uint8Array(att.content);
             } else if (ArrayBuffer.isView(att.content)) {
-              bytes = new Uint8Array(att.content.buffer, att.content.byteOffset, att.content.byteLength);
+              bytes = new Uint8Array(
+                att.content.buffer,
+                att.content.byteOffset,
+                att.content.byteLength,
+              );
             } else {
               bytes = null;
             }
 
             if (bytes) {
-              let binary = '';
+              let binary = "";
               for (let i = 0; i < bytes.byteLength; i += 1) {
                 binary += String.fromCharCode(bytes[i]);
               }
-              const base64 = typeof btoa === 'function' ? btoa(binary) : null;
+              const base64 = typeof btoa === "function" ? btoa(binary) : null;
               if (base64) {
-                const mime = att.mimeType || 'application/octet-stream';
+                const mime = att.mimeType || "application/octet-stream";
                 dataUrl = `data:${mime};base64,${base64}`;
               }
             }
           } catch (error) {
-            console.warn('Failed to create data URL for attachment', error);
+            console.warn("Failed to create data URL for attachment", error);
           }
         }
 
-        const mimeLower = (att.mimeType || '').toLowerCase();
+        const mimeLower = (att.mimeType || "").toLowerCase();
         const isLikelyInlineImage =
-          mimeLower.startsWith('image/') &&
+          mimeLower.startsWith("image/") &&
           (att.inline === true ||
             att.related === true ||
             att.contentId != null ||
-            att.disposition === 'inline');
+            att.disposition === "inline");
         const isInline = Boolean(isLikelyInlineImage);
 
         return {
           filename: att.filename || `attachment-${index + 1}`,
           path: dataUrl,
           size: att.size || sizeFromContent || 0,
-          mimeType: att.mimeType || 'application/octet-stream',
+          mimeType: att.mimeType || "application/octet-stream",
           inline: isInline,
-          contentId: att.contentId || null
+          contentId: att.contentId || null,
         };
       })
     : [];
@@ -535,7 +547,7 @@ async function parseEmlWithMetadata(emlText) {
   return {
     body: {
       html: sanitizedHtml,
-      text
+      text,
     },
     emailMeta: {
       id: messageId || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -556,8 +568,8 @@ async function parseEmlWithMetadata(emlText) {
       threadId: null,
       attachments,
       hasExternalImages,
-      hasAttachments
-    }
+      hasAttachments,
+    },
   };
 }
 
@@ -571,7 +583,7 @@ export async function getManifest() {
   }
 
   if (!manifestPromise) {
-    manifestPromise = fetchJson('manifest.json')
+    manifestPromise = fetchJson("manifest.json")
       .then((data) => {
         manifestCache = data;
         return data;
@@ -592,7 +604,7 @@ export async function getManifest() {
  */
 export async function getEmailBody(emailId) {
   if (!emailId) {
-    return { html: '', text: '' };
+    return { html: "", text: "" };
   }
 
   if (emailBodyCache.has(emailId)) {
@@ -619,31 +631,36 @@ export async function getEmailBody(emailId) {
  */
 export async function getSingleCurateEmail(absolutePath) {
   if (!absolutePath) {
-    throw new Error('EML path is required to load single email');
+    throw new Error("EML path is required to load single email");
   }
-  const normalisedPath = String(absolutePath).replace(/\\/g, '/');
+  const normalisedPath = String(absolutePath).replace(/\\/g, "/");
   const node = await loadCurateNode(normalisedPath);
   const { apiClient } = getCurateClients();
   const content = await callCurateApi(apiClient.getPlainContent, apiClient, node);
 
   let emlText;
-  if (typeof content === 'string') {
+  if (typeof content === "string") {
     emlText = content;
   } else if (content instanceof Blob) {
     emlText = await content.text();
-  } else if (content && typeof content === 'object' && 'text' in content && typeof content.text === 'function') {
+  } else if (
+    content &&
+    typeof content === "object" &&
+    "text" in content &&
+    typeof content.text === "function"
+  ) {
     emlText = await content.text();
   } else {
-    emlText = content != null ? String(content) : '';
+    emlText = content != null ? String(content) : "";
   }
 
   const { emailMeta, body } = await parseEmlWithMetadata(emlText);
   return {
     email: {
       ...emailMeta,
-      emlPath: normalisedPath
+      emlPath: normalisedPath,
     },
-    body
+    body,
   };
 }
 
@@ -655,11 +672,11 @@ export async function getSingleCurateEmail(absolutePath) {
 export async function getAttachment(attachmentPath, options = {}) {
   const normalisedPath = normaliseRelativePath(attachmentPath);
   if (!normalisedPath) {
-    throw new Error('Attachment path is required');
+    throw new Error("Attachment path is required");
   }
 
   const preferDirectUrl = Boolean(options?.preferDirectUrl);
-  const useDirectUrl = preferDirectUrl && getArchiveMode() === 'curate';
+  const useDirectUrl = preferDirectUrl && getArchiveMode() === "curate";
   const cacheKey = useDirectUrl ? `direct:${normalisedPath}` : normalisedPath;
 
   if (attachmentUrlCache.has(cacheKey)) {
@@ -672,9 +689,10 @@ export async function getAttachment(attachmentPath, options = {}) {
     return directUrl;
   }
 
-  const blob = getArchiveMode() === 'curate'
-    ? await loadCurateBlob(normalisedPath)
-    : await fetchAttachmentBlobHttp(normalisedPath, attachmentPath);
+  const blob =
+    getArchiveMode() === "curate"
+      ? await loadCurateBlob(normalisedPath)
+      : await fetchAttachmentBlobHttp(normalisedPath, attachmentPath);
   const blobUrl = URL.createObjectURL(blob);
   attachmentUrlCache.set(cacheKey, blobUrl);
   return blobUrl;
@@ -683,7 +701,9 @@ export async function getAttachment(attachmentPath, options = {}) {
 async function fetchAttachmentBlobHttp(normalisedPath, originalPathForError) {
   const response = await fetch(buildHttpResourceUrl(normalisedPath));
   if (!response.ok) {
-    throw new Error(`Failed to fetch attachment ${originalPathForError}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch attachment ${originalPathForError}: ${response.status} ${response.statusText}`,
+    );
   }
   return response.blob();
 }
@@ -699,12 +719,12 @@ export async function resolveInlineImage(contentId, attachments = []) {
     return null;
   }
 
-  const strippedContentId = contentId.replace(/[<>]/g, '').trim();
+  const strippedContentId = contentId.replace(/[<>]/g, "").trim();
   const attachment = attachments.find(
     (item) =>
       item.inline &&
-      typeof item.contentId === 'string' &&
-      item.contentId.replace(/[<>]/g, '').trim() === strippedContentId
+      typeof item.contentId === "string" &&
+      item.contentId.replace(/[<>]/g, "").trim() === strippedContentId,
   );
 
   if (!attachment) {

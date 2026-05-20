@@ -159,7 +159,14 @@ export async function searchNodes(query, from = 0, size = 0) {
   });
 }
 
-export async function countByExtension(extension, pathPrefix = [], minDate, maxDate, minSize, maxSize) {
+export async function countByExtension(
+  extension,
+  pathPrefix = [],
+  minDate,
+  maxDate,
+  minSize,
+  maxSize,
+) {
   const query = {
     Extension: extension,
     Type: "LEAF",
@@ -173,7 +180,14 @@ export async function countByExtension(extension, pathPrefix = [], minDate, maxD
   return searchNodes(query, 0, 0);
 }
 
-export async function countByExtensions(extensions, pathPrefix = [], minDate, maxDate, minSize, maxSize) {
+export async function countByExtensions(
+  extensions,
+  pathPrefix = [],
+  minDate,
+  maxDate,
+  minSize,
+  maxSize,
+) {
   const results = {};
   // Batch in groups of 4 to avoid hammering the API
   for (let i = 0; i < extensions.length; i += 4) {
@@ -203,12 +217,17 @@ export async function searchAllFiles(pathPrefix = [], minDate, maxDate, minSize,
 }
 
 export async function getBulkMeta(nodePaths, limit = 200, offset = 0) {
-  return apiCall("POST", "/meta/bulk/get", {
-    NodePaths: nodePaths,
-    AllMetaProviders: true,
-    Limit: limit,
-    Offset: offset,
-  }, TTL_SHORT);
+  return apiCall(
+    "POST",
+    "/meta/bulk/get",
+    {
+      NodePaths: nodePaths,
+      AllMetaProviders: true,
+      Limit: limit,
+      Offset: offset,
+    },
+    TTL_SHORT,
+  );
 }
 
 export async function getRecycleBin(workspaceSlug, limit = 200, offset = 0) {
@@ -220,38 +239,64 @@ export async function getRecycleBin(workspaceSlug, limit = 200, offset = 0) {
 }
 
 export async function searchUserMeta(namespace, limit = 200, offset = 0) {
-  return apiCall("POST", "/user-meta/search", {
-    Namespace: namespace,
-    Limit: limit,
-    Offset: offset,
-  }, TTL_LONG);
+  return apiCall(
+    "POST",
+    "/user-meta/search",
+    {
+      Namespace: namespace,
+      Limit: limit,
+      Offset: offset,
+    },
+    TTL_LONG,
+  );
 }
 
-export async function getActivityStream(boxName, contextType, contextData, limit = 100, offset = 0) {
-  return apiCall("POST", "/activity/stream", {
-    BoxName: boxName,
-    Context: contextType,
-    ContextData: contextData,
-    Limit: String(limit),
-    Offset: String(offset),
-    Language: "en-us",
-  }, TTL_SHORT);
+export async function getActivityStream(
+  boxName,
+  contextType,
+  contextData,
+  limit = 100,
+  offset = 0,
+) {
+  return apiCall(
+    "POST",
+    "/activity/stream",
+    {
+      BoxName: boxName,
+      Context: contextType,
+      ContextData: contextData,
+      Limit: String(limit),
+      Offset: String(offset),
+      Language: "en-us",
+    },
+    TTL_SHORT,
+  );
 }
 
 export async function getAuditChartData(msgId, timeRangeType, refTime) {
-  return apiCall("POST", "/log/audit/chartdata", {
-    MsgId: String(msgId),
-    RefTime: refTime ?? Math.floor(Date.now() / 1000),
-    TimeRangeType: timeRangeType,
-  }, TTL_SHORT);
+  return apiCall(
+    "POST",
+    "/log/audit/chartdata",
+    {
+      MsgId: String(msgId),
+      RefTime: refTime ?? Math.floor(Date.now() / 1000),
+      TimeRangeType: timeRangeType,
+    },
+    TTL_SHORT,
+  );
 }
 
 export async function getAuditLogs(query, page = 0, size = 25) {
-  return apiCall("POST", "/log/audit", {
-    Page: page,
-    Size: size,
-    Query: query,
-  }, TTL_SHORT);
+  return apiCall(
+    "POST",
+    "/log/audit",
+    {
+      Page: page,
+      Size: size,
+      Query: query,
+    },
+    TTL_SHORT,
+  );
 }
 
 async function apiMutate(method, endpoint, body = null) {
@@ -305,7 +350,10 @@ export async function getMimeBreakdown(baseUrl, datasource = null) {
   return formatApiCall(baseUrl, path);
 }
 
-export async function getMimeTimeseries(baseUrl, { metric = "file_count", datasource, mimeOrExt, from, to } = {}) {
+export async function getMimeTimeseries(
+  baseUrl,
+  { metric = "file_count", datasource, mimeOrExt, from, to } = {},
+) {
   const params = new URLSearchParams({ metric });
   if (datasource) params.set("datasource", datasource);
   if (mimeOrExt) params.set("mime_or_ext", mimeOrExt);
@@ -314,7 +362,10 @@ export async function getMimeTimeseries(baseUrl, { metric = "file_count", dataso
   return formatApiCall(baseUrl, `/timeseries/chart?${params}`);
 }
 
-export async function getMimeTimeseriesByDatasource(baseUrl, { metric = "file_count", mimeOrExt, from, to } = {}) {
+export async function getMimeTimeseriesByDatasource(
+  baseUrl,
+  { metric = "file_count", mimeOrExt, from, to } = {},
+) {
   const params = new URLSearchParams({ metric });
   if (mimeOrExt) params.set("mime_or_ext", mimeOrExt);
   if (from) params.set("from_snapshot_at", from);
@@ -322,7 +373,10 @@ export async function getMimeTimeseriesByDatasource(baseUrl, { metric = "file_co
   return formatApiCall(baseUrl, `/timeseries/chart/by-datasource?${params}`);
 }
 
-export async function getMimeTimeseriesByFormat(baseUrl, { metric = "file_count", datasource, from, to } = {}) {
+export async function getMimeTimeseriesByFormat(
+  baseUrl,
+  { metric = "file_count", datasource, from, to } = {},
+) {
   const params = new URLSearchParams({ metric });
   if (datasource) params.set("datasource", datasource);
   if (from) params.set("from_snapshot_at", from);
@@ -350,11 +404,28 @@ export function categorizeMime(mimeOrExt) {
   if (m.startsWith("video/")) return "Video";
   if (m === "text/csv" || m === "text/tab-separated-values") return "Spreadsheets";
   if (m.startsWith("text/")) return "Documents";
-  if (m.includes("wordprocessing") || m === "application/msword" || m === "application/rtf") return "Documents";
-  if (m.includes(".sheet") || m.includes("spreadsheet") || m.includes("excel") || m === "application/vnd.ms-excel") return "Spreadsheets";
+  if (m.includes("wordprocessing") || m === "application/msword" || m === "application/rtf")
+    return "Documents";
+  if (
+    m.includes(".sheet") ||
+    m.includes("spreadsheet") ||
+    m.includes("excel") ||
+    m === "application/vnd.ms-excel"
+  )
+    return "Spreadsheets";
   if (m.includes("presentation") || m === "application/vnd.ms-powerpoint") return "Presentations";
-  if (["application/zip", "application/x-rar-compressed", "application/x-7z-compressed",
-       "application/x-tar", "application/gzip", "application/x-bzip2", "application/x-xz"].includes(m)) return "Archives";
+  if (
+    [
+      "application/zip",
+      "application/x-rar-compressed",
+      "application/x-7z-compressed",
+      "application/x-tar",
+      "application/gzip",
+      "application/x-bzip2",
+      "application/x-xz",
+    ].includes(m)
+  )
+    return "Archives";
   return "Other";
 }
 
@@ -398,10 +469,7 @@ export function invalidateCache(pattern) {
 export function currentUserCanViewDashboard() {
   const user = window.pydio?.user;
   if (!user) return false;
-  return (
-    user.isAdmin ||
-    user.idmUser?.Roles?.some((r) => r.Label === "SuperUser")
-  );
+  return user.isAdmin || user.idmUser?.Roles?.some((r) => r.Label === "SuperUser");
 }
 
 export function formatBytes(bytes) {
@@ -429,12 +497,58 @@ export function extensionFromPath(path) {
 }
 
 export const FILE_TYPE_GROUPS = {
-  Documents: { extensions: ["doc", "docx", "odt", "rtf", "txt"], color: "var(--md-sys-color-custom-doc-color)", containerColor: "var(--md-sys-color-custom-doc-colorContainer)" },
-  Spreadsheets: { extensions: ["xls", "xlsx", "ods", "csv"], color: "var(--md-sys-color-custom-xls-color)", containerColor: "var(--md-sys-color-custom-xls-colorContainer)" },
-  Presentations: { extensions: ["ppt", "pptx", "odp"], color: "var(--md-sys-color-custom-ppt-color)", containerColor: "var(--md-sys-color-custom-ppt-colorContainer)" },
-  Images: { extensions: ["jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp", "svg", "webp", "raw", "cr2", "nef", "dng"], color: "var(--md-sys-color-primary)", containerColor: "var(--md-sys-color-primary-container)" },
-  Audio: { extensions: ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a"], color: "var(--md-sys-color-custom-music-color)", containerColor: "var(--md-sys-color-custom-music-colorContainer)" },
-  Video: { extensions: ["mp4", "avi", "mov", "mkv", "wmv", "flv", "webm", "m4v"], color: "var(--md-sys-color-custom-video-color)", containerColor: "var(--md-sys-color-custom-video-colorContainer)" },
-  Archives: { extensions: ["zip", "rar", "7z", "tar", "gz", "bz2", "xz"], color: "var(--md-sys-color-custom-archive-color)", containerColor: "var(--md-sys-color-custom-archive-colorContainer)" },
-  PDF: { extensions: ["pdf"], color: "var(--md-sys-color-custom-pdf-color)", containerColor: "var(--md-sys-color-custom-pdf-colorContainer)" },
+  Documents: {
+    extensions: ["doc", "docx", "odt", "rtf", "txt"],
+    color: "var(--md-sys-color-custom-doc-color)",
+    containerColor: "var(--md-sys-color-custom-doc-colorContainer)",
+  },
+  Spreadsheets: {
+    extensions: ["xls", "xlsx", "ods", "csv"],
+    color: "var(--md-sys-color-custom-xls-color)",
+    containerColor: "var(--md-sys-color-custom-xls-colorContainer)",
+  },
+  Presentations: {
+    extensions: ["ppt", "pptx", "odp"],
+    color: "var(--md-sys-color-custom-ppt-color)",
+    containerColor: "var(--md-sys-color-custom-ppt-colorContainer)",
+  },
+  Images: {
+    extensions: [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "tiff",
+      "tif",
+      "bmp",
+      "svg",
+      "webp",
+      "raw",
+      "cr2",
+      "nef",
+      "dng",
+    ],
+    color: "var(--md-sys-color-primary)",
+    containerColor: "var(--md-sys-color-primary-container)",
+  },
+  Audio: {
+    extensions: ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a"],
+    color: "var(--md-sys-color-custom-music-color)",
+    containerColor: "var(--md-sys-color-custom-music-colorContainer)",
+  },
+  Video: {
+    extensions: ["mp4", "avi", "mov", "mkv", "wmv", "flv", "webm", "m4v"],
+    color: "var(--md-sys-color-custom-video-color)",
+    containerColor: "var(--md-sys-color-custom-video-colorContainer)",
+  },
+  Archives: {
+    extensions: ["zip", "rar", "7z", "tar", "gz", "bz2", "xz"],
+    color: "var(--md-sys-color-custom-archive-color)",
+    containerColor: "var(--md-sys-color-custom-archive-colorContainer)",
+  },
+  PDF: {
+    extensions: ["pdf"],
+    color: "var(--md-sys-color-custom-pdf-color)",
+    containerColor: "var(--md-sys-color-custom-pdf-colorContainer)",
+  },
 };

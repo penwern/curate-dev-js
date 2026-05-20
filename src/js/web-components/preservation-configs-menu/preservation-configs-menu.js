@@ -12,8 +12,7 @@ import "@material/web/iconbutton/icon-button.js";
 import { mdiStar, mdiStarOutline, mdiDelete, mdiCog } from "@mdi/js";
 import { PreservationConfigAPI } from "./api-client.js";
 import { icon } from "../utils/icons.js";
-import {styles} from "./styles.js";   
-
+import { styles } from "./styles.js";
 
 class PreservationConfigManager extends LitElement {
   static properties = {
@@ -112,8 +111,7 @@ class PreservationConfigManager extends LitElement {
         name: this.configName,
         description: this.configDescription,
         normalize: this.normalize ? 1 : 0,
-        image_normalization_tiff:
-          this.imageNormalizationTiff === "TIFF" ? 1 : 0,
+        image_normalization_tiff: this.imageNormalizationTiff === "TIFF" ? 1 : 0,
         dip_enabled: this.dipEnabled ? 1 : 0,
         process_type: this.processType.toLowerCase(),
         compress_aip: this.compressAip ? 1 : 0,
@@ -122,9 +120,7 @@ class PreservationConfigManager extends LitElement {
         gen_transfer_struct_report: this.genTransferStructReport ? 1 : 0,
         document_empty_directories: this.documentEmptyDirectories ? 1 : 0,
         extract_packages: this.extractPackages ? 1 : 0,
-        delete_packages_after_extraction: this.deletePackagesAfterExtraction
-          ? 1
-          : 0,
+        delete_packages_after_extraction: this.deletePackagesAfterExtraction ? 1 : 0,
         user: pydio?.user?.id || "current-user", // Use actual user if available
       };
 
@@ -153,8 +149,7 @@ class PreservationConfigManager extends LitElement {
     this.configName = config.name || "";
     this.configDescription = config.description || "";
     this.normalize = !!config.normalize;
-    this.imageNormalizationTiff =
-      config.image_normalization_tiff === 1 ? "TIFF" : "JPEG2000";
+    this.imageNormalizationTiff = config.image_normalization_tiff === 1 ? "TIFF" : "JPEG2000";
     this.dipEnabled = !!config.dip_enabled;
     this.processType = config.process_type || "standard";
     this.compressAip = !!config.compress_aip;
@@ -163,17 +158,14 @@ class PreservationConfigManager extends LitElement {
     this.genTransferStructReport = !!config.gen_transfer_struct_report;
     this.documentEmptyDirectories = !!config.document_empty_directories;
     this.extractPackages = !!config.extract_packages;
-    this.deletePackagesAfterExtraction =
-      !!config.delete_packages_after_extraction;
+    this.deletePackagesAfterExtraction = !!config.delete_packages_after_extraction;
     this.isEditMode = true;
     this.editConfigId = config.id;
   }
 
   async deleteConfig(configId) {
     if (
-      !confirm(
-        "Deleting a config is permanent and cannot be reverted, do you wish to continue?"
-      )
+      !confirm("Deleting a config is permanent and cannot be reverted, do you wish to continue?")
     ) {
       return;
     }
@@ -189,25 +181,21 @@ class PreservationConfigManager extends LitElement {
   }
 
   toggleBookmark(configId) {
-    const bookmarkData = JSON.parse(
-      localStorage.getItem(configId.toString()) || "{}"
-    );
+    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
     const newBookmarkState = !bookmarkData.bookmarked;
 
     localStorage.setItem(
       configId.toString(),
       JSON.stringify({
         bookmarked: newBookmarkState,
-      })
+      }),
     );
 
     this.requestUpdate();
   }
 
   isBookmarked(configId) {
-    const bookmarkData = JSON.parse(
-      localStorage.getItem(configId.toString()) || "{}"
-    );
+    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
     return bookmarkData.bookmarked || false;
   }
 
@@ -216,18 +204,13 @@ class PreservationConfigManager extends LitElement {
   }
 
   get canSave() {
-    return (
-      this.configName &&
-      this.configName.trim().length >= 3 &&
-      !this.saveInProgress
-    );
+    return this.configName && this.configName.trim().length >= 3 && !this.saveInProgress;
   }
 
   get saveButtonText() {
     if (this.saveInProgress) return "Saving...";
     if (!this.configName) return "Save Config";
-    if (this.configName.trim().length < 3)
-      return "Add a name 3 characters or longer";
+    if (this.configName.trim().length < 3) return "Add a name 3 characters or longer";
     return this.isEditMode ? "Update Config" : "Save Config";
   }
 
@@ -237,9 +220,7 @@ class PreservationConfigManager extends LitElement {
         <div class="panels-wrapper">
           <!-- Form Section -->
           <div class="form-section">
-            <div class="section-title">
-              ${icon(mdiCog)} Create or Edit Configs
-            </div>
+            <div class="section-title">${icon(mdiCog)} Create or Edit Configs</div>
 
             <!-- Details Category -->
             <div class="category">
@@ -283,8 +264,7 @@ class PreservationConfigManager extends LitElement {
                   <md-outlined-select
                     label="Image Normalisation Format"
                     .value=${this.imageNormalizationTiff}
-                    @change=${(e) =>
-                      (this.imageNormalizationTiff = e.target.value)}
+                    @change=${(e) => (this.imageNormalizationTiff = e.target.value)}
                     ?disabled=${!this.normalize}
                   >
                     <md-select-option value="TIFF">
@@ -358,10 +338,9 @@ class PreservationConfigManager extends LitElement {
 
               <div class="suboptions ${this.compressAip ? "enabled" : ""}">
                 <div class="info-panel">
-                  Compressing AIPs will make their contents unsearchable and
-                  prevent descriptive metadata from being reassociated with
-                  output objects. You can compress your AIPs for distribution or
-                  deep-storage while conserving the uncompressed AIP by
+                  Compressing AIPs will make their contents unsearchable and prevent descriptive
+                  metadata from being reassociated with output objects. You can compress your AIPs
+                  for distribution or deep-storage while conserving the uncompressed AIP by
                   right-clicking an AIP in a workspace.
                 </div>
 
@@ -369,8 +348,7 @@ class PreservationConfigManager extends LitElement {
                   <md-outlined-select
                     label="Compression Algorithm"
                     .value=${this.compressionAlgorithm}
-                    @change=${(e) =>
-                      (this.compressionAlgorithm = e.target.value)}
+                    @change=${(e) => (this.compressionAlgorithm = e.target.value)}
                     ?disabled=${!this.compressAip}
                   >
                     <md-select-option value="tar">
@@ -405,8 +383,7 @@ class PreservationConfigManager extends LitElement {
                       max="9"
                       step="1"
                       .value=${this.compressionLevel}
-                      @input=${(e) =>
-                        (this.compressionLevel = parseInt(e.target.value))}
+                      @input=${(e) => (this.compressionLevel = parseInt(e.target.value))}
                       ?disabled=${!this.compressAip}
                       labeled
                     >
@@ -423,8 +400,7 @@ class PreservationConfigManager extends LitElement {
               <div class="toggle-field">
                 <md-switch
                   ?selected=${this.genTransferStructReport}
-                  @change=${(e) =>
-                    (this.genTransferStructReport = e.target.selected)}
+                  @change=${(e) => (this.genTransferStructReport = e.target.selected)}
                 >
                 </md-switch>
                 <label>Generate Transfer Structure Report</label>
@@ -433,8 +409,7 @@ class PreservationConfigManager extends LitElement {
               <div class="toggle-field">
                 <md-switch
                   ?selected=${this.documentEmptyDirectories}
-                  @change=${(e) =>
-                    (this.documentEmptyDirectories = e.target.selected)}
+                  @change=${(e) => (this.documentEmptyDirectories = e.target.selected)}
                 >
                 </md-switch>
                 <label>Document Empty Directories</label>
@@ -453,8 +428,7 @@ class PreservationConfigManager extends LitElement {
                 <div class="toggle-field">
                   <md-switch
                     ?selected=${this.deletePackagesAfterExtraction}
-                    @change=${(e) =>
-                      (this.deletePackagesAfterExtraction = e.target.selected)}
+                    @change=${(e) => (this.deletePackagesAfterExtraction = e.target.selected)}
                     ?disabled=${!this.extractPackages}
                   >
                   </md-switch>
@@ -464,16 +438,11 @@ class PreservationConfigManager extends LitElement {
             </div>
 
             <div class="form-actions">
-              <md-filled-button
-                @click=${this.saveConfig}
-                ?disabled=${!this.canSave}
-              >
+              <md-filled-button @click=${this.saveConfig} ?disabled=${!this.canSave}>
                 ${this.saveInProgress ? html`<div class="spinner"></div>` : ""}
                 ${this.saveButtonText}
               </md-filled-button>
-              <md-outlined-button @click=${this.clearForm}>
-                Clear Form
-              </md-outlined-button>
+              <md-outlined-button @click=${this.clearForm}> Clear Form </md-outlined-button>
             </div>
           </div>
 
@@ -488,55 +457,51 @@ class PreservationConfigManager extends LitElement {
                     Loading configurations...
                   </div>`
                 : this.savedConfigs.length === 0
-                ? html`<div class="no-configs">
-                    No Saved Preservation Configs Found
-                  </div>`
-                : this.savedConfigs.map(
-                    (config, index) => html`
-                      <div
-                        class="config-item"
-                        style="animation-delay: ${index * 0.1}s"
-                        @click=${() => this.loadConfig(config)}
-                      >
-                        <div class="config-header">
-                          <div class="config-name">${config.name}</div>
-                          <div class="config-actions">
-                            <md-icon-button
-                              class="${this.isBookmarked(config.id)
-                                ? "starred"
-                                : ""}"
-                              @click=${(e) => {
-                                e.stopPropagation();
-                                this.toggleBookmark(config.id);
-                              }}
-                            >
-                              ${this.isBookmarked(config.id)
-                                ? icon(mdiStar)
-                                : icon(mdiStarOutline)}
-                            </md-icon-button>
-                            ${when(config.user !== "System" && config.name !== "Default", ()=>{
+                  ? html`<div class="no-configs">No Saved Preservation Configs Found</div>`
+                  : this.savedConfigs.map(
+                      (config, index) => html`
+                        <div
+                          class="config-item"
+                          style="animation-delay: ${index * 0.1}s"
+                          @click=${() => this.loadConfig(config)}
+                        >
+                          <div class="config-header">
+                            <div class="config-name">${config.name}</div>
+                            <div class="config-actions">
+                              <md-icon-button
+                                class="${this.isBookmarked(config.id) ? "starred" : ""}"
+                                @click=${(e) => {
+                                  e.stopPropagation();
+                                  this.toggleBookmark(config.id);
+                                }}
+                              >
+                                ${this.isBookmarked(config.id)
+                                  ? icon(mdiStar)
+                                  : icon(mdiStarOutline)}
+                              </md-icon-button>
+                              ${when(config.user !== "System" && config.name !== "Default", () => {
                                 return html`<md-outlined-button
-                              class="delete-btn"
-                              @click=${(e) => {
-                                e.stopPropagation();
-                                this.deleteConfig(config.id);
-                              }}
-                            >
-                              Delete
-                            </md-outlined-button>`
-                            })}
+                                  class="delete-btn"
+                                  @click=${(e) => {
+                                    e.stopPropagation();
+                                    this.deleteConfig(config.id);
+                                  }}
+                                >
+                                  Delete
+                                </md-outlined-button>`;
+                              })}
+                            </div>
+                          </div>
+                          <div class="config-details">
+                            <div class="config-description">
+                              <strong>Description:</strong>
+                              ${config.description || "No description"}
+                            </div>
+                            <div><strong>User:</strong> ${config.user}</div>
                           </div>
                         </div>
-                        <div class="config-details">
-                          <div class="config-description">
-                            <strong>Description:</strong>
-                            ${config.description || "No description"}
-                          </div>
-                          <div><strong>User:</strong> ${config.user}</div>
-                        </div>
-                      </div>
-                    `
-                  )}
+                      `,
+                    )}
             </div>
           </div>
         </div>

@@ -143,7 +143,14 @@ export function getVisibleTreeRows(nodes = [], expandedNodes = new Set()) {
  * @param {Function} getMatchMetadata - Function to compute match metadata for a node
  * @returns {Array<{node: Object, path: string[], idPath: string[], matches: Object}>}
  */
-export function searchTree(nodes, query, path = [], idPath = [], field = 'all', getMatchMetadata = null) {
+export function searchTree(
+  nodes,
+  query,
+  path = [],
+  idPath = [],
+  field = "all",
+  getMatchMetadata = null,
+) {
   if (!nodes || !nodes.length || !query) return [];
   let results = [];
   for (const node of nodes) {
@@ -165,7 +172,9 @@ export function searchTree(nodes, query, path = [], idPath = [], field = 'all', 
     }
 
     if (node.children) {
-      results = results.concat(searchTree(node.children, query, newPath, newIdPath, field, getMatchMetadata));
+      results = results.concat(
+        searchTree(node.children, query, newPath, newIdPath, field, getMatchMetadata),
+      );
     }
   }
   return results;
@@ -179,7 +188,7 @@ export function searchTree(nodes, query, path = [], idPath = [], field = 'all', 
  * @returns {Object}
  */
 function defaultMatchMetadata(node, query, field) {
-  const normalizedQuery = (query || '').toLowerCase();
+  const normalizedQuery = (query || "").toLowerCase();
   const matches = {
     title: false,
     identifier: false,
@@ -189,12 +198,12 @@ function defaultMatchMetadata(node, query, field) {
 
   if (!normalizedQuery || !node) return matches;
 
-  matches.title = (node.title || '').toLowerCase().includes(normalizedQuery);
-  matches.identifier = (node.code || '').toLowerCase().includes(normalizedQuery);
-  matches.status = (node.status || '').toLowerCase().includes(normalizedQuery);
-  matches.location = (node.location || '').toLowerCase().includes(normalizedQuery);
+  matches.title = (node.title || "").toLowerCase().includes(normalizedQuery);
+  matches.identifier = (node.code || "").toLowerCase().includes(normalizedQuery);
+  matches.status = (node.status || "").toLowerCase().includes(normalizedQuery);
+  matches.location = (node.location || "").toLowerCase().includes(normalizedQuery);
 
-  if (!field || field === 'all') return matches;
+  if (!field || field === "all") return matches;
 
   // Filter to only the requested field
   const filtered = {
@@ -203,9 +212,9 @@ function defaultMatchMetadata(node, query, field) {
     status: false,
     location: false,
   };
-  const normalizedField = ['title', 'identifier', 'status', 'location'].includes(field)
+  const normalizedField = ["title", "identifier", "status", "location"].includes(field)
     ? field
-    : 'title';
+    : "title";
   filtered[normalizedField] = matches[normalizedField];
   return filtered;
 }

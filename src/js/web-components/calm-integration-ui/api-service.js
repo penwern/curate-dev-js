@@ -1,5 +1,5 @@
 // api-service.js
-import CurateApi from '../../core/CurateFunctions/CurateApi.js';
+import CurateApi from "../../core/CurateFunctions/CurateApi.js";
 
 class ApiService {
   constructor(baseUrl = `${window.location.origin}/api/calm`) {
@@ -7,7 +7,7 @@ class ApiService {
   }
 
   async _makeRequest(endpoint, options = {}) {
-    const method = options.method || 'GET';
+    const method = options.method || "GET";
     let body = null;
 
     if (options.body) {
@@ -131,9 +131,7 @@ class ApiService {
 
   // Discovered fields queue helpers (whitelist workflow)
   async getDiscoveredFieldsQueue(unreviewedOnly = true) {
-    return this._makeRequest(
-      `/metadata/discovered-fields?unreviewed_only=${unreviewedOnly}`
-    );
+    return this._makeRequest(`/metadata/discovered-fields?unreviewed_only=${unreviewedOnly}`);
   }
 
   async reviewDiscoveredField(discoveredId, action, addToWhitelist = false) {
@@ -160,12 +158,9 @@ class ApiService {
   }
 
   async cleanupDiscoveredFields(daysOld = 30) {
-    return this._makeRequest(
-      `/metadata/discovered-fields/cleanup?days_old=${daysOld}`,
-      {
-        method: "DELETE",
-      }
-    );
+    return this._makeRequest(`/metadata/discovered-fields/cleanup?days_old=${daysOld}`, {
+      method: "DELETE",
+    });
   }
 
   // Get whitelisted CALM fields, mapping status, and cached record info
@@ -220,11 +215,7 @@ class ApiService {
     return this._makeRequest("/metadata/mappings");
   }
 
-  async saveMetadataMapping(
-    calmField,
-    curateField,
-    transformationLogic = null
-  ) {
+  async saveMetadataMapping(calmField, curateField, transformationLogic = null) {
     return this._makeRequest("/metadata/mappings", {
       method: "POST",
       body: JSON.stringify({

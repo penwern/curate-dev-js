@@ -342,12 +342,8 @@ export class ArchiveProcessingStatus extends LitElement {
   render() {
     return html`
       <div class="card">
-        ${this._renderHeader()}
-        ${this._renderSource()}
-        ${this._renderProgress()}
-        ${this._renderDetails()}
-        ${this._renderLinks()}
-        ${this._renderError()}
+        ${this._renderHeader()} ${this._renderSource()} ${this._renderProgress()}
+        ${this._renderDetails()} ${this._renderLinks()} ${this._renderError()}
       </div>
     `;
   }
@@ -408,11 +404,17 @@ export class ArchiveProcessingStatus extends LitElement {
     }
 
     if (status === "completed") {
-      return html`<span class="mdi mdi-check-circle" style="color: var(--md-sys-color-on-tertiary-container); font-size: 28px;"></span>`;
+      return html`<span
+        class="mdi mdi-check-circle"
+        style="color: var(--md-sys-color-on-tertiary-container); font-size: 28px;"
+      ></span>`;
     }
 
     if (status === "failed") {
-      return html`<span class="mdi mdi-alert-circle" style="color: var(--md-sys-color-on-error-container); font-size: 28px;"></span>`;
+      return html`<span
+        class="mdi mdi-alert-circle"
+        style="color: var(--md-sys-color-on-error-container); font-size: 28px;"
+      ></span>`;
     }
 
     return html`<md-circular-progress indeterminate density="-4"></md-circular-progress>`;
@@ -492,35 +494,6 @@ export class ArchiveProcessingStatus extends LitElement {
       </section>
     `;
   }
-
 }
 
 customElements.define("archive-processing-status", ArchiveProcessingStatus);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

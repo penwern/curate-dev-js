@@ -1,6 +1,6 @@
-﻿import { LitElement, html, css } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
-import { formatEmailDate } from '../utils/dateFormat.js';
+﻿import { LitElement, html, css } from "lit";
+import { classMap } from "lit/directives/class-map.js";
+import { formatEmailDate } from "../utils/dateFormat.js";
 import { attachmentIcon, forumIcon, folderIcon } from "../../utils/icons.js";
 
 export class EmailListItem extends LitElement {
@@ -10,7 +10,7 @@ export class EmailListItem extends LitElement {
     threadCount: { type: Number },
     isInThread: { type: Boolean },
     threadIndex: { type: Number },
-    isCollapsedPreview: { type: Boolean }
+    isCollapsedPreview: { type: Boolean },
   };
 
   constructor() {
@@ -38,7 +38,10 @@ export class EmailListItem extends LitElement {
       background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface);
       cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
     }
 
     .email-item:hover {
@@ -176,18 +179,20 @@ export class EmailListItem extends LitElement {
   }
 
   _handleKeydown(event) {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       this._emitSelection();
     }
   }
 
   _emitSelection() {
-    this.dispatchEvent(new CustomEvent('email-selected', {
-      detail: this.email.id,
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent("email-selected", {
+        detail: this.email.id,
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   render() {
@@ -196,15 +201,16 @@ export class EmailListItem extends LitElement {
     }
 
     const classes = {
-      'email-item': true,
+      "email-item": true,
       selected: this.selected,
       thread: this.isInThread,
-      'collapsed-preview': this.isCollapsedPreview && this.threadIndex === 0
+      "collapsed-preview": this.isCollapsedPreview && this.threadIndex === 0,
     };
 
-    const sender = this.email.from?.name || this.email.from?.email || 'Unknown sender';
-    const subject = this.email.subject || '(No subject)';
-    const folderLabel = this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || '';
+    const sender = this.email.from?.name || this.email.from?.email || "Unknown sender";
+    const subject = this.email.subject || "(No subject)";
+    const folderLabel =
+      this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || "";
 
     return html`
       <article
@@ -221,28 +227,30 @@ export class EmailListItem extends LitElement {
         </div>
         <div class="item-subject">
           <span class="subject">${subject}</span>
-          ${this.threadCount > 1 && this.threadIndex === 0 ? html`
-            <span class="thread-pill">${this.threadCount}</span>
-          ` : ''}
+          ${this.threadCount > 1 && this.threadIndex === 0
+            ? html` <span class="thread-pill">${this.threadCount}</span> `
+            : ""}
         </div>
         <div class="item-snippet">${this.email.snippet}</div>
         <div class="item-meta">
-          ${this.threadCount > 1 && this.threadIndex === 0 ? html`
-            <span class="meta-pill">${forumIcon}<span>Conversation</span></span>
-          ` : ''}
-          ${this.email.hasAttachments ? html`
-            <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span>
-          ` : ''}
-          ${folderLabel ? html`
-            <span class="meta-pill folder" title=${folderLabel}>
-              ${folderIcon}
-              <span class="folder-label">${folderLabel}</span>
-            </span>
-          ` : ''}
+          ${this.threadCount > 1 && this.threadIndex === 0
+            ? html` <span class="meta-pill">${forumIcon}<span>Conversation</span></span> `
+            : ""}
+          ${this.email.hasAttachments
+            ? html` <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span> `
+            : ""}
+          ${folderLabel
+            ? html`
+                <span class="meta-pill folder" title=${folderLabel}>
+                  ${folderIcon}
+                  <span class="folder-label">${folderLabel}</span>
+                </span>
+              `
+            : ""}
         </div>
       </article>
     `;
   }
 }
 
-customElements.define('email-list-item', EmailListItem);
+customElements.define("email-list-item", EmailListItem);

@@ -8,15 +8,17 @@ const CurateEmail = {
 
     const selection = window.pydio?._dataModel?._selectedNodes || [];
     if (!selection.length || selection.length > 1) {
-      Curate.ui.modals.curatePopup(
-        {
-          title: "Process Archive",
-          type: "error",
-          message: "Select a single archive to process before launching this action.",
-          buttonType: "close",
-        },
-        {}
-      ).fire();
+      Curate.ui.modals
+        .curatePopup(
+          {
+            title: "Process Archive",
+            type: "error",
+            message: "Select a single archive to process before launching this action.",
+            buttonType: "close",
+          },
+          {},
+        )
+        .fire();
       return;
     }
 
@@ -27,15 +29,17 @@ const CurateEmail = {
 
     // Validate file extension
     if (!fileName.endsWith(".pst") && !fileName.endsWith(".mbox")) {
-      Curate.ui.modals.curatePopup(
-        {
-          title: "Process Archive",
-          type: "error",
-          message: "Selected item must be an MBOX or PST file.",
-          buttonType: "close",
-        },
-        {}
-      ).fire();
+      Curate.ui.modals
+        .curatePopup(
+          {
+            title: "Process Archive",
+            type: "error",
+            message: "Selected item must be an MBOX or PST file.",
+            buttonType: "close",
+          },
+          {},
+        )
+        .fire();
       return;
     }
 
@@ -46,15 +50,17 @@ const CurateEmail = {
     const validMimeForMbox = mimeType === "text/plain" || mimeType.startsWith("text/plain;");
 
     if ((isPst && !validMimeForPst) || (isMbox && !validMimeForMbox)) {
-      Curate.ui.modals.curatePopup(
-        {
-          title: "Process Archive",
-          type: "error",
-          message: "Selected item must be an MBOX or PST file.",
-          buttonType: "close",
-        },
-        {}
-      ).fire();
+      Curate.ui.modals
+        .curatePopup(
+          {
+            title: "Process Archive",
+            type: "error",
+            message: "Selected item must be an MBOX or PST file.",
+            buttonType: "close",
+          },
+          {},
+        )
+        .fire();
       return;
     }
 
@@ -70,20 +76,20 @@ const CurateEmail = {
       .replace(/^\/+/, "")
       .trim();
     if (!relativePath) {
-      Curate.ui.modals.curatePopup(
-        {
-          title: "Process Archive",
-          message: "Could not determine the path for the selected item.",
-          buttonType: "close",
-          type: "error",
-        },
-        {}
-      ).fire();
+      Curate.ui.modals
+        .curatePopup(
+          {
+            title: "Process Archive",
+            message: "Could not determine the path for the selected item.",
+            buttonType: "close",
+            type: "error",
+          },
+          {},
+        )
+        .fire();
       return;
     }
-    const sourceUri = workspaceSlug
-      ? `${workspaceSlug}/${relativePath}`
-      : relativePath;
+    const sourceUri = workspaceSlug ? `${workspaceSlug}/${relativePath}` : relativePath;
 
     const POLL_INTERVAL_MS = 5000;
     const TERMINAL_STATUSES = new Set(["completed", "failed"]);
@@ -148,7 +154,7 @@ const CurateEmail = {
         `/archives/status/${encodeURIComponent(jobId)}`,
         "GET",
         undefined,
-        API_BASE_URL
+        API_BASE_URL,
       );
     }
 
@@ -159,7 +165,7 @@ const CurateEmail = {
         {
           sourceUri,
         },
-        API_BASE_URL
+        API_BASE_URL,
       );
     }
 
@@ -219,7 +225,8 @@ const CurateEmail = {
             modalContent.style.paddingTop = "24px";
           }
 
-          const modalScrollRegion = container.querySelector(".config-modal-main-options-container") ||
+          const modalScrollRegion =
+            container.querySelector(".config-modal-main-options-container") ||
             container.querySelector(".config-main-options-container");
           if (modalScrollRegion) {
             modalScrollRegion.style.overflow = "hidden";
@@ -253,11 +260,11 @@ const CurateEmail = {
         afterRestored() {
           updateBadgeForStatus(latestStatus);
         },
-      }
+      },
     );
 
     modalInstance.fire();
-  }
+  },
 };
 
 export default CurateEmail;

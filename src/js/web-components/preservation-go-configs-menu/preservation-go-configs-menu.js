@@ -124,11 +124,13 @@ class PreservationGoConfigManager extends LitElement {
 
   async saveConfig() {
     if (!this.configName || this.configName.trim().length < 3) {
-      Curate.ui.modals.curatePopup({
-        title: "Invalid Configuration",
-        message: "Please enter a config name with at least 3 characters",
-        type: "warning"
-      }).fire();
+      Curate.ui.modals
+        .curatePopup({
+          title: "Invalid Configuration",
+          message: "Please enter a config name with at least 3 characters",
+          type: "warning",
+        })
+        .fire();
       return;
     }
 
@@ -140,7 +142,7 @@ class PreservationGoConfigManager extends LitElement {
           configName: this.configName,
           configDescription: this.configDescription,
           CompressAip: this.CompressAip,
-          Normalize: this.Normalize
+          Normalize: this.Normalize,
         });
       }
 
@@ -163,10 +165,11 @@ class PreservationGoConfigManager extends LitElement {
           normalize: this.Normalize,
           transcribe_files: this.TranscribeFiles,
           perform_policy_checks_on_originals: this.PerformPolicyChecksOnOriginals,
-          perform_policy_checks_on_preservation_derivatives: this.PerformPolicyChecksOnPreservationDerivatives,
+          perform_policy_checks_on_preservation_derivatives:
+            this.PerformPolicyChecksOnPreservationDerivatives,
           perform_policy_checks_on_access_derivatives: this.PerformPolicyChecksOnAccessDerivatives,
           thumbnail_mode: this.ThumbnailMode,
-        }
+        },
       };
 
       // Add ID if editing existing config
@@ -212,28 +215,69 @@ class PreservationGoConfigManager extends LitElement {
       return defaultValue;
     };
 
-    this.AssignUuidsToDirectories = getValue('assignUuidsToDirectories', 'assign_uuids_to_directories', true);
-    this.ExamineContents = getValue('examineContents', 'examine_contents', false);
-    this.GenerateTransferStructureReport = getValue('generateTransferStructureReport', 'generate_transfer_structure_report', true);
-    this.DocumentEmptyDirectories = getValue('documentEmptyDirectories', 'document_empty_directories', true);
-    this.ExtractPackages = getValue('extractPackages', 'extract_packages', true);
-    this.DeletePackagesAfterExtraction = getValue('deletePackagesAfterExtraction', 'delete_packages_after_extraction', false);
-    this.IdentifyTransfer = getValue('identifyTransfer', 'identify_transfer', true);
-    this.IdentifySubmissionAndMetadata = getValue('identifySubmissionAndMetadata', 'identify_submission_and_metadata', true);
-    this.IdentifyBeforeNormalization = getValue('identifyBeforeNormalization', 'identify_before_normalization', true);
-    this.Normalize = getValue('normalize', 'normalize', true);
-    this.TranscribeFiles = getValue('transcribeFiles', 'transcribe_files', true);
-    this.PerformPolicyChecksOnOriginals = getValue('performPolicyChecksOnOriginals', 'perform_policy_checks_on_originals', true);
-    this.PerformPolicyChecksOnPreservationDerivatives = getValue('performPolicyChecksOnPreservationDerivatives', 'perform_policy_checks_on_preservation_derivatives', true);
-    this.PerformPolicyChecksOnAccessDerivatives = getValue('performPolicyChecksOnAccessDerivatives', 'perform_policy_checks_on_access_derivatives', true);
+    this.AssignUuidsToDirectories = getValue(
+      "assignUuidsToDirectories",
+      "assign_uuids_to_directories",
+      true,
+    );
+    this.ExamineContents = getValue("examineContents", "examine_contents", false);
+    this.GenerateTransferStructureReport = getValue(
+      "generateTransferStructureReport",
+      "generate_transfer_structure_report",
+      true,
+    );
+    this.DocumentEmptyDirectories = getValue(
+      "documentEmptyDirectories",
+      "document_empty_directories",
+      true,
+    );
+    this.ExtractPackages = getValue("extractPackages", "extract_packages", true);
+    this.DeletePackagesAfterExtraction = getValue(
+      "deletePackagesAfterExtraction",
+      "delete_packages_after_extraction",
+      false,
+    );
+    this.IdentifyTransfer = getValue("identifyTransfer", "identify_transfer", true);
+    this.IdentifySubmissionAndMetadata = getValue(
+      "identifySubmissionAndMetadata",
+      "identify_submission_and_metadata",
+      true,
+    );
+    this.IdentifyBeforeNormalization = getValue(
+      "identifyBeforeNormalization",
+      "identify_before_normalization",
+      true,
+    );
+    this.Normalize = getValue("normalize", "normalize", true);
+    this.TranscribeFiles = getValue("transcribeFiles", "transcribe_files", true);
+    this.PerformPolicyChecksOnOriginals = getValue(
+      "performPolicyChecksOnOriginals",
+      "perform_policy_checks_on_originals",
+      true,
+    );
+    this.PerformPolicyChecksOnPreservationDerivatives = getValue(
+      "performPolicyChecksOnPreservationDerivatives",
+      "perform_policy_checks_on_preservation_derivatives",
+      true,
+    );
+    this.PerformPolicyChecksOnAccessDerivatives = getValue(
+      "performPolicyChecksOnAccessDerivatives",
+      "perform_policy_checks_on_access_derivatives",
+      true,
+    );
 
     // Handle thumbnail mode - support both camelCase and snake_case
-    this.ThumbnailMode = a3mConfig.thumbnailMode !== undefined ? a3mConfig.thumbnailMode :
-      (a3mConfig.thumbnail_mode !== undefined ? a3mConfig.thumbnail_mode : 1);
+    this.ThumbnailMode =
+      a3mConfig.thumbnailMode !== undefined
+        ? a3mConfig.thumbnailMode
+        : a3mConfig.thumbnail_mode !== undefined
+          ? a3mConfig.thumbnail_mode
+          : 1;
 
     // Handle root-level properties
     this.CompressAip = config.compress_aip !== undefined ? !!config.compress_aip : false;
-    this.AipCompressionLevel = config.aip_compression_level !== undefined ? config.aip_compression_level : 1;
+    this.AipCompressionLevel =
+      config.aip_compression_level !== undefined ? config.aip_compression_level : 1;
     this.AipCompressionAlgorithm = config.aip_compression_algorithm || "ZIP";
 
     this.isEditMode = true;
@@ -244,7 +288,7 @@ class PreservationGoConfigManager extends LitElement {
         configName: this.configName,
         configDescription: this.configDescription,
         CompressAip: this.CompressAip,
-        Normalize: this.Normalize
+        Normalize: this.Normalize,
       });
     }
   }
@@ -252,92 +296,96 @@ class PreservationGoConfigManager extends LitElement {
   async deleteConfig(configId) {
     // Prevent deletion of the default config (id: 1)
     if (configId === defaultConfigId) {
-      Curate.ui.modals.curatePopup({
-        title: "Cannot Delete Default Config",
-        message: "Cannot delete the default config. This is a system configuration that must be preserved.",
-        type: "error"
-      }).fire();
+      Curate.ui.modals
+        .curatePopup({
+          title: "Cannot Delete Default Config",
+          message:
+            "Cannot delete the default config. This is a system configuration that must be preserved.",
+          type: "error",
+        })
+        .fire();
       return;
     }
 
-    Curate.ui.modals.curatePopup({
-      title: "Confirm Deletion",
-      message: "Deleting a config is permanent and cannot be reverted, do you wish to continue?",
-      type: "warning",
-      buttonType: "okCancel"
-    }, {
-      onOk: async () => {
-        try {
-          await this.api.deleteConfig(configId);
-          // Reload configs after successful deletion
-          await this.loadConfigs();
-        } catch (error) {
-          console.error("Failed to delete preservation go config:", error);
-          // Error modal is already shown by the API client
-        }
-      },
-      onCancel: () => {
-        // User cancelled - no action needed
-      }
-    }).fire();
+    Curate.ui.modals
+      .curatePopup(
+        {
+          title: "Confirm Deletion",
+          message:
+            "Deleting a config is permanent and cannot be reverted, do you wish to continue?",
+          type: "warning",
+          buttonType: "okCancel",
+        },
+        {
+          onOk: async () => {
+            try {
+              await this.api.deleteConfig(configId);
+              // Reload configs after successful deletion
+              await this.loadConfigs();
+            } catch (error) {
+              console.error("Failed to delete preservation go config:", error);
+              // Error modal is already shown by the API client
+            }
+          },
+          onCancel: () => {
+            // User cancelled - no action needed
+          },
+        },
+      )
+      .fire();
   }
 
   toggleBookmark(configId) {
-    const bookmarkData = JSON.parse(
-      localStorage.getItem(configId.toString()) || "{}"
-    );
+    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
     const newBookmarkState = !bookmarkData.bookmarked;
 
     localStorage.setItem(
       configId.toString(),
       JSON.stringify({
         bookmarked: newBookmarkState,
-      })
+      }),
     );
 
     this.requestUpdate();
   }
 
   isBookmarked(configId) {
-    const bookmarkData = JSON.parse(
-      localStorage.getItem(configId.toString()) || "{}"
-    );
+    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
     return bookmarkData.bookmarked || false;
   }
 
   openAtomConfig() {
     if (window.curateAtomReadonly === true) {
-      Curate.ui.modals.curatePopup(
-        { title: "AtoM Configuration" },
-        {
-          afterLoaded: (c) => {
-            const el = document.createElement("atom-config-readonly");
-            c.querySelector(".config-main-options-container").appendChild(el);
+      Curate.ui.modals
+        .curatePopup(
+          { title: "AtoM Configuration" },
+          {
+            afterLoaded: (c) => {
+              const el = document.createElement("atom-config-readonly");
+              c.querySelector(".config-main-options-container").appendChild(el);
+            },
           },
-        }
-      ).fire();
+        )
+        .fire();
       return;
     }
-    Curate.ui.modals.curatePopup({
-      title: "AtoM Configuration",
-      message: "AtoM Configuration would open here",
-      type: "info"
-    }).fire();
+    Curate.ui.modals
+      .curatePopup({
+        title: "AtoM Configuration",
+        message: "AtoM Configuration would open here",
+        type: "info",
+      })
+      .fire();
   }
 
   get canSave() {
-    return (
-      this.configName &&
-      this.configName.trim().length >= 3 &&
-      !this.saveInProgress
-    );
+    return this.configName && this.configName.trim().length >= 3 && !this.saveInProgress;
   }
 
   get saveButtonText() {
     if (this.saveInProgress) return "Saving...";
     if (!this.configName) return "Save Config";
-    if (this.configName.trim().length < 3)
-      return "Add a name 3 characters or longer";
+    if (this.configName.trim().length < 3) return "Add a name 3 characters or longer";
     return this.isEditMode ? "Update Config" : "Save Config";
   }
 

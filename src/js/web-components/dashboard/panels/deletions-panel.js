@@ -13,12 +13,7 @@ import {
   formatDate,
   extensionFromPath,
 } from "../client.js";
-import {
-  deleteClockIcon,
-  deleteIcon,
-  restartIcon,
-  alertCircleIcon,
-} from "../../utils/icons.js";
+import { deleteClockIcon, deleteIcon, restartIcon, alertCircleIcon } from "../../utils/icons.js";
 import { fetchAllAuditLogs } from "../utils/export-utils.js";
 
 class DeletionsPanel extends LitElement {
@@ -43,7 +38,9 @@ class DeletionsPanel extends LitElement {
   };
 
   static styles = css`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
 
     .stats-grid {
       display: grid;
@@ -60,7 +57,9 @@ class DeletionsPanel extends LitElement {
     }
 
     @media (max-width: 768px) {
-      .charts-row { grid-template-columns: 1fr; }
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ─── Work area ─── */
@@ -122,7 +121,11 @@ class DeletionsPanel extends LitElement {
       align-items: center;
       gap: 10px;
       padding: 11px 20px;
-      background: color-mix(in srgb, var(--md-sys-color-primary-container) 40%, var(--md-sys-color-surface));
+      background: color-mix(
+        in srgb,
+        var(--md-sys-color-primary-container) 40%,
+        var(--md-sys-color-surface)
+      );
       border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
       animation: barSlideIn 0.18s ease-out;
     }
@@ -164,30 +167,52 @@ class DeletionsPanel extends LitElement {
       font-weight: 600;
       letter-spacing: 0.1px;
       cursor: pointer;
-      transition: filter 0.12s ease, transform 0.12s ease;
+      transition:
+        filter 0.12s ease,
+        transform 0.12s ease;
       white-space: nowrap;
     }
 
-    .action-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
-    .action-btn:active:not(:disabled) { transform: scale(0.97); }
-    .action-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+      pointer-events: none;
+    }
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+    .action-btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
 
     .restore-btn {
       background: var(--md-sys-color-secondary-container);
       color: var(--md-sys-color-on-secondary-container);
     }
-    .restore-btn:hover:not(:disabled) { filter: brightness(0.92); }
+    .restore-btn:hover:not(:disabled) {
+      filter: brightness(0.92);
+    }
 
     .perm-delete-btn {
       background: color-mix(in srgb, var(--md-sys-color-error-container) 70%, transparent);
       color: var(--md-sys-color-on-error-container);
       border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
     }
-    .perm-delete-btn:hover:not(:disabled) { filter: brightness(0.9); }
+    .perm-delete-btn:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
 
     @keyframes barSlideIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ─── Confirm bar ─── */
@@ -207,7 +232,10 @@ class DeletionsPanel extends LitElement {
       opacity: 0.85;
       display: flex;
     }
-    .confirm-icon-wrap svg { width: 20px; height: 20px; }
+    .confirm-icon-wrap svg {
+      width: 20px;
+      height: 20px;
+    }
 
     .confirm-text-wrap {
       flex: 1;
@@ -233,7 +261,10 @@ class DeletionsPanel extends LitElement {
       color: var(--md-sys-color-on-error);
       border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    .confirm-cancel-btn:hover { background: rgba(255, 255, 255, 0.25); filter: none; }
+    .confirm-cancel-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      filter: none;
+    }
 
     .confirm-ok-btn {
       background: var(--md-sys-color-on-error);
@@ -251,12 +282,17 @@ class DeletionsPanel extends LitElement {
       gap: 8px;
       padding: 10px 20px;
       background: color-mix(in srgb, var(--md-sys-color-error-container) 40%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-error-container) 80%, transparent);
+      border-bottom: 1px solid
+        color-mix(in srgb, var(--md-sys-color-error-container) 80%, transparent);
       font-size: 12px;
       color: var(--md-sys-color-on-error-container);
       animation: barSlideIn 0.15s ease-out;
     }
-    .error-notice svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .error-notice svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
     .error-dismiss {
       margin-left: auto;
       background: none;
@@ -269,10 +305,14 @@ class DeletionsPanel extends LitElement {
       padding: 0;
       opacity: 0.7;
     }
-    .error-dismiss:hover { opacity: 1; }
+    .error-dismiss:hover {
+      opacity: 1;
+    }
 
     /* ─── Queue table ─── */
-    .queue-scroll { overflow-x: auto; }
+    .queue-scroll {
+      overflow-x: auto;
+    }
 
     .queue-table {
       width: 100%;
@@ -308,7 +348,9 @@ class DeletionsPanel extends LitElement {
       vertical-align: middle;
     }
 
-    .queue-table tbody tr { transition: background 0.1s; }
+    .queue-table tbody tr {
+      transition: background 0.1s;
+    }
 
     .queue-table tbody tr:hover td {
       background: var(--md-sys-color-hover-background);
@@ -341,12 +383,16 @@ class DeletionsPanel extends LitElement {
       border-radius: 4px;
       cursor: pointer;
       position: relative;
-      transition: background 0.1s, border-color 0.1s;
+      transition:
+        background 0.1s,
+        border-color 0.1s;
       flex-shrink: 0;
       display: block;
     }
 
-    .queue-table input[type="checkbox"]:hover { border-color: var(--md-sys-color-primary); }
+    .queue-table input[type="checkbox"]:hover {
+      border-color: var(--md-sys-color-primary);
+    }
 
     .queue-table input[type="checkbox"]:checked,
     .queue-table input[type="checkbox"]:indeterminate {
@@ -503,8 +549,12 @@ class DeletionsPanel extends LitElement {
     }
 
     @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
     }
 
     /* ─── Empty state ─── */
@@ -524,7 +574,10 @@ class DeletionsPanel extends LitElement {
       opacity: 0.2;
       color: var(--md-sys-color-on-surface-variant);
     }
-    .empty-icon svg { width: 44px; height: 44px; }
+    .empty-icon svg {
+      width: 44px;
+      height: 44px;
+    }
 
     .empty-heading {
       font-size: 14px;
@@ -548,7 +601,6 @@ class DeletionsPanel extends LitElement {
       border-radius: 16px;
       overflow: hidden;
     }
-
   `;
 
   constructor() {
@@ -706,14 +758,16 @@ class DeletionsPanel extends LitElement {
           const chartLabels = Object.keys(perWs);
           this._chartData = {
             labels: chartLabels,
-            datasets: [{
-              label: "Deleted Items",
-              data: chartLabels.map((l) => perWs[l].count),
-              backgroundColor: errorColor + "AA",
-              borderRadius: 6,
-              borderSkipped: false,
-              barThickness: 28,
-            }],
+            datasets: [
+              {
+                label: "Deleted Items",
+                data: chartLabels.map((l) => perWs[l].count),
+                backgroundColor: errorColor + "AA",
+                borderRadius: 6,
+                borderSkipped: false,
+                barThickness: 28,
+              },
+            ],
           };
           this._recycleBinLoading = false;
         }),
@@ -740,17 +794,20 @@ class DeletionsPanel extends LitElement {
 
     const now = Math.floor(Date.now() / 1000);
     const bins = [
-      { label: "< 7 days",    max: 7 * 86400,   count: 0 },
-      { label: "7–30 days",   max: 30 * 86400,  count: 0 },
-      { label: "1–3 months",  max: 90 * 86400,  count: 0 },
-      { label: "> 3 months",  max: Infinity,    count: 0 },
+      { label: "< 7 days", max: 7 * 86400, count: 0 },
+      { label: "7–30 days", max: 30 * 86400, count: 0 },
+      { label: "1–3 months", max: 90 * 86400, count: 0 },
+      { label: "> 3 months", max: Infinity, count: 0 },
     ];
 
     for (const row of this._tableRows) {
       const ts = row.requesterTs || row.mtime;
       const age = ts ? now - ts : 0;
       for (const bin of bins) {
-        if (age <= bin.max) { bin.count++; break; }
+        if (age <= bin.max) {
+          bin.count++;
+          break;
+        }
       }
     }
 
@@ -760,14 +817,16 @@ class DeletionsPanel extends LitElement {
 
     this._ageBinData = {
       labels: bins.map((b) => b.label),
-      datasets: [{
-        label: "Items",
-        data: bins.map((b) => b.count),
-        backgroundColor: colors,
-        borderRadius: 6,
-        borderSkipped: false,
-        barThickness: 28,
-      }],
+      datasets: [
+        {
+          label: "Items",
+          data: bins.map((b) => b.count),
+          backgroundColor: colors,
+          borderRadius: 6,
+          borderSkipped: false,
+          barThickness: 28,
+        },
+      ],
     };
   }
 
@@ -801,7 +860,11 @@ class DeletionsPanel extends LitElement {
       });
     } catch (err) {
       console.error("DeletionsPanel requester lookup error:", err);
-      this._tableRows = this._tableRows.map((row) => ({ ...row, requester: "", requesterTs: null }));
+      this._tableRows = this._tableRows.map((row) => ({
+        ...row,
+        requester: "",
+        requesterTs: null,
+      }));
     } finally {
       this._requesterLoading = false;
     }
@@ -810,9 +873,7 @@ class DeletionsPanel extends LitElement {
   // ── Selection ─────────────────────────────────────────────────────────────
 
   _toggleSelectAll(e) {
-    this._selected = e.target.checked
-      ? new Set(this._tableRows.map((r) => r.path))
-      : new Set();
+    this._selected = e.target.checked ? new Set(this._tableRows.map((r) => r.path)) : new Set();
   }
 
   _toggleRow(path, checked) {
@@ -922,7 +983,10 @@ class DeletionsPanel extends LitElement {
       Workspace: row.workspace,
       "Size (Bytes)": row.size,
       "Size (Formatted)": formatBytes(row.size),
-      "In Bin Since": (row.requesterTs || row.mtime) ? new Date((row.requesterTs || row.mtime) * 1000).toISOString() : "",
+      "In Bin Since":
+        row.requesterTs || row.mtime
+          ? new Date((row.requesterTs || row.mtime) * 1000).toISOString()
+          : "",
       "Deleted By": row.requester || "Unknown",
       Path: row.path,
     }));
@@ -970,9 +1034,15 @@ class DeletionsPanel extends LitElement {
     if (this._actionError) {
       return html`
         <div class="error-notice">
-          ${alertCircleIcon}
-          ${this._actionError}
-          <button class="error-dismiss" @click=${() => { this._actionError = ""; }}>Dismiss</button>
+          ${alertCircleIcon} ${this._actionError}
+          <button
+            class="error-dismiss"
+            @click=${() => {
+              this._actionError = "";
+            }}
+          >
+            Dismiss
+          </button>
         </div>
       `;
     }
@@ -982,10 +1052,20 @@ class DeletionsPanel extends LitElement {
         <div class="confirm-bar">
           <div class="confirm-icon-wrap">${alertCircleIcon}</div>
           <div class="confirm-text-wrap">
-            <span class="confirm-title">Permanently delete ${count} item${count !== 1 ? "s" : ""}?</span>
-            <span class="confirm-sub">This action is irreversible. Items will be removed from all storage and cannot be recovered.</span>
+            <span class="confirm-title"
+              >Permanently delete ${count} item${count !== 1 ? "s" : ""}?</span
+            >
+            <span class="confirm-sub"
+              >This action is irreversible. Items will be removed from all storage and cannot be
+              recovered.</span
+            >
           </div>
-          <button class="action-btn confirm-cancel-btn" @click=${() => { this._confirmDelete = false; }}>
+          <button
+            class="action-btn confirm-cancel-btn"
+            @click=${() => {
+              this._confirmDelete = false;
+            }}
+          >
             Cancel
           </button>
           <button
@@ -1016,7 +1096,9 @@ class DeletionsPanel extends LitElement {
           <button
             class="action-btn perm-delete-btn"
             ?disabled=${this._actionInProgress}
-            @click=${() => { this._confirmDelete = true; }}
+            @click=${() => {
+              this._confirmDelete = true;
+            }}
           >
             ${deleteIcon} Permanently Delete
           </button>
@@ -1037,19 +1119,33 @@ class DeletionsPanel extends LitElement {
             <thead>
               <tr>
                 <th class="col-cb"></th>
-                <th>Name</th><th>Type</th><th>Workspace</th>
-                <th>Size</th><th>In bin since</th><th>Requested by</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Workspace</th>
+                <th>Size</th>
+                <th>In bin since</th>
+                <th>Requested by</th>
               </tr>
             </thead>
             <tbody>
-              ${Array.from({ length: 5 }, (_, i) => html`
-                <tr>
-                  <td class="col-cb"></td>
-                  ${[65, 30, 45, 25, 40, 70].map((w) => html`
-                    <td><div class="skeleton-cell" style="width:${w}%;animation-delay:${i * 0.07}s"></div></td>
-                  `)}
-                </tr>
-              `)}
+              ${Array.from(
+                { length: 5 },
+                (_, i) => html`
+                  <tr>
+                    <td class="col-cb"></td>
+                    ${[65, 30, 45, 25, 40, 70].map(
+                      (w) => html`
+                        <td>
+                          <div
+                            class="skeleton-cell"
+                            style="width:${w}%;animation-delay:${i * 0.07}s"
+                          ></div>
+                        </td>
+                      `,
+                    )}
+                  </tr>
+                `,
+              )}
             </tbody>
           </table>
         </div>
@@ -1062,8 +1158,8 @@ class DeletionsPanel extends LitElement {
           <div class="empty-icon">${deleteClockIcon}</div>
           <div class="empty-heading">Recycle bins are clear</div>
           <div class="empty-body">
-            No items are currently pending review. All deleted content has been actioned
-            or no deletions have occurred.
+            No items are currently pending review. All deleted content has been actioned or no
+            deletions have occurred.
           </div>
         </div>
       `;
@@ -1093,34 +1189,38 @@ class DeletionsPanel extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${this._tableRows.map((row) => html`
-              <tr class=${this._selected.has(row.path) ? "row-selected" : ""}>
-                <td class="col-cb">
-                  <div class="cb-wrap">
-                    <input
-                      type="checkbox"
-                      .checked=${this._selected.has(row.path)}
-                      @change=${(e) => this._toggleRow(row.path, e.target.checked)}
-                    />
-                  </div>
-                </td>
-                <td>
-                  <div class="name-cell">
-                    <span class="name-primary" title=${row.name}>${row.name}</span>
-                    <span class="name-path" title=${row.path}>${row.path}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="type-badge type-badge--${row.type === "Folder" ? "folder" : "file"}">
-                    ${row.type}
-                  </span>
-                </td>
-                <td>${row.workspace}</td>
-                <td>${formatBytes(row.size)}</td>
-                <td>${formatDate(row.requesterTs || row.mtime)}</td>
-                <td>${this._renderRequester(row)}</td>
-              </tr>
-            `)}
+            ${this._tableRows.map(
+              (row) => html`
+                <tr class=${this._selected.has(row.path) ? "row-selected" : ""}>
+                  <td class="col-cb">
+                    <div class="cb-wrap">
+                      <input
+                        type="checkbox"
+                        .checked=${this._selected.has(row.path)}
+                        @change=${(e) => this._toggleRow(row.path, e.target.checked)}
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="name-primary" title=${row.name}>${row.name}</span>
+                      <span class="name-path" title=${row.path}>${row.path}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      class="type-badge type-badge--${row.type === "Folder" ? "folder" : "file"}"
+                    >
+                      ${row.type}
+                    </span>
+                  </td>
+                  <td>${row.workspace}</td>
+                  <td>${formatBytes(row.size)}</td>
+                  <td>${formatDate(row.requesterTs || row.mtime)}</td>
+                  <td>${this._renderRequester(row)}</td>
+                </tr>
+              `,
+            )}
           </tbody>
         </table>
       </div>
@@ -1176,7 +1276,9 @@ class DeletionsPanel extends LitElement {
             indexAxis: "y",
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} item${ctx.raw !== 1 ? "s" : ""}` } },
+              tooltip: {
+                callbacks: { label: (ctx) => ` ${ctx.raw} item${ctx.raw !== 1 ? "s" : ""}` },
+              },
             },
             scales: { x: { ticks: { precision: 0 } } },
           }}
@@ -1184,7 +1286,6 @@ class DeletionsPanel extends LitElement {
       </div>
 
       <div class="work-area">
-
         <div>
           <div class="section-header">
             <span class="section-title">Review Queue</span>
@@ -1193,10 +1294,7 @@ class DeletionsPanel extends LitElement {
               : ""}
             <div class="section-rule"></div>
           </div>
-          <div class="queue-card">
-            ${this._renderActionArea()}
-            ${this._renderQueueTable()}
-          </div>
+          <div class="queue-card">${this._renderActionArea()} ${this._renderQueueTable()}</div>
         </div>
 
         <div>
@@ -1222,7 +1320,6 @@ class DeletionsPanel extends LitElement {
             ></data-table>
           </div>
         </div>
-
       </div>
     `;
   }

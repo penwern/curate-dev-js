@@ -9,91 +9,91 @@ export const mockManifest = {
   totalEmails: 15,
   version: "1.0",
   pstFolders: {
-    "Inbox": {
+    Inbox: {
       name: "Inbox",
       path: "Inbox",
-      emailIds: []
+      emailIds: [],
     },
     "Inbox/Newsletters": {
       name: "Newsletters",
       path: "Inbox/Newsletters",
-      emailIds: ["006", "013"]
+      emailIds: ["006", "013"],
     },
     "Inbox/DevOps": {
       name: "DevOps Alerts",
       path: "Inbox/DevOps",
-      emailIds: ["008"]
+      emailIds: ["008"],
     },
-    "Calendar": {
+    Calendar: {
       name: "Calendar",
       path: "Calendar",
-      emailIds: ["010"]
+      emailIds: ["010"],
     },
-    "Support": {
+    Support: {
       name: "Support",
       path: "Support",
-      emailIds: []
+      emailIds: [],
     },
     "Support/Tickets": {
       name: "Tickets",
       path: "Support/Tickets",
-      emailIds: ["011"]
+      emailIds: ["011"],
     },
-    "Projects": {
+    Projects: {
       name: "Projects",
       path: "Projects",
-      emailIds: []
+      emailIds: [],
     },
     "Projects/Finance": {
       name: "Finance Review",
       path: "Projects/Finance",
-      emailIds: ["001", "002", "003"]
+      emailIds: ["001", "002", "003"],
     },
     "Projects/Design": {
       name: "Design Feedback",
       path: "Projects/Design",
-      emailIds: ["004", "005"]
+      emailIds: ["004", "005"],
     },
-    "Sales": {
+    Sales: {
       name: "Sales",
       path: "Sales",
-      emailIds: []
+      emailIds: [],
     },
     "Sales/Reports": {
       name: "Reports",
       path: "Sales/Reports",
-      emailIds: ["012"]
+      emailIds: ["012"],
     },
     "Company Updates": {
       name: "Company Updates",
       path: "Company Updates",
-      emailIds: []
+      emailIds: [],
     },
     "Company Updates/HR": {
       name: "HR",
       path: "Company Updates/HR",
-      emailIds: ["007"]
+      emailIds: ["007"],
     },
     "Company Updates/Security": {
       name: "Security",
       path: "Company Updates/Security",
-      emailIds: ["009"]
+      emailIds: ["009"],
     },
     "Company Updates/IT": {
       name: "IT",
       path: "Company Updates/IT",
-      emailIds: ["014"]
+      emailIds: ["014"],
     },
-    "Vendors": {
+    Vendors: {
       name: "Vendors",
       path: "Vendors",
-      emailIds: []
+      emailIds: [],
     },
     "Vendors/Procurement": {
       name: "Procurement",
       path: "Vendors/Procurement",
-      emailIds: ["015"]
-    }
+      emailIds: ["015"],
+    },
   },
 
   emails: [
@@ -110,7 +110,8 @@ export const mockManifest = {
       replyTo: null,
       subject: "Q4 Budget Review",
       date: "2024-03-15T14:30:00Z",
-      snippet: "Here's the budget analysis for Q4 including projections and actual spend across all departments...",
+      snippet:
+        "Here's the budget analysis for Q4 including projections and actual spend across all departments...",
       messageId: "<msg001@company.com>",
       inReplyTo: null,
       references: [],
@@ -122,11 +123,11 @@ export const mockManifest = {
           size: 45600,
           mimeType: "application/vnd.ms-excel",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
     {
       id: "002",
@@ -140,14 +141,15 @@ export const mockManifest = {
       replyTo: null,
       subject: "Re: Q4 Budget Review",
       date: "2024-03-15T15:45:00Z",
-      snippet: "Thanks Alice! The numbers look good overall. I have a few questions about the marketing spend...",
+      snippet:
+        "Thanks Alice! The numbers look good overall. I have a few questions about the marketing spend...",
       messageId: "<msg002@company.com>",
       inReplyTo: "<msg001@company.com>",
       references: ["<msg001@company.com>"],
       threadId: "thread-001",
       attachments: [],
       hasExternalImages: false,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "003",
@@ -161,7 +163,8 @@ export const mockManifest = {
       replyTo: null,
       subject: "Re: Q4 Budget Review",
       date: "2024-03-15T16:20:00Z",
-      snippet: "Good catch! Let me clarify the marketing allocation. See the updated breakdown attached...",
+      snippet:
+        "Good catch! Let me clarify the marketing allocation. See the updated breakdown attached...",
       messageId: "<msg003@company.com>",
       inReplyTo: "<msg002@company.com>",
       references: ["<msg001@company.com>", "<msg002@company.com>"],
@@ -173,11 +176,11 @@ export const mockManifest = {
           size: 234500,
           mimeType: "application/pdf",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
 
     // Thread 2: Design feedback (2 emails)
@@ -193,7 +196,8 @@ export const mockManifest = {
       replyTo: null,
       subject: "New Homepage Design Mockups",
       date: "2024-03-14T09:00:00Z",
-      snippet: "Hi team! We've completed the homepage redesign mockups. Please review and provide feedback by EOW...",
+      snippet:
+        "Hi team! We've completed the homepage redesign mockups. Please review and provide feedback by EOW...",
       messageId: "<msg004@company.com>",
       inReplyTo: null,
       references: [],
@@ -205,7 +209,7 @@ export const mockManifest = {
           size: 856200,
           mimeType: "image/png",
           inline: true,
-          contentId: "homepage@company.com"
+          contentId: "homepage@company.com",
         },
         {
           filename: "mobile-view.png",
@@ -213,11 +217,11 @@ export const mockManifest = {
           size: 423100,
           mimeType: "image/png",
           inline: true,
-          contentId: "mobile@company.com"
-        }
+          contentId: "mobile@company.com",
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
     {
       id: "005",
@@ -231,14 +235,15 @@ export const mockManifest = {
       replyTo: null,
       subject: "Re: New Homepage Design Mockups",
       date: "2024-03-14T14:30:00Z",
-      snippet: "Love the new direction! A few suggestions: 1. CTA button could be more prominent 2. Consider...",
+      snippet:
+        "Love the new direction! A few suggestions: 1. CTA button could be more prominent 2. Consider...",
       messageId: "<msg005@company.com>",
       inReplyTo: "<msg004@company.com>",
       references: ["<msg004@company.com>"],
       threadId: "thread-002",
       attachments: [],
       hasExternalImages: false,
-      hasAttachments: false
+      hasAttachments: false,
     },
 
     // Standalone emails
@@ -254,14 +259,15 @@ export const mockManifest = {
       replyTo: null,
       subject: "Your Weekly Tech Digest",
       date: "2024-03-13T08:00:00Z",
-      snippet: "Top stories this week: AI breakthroughs, new framework releases, and industry insights...",
+      snippet:
+        "Top stories this week: AI breakthroughs, new framework releases, and industry insights...",
       messageId: "<msg006@example.com>",
       inReplyTo: null,
       references: [],
       threadId: null,
       attachments: [],
       hasExternalImages: true,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "007",
@@ -274,14 +280,15 @@ export const mockManifest = {
         { name: "Bob Smith", email: "bob@company.com" },
         { name: "Carol White", email: "carol@company.com" },
         { name: "David Brown", email: "david@company.com" },
-        { name: "Eve Davis", email: "eve@company.com" }
+        { name: "Eve Davis", email: "eve@company.com" },
       ],
       cc: [],
       bcc: [],
       replyTo: null,
       subject: "Important: Benefits Enrollment Deadline March 31st",
       date: "2024-03-12T10:00:00Z",
-      snippet: "Reminder: The deadline for benefits enrollment is approaching. Please complete your selections by March 31st...",
+      snippet:
+        "Reminder: The deadline for benefits enrollment is approaching. Please complete your selections by March 31st...",
       messageId: "<msg007@company.com>",
       inReplyTo: null,
       references: [],
@@ -293,11 +300,11 @@ export const mockManifest = {
           size: 1245000,
           mimeType: "application/pdf",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
     {
       id: "008",
@@ -318,7 +325,7 @@ export const mockManifest = {
       threadId: null,
       attachments: [],
       hasExternalImages: true,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "009",
@@ -332,14 +339,15 @@ export const mockManifest = {
       replyTo: null,
       subject: "🔒 Monthly Security Update - Action Required",
       date: "2024-03-10T09:00:00Z",
-      snippet: "As part of our ongoing security improvements, please update your password and enable 2FA by March 15th...",
+      snippet:
+        "As part of our ongoing security improvements, please update your password and enable 2FA by March 15th...",
       messageId: "<msg009@company.com>",
       inReplyTo: null,
       references: [],
       threadId: null,
       attachments: [],
       hasExternalImages: false,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "010",
@@ -351,9 +359,11 @@ export const mockManifest = {
       cc: [],
       bcc: [],
       replyTo: null,
-      subject: "Invitation: Quarterly Planning Meeting @ Thu Mar 21, 2024 2pm - 3pm (alice@company.com)",
+      subject:
+        "Invitation: Quarterly Planning Meeting @ Thu Mar 21, 2024 2pm - 3pm (alice@company.com)",
       date: "2024-03-09T11:30:00Z",
-      snippet: "You have been invited to Quarterly Planning Meeting on Thursday, March 21st at 2:00 PM...",
+      snippet:
+        "You have been invited to Quarterly Planning Meeting on Thursday, March 21st at 2:00 PM...",
       messageId: "<msg010@company.com>",
       inReplyTo: null,
       references: [],
@@ -365,11 +375,11 @@ export const mockManifest = {
           size: 1200,
           mimeType: "text/calendar",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
     {
       id: "011",
@@ -383,14 +393,15 @@ export const mockManifest = {
       replyTo: { name: "Support Team", email: "help@company.com" },
       subject: "Re: [Ticket #1234] Login issues",
       date: "2024-03-08T14:15:00Z",
-      snippet: "Thank you for contacting support. We've investigated the login issue and found the cause...",
+      snippet:
+        "Thank you for contacting support. We've investigated the login issue and found the cause...",
       messageId: "<msg011@company.com>",
       inReplyTo: null,
       references: [],
       threadId: null,
       attachments: [],
       hasExternalImages: false,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "012",
@@ -404,7 +415,8 @@ export const mockManifest = {
       replyTo: null,
       subject: "Q1 Sales Report - Record Breaking Quarter! 🎉",
       date: "2024-03-07T16:00:00Z",
-      snippet: "Excited to share that we've exceeded our Q1 targets by 23%! Here's the full breakdown...",
+      snippet:
+        "Excited to share that we've exceeded our Q1 targets by 23%! Here's the full breakdown...",
       messageId: "<msg012@company.com>",
       inReplyTo: null,
       references: [],
@@ -416,7 +428,7 @@ export const mockManifest = {
           size: 67800,
           mimeType: "application/vnd.ms-excel",
           inline: false,
-          contentId: null
+          contentId: null,
         },
         {
           filename: "regional-breakdown.csv",
@@ -424,11 +436,11 @@ export const mockManifest = {
           size: 8900,
           mimeType: "text/csv",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
+      hasAttachments: true,
     },
     {
       id: "013",
@@ -449,7 +461,7 @@ export const mockManifest = {
       threadId: null,
       attachments: [],
       hasExternalImages: true,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "014",
@@ -463,14 +475,15 @@ export const mockManifest = {
       replyTo: null,
       subject: "Scheduled Maintenance: Network Upgrade - Sunday 3/17 2AM-6AM",
       date: "2024-03-05T09:00:00Z",
-      snippet: "Please be advised that we will be performing network infrastructure upgrades on Sunday, March 17th from 2:00 AM to 6:00 AM. All systems will be unavailable during this time...",
+      snippet:
+        "Please be advised that we will be performing network infrastructure upgrades on Sunday, March 17th from 2:00 AM to 6:00 AM. All systems will be unavailable during this time...",
       messageId: "<msg014@company.com>",
       inReplyTo: null,
       references: [],
       threadId: null,
       attachments: [],
       hasExternalImages: false,
-      hasAttachments: false
+      hasAttachments: false,
     },
     {
       id: "015",
@@ -484,7 +497,8 @@ export const mockManifest = {
       replyTo: null,
       subject: "Proposal: Enterprise Software Licensing Agreement",
       date: "2024-03-04T10:30:00Z",
-      snippet: "Thank you for your interest in our enterprise solutions. Attached is our proposal for a 3-year licensing agreement with volume discounts...",
+      snippet:
+        "Thank you for your interest in our enterprise solutions. Attached is our proposal for a 3-year licensing agreement with volume discounts...",
       messageId: "<msg015@vendor.com>",
       inReplyTo: null,
       references: [],
@@ -496,7 +510,7 @@ export const mockManifest = {
           size: 456700,
           mimeType: "application/pdf",
           inline: false,
-          contentId: null
+          contentId: null,
         },
         {
           filename: "pricing-breakdown.xlsx",
@@ -504,18 +518,18 @@ export const mockManifest = {
           size: 23400,
           mimeType: "application/vnd.ms-excel",
           inline: false,
-          contentId: null
-        }
+          contentId: null,
+        },
       ],
       hasExternalImages: false,
-      hasAttachments: true
-    }
+      hasAttachments: true,
+    },
   ],
 
   threads: {
     "thread-001": ["001", "002", "003"],
-    "thread-002": ["004", "005"]
-  }
+    "thread-002": ["004", "005"],
+  },
 };
 
 /**
@@ -537,7 +551,7 @@ export const mockEmailBodies = {
       <p>Please review the attached spreadsheet for detailed breakdowns. Let's discuss any concerns in tomorrow's meeting.</p>
       <p>Best regards,<br>Alice</p>
     `,
-    text: "Hi Bob,\n\nHere's the budget analysis for Q4 including projections and actual spend across all departments.\n\nKey highlights:\n- Engineering: On track, 98% of budget utilized\n- Marketing: Over budget by 12% due to additional campaign spend\n- Sales: Under budget by 8%, strong performance\n- Operations: Exactly on target\n\nPlease review the attached spreadsheet for detailed breakdowns. Let's discuss any concerns in tomorrow's meeting.\n\nBest regards,\nAlice"
+    text: "Hi Bob,\n\nHere's the budget analysis for Q4 including projections and actual spend across all departments.\n\nKey highlights:\n- Engineering: On track, 98% of budget utilized\n- Marketing: Over budget by 12% due to additional campaign spend\n- Sales: Under budget by 8%, strong performance\n- Operations: Exactly on target\n\nPlease review the attached spreadsheet for detailed breakdowns. Let's discuss any concerns in tomorrow's meeting.\n\nBest regards,\nAlice",
   },
   "002": {
     html: `
@@ -551,7 +565,7 @@ export const mockEmailBodies = {
       <p>Can you provide more details?</p>
       <p>Thanks,<br>Bob</p>
     `,
-    text: "Thanks Alice!\n\nThe numbers look good overall. I have a few questions about the marketing spend:\n\n1. What was the ROI on the additional campaign spend?\n2. Is the overage a one-time event or should we adjust Q1 budget?\n3. Which channels performed best?\n\nCan you provide more details?\n\nThanks,\nBob"
+    text: "Thanks Alice!\n\nThe numbers look good overall. I have a few questions about the marketing spend:\n\n1. What was the ROI on the additional campaign spend?\n2. Is the overage a one-time event or should we adjust Q1 budget?\n3. Which channels performed best?\n\nCan you provide more details?\n\nThanks,\nBob",
   },
   "003": {
     html: `
@@ -570,7 +584,7 @@ export const mockEmailBodies = {
       </ul>
       <p>Alice</p>
     `,
-    text: "Good catch Bob! Let me clarify the marketing allocation.\n\n> Bob Smith wrote:\n> What was the ROI on the additional campaign spend?\n\nThe ROI was 3.2x, well above our 2.5x target. See the updated breakdown attached.\n\nRegarding budget adjustment: I recommend increasing Q1 marketing by 10% to capitalize on the momentum.\n\nTop channels:\n- Social media: 4.1x ROI\n- Content marketing: 3.8x ROI\n- Email campaigns: 2.9x ROI\n\nAlice"
+    text: "Good catch Bob! Let me clarify the marketing allocation.\n\n> Bob Smith wrote:\n> What was the ROI on the additional campaign spend?\n\nThe ROI was 3.2x, well above our 2.5x target. See the updated breakdown attached.\n\nRegarding budget adjustment: I recommend increasing Q1 marketing by 10% to capitalize on the momentum.\n\nTop channels:\n- Social media: 4.1x ROI\n- Content marketing: 3.8x ROI\n- Email campaigns: 2.9x ROI\n\nAlice",
   },
   "004": {
     html: `
@@ -590,7 +604,7 @@ export const mockEmailBodies = {
       <p>Looking forward to your thoughts!</p>
       <p>Design Team</p>
     `,
-    text: "Hi team!\n\nWe've completed the homepage redesign mockups. Please review and provide feedback by end of week.\n\nKey changes:\n- Cleaner, more modern aesthetic\n- Improved mobile responsiveness\n- Better visual hierarchy\n- Accessibility improvements (WCAG 2.1 AA compliant)\n\nSee attached mockups for desktop and mobile versions.\n\nLooking forward to your thoughts!\n\nDesign Team"
+    text: "Hi team!\n\nWe've completed the homepage redesign mockups. Please review and provide feedback by end of week.\n\nKey changes:\n- Cleaner, more modern aesthetic\n- Improved mobile responsiveness\n- Better visual hierarchy\n- Accessibility improvements (WCAG 2.1 AA compliant)\n\nSee attached mockups for desktop and mobile versions.\n\nLooking forward to your thoughts!\n\nDesign Team",
   },
   "005": {
     html: `
@@ -605,7 +619,7 @@ export const mockEmailBodies = {
       <p>Overall this is a huge improvement. Let's iterate on these points and ship it!</p>
       <p>Product Team</p>
     `,
-    text: "Love the new direction!\n\nA few suggestions:\n1. CTA button could be more prominent (consider primary color)\n2. Testimonials section should be above the fold on desktop\n3. Product imagery needs more visual weight\n4. Consider adding a video hero section\n\nOverall this is a huge improvement. Let's iterate on these points and ship it!\n\nProduct Team"
+    text: "Love the new direction!\n\nA few suggestions:\n1. CTA button could be more prominent (consider primary color)\n2. Testimonials section should be above the fold on desktop\n3. Product imagery needs more visual weight\n4. Consider adding a video hero section\n\nOverall this is a huge improvement. Let's iterate on these points and ship it!\n\nProduct Team",
   },
   "006": {
     html: `
@@ -624,7 +638,7 @@ export const mockEmailBodies = {
         <p style="color: #666; font-size: 12px;">You're receiving this because you subscribed to our newsletter.</p>
       </div>
     `,
-    text: "Your Weekly Tech Digest\n\nTop stories this week:\n\nAI Breakthroughs in Natural Language Processing\nNew models achieve unprecedented accuracy in context understanding...\n\nFramework Update: v4.0 Released\nMajor performance improvements and new features...\n\nYou're receiving this because you subscribed to our newsletter."
+    text: "Your Weekly Tech Digest\n\nTop stories this week:\n\nAI Breakthroughs in Natural Language Processing\nNew models achieve unprecedented accuracy in context understanding...\n\nFramework Update: v4.0 Released\nMajor performance improvements and new features...\n\nYou're receiving this because you subscribed to our newsletter.",
   },
   "007": {
     html: `
@@ -642,7 +656,7 @@ export const mockEmailBodies = {
       <p>Questions? Contact HR at hr@company.com</p>
       <p>HR Department</p>
     `,
-    text: "Important Reminder\n\nThe deadline for benefits enrollment is approaching. Please complete your selections by March 31st.\n\nWhat you need to do:\n1. Log into the benefits portal at benefits.company.com\n2. Review available plans (medical, dental, vision, 401k)\n3. Make your selections\n4. Submit your enrollment\n\nIf you miss the deadline, you'll be automatically enrolled in the default plan and won't be able to make changes until next year.\n\nAttached is the comprehensive benefits guide with plan details and comparison charts.\n\nQuestions? Contact HR at hr@company.com\n\nHR Department"
+    text: "Important Reminder\n\nThe deadline for benefits enrollment is approaching. Please complete your selections by March 31st.\n\nWhat you need to do:\n1. Log into the benefits portal at benefits.company.com\n2. Review available plans (medical, dental, vision, 401k)\n3. Make your selections\n4. Submit your enrollment\n\nIf you miss the deadline, you'll be automatically enrolled in the default plan and won't be able to make changes until next year.\n\nAttached is the comprehensive benefits guide with plan details and comparison charts.\n\nQuestions? Contact HR at hr@company.com\n\nHR Department",
   },
   "008": {
     html: `
@@ -659,7 +673,7 @@ export const mockEmailBodies = {
         <img src="https://github.com/identicons/user123.png" alt="Profile">
       </div>
     `,
-    text: "Alice Johnson wants to merge 3 commits into main from feature/email-viewer\n\nChanges:\n- Add email-viewer component with split pane layout\n- Implement virtual scrolling for email list\n- Add DOMPurify for HTML sanitization\n\n+847 additions, -12 deletions across 8 files\n\nView Pull Request: https://github.com/company/project/pull/42"
+    text: "Alice Johnson wants to merge 3 commits into main from feature/email-viewer\n\nChanges:\n- Add email-viewer component with split pane layout\n- Implement virtual scrolling for email list\n- Add DOMPurify for HTML sanitization\n\n+847 additions, -12 deletions across 8 files\n\nView Pull Request: https://github.com/company/project/pull/42",
   },
   "009": {
     html: `
@@ -686,7 +700,7 @@ export const mockEmailBodies = {
       <p>Need help? Contact security@company.com or visit the IT helpdesk.</p>
       <p>Security Team</p>
     `,
-    text: "🔒 Monthly Security Update - Action Required\n\nAs part of our ongoing security improvements, please complete the following by March 15th:\n\nRequired Actions:\n1. Update your password\n   - Minimum 12 characters\n   - Mix of uppercase, lowercase, numbers, and symbols\n   - Cannot reuse last 5 passwords\n\n2. Enable Two-Factor Authentication (2FA)\n   - Download authenticator app (Authy, Google Authenticator, or Microsoft Authenticator)\n   - Scan QR code in account settings\n   - Save backup codes in secure location\n\nWhy this matters: These measures significantly reduce the risk of unauthorized access to company systems and data.\n\nNeed help? Contact security@company.com or visit the IT helpdesk.\n\nSecurity Team"
+    text: "🔒 Monthly Security Update - Action Required\n\nAs part of our ongoing security improvements, please complete the following by March 15th:\n\nRequired Actions:\n1. Update your password\n   - Minimum 12 characters\n   - Mix of uppercase, lowercase, numbers, and symbols\n   - Cannot reuse last 5 passwords\n\n2. Enable Two-Factor Authentication (2FA)\n   - Download authenticator app (Authy, Google Authenticator, or Microsoft Authenticator)\n   - Scan QR code in account settings\n   - Save backup codes in secure location\n\nWhy this matters: These measures significantly reduce the risk of unauthorized access to company systems and data.\n\nNeed help? Contact security@company.com or visit the IT helpdesk.\n\nSecurity Team",
   },
   "010": {
     html: `
@@ -720,7 +734,7 @@ export const mockEmailBodies = {
         <p>Please review the attached calendar invite (.ics file) to add this to your calendar.</p>
       </div>
     `,
-    text: "📅 Meeting Invitation\n\nEvent: Quarterly Planning Meeting\nWhen: Thursday, March 21, 2024 at 2:00 PM - 3:00 PM (PST)\nWhere: Conference Room A / Zoom (hybrid)\nOrganizer: calendar@company.com\n\nAgenda:\n- Q1 Review and Analysis\n- Q2 Goals and Initiatives\n- Resource Allocation\n- Key Milestones and Deadlines\n\nPlease review the attached calendar invite (.ics file) to add this to your calendar."
+    text: "📅 Meeting Invitation\n\nEvent: Quarterly Planning Meeting\nWhen: Thursday, March 21, 2024 at 2:00 PM - 3:00 PM (PST)\nWhere: Conference Room A / Zoom (hybrid)\nOrganizer: calendar@company.com\n\nAgenda:\n- Q1 Review and Analysis\n- Q2 Goals and Initiatives\n- Resource Allocation\n- Key Milestones and Deadlines\n\nPlease review the attached calendar invite (.ics file) to add this to your calendar.",
   },
   "011": {
     html: `
@@ -745,7 +759,7 @@ export const mockEmailBodies = {
       <p>Support Team<br>
       Ticket #1234</p>
     `,
-    text: "Hello,\n\nThank you for contacting support. We've investigated the login issue and found the cause.\n\nIssue:\nYour session cookies were corrupted, preventing successful authentication.\n\nResolution:\n1. Clear your browser cache and cookies\n2. Close all browser windows\n3. Restart your browser\n4. Try logging in again\n\nIf the issue persists, please reply to this email with:\n- Browser type and version\n- Operating system\n- Screenshot of any error messages\n\nWe're here to help!\n\nSupport Team\nTicket #1234"
+    text: "Hello,\n\nThank you for contacting support. We've investigated the login issue and found the cause.\n\nIssue:\nYour session cookies were corrupted, preventing successful authentication.\n\nResolution:\n1. Clear your browser cache and cookies\n2. Close all browser windows\n3. Restart your browser\n4. Try logging in again\n\nIf the issue persists, please reply to this email with:\n- Browser type and version\n- Operating system\n- Screenshot of any error messages\n\nWe're here to help!\n\nSupport Team\nTicket #1234",
   },
   "012": {
     html: `
@@ -782,7 +796,7 @@ export const mockEmailBodies = {
       <p>Congratulations to the entire team on this outstanding performance!</p>
       <p>Sales Team</p>
     `,
-    text: "🎉 Q1 Sales Report - Record Breaking Quarter!\n\nExcited to share that we've exceeded our Q1 targets by 23%!\n\nKey Metrics:\n- Revenue: $6.15M (target: $5.0M) +23%\n- New Customers: 187 (target: 150) +25%\n- Avg Deal Size: $38k (target: $33k) +15%\n\nSee attached files for full regional breakdown and detailed analysis.\n\nCongratulations to the entire team on this outstanding performance!\n\nSales Team"
+    text: "🎉 Q1 Sales Report - Record Breaking Quarter!\n\nExcited to share that we've exceeded our Q1 targets by 23%!\n\nKey Metrics:\n- Revenue: $6.15M (target: $5.0M) +23%\n- New Customers: 187 (target: 150) +25%\n- Avg Deal Size: $38k (target: $33k) +15%\n\nSee attached files for full regional breakdown and detailed analysis.\n\nCongratulations to the entire team on this outstanding performance!\n\nSales Team",
   },
   "013": {
     html: `
@@ -795,7 +809,7 @@ export const mockEmailBodies = {
         <img src="https://example.com/promo-banner.png" alt="Premium Features">
       </div>
     `,
-    text: "Don't Miss Out! 50% Off Premium Plans\n\nLimited time offer: Upgrade to Premium and save 50%\n\nOffer expires March 13th\n\nUpgrade Now: https://example.com/upgrade"
+    text: "Don't Miss Out! 50% Off Premium Plans\n\nLimited time offer: Upgrade to Premium and save 50%\n\nOffer expires March 13th\n\nUpgrade Now: https://example.com/upgrade",
   },
   "014": {
     html: `
@@ -822,7 +836,7 @@ export const mockEmailBodies = {
       <p>We apologize for any inconvenience. This upgrade will significantly improve network performance and reliability.</p>
       <p>Questions? Contact IT Department: it@company.com</p>
     `,
-    text: "Scheduled Maintenance Notice\n\nPlease be advised that we will be performing network infrastructure upgrades on:\n\nSunday, March 17th, 2024\n2:00 AM - 6:00 AM (PST)\n\nImpact:\nAll systems will be unavailable during this maintenance window, including:\n- Email services\n- File storage and sharing\n- Internal applications\n- VPN access\n\nWhat to expect:\n- Complete network downtime for the 4-hour window\n- No remote access available\n- Office will remain accessible for on-site work\n\nWe apologize for any inconvenience. This upgrade will significantly improve network performance and reliability.\n\nQuestions? Contact IT Department: it@company.com"
+    text: "Scheduled Maintenance Notice\n\nPlease be advised that we will be performing network infrastructure upgrades on:\n\nSunday, March 17th, 2024\n2:00 AM - 6:00 AM (PST)\n\nImpact:\nAll systems will be unavailable during this maintenance window, including:\n- Email services\n- File storage and sharing\n- Internal applications\n- VPN access\n\nWhat to expect:\n- Complete network downtime for the 4-hour window\n- No remote access available\n- Office will remain accessible for on-site work\n\nWe apologize for any inconvenience. This upgrade will significantly improve network performance and reliability.\n\nQuestions? Contact IT Department: it@company.com",
   },
   "015": {
     html: `
@@ -849,6 +863,6 @@ export const mockEmailBodies = {
       carlos@vendor.com<br>
       (555) 123-4567</p>
     `,
-    text: "Dear Procurement Team,\n\nThank you for your interest in our enterprise solutions. Attached is our proposal for a 3-year licensing agreement with volume discounts.\n\nProposal Highlights:\n- Licensing Model: Per-user subscription with unlimited deployment\n- Term: 3 years with option to renew\n- Volume Discount: 30% off standard pricing for 500+ users\n- Support: 24/7 premium support included\n- Training: Complimentary onboarding for up to 50 administrators\n\nPricing Summary:\nYear 1: $450,000 (includes implementation)\nYear 2: $380,000 (annual subscription)\nYear 3: $380,000 (annual subscription)\n\nTotal 3-Year Investment: $1,210,000 (saves $520,000 vs. monthly billing)\n\nDetailed pricing breakdown and technical specifications are in the attached documents.\n\nI'm available to discuss this proposal at your convenience. Please let me know if you have any questions or would like to schedule a call.\n\nBest regards,\n\nCarlos Garcia\nEnterprise Sales Manager\ncarlos@vendor.com\n(555) 123-4567"
-  }
+    text: "Dear Procurement Team,\n\nThank you for your interest in our enterprise solutions. Attached is our proposal for a 3-year licensing agreement with volume discounts.\n\nProposal Highlights:\n- Licensing Model: Per-user subscription with unlimited deployment\n- Term: 3 years with option to renew\n- Volume Discount: 30% off standard pricing for 500+ users\n- Support: 24/7 premium support included\n- Training: Complimentary onboarding for up to 50 administrators\n\nPricing Summary:\nYear 1: $450,000 (includes implementation)\nYear 2: $380,000 (annual subscription)\nYear 3: $380,000 (annual subscription)\n\nTotal 3-Year Investment: $1,210,000 (saves $520,000 vs. monthly billing)\n\nDetailed pricing breakdown and technical specifications are in the attached documents.\n\nI'm available to discuss this proposal at your convenience. Please let me know if you have any questions or would like to schedule a call.\n\nBest regards,\n\nCarlos Garcia\nEnterprise Sales Manager\ncarlos@vendor.com\n(555) 123-4567",
+  },
 };

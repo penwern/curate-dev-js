@@ -31,7 +31,9 @@ class AsSearchFieldSelector extends LitElement {
       cursor: pointer;
       font: inherit;
       line-height: 1;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease;
       height: var(--header-control-height, 36px);
     }
 
@@ -136,7 +138,7 @@ class AsSearchFieldSelector extends LitElement {
               <span>${option.label}</span>
               ${option.description ? html`<small>${option.description}</small>` : nothing}
             </button>
-          `
+          `,
         )}
       </div>
     `;
@@ -148,7 +150,7 @@ class AsSearchFieldSelector extends LitElement {
       new CustomEvent("toggle", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -158,7 +160,7 @@ class AsSearchFieldSelector extends LitElement {
         detail: { value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

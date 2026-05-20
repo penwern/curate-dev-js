@@ -1,4 +1,4 @@
-import { createFocusTrap } from 'focus-trap';
+import { createFocusTrap } from "focus-trap";
 
 /**
  * Custom Page Router for Pydio Cells Enterprise
@@ -12,15 +12,15 @@ const CurateRouter = (function () {
   let routes = new Map();
   let currentPage = null;
   let originalContent = null;
-  let routePrefix = '/custom';
+  let routePrefix = "/custom";
   let focusTrap = null;
   let isInitialized = false;
-  let lastNonCustomUrl = '/'; // Track last non-custom URL for close button
+  let lastNonCustomUrl = "/"; // Track last non-custom URL for close button
   let pydioInitCheckCount = 0; // Track how many times we've checked for pydio.user
   let configuration = {
-    routePrefix: '/custom',
+    routePrefix: "/custom",
     showHeader: true,
-    escapeClosesPage: true
+    escapeClosesPage: true,
   };
 
   /**
@@ -46,7 +46,7 @@ const CurateRouter = (function () {
    */
   function initialize(config = {}) {
     if (isInitialized) {
-      console.warn('CurateRouter: Already initialized');
+      console.warn("CurateRouter: Already initialized");
       return;
     }
 
@@ -61,10 +61,10 @@ const CurateRouter = (function () {
   }
 
   function bindHistoryEvents() {
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
 
     if (configuration.escapeClosesPage) {
-      document.addEventListener('keydown', handleEscapeKey);
+      document.addEventListener("keydown", handleEscapeKey);
     }
 
     // Also listen for URL changes that don't trigger popstate (like Pydio navigation)
@@ -87,18 +87,18 @@ const CurateRouter = (function () {
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(history, args);
       setTimeout(urlChangeListener, 10);
     };
 
-    history.replaceState = function(...args) {
+    history.replaceState = function (...args) {
       originalReplaceState.apply(history, args);
       setTimeout(urlChangeListener, 10);
     };
 
     // Listen for window resize to reposition custom pages
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       if (currentPage && currentPage.container && currentPage.container.element) {
         repositionCurrentPage();
       }
@@ -113,7 +113,7 @@ const CurateRouter = (function () {
   }
 
   function handleEscapeKey(event) {
-    if (event.key === 'Escape' && currentPage) {
+    if (event.key === "Escape" && currentPage) {
       back();
     }
   }
@@ -122,11 +122,11 @@ const CurateRouter = (function () {
     const path = window.location.pathname;
 
     if (path.startsWith(routePrefix)) {
-      const routePath = path.substring(routePrefix.length) || '/';
+      const routePath = path.substring(routePrefix.length) || "/";
 
       // Check if user is logged in before rendering custom routes
       // pydio.user starts as null and gets set during Pydio initialization
-      if (typeof pydio !== 'undefined' && pydio.user === null) {
+      if (typeof pydio !== "undefined" && pydio.user === null) {
         // pydio exists but user is null - could be initializing or logged out
         pydioInitCheckCount++;
 
@@ -145,13 +145,13 @@ const CurateRouter = (function () {
       }
 
       // Reset check count when we successfully find a user
-      if (typeof pydio !== 'undefined' && pydio.user && pydio.user.id) {
+      if (typeof pydio !== "undefined" && pydio.user && pydio.user.id) {
         pydioInitCheckCount = 0;
       }
 
       // Check if we're already on this route - prevent duplicate navigation
       if (currentPage) {
-        const currentRoutePath = window.location.pathname.substring(routePrefix.length) || '/';
+        const currentRoutePath = window.location.pathname.substring(routePrefix.length) || "/";
         if (currentRoutePath === routePath) {
           return;
         }
@@ -161,10 +161,13 @@ const CurateRouter = (function () {
 
       if (match) {
         if (match.route?.options?.allowUrlAccess === false) {
-          console.warn('CurateRouter: Protected route cannot be accessed directly via URL:', routePath);
-          const targetUrl = lastNonCustomUrl || '/';
+          console.warn(
+            "CurateRouter: Protected route cannot be accessed directly via URL:",
+            routePath,
+          );
+          const targetUrl = lastNonCustomUrl || "/";
           if (path !== targetUrl) {
-            window.history.replaceState(null, '', targetUrl);
+            window.history.replaceState(null, "", targetUrl);
           }
           return;
         }
@@ -207,8 +210,8 @@ const CurateRouter = (function () {
   }
 
   function matchRoute(pattern, path) {
-    const patternParts = pattern.split('/');
-    const pathParts = path.split('/');
+    const patternParts = pattern.split("/");
+    const pathParts = path.split("/");
 
     if (patternParts.length !== pathParts.length) {
       return null;
@@ -219,7 +222,7 @@ const CurateRouter = (function () {
       const patternPart = patternParts[i];
       const pathPart = pathParts[i];
 
-      if (patternPart.startsWith(':')) {
+      if (patternPart.startsWith(":")) {
         const paramName = patternPart.substring(1);
         params[paramName] = decodeURIComponent(pathPart);
       } else if (patternPart !== pathPart) {
@@ -262,18 +265,18 @@ const CurateRouter = (function () {
    * });
    */
   function addRoute(path, handler, options = {}) {
-    if (!path || typeof handler !== 'function') {
-      throw new Error('CurateRouter: Invalid route parameters');
+    if (!path || typeof handler !== "function") {
+      throw new Error("CurateRouter: Invalid route parameters");
     }
 
     const route = {
       handler,
       options: {
         ...options,
-        title: options.title || 'Custom Page',
+        title: options.title || "Custom Page",
         showHeader: options.showHeader !== false,
-        allowUrlAccess: options.allowUrlAccess !== false
-      }
+        allowUrlAccess: options.allowUrlAccess !== false,
+      },
     };
 
     routes.set(path, route);
@@ -304,13 +307,13 @@ const CurateRouter = (function () {
    */
   function navigate(path, updateHistory = true) {
     if (!isInitialized) {
-      throw new Error('CurateRouter: Not initialized. Call initialize() first.');
+      throw new Error("CurateRouter: Not initialized. Call initialize() first.");
     }
 
-    const fullPath = routePrefix + (path.startsWith('/') ? path : '/' + path);
+    const fullPath = routePrefix + (path.startsWith("/") ? path : "/" + path);
 
     if (updateHistory) {
-      window.history.pushState(null, '', fullPath);
+      window.history.pushState(null, "", fullPath);
     }
 
     checkCurrentRoute();
@@ -318,17 +321,17 @@ const CurateRouter = (function () {
 
   function openRoute(path, params = {}, overrides = {}) {
     if (!isInitialized) {
-      throw new Error('CurateRouter: Not initialized. Call initialize() first.');
+      throw new Error("CurateRouter: Not initialized. Call initialize() first.");
     }
 
-    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    const normalizedPath = path.startsWith("/") ? path : "/" + path;
     const route = routes.get(normalizedPath);
 
     if (!route) {
       throw new Error(`CurateRouter: Route not found for path ${normalizedPath}`);
     }
 
-    const closeOnUrlChange = Object.prototype.hasOwnProperty.call(overrides, 'closeOnUrlChange')
+    const closeOnUrlChange = Object.prototype.hasOwnProperty.call(overrides, "closeOnUrlChange")
       ? overrides.closeOnUrlChange !== false
       : route.options?.closeOnUrlChange !== false;
 
@@ -339,8 +342,8 @@ const CurateRouter = (function () {
         ...overrides,
         keepOpenWithoutRoute: true,
         closeOnUrlChange,
-        routePath: normalizedPath
-      }
+        routePath: normalizedPath,
+      },
     };
 
     const initialUrl = window.location.pathname;
@@ -372,7 +375,7 @@ const CurateRouter = (function () {
         isStandalone: route?.options?.keepOpenWithoutRoute === true,
         initialUrl: route?.options?.keepOpenWithoutRoute === true ? window.location.pathname : null,
         closeOnUrlChange: route?.options?.closeOnUrlChange !== false,
-        routePath: route?.options?.routePath || null
+        routePath: route?.options?.routePath || null,
       };
 
       const query = new URLSearchParams(window.location.search);
@@ -383,32 +386,31 @@ const CurateRouter = (function () {
         query: queryObj,
         navigate: navigationUtils.navigate,
         close: navigationUtils.close,
-        back: navigationUtils.back
+        back: navigationUtils.back,
       };
 
       Promise.resolve(route.handler(container.content, handlerContext))
-        .then(cleanup => {
-          if (currentPage && typeof cleanup === 'function') {
+        .then((cleanup) => {
+          if (currentPage && typeof cleanup === "function") {
             currentPage.cleanup = cleanup;
           }
           // Re-ensure positioning after route handler runs (in case it modified styles)
           repositionCurrentPage();
           setupFocusManagement(container.element);
         })
-        .catch(error => {
-          console.error('CurateRouter: Route handler error:', error);
-          showErrorPage('An error occurred while loading this page.');
+        .catch((error) => {
+          console.error("CurateRouter: Route handler error:", error);
+          showErrorPage("An error occurred while loading this page.");
         });
-
     } catch (error) {
-      console.error('CurateRouter: Navigation error:', error);
-      showErrorPage('Failed to navigate to page.');
+      console.error("CurateRouter: Navigation error:", error);
+      showErrorPage("Failed to navigate to page.");
     }
   }
 
   function createPageContainer(options) {
-    const pageElement = document.createElement('div');
-    pageElement.className = 'curate-router-page';
+    const pageElement = document.createElement("div");
+    pageElement.className = "curate-router-page";
     pageElement.style.cssText = `
       position: absolute;
       top: 0;
@@ -427,8 +429,8 @@ const CurateRouter = (function () {
       const header = createPageHeader(options.title);
       pageElement.appendChild(header);
 
-      contentElement = document.createElement('div');
-      contentElement.className = 'curate-router-content';
+      contentElement = document.createElement("div");
+      contentElement.className = "curate-router-content";
       contentElement.style.cssText = `
         flex: 1;
         overflow: auto;
@@ -443,7 +445,7 @@ const CurateRouter = (function () {
 
     // Wait for desktop-container to be ready and positioned
     const positionPage = () => {
-      const desktopContainer = document.querySelector('.desktop-container');
+      const desktopContainer = document.querySelector(".desktop-container");
 
       if (desktopContainer) {
         // Get the exact position and size of desktop-container
@@ -452,18 +454,22 @@ const CurateRouter = (function () {
         // Check if desktop-container has been positioned (not still at 0,0 with no size)
         if (rect.width > 0 && rect.height > 0) {
           // Position custom page fixed to match desktop-container exactly
-          pageElement.style.position = 'fixed';
-          pageElement.style.top = rect.top + 'px';
-          pageElement.style.left = rect.left + 'px';
-          pageElement.style.width = rect.width + 'px';
-          pageElement.style.height = rect.height + 'px';
-          pageElement.style.zIndex = '901'; // High z-index to appear above page content
-          pageElement.style.pointerEvents = 'auto';
+          pageElement.style.position = "fixed";
+          pageElement.style.top = rect.top + "px";
+          pageElement.style.left = rect.left + "px";
+          pageElement.style.width = rect.width + "px";
+          pageElement.style.height = rect.height + "px";
+          pageElement.style.zIndex = "901"; // High z-index to appear above page content
+          pageElement.style.pointerEvents = "auto";
 
           // Prevent scroll events from bubbling to prevent Pydio UI scrolling
-          pageElement.addEventListener('wheel', (e) => {
-            e.stopPropagation();
-          }, { passive: false });
+          pageElement.addEventListener(
+            "wheel",
+            (e) => {
+              e.stopPropagation();
+            },
+            { passive: false },
+          );
 
           document.body.appendChild(pageElement);
           return true; // Success
@@ -486,18 +492,24 @@ const CurateRouter = (function () {
           setTimeout(checkReady, 100);
         } else {
           // Give up and use fallback
-          console.warn('CurateRouter: Could not position over .desktop-container, using body fallback');
-          pageElement.style.position = 'fixed';
-          pageElement.style.top = '0';
-          pageElement.style.left = '0';
-          pageElement.style.right = '0';
-          pageElement.style.bottom = '0';
-          pageElement.style.zIndex = '900';
+          console.warn(
+            "CurateRouter: Could not position over .desktop-container, using body fallback",
+          );
+          pageElement.style.position = "fixed";
+          pageElement.style.top = "0";
+          pageElement.style.left = "0";
+          pageElement.style.right = "0";
+          pageElement.style.bottom = "0";
+          pageElement.style.zIndex = "900";
 
           // Prevent scroll events from bubbling to prevent Pydio UI scrolling
-          pageElement.addEventListener('wheel', (e) => {
-            e.stopPropagation();
-          }, { passive: false });
+          pageElement.addEventListener(
+            "wheel",
+            (e) => {
+              e.stopPropagation();
+            },
+            { passive: false },
+          );
 
           document.body.appendChild(pageElement);
         }
@@ -507,21 +519,21 @@ const CurateRouter = (function () {
 
     return {
       element: pageElement,
-      content: contentElement
+      content: contentElement,
     };
   }
 
   function createPageHeader(title) {
     // Outer wrapper provides spacing around the bar
-    const header = document.createElement('div');
-    header.className = 'curate-router-header';
+    const header = document.createElement("div");
+    header.className = "curate-router-header";
     header.style.cssText = `
       padding: 8px 6px;
       flex-shrink: 0;
     `;
 
     // Rounded bar — the visible element
-    const bar = document.createElement('div');
+    const bar = document.createElement("div");
     bar.style.cssText = `
       display: flex;
       justify-content: space-between;
@@ -531,7 +543,7 @@ const CurateRouter = (function () {
       background: color-mix(in srgb, var(--md-sys-color-primary) 11%, var(--md-sys-color-surface));
     `;
 
-    const titleElement = document.createElement('span');
+    const titleElement = document.createElement("span");
     titleElement.textContent = title;
     titleElement.style.cssText = `
       margin: 0;
@@ -543,9 +555,9 @@ const CurateRouter = (function () {
       text-overflow: ellipsis;
     `;
 
-    const closeButton = document.createElement('button');
-    closeButton.textContent = 'Close';
-    closeButton.addEventListener('click', closeAndReturnToUnderlying);
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", closeAndReturnToUnderlying);
     closeButton.style.cssText = `
       background: var(--md-sys-color-secondary, #625b71);
       color: var(--md-sys-color-on-secondary, #ffffff);
@@ -559,11 +571,11 @@ const CurateRouter = (function () {
       transition: opacity 0.2s;
     `;
 
-    closeButton.addEventListener('mouseenter', () => {
-      closeButton.style.opacity = '0.85';
+    closeButton.addEventListener("mouseenter", () => {
+      closeButton.style.opacity = "0.85";
     });
-    closeButton.addEventListener('mouseleave', () => {
-      closeButton.style.opacity = '1';
+    closeButton.addEventListener("mouseleave", () => {
+      closeButton.style.opacity = "1";
     });
 
     bar.appendChild(titleElement);
@@ -587,8 +599,8 @@ const CurateRouter = (function () {
     }
 
     // Navigate to the last non-custom URL (or fallback to base path)
-    const targetUrl = lastNonCustomUrl || '/';
-    window.history.pushState(null, '', targetUrl);
+    const targetUrl = lastNonCustomUrl || "/";
+    window.history.pushState(null, "", targetUrl);
     closePage();
   }
 
@@ -596,25 +608,28 @@ const CurateRouter = (function () {
     return {
       navigate: (path) => navigate(path),
       close: () => close(),
-      back: () => back()
+      back: () => back(),
     };
   }
 
   function captureOriginalState() {
     if (!originalContent) {
       originalContent = {
-        activeElement: document.activeElement
+        activeElement: document.activeElement,
       };
     }
   }
 
   function restoreOriginalContent() {
-    if (originalContent && originalContent.activeElement &&
-        typeof originalContent.activeElement.focus === 'function') {
+    if (
+      originalContent &&
+      originalContent.activeElement &&
+      typeof originalContent.activeElement.focus === "function"
+    ) {
       try {
         originalContent.activeElement.focus();
       } catch (e) {
-        console.warn('CurateRouter: Could not restore focus');
+        console.warn("CurateRouter: Could not restore focus");
       }
     }
   }
@@ -626,11 +641,11 @@ const CurateRouter = (function () {
         escapeDeactivates: false,
         clickOutsideDeactivates: false,
         returnFocusOnDeactivate: false,
-        allowOutsideClick: true  // Allow clicks outside the trap (like sidebar)
+        allowOutsideClick: true, // Allow clicks outside the trap (like sidebar)
       });
       focusTrap.activate();
     } catch (error) {
-      console.warn('CurateRouter: Focus trap setup failed:', error);
+      console.warn("CurateRouter: Focus trap setup failed:", error);
     }
   }
 
@@ -646,15 +661,19 @@ const CurateRouter = (function () {
 
     teardownFocusManagement();
 
-    if (currentPage.cleanup && typeof currentPage.cleanup === 'function') {
+    if (currentPage.cleanup && typeof currentPage.cleanup === "function") {
       try {
         currentPage.cleanup();
       } catch (error) {
-        console.error('CurateRouter: Error in cleanup function:', error);
+        console.error("CurateRouter: Error in cleanup function:", error);
       }
     }
 
-    if (currentPage.container && currentPage.container.element && currentPage.container.element.parentNode) {
+    if (
+      currentPage.container &&
+      currentPage.container.element &&
+      currentPage.container.element.parentNode
+    ) {
       currentPage.container.element.remove();
     }
 
@@ -701,7 +720,7 @@ const CurateRouter = (function () {
           </div>
         `;
       },
-      options: { title: 'Error', showHeader: true }
+      options: { title: "Error", showHeader: true },
     };
 
     navigateToRoute(errorRoute, {}, false);
@@ -724,11 +743,13 @@ const CurateRouter = (function () {
    * }
    */
   function getCurrentPage() {
-    return currentPage ? {
-      path: window.location.pathname,
-      params: currentPage.params,
-      title: currentPage.route.options.title
-    } : null;
+    return currentPage
+      ? {
+          path: window.location.pathname,
+          params: currentPage.params,
+          title: currentPage.route.options.title,
+        }
+      : null;
   }
 
   /**
@@ -769,9 +790,9 @@ const CurateRouter = (function () {
     // If path includes the route prefix, extract just the route part
     let routePath = path;
     if (path.startsWith(routePrefix)) {
-      routePath = path.substring(routePrefix.length) || '/';
-    } else if (!path.startsWith('/')) {
-      routePath = '/' + path;
+      routePath = path.substring(routePrefix.length) || "/";
+    } else if (!path.startsWith("/")) {
+      routePath = "/" + path;
     }
 
     // Check if this route matches any registered routes
@@ -794,20 +815,20 @@ const CurateRouter = (function () {
   function repositionCurrentPage() {
     if (!currentPage || !currentPage.container || !currentPage.container.element) return;
 
-    const desktopContainer = document.querySelector('.desktop-container');
+    const desktopContainer = document.querySelector(".desktop-container");
     if (desktopContainer) {
       const rect = desktopContainer.getBoundingClientRect();
 
       if (rect.width > 0 && rect.height > 0) {
         const pageElement = currentPage.container.element;
         // Reapply critical positioning styles that might have been overridden
-        pageElement.style.position = 'fixed';
-        pageElement.style.top = rect.top + 'px';
-        pageElement.style.left = rect.left + 'px';
-        pageElement.style.width = rect.width + 'px';
-        pageElement.style.height = rect.height + 'px';
-        pageElement.style.zIndex = '901';
-        pageElement.style.pointerEvents = 'auto';
+        pageElement.style.position = "fixed";
+        pageElement.style.top = rect.top + "px";
+        pageElement.style.left = rect.left + "px";
+        pageElement.style.width = rect.width + "px";
+        pageElement.style.height = rect.height + "px";
+        pageElement.style.zIndex = "901";
+        pageElement.style.pointerEvents = "auto";
       }
     }
   }
@@ -822,7 +843,7 @@ const CurateRouter = (function () {
     getCurrentPage,
     isActive,
     isValidRoute,
-    checkRoute
+    checkRoute,
   };
 })();
 

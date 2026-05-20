@@ -87,7 +87,7 @@ class ManualHarvestByIdsPanel extends LitElement {
         detail: { value: e.target.value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -98,7 +98,7 @@ class ManualHarvestByIdsPanel extends LitElement {
       new CustomEvent("run-harvest-ids", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -108,7 +108,7 @@ class ManualHarvestByIdsPanel extends LitElement {
         detail: { value: "" },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -118,10 +118,7 @@ class ManualHarvestByIdsPanel extends LitElement {
     return html`
       <div class="form-section">
         <h3><span>${textboxIcon}</span>Harvest by Identifier</h3>
-        <p>
-          Enter the unique record identifiers you want to harvest, one per
-          line.
-        </p>
+        <p>Enter the unique record identifiers you want to harvest, one per line.</p>
 
         <md-outlined-text-field
           type="textarea"
@@ -142,7 +139,7 @@ class ManualHarvestByIdsPanel extends LitElement {
                 ${idCount} record${idCount === 1 ? "" : "s"} will be processed
               </div>
             </div>
-          `
+          `,
         )}
       </div>
 
@@ -150,13 +147,10 @@ class ManualHarvestByIdsPanel extends LitElement {
         ${when(
           this.manualHarvestIds.trim(),
           () => html`
-            <md-outlined-button
-              @click=${this._clearIds}
-              ?disabled=${this.isManualHarvesting}
-            >
+            <md-outlined-button @click=${this._clearIds} ?disabled=${this.isManualHarvesting}>
               Clear
             </md-outlined-button>
-          `
+          `,
         )}
 
         <md-filled-button
@@ -167,9 +161,7 @@ class ManualHarvestByIdsPanel extends LitElement {
             ${playIcon}
             ${this.isManualHarvesting
               ? "Harvesting..."
-              : `Harvest ${idCount > 0 ? idCount : ""} Record${
-                  idCount === 1 ? "" : "s"
-                }`}
+              : `Harvest ${idCount > 0 ? idCount : ""} Record${idCount === 1 ? "" : "s"}`}
           </span>
         </md-filled-button>
       </div>

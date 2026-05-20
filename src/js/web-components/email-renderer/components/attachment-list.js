@@ -1,10 +1,10 @@
-﻿import { LitElement, html, css } from 'lit';
+﻿import { LitElement, html, css } from "lit";
 import { attachmentIcon, downloadIcon } from "../../utils/icons.js";
-import { getAttachment } from '../data/dataService.js';
+import { getAttachment } from "../data/dataService.js";
 
 export class AttachmentList extends LitElement {
   static properties = {
-    attachments: { type: Array }
+    attachments: { type: Array },
   };
 
   static styles = css`
@@ -55,7 +55,9 @@ export class AttachmentList extends LitElement {
       border: 1px solid var(--md-sys-color-outline-variant);
       background: var(--md-sys-color-surface-1);
       cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
     }
 
     .attachment-item:hover {
@@ -118,26 +120,30 @@ export class AttachmentList extends LitElement {
   async _download(attachment) {
     try {
       let url = null;
-      if (attachment && typeof attachment.path === 'string' && (attachment.path.startsWith('blob:') || attachment.path.startsWith('data:'))) {
+      if (
+        attachment &&
+        typeof attachment.path === "string" &&
+        (attachment.path.startsWith("blob:") || attachment.path.startsWith("data:"))
+      ) {
         url = attachment.path;
       } else {
         url = await getAttachment(attachment.path);
       }
-      const anchor = document.createElement('a');
+      const anchor = document.createElement("a");
       anchor.href = url;
       anchor.download = attachment.filename;
       anchor.click();
-      if (typeof url === 'string' && url.startsWith('blob:')) {
+      if (typeof url === "string" && url.startsWith("blob:")) {
         setTimeout(() => URL.revokeObjectURL(url), 100);
       }
     } catch (error) {
-      console.error('Failed to download attachment:', error);
+      console.error("Failed to download attachment:", error);
     }
   }
 
   _formatBytes(bytes) {
     if (!bytes || bytes === 0) {
-      return '0 B';
+      return "0 B";
     }
     if (bytes < 1024) {
       return `${bytes} B`;
@@ -159,22 +165,24 @@ export class AttachmentList extends LitElement {
           <span class="icon">${attachmentIcon}</span>
           <span>Attachments (${this.attachments.length})</span>
         </div>
-        ${this.attachments.map(att => html`
-          <div class="attachment-item" @click=${() => this._download(att)}>
-            <span class="attachment-icon">${attachmentIcon}</span>
-            <div class="attachment-info">
-              <span class="filename">${att.filename}</span>
-              <div class="meta">
-                <span>${att.mimeType || 'Unknown type'}</span>
-                <span>${this._formatBytes(att.size)}</span>
+        ${this.attachments.map(
+          (att) => html`
+            <div class="attachment-item" @click=${() => this._download(att)}>
+              <span class="attachment-icon">${attachmentIcon}</span>
+              <div class="attachment-info">
+                <span class="filename">${att.filename}</span>
+                <div class="meta">
+                  <span>${att.mimeType || "Unknown type"}</span>
+                  <span>${this._formatBytes(att.size)}</span>
+                </div>
               </div>
+              <span class="download-icon">${downloadIcon}</span>
             </div>
-            <span class="download-icon">${downloadIcon}</span>
-          </div>
-        `)}
+          `,
+        )}
       </div>
     `;
   }
 }
 
-customElements.define('attachment-list', AttachmentList);
+customElements.define("attachment-list", AttachmentList);

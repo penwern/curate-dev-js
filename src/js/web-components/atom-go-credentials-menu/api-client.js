@@ -67,7 +67,6 @@ class AtomConfigAPI {
     }
   }
 
-
   /**
    * Create a new atom configuration
    * @param {Object} config - Configuration object
@@ -88,9 +87,7 @@ class AtomConfigAPI {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `HTTP error while creating config, Status: ${response.status}`
-        );
+        throw new Error(`HTTP error while creating config, Status: ${response.status}`);
       }
 
       console.info("Atom config created successfully");
@@ -98,7 +95,7 @@ class AtomConfigAPI {
     } catch (error) {
       console.error("Error creating atom config:", error);
       this.showErrorModal(
-        "There was an error saving your atom configuration. Please try again, or contact support if the problem persists."
+        "There was an error saving your atom configuration. Please try again, or contact support if the problem persists.",
       );
       throw error;
     }
@@ -124,9 +121,7 @@ class AtomConfigAPI {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `HTTP error while updating config, Status: ${response.status}`
-        );
+        throw new Error(`HTTP error while updating config, Status: ${response.status}`);
       }
 
       if (response.status === 200) {
@@ -136,12 +131,11 @@ class AtomConfigAPI {
     } catch (error) {
       console.error("Error updating atom config:", error);
       this.showErrorModal(
-        "There was an error saving your atom configuration. Please try again, or contact support if the problem persists."
+        "There was an error saving your atom configuration. Please try again, or contact support if the problem persists.",
       );
       throw error;
     }
   }
-
 
   /**
    * Save or update a config (determines create vs update based on existing config)
@@ -156,7 +150,6 @@ class AtomConfigAPI {
       return await this.createConfig(config);
     }
   }
-
 
   /**
    * Show error modal using the existing Curate UI system

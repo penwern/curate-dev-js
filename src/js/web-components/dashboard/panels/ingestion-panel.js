@@ -2,12 +2,7 @@ import { LitElement, html, css } from "lit";
 import "../components/stat-card.js";
 import "../components/chart-card.js";
 import "../components/data-table.js";
-import {
-  getAuditChartData,
-  getAuditLogs,
-  formatBytes,
-  formatNumber,
-} from "../client.js";
+import { getAuditChartData, getAuditLogs, formatBytes, formatNumber } from "../client.js";
 import { cloudUploadIcon, chartLineIcon } from "../../utils/icons.js";
 import { fetchAllAuditLogs } from "../utils/export-utils.js";
 
@@ -32,7 +27,9 @@ class IngestionPanel extends LitElement {
   };
 
   static styles = css`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -73,7 +70,9 @@ class IngestionPanel extends LitElement {
       background: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
     }
-    .chart-section { margin-bottom: 24px; }
+    .chart-section {
+      margin-bottom: 24px;
+    }
     .table-header {
       display: flex;
       align-items: center;
@@ -279,22 +278,25 @@ class IngestionPanel extends LitElement {
 
     const style = getComputedStyle(document.documentElement);
     const primary = style.getPropertyValue("--md-sys-color-primary").trim() || "#006689";
-    const primaryContainer = style.getPropertyValue("--md-sys-color-primary-container").trim() || "#c3e8ff";
+    const primaryContainer =
+      style.getPropertyValue("--md-sys-color-primary-container").trim() || "#c3e8ff";
 
     this._chartData = {
       labels: results.map((r) => r.Name),
-      datasets: [{
-        label: "Files Uploaded",
-        data: results.map((r) => r.Count ?? 0),
-        borderColor: primary,
-        backgroundColor: primaryContainer + "99",
-        fill: true,
-        tension: 0.3,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        pointBackgroundColor: primary,
-        borderWidth: 2,
-      }],
+      datasets: [
+        {
+          label: "Files Uploaded",
+          data: results.map((r) => r.Count ?? 0),
+          borderColor: primary,
+          backgroundColor: primaryContainer + "99",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          pointBackgroundColor: primary,
+          borderWidth: 2,
+        },
+      ],
     };
   }
 
@@ -405,8 +407,11 @@ class IngestionPanel extends LitElement {
   _formatUploadDate(ts) {
     if (!ts) return "—";
     return new Date(ts * 1000).toLocaleDateString("en-GB", {
-      day: "numeric", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
@@ -440,18 +445,23 @@ class IngestionPanel extends LitElement {
           <span slot="icon">${chartLineIcon}</span>
         </stat-card>
       </div>
-      <div class="aip-note">Stats and chart include AIP uploads · counts reflect individual file events; a single folder deletion can remove many uploaded files</div>
+      <div class="aip-note">
+        Stats and chart include AIP uploads · counts reflect individual file events; a single folder
+        deletion can remove many uploaded files
+      </div>
 
       <div class="filter-bar">
         <div class="granularity-toggle">
-          ${["daily", "weekly", "monthly"].map((g) => html`
-            <button
-              class="gran-btn ${this._granularity === g ? "active" : ""}"
-              @click=${() => this._setGranularity(g)}
-            >
-              ${g.charAt(0).toUpperCase() + g.slice(1)}
-            </button>
-          `)}
+          ${["daily", "weekly", "monthly"].map(
+            (g) => html`
+              <button
+                class="gran-btn ${this._granularity === g ? "active" : ""}"
+                @click=${() => this._setGranularity(g)}
+              >
+                ${g.charAt(0).toUpperCase() + g.slice(1)}
+              </button>
+            `,
+          )}
         </div>
       </div>
 
@@ -465,7 +475,9 @@ class IngestionPanel extends LitElement {
           .options=${{
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString()} files uploaded` } },
+              tooltip: {
+                callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString()} files uploaded` },
+              },
             },
             scales: { y: { ticks: { precision: 0 } } },
           }}
@@ -493,21 +505,36 @@ class IngestionPanel extends LitElement {
             type="date"
             .value=${this._dateFrom}
             .max=${this._dateTo || ""}
-            @change=${(e) => { this._dateFrom = e.target.value; this._loadTable(0); }}
+            @change=${(e) => {
+              this._dateFrom = e.target.value;
+              this._loadTable(0);
+            }}
           />
           <span>To</span>
           <input
             type="date"
             .value=${this._dateTo}
             .min=${this._dateFrom || ""}
-            @change=${(e) => { this._dateTo = e.target.value; this._loadTable(0); }}
+            @change=${(e) => {
+              this._dateTo = e.target.value;
+              this._loadTable(0);
+            }}
           />
         </div>
-        ${this._dateFrom || this._dateTo ? html`
-          <button class="clear-dates" @click=${() => { this._dateFrom = ""; this._dateTo = ""; this._loadTable(0); }}>
-            Clear dates
-          </button>
-        ` : ""}
+        ${this._dateFrom || this._dateTo
+          ? html`
+              <button
+                class="clear-dates"
+                @click=${() => {
+                  this._dateFrom = "";
+                  this._dateTo = "";
+                  this._loadTable(0);
+                }}
+              >
+                Clear dates
+              </button>
+            `
+          : ""}
       </div>
       <data-table
         .columns=${columns}

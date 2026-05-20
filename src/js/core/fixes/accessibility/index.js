@@ -1,1 +1,1 @@
-import('./AddLangAttr.js')
+import("./AddLangAttr.js");

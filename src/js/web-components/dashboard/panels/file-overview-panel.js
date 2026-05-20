@@ -117,27 +117,31 @@ class FileOverviewPanel extends LitElement {
 
         this._workspaceData = {
           labels: wsLabels,
-          datasets: [{
-            label: "Storage Used",
-            data: wsSizes,
-            backgroundColor: primaryColor + "CC",
-            borderRadius: 6,
-            borderSkipped: false,
-            barThickness: 28,
-          }],
+          datasets: [
+            {
+              label: "Storage Used",
+              data: wsSizes,
+              backgroundColor: primaryColor + "CC",
+              borderRadius: 6,
+              borderSkipped: false,
+              barThickness: 28,
+            },
+          ],
         };
 
         const tertiaryColor = style.getPropertyValue("--md-sys-color-tertiary").trim() || "#605a7d";
         this._fileCountData = {
           labels: wsLabels,
-          datasets: [{
-            label: "Files",
-            data: wsCounts,
-            backgroundColor: tertiaryColor + "CC",
-            borderRadius: 6,
-            borderSkipped: false,
-            barThickness: 28,
-          }],
+          datasets: [
+            {
+              label: "Files",
+              data: wsCounts,
+              backgroundColor: tertiaryColor + "CC",
+              borderRadius: 6,
+              borderSkipped: false,
+              barThickness: 28,
+            },
+          ],
         };
       }
     } catch (err) {
@@ -177,15 +181,20 @@ class FileOverviewPanel extends LitElement {
         }
       }
 
-      this._typeData = typeLabels.length > 0 ? {
-        labels: typeLabels,
-        datasets: [{
-          data: typeCounts,
-          backgroundColor: typeColors,
-          borderWidth: 0,
-          hoverOffset: 4,
-        }],
-      } : null;
+      this._typeData =
+        typeLabels.length > 0
+          ? {
+              labels: typeLabels,
+              datasets: [
+                {
+                  data: typeCounts,
+                  backgroundColor: typeColors,
+                  borderWidth: 0,
+                  hoverOffset: 4,
+                },
+              ],
+            }
+          : null;
     } catch (err) {
       console.error("FileOverviewPanel types error:", err);
     } finally {

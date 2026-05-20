@@ -10,9 +10,7 @@ export const preservationGoConfigUI = (component) => html`
     <div class="panels-wrapper">
       <!-- Form Section -->
       <div class="form-section">
-        <div class="section-title">
-          ${icon(mdiCog)} Create or Edit Configs
-        </div>
+        <div class="section-title">${icon(mdiCog)} Create or Edit Configs</div>
 
         <div class="form-scroll-container">
           <!-- Details Category -->
@@ -39,9 +37,7 @@ export const preservationGoConfigUI = (component) => html`
 
           <!-- Directory and Transfer Processing -->
           <div class="category">
-            <div class="category-header">
-              Directory and Transfer Processing
-            </div>
+            <div class="category-header">Directory and Transfer Processing</div>
 
             <div class="toggle-field">
               <md-switch
@@ -55,8 +51,7 @@ export const preservationGoConfigUI = (component) => html`
             <div class="toggle-field">
               <md-switch
                 .selected=${component.ExamineContents}
-                @change=${() =>
-                  (component.ExamineContents = !component.ExamineContents)}
+                @change=${() => (component.ExamineContents = !component.ExamineContents)}
               ></md-switch>
               <label>Examine Contents</label>
             </div>
@@ -65,7 +60,8 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.GenerateTransferStructureReport}
                 @change=${() =>
-                  (component.GenerateTransferStructureReport = !component.GenerateTransferStructureReport)}
+                  (component.GenerateTransferStructureReport =
+                    !component.GenerateTransferStructureReport)}
               ></md-switch>
               <label>Generate Transfer Structure Report</label>
             </div>
@@ -97,7 +93,8 @@ export const preservationGoConfigUI = (component) => html`
                 <md-switch
                   .selected=${component.DeletePackagesAfterExtraction}
                   @change=${() =>
-                    (component.DeletePackagesAfterExtraction = !component.DeletePackagesAfterExtraction)}
+                    (component.DeletePackagesAfterExtraction =
+                      !component.DeletePackagesAfterExtraction)}
                   ?disabled=${!component.ExtractPackages}
                 ></md-switch>
                 <label>Delete Packages After Extraction</label>
@@ -121,7 +118,8 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.IdentifySubmissionAndMetadata}
                 @change=${() =>
-                  (component.IdentifySubmissionAndMetadata = !component.IdentifySubmissionAndMetadata)}
+                  (component.IdentifySubmissionAndMetadata =
+                    !component.IdentifySubmissionAndMetadata)}
               ></md-switch>
               <label>Identify Submission and Metadata</label>
             </div>
@@ -165,7 +163,8 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.PerformPolicyChecksOnOriginals}
                 @change=${() =>
-                  (component.PerformPolicyChecksOnOriginals = !component.PerformPolicyChecksOnOriginals)}
+                  (component.PerformPolicyChecksOnOriginals =
+                    !component.PerformPolicyChecksOnOriginals)}
               ></md-switch>
               <label>Perform Policy Checks on Originals</label>
             </div>
@@ -174,18 +173,18 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.PerformPolicyChecksOnPreservationDerivatives}
                 @change=${() =>
-                  (component.PerformPolicyChecksOnPreservationDerivatives = !component.PerformPolicyChecksOnPreservationDerivatives)}
+                  (component.PerformPolicyChecksOnPreservationDerivatives =
+                    !component.PerformPolicyChecksOnPreservationDerivatives)}
               ></md-switch>
-              <label>
-                Perform Policy Checks on Preservation Derivatives
-              </label>
+              <label> Perform Policy Checks on Preservation Derivatives </label>
             </div>
 
             <div class="toggle-field">
               <md-switch
                 .selected=${component.PerformPolicyChecksOnAccessDerivatives}
                 @change=${() =>
-                  (component.PerformPolicyChecksOnAccessDerivatives = !component.PerformPolicyChecksOnAccessDerivatives)}
+                  (component.PerformPolicyChecksOnAccessDerivatives =
+                    !component.PerformPolicyChecksOnAccessDerivatives)}
               ></md-switch>
               <label>Perform Policy Checks on Access Derivatives</label>
             </div>
@@ -199,8 +198,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-outlined-select
                 label="Thumbnail Mode"
                 .value=${component.ThumbnailMode.toString()}
-                @change=${(e) =>
-                  (component.ThumbnailMode = parseInt(e.target.value))}
+                @change=${(e) => (component.ThumbnailMode = parseInt(e.target.value))}
               >
                 <md-select-option value="1">
                   <div slot="headline">Generate</div>
@@ -229,18 +227,17 @@ export const preservationGoConfigUI = (component) => html`
 
             <div class="suboptions ${component.CompressAip ? "enabled" : ""}">
               <div class="info-panel">
-                Compressing AIPs makes their contents unsearchable and breaks
-                metadata reassociation. To preserve searchability, compress only
-                for distribution or deep storage by right-clicking the AIP in a
-                workspace while keeping the original uncompressed.
+                Compressing AIPs makes their contents unsearchable and breaks metadata
+                reassociation. To preserve searchability, compress only for distribution or deep
+                storage by right-clicking the AIP in a workspace while keeping the original
+                uncompressed.
               </div>
 
               <div class="form-field">
                 <md-outlined-select
                   label="Compression Algorithm"
                   .value=${component.AipCompressionAlgorithm}
-                  @change=${(e) =>
-                    (component.AipCompressionAlgorithm = e.target.value)}
+                  @change=${(e) => (component.AipCompressionAlgorithm = e.target.value)}
                   ?disabled=${!component.CompressAip}
                 >
                   <md-select-option value="ZIP">
@@ -259,18 +256,11 @@ export const preservationGoConfigUI = (component) => html`
         </div>
 
         <div class="form-actions">
-          <md-filled-button
-            @click=${component.saveConfig}
-            ?disabled=${!component.canSave}
-          >
-            ${component.saveInProgress
-              ? html`<div class="spinner"></div>`
-              : ""}
+          <md-filled-button @click=${component.saveConfig} ?disabled=${!component.canSave}>
+            ${component.saveInProgress ? html`<div class="spinner"></div>` : ""}
             ${component.saveButtonText}
           </md-filled-button>
-          <md-outlined-button @click=${component.clearForm}>
-            Clear Form
-          </md-outlined-button>
+          <md-outlined-button @click=${component.clearForm}> Clear Form </md-outlined-button>
         </div>
       </div>
 
@@ -287,68 +277,66 @@ export const preservationGoConfigUI = (component) => html`
                 </div>
               `
             : component.savedConfigs.length === 0
-            ? html`
-                <div class="no-configs">
-                  ${component.loadError 
-                    ? "Failed to load preservation configs. Please try refreshing or check your connection."
-                    : "No Saved Preservation Configs Found"}
-                </div>
-              `
-            : component.savedConfigs.map(
-                (config, index) => html`
-                  <div
-                    class="config-item"
-                    style="animation-delay: ${index * 0.1}s"
-                    @click=${() => component.loadConfig(config)}
-                  >
-                    <div class="config-header">
-                      <div class="config-name">${config.name}</div>
-                      <div class="config-actions">
-                        <md-icon-button
-                          class="${component.isBookmarked(config.id)
-                            ? "starred"
-                            : ""}"
-                          @click=${(e) => {
-                            e.stopPropagation();
-                            component.toggleBookmark(config.id);
-                          }}
-                        >
-                          ${component.isBookmarked(config.id)
-                            ? icon(mdiStar)
-                            : icon(mdiStarOutline)}
-                        </md-icon-button>
-                        ${when(config.id !== defaultConfigId, () => {
-                          return html`
-                            <md-outlined-button
-                              class="delete-btn"
-                              @click=${(e) => {
-                                e.stopPropagation();
-                                component.deleteConfig(config.id);
-                              }}
-                            >
-                              Delete
-                            </md-outlined-button>
-                          `;
-                        })}
-                      </div>
-                    </div>
-                    <div class="config-details">
-                      <div class="config-description">
-                        <strong>Description:</strong>
-                        ${config.description || "No description"}
-                      </div>
-                      <div>
-                        <strong>Normalize:</strong>
-                        ${config.a3m_config?.normalize ? "Yes" : "No"}
-                      </div>
-                      <div>
-                        <strong>Compress AIP:</strong>
-                        ${config.compress_aip ? "Yes" : "No"}
-                      </div>
-                    </div>
+              ? html`
+                  <div class="no-configs">
+                    ${component.loadError
+                      ? "Failed to load preservation configs. Please try refreshing or check your connection."
+                      : "No Saved Preservation Configs Found"}
                   </div>
                 `
-              )}
+              : component.savedConfigs.map(
+                  (config, index) => html`
+                    <div
+                      class="config-item"
+                      style="animation-delay: ${index * 0.1}s"
+                      @click=${() => component.loadConfig(config)}
+                    >
+                      <div class="config-header">
+                        <div class="config-name">${config.name}</div>
+                        <div class="config-actions">
+                          <md-icon-button
+                            class="${component.isBookmarked(config.id) ? "starred" : ""}"
+                            @click=${(e) => {
+                              e.stopPropagation();
+                              component.toggleBookmark(config.id);
+                            }}
+                          >
+                            ${component.isBookmarked(config.id)
+                              ? icon(mdiStar)
+                              : icon(mdiStarOutline)}
+                          </md-icon-button>
+                          ${when(config.id !== defaultConfigId, () => {
+                            return html`
+                              <md-outlined-button
+                                class="delete-btn"
+                                @click=${(e) => {
+                                  e.stopPropagation();
+                                  component.deleteConfig(config.id);
+                                }}
+                              >
+                                Delete
+                              </md-outlined-button>
+                            `;
+                          })}
+                        </div>
+                      </div>
+                      <div class="config-details">
+                        <div class="config-description">
+                          <strong>Description:</strong>
+                          ${config.description || "No description"}
+                        </div>
+                        <div>
+                          <strong>Normalize:</strong>
+                          ${config.a3m_config?.normalize ? "Yes" : "No"}
+                        </div>
+                        <div>
+                          <strong>Compress AIP:</strong>
+                          ${config.compress_aip ? "Yes" : "No"}
+                        </div>
+                      </div>
+                    </div>
+                  `,
+                )}
         </div>
       </div>
     </div>

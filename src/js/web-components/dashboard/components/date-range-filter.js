@@ -51,7 +51,9 @@ class DateRangeFilter extends LitElement {
 
   _emit() {
     const from = this.fromDate ? Math.floor(new Date(this.fromDate).getTime() / 1000) : null;
-    const to = this.toDate ? Math.floor(new Date(this.toDate + "T23:59:59").getTime() / 1000) : null;
+    const to = this.toDate
+      ? Math.floor(new Date(this.toDate + "T23:59:59").getTime() / 1000)
+      : null;
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
         detail: { from, to },

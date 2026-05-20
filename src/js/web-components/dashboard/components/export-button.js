@@ -1,6 +1,6 @@
-import { LitElement, html, css } from 'lit';
-import { downloadIcon, chevronDownIcon } from '../../utils/icons.js';
-import '../../utils/penwern-spinner.js';
+import { LitElement, html, css } from "lit";
+import { downloadIcon, chevronDownIcon } from "../../utils/icons.js";
+import "../../utils/penwern-spinner.js";
 
 /**
  * A button that opens a dropdown of export format options.
@@ -87,8 +87,14 @@ class ExportButton extends LitElement {
     }
 
     @keyframes dropIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .dropdown-item {
@@ -120,19 +126,19 @@ class ExportButton extends LitElement {
     super();
     this.formats = [];
     this.loading = false;
-    this.label = 'Export';
+    this.label = "Export";
     this._open = false;
     this._onDocumentClick = this._onDocumentClick.bind(this);
   }
 
   connectedCallback() {
     super.connectedCallback();
-    document.addEventListener('click', this._onDocumentClick);
+    document.addEventListener("click", this._onDocumentClick);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('click', this._onDocumentClick);
+    document.removeEventListener("click", this._onDocumentClick);
   }
 
   _onDocumentClick(e) {
@@ -149,38 +155,42 @@ class ExportButton extends LitElement {
 
   _select(format) {
     this._open = false;
-    this.dispatchEvent(new CustomEvent('export-format-selected', {
-      detail: { format },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent("export-format-selected", {
+        detail: { format },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   render() {
     return html`
       <button
-        class="export-btn ${this._open ? 'open' : ''}"
+        class="export-btn ${this._open ? "open" : ""}"
         ?disabled=${this.loading}
         @click=${this._toggle}
-        title=${this.loading ? 'Exporting…' : 'Export data'}
+        title=${this.loading ? "Exporting…" : "Export data"}
       >
-        ${this.loading
-          ? html`<penwern-spinner size="16"></penwern-spinner>`
-          : downloadIcon}
+        ${this.loading ? html`<penwern-spinner size="16"></penwern-spinner>` : downloadIcon}
         ${this.label}
         <span class="chevron-wrap">${chevronDownIcon}</span>
       </button>
-      ${this._open ? html`
-        <div class="dropdown">
-          ${this.formats.map((f) => html`
-            <button class="dropdown-item" @click=${() => this._select(f.value)}>
-              ${f.label}
-            </button>
-          `)}
-        </div>
-      ` : ''}
+      ${this._open
+        ? html`
+            <div class="dropdown">
+              ${this.formats.map(
+                (f) => html`
+                  <button class="dropdown-item" @click=${() => this._select(f.value)}>
+                    ${f.label}
+                  </button>
+                `,
+              )}
+            </div>
+          `
+        : ""}
     `;
   }
 }
 
-customElements.define('export-button', ExportButton);
+customElements.define("export-button", ExportButton);

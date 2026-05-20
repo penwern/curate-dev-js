@@ -51,7 +51,7 @@ class AtomGoCredentialsManager extends LitElement {
       const config = await this.api.getConfigs();
       // The API returns the single config object directly
       this.currentConfig = config;
-      
+
       if (this.currentConfig) {
         this.host = this.currentConfig.host || "";
         this.apikey = this.currentConfig.apikey || "";
@@ -79,12 +79,20 @@ class AtomGoCredentialsManager extends LitElement {
   }
 
   async saveConfig() {
-    if (!this.host || !this.apikey || !this.loginemail || !this.loginpassword || !this.rsynctarget) {
-      Curate.ui.modals.curatePopup({
-        title: "Missing Required Fields",
-        message: "Please fill in all required fields",
-        type: "warning"
-      }).fire();
+    if (
+      !this.host ||
+      !this.apikey ||
+      !this.loginemail ||
+      !this.loginpassword ||
+      !this.rsynctarget
+    ) {
+      Curate.ui.modals
+        .curatePopup({
+          title: "Missing Required Fields",
+          message: "Please fill in all required fields",
+          type: "warning",
+        })
+        .fire();
       return;
     }
 
@@ -94,7 +102,7 @@ class AtomGoCredentialsManager extends LitElement {
       if (window.curateDebug) {
         console.log("Save requested with values:", {
           host: this.host,
-          loginemail: this.loginemail
+          loginemail: this.loginemail,
         });
       }
 
@@ -104,7 +112,7 @@ class AtomGoCredentialsManager extends LitElement {
         loginemail: this.loginemail,
         loginpassword: this.loginpassword,
         rsynctarget: this.rsynctarget,
-        rsynccommand: this.rsynccommand
+        rsynccommand: this.rsynccommand,
       };
 
       if (window.curateDebug) {
@@ -114,7 +122,7 @@ class AtomGoCredentialsManager extends LitElement {
       // Save using API - pass whether we have an existing config
       const hasExisting = this.currentConfig !== null;
       const savedConfig = await this.api.saveConfig(config, hasExisting);
-      
+
       // Update current config with the saved result
       this.currentConfig = savedConfig;
     } catch (error) {
@@ -124,7 +132,6 @@ class AtomGoCredentialsManager extends LitElement {
       this.saveInProgress = false;
     }
   }
-
 
   get canSave() {
     return (

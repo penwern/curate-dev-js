@@ -1,4 +1,4 @@
-import CurateUi from '../../../CurateFunctions/CurateUi.js';
+import CurateUi from "../../../CurateFunctions/CurateUi.js";
 
 /**
  * UploadVolumeChecker Plugin
@@ -8,15 +8,15 @@ import CurateUi from '../../../CurateFunctions/CurateUi.js';
  */
 
 export default {
-  name: 'UploadVolumeChecker',
+  name: "UploadVolumeChecker",
 
   // Configuration (can be made configurable later)
   config: {
-    maxFileCount: 100,         // Maximum number of files in a single upload (lowered for testing)
-    warningFileCount: 50,      // Show warning at this threshold
+    maxFileCount: 100, // Maximum number of files in a single upload (lowered for testing)
+    warningFileCount: 50, // Show warning at this threshold
     maxTotalSize: 10 * 1024 * 1024 * 1024, // 10GB max total size
-    warningTotalSize: 5 * 1024 * 1024 * 1024,  // 5GB warning threshold
-    blockUploads: true,        // For experimentation - blocks uploads above threshold
+    warningTotalSize: 5 * 1024 * 1024 * 1024, // 5GB warning threshold
+    blockUploads: true, // For experimentation - blocks uploads above threshold
   },
 
   // Track current upload session
@@ -28,19 +28,19 @@ export default {
   },
 
   hooks: {
-    beforeUpload: function(uploadItem) {
+    beforeUpload: function (uploadItem) {
       // 'this' refers to the plugin object due to .call() in UploadInterceptor
       const config = this.config;
       const session = this.currentUploadSession;
 
-      console.log('UploadVolumeChecker: Checking upload volume for:', uploadItem._label);
+      console.log("UploadVolumeChecker: Checking upload volume for:", uploadItem._label);
 
       // If this is the first file in a new session, reset counters
       if (session.fileCount === 0) {
         session.files = [];
         session.totalSize = 0;
         session.isBlocked = false;
-        console.log('UploadVolumeChecker: Starting new upload session');
+        console.log("UploadVolumeChecker: Starting new upload session");
       }
 
       // Add current file to session tracking
@@ -49,10 +49,12 @@ export default {
       session.files.push({
         name: uploadItem._label,
         size: uploadItem._file.size,
-        path: uploadItem._file.webkitRelativePath || uploadItem._label
+        path: uploadItem._file.webkitRelativePath || uploadItem._label,
       });
 
-      console.log(`UploadVolumeChecker: Session stats - Files: ${session.fileCount}, Total Size: ${(session.totalSize / 1024 / 1024).toFixed(2)}MB`);
+      console.log(
+        `UploadVolumeChecker: Session stats - Files: ${session.fileCount}, Total Size: ${(session.totalSize / 1024 / 1024).toFixed(2)}MB`,
+      );
 
       // Check thresholds
       const exceedsMaxFiles = session.fileCount > config.maxFileCount;
@@ -75,22 +77,22 @@ export default {
     },
 
     onUploadComplete: (uploadItem) => {
-      console.log('UploadVolumeChecker: Upload completed for:', uploadItem._label);
+      console.log("UploadVolumeChecker: Upload completed for:", uploadItem._label);
       // Note: We don't reset session here as multiple files might be uploading concurrently
     },
 
     onUploadError: (uploadItem) => {
-      console.log('UploadVolumeChecker: Upload failed for:', uploadItem._label);
+      console.log("UploadVolumeChecker: Upload failed for:", uploadItem._label);
       // Could implement error tracking here
-    }
+    },
   },
 
   // Show blocking modal when limits are exceeded
-  showBlockingModal: function(session, config) {
+  showBlockingModal: function (session, config) {
     const fileCountIssue = session.fileCount > config.maxFileCount;
     const sizeIssue = session.totalSize > config.maxTotalSize;
 
-    let message = 'Upload blocked due to volume limits:\n\n';
+    let message = "Upload blocked due to volume limits:\n\n";
 
     if (fileCountIssue) {
       message += `• File count: ${session.fileCount} files (limit: ${config.maxFileCount})\n`;
@@ -102,36 +104,36 @@ export default {
       message += `• Total size: ${sizeMB}MB (limit: ${limitMB}MB)\n`;
     }
 
-    message += '\nPlease reduce the number of files or total size and try again.';
+    message += "\nPlease reduce the number of files or total size and try again.";
 
     const popup = new CurateUi.modals.curatePopup(
       {
-        title: 'Upload Volume Limit Exceeded',
+        title: "Upload Volume Limit Exceeded",
         message: message,
-        type: 'error',
-        buttonType: 'close'
+        type: "error",
+        buttonType: "close",
       },
       {
         afterLoaded: () => {
-          console.log('UploadVolumeChecker: Blocking modal displayed');
+          console.log("UploadVolumeChecker: Blocking modal displayed");
         },
         afterClosed: () => {
-          console.log('UploadVolumeChecker: Blocking modal closed');
+          console.log("UploadVolumeChecker: Blocking modal closed");
           // Reset session after user acknowledges
           this.resetSession();
-        }
-      }
+        },
+      },
     );
 
     popup.fire();
   },
 
   // Show warning modal when approaching limits
-  showWarningModal: function(session, config) {
+  showWarningModal: function (session, config) {
     const fileCountWarning = session.fileCount > config.warningFileCount;
     const sizeWarning = session.totalSize > config.warningTotalSize;
 
-    let message = 'Upload volume warning:\n\n';
+    let message = "Upload volume warning:\n\n";
 
     if (fileCountWarning) {
       message += `• File count: ${session.fileCount} files (warning threshold: ${config.warningFileCount})\n`;
@@ -143,44 +145,44 @@ export default {
       message += `• Total size: ${sizeMB}MB (warning threshold: ${warnMB}MB)\n`;
     }
 
-    message += '\nConsider breaking this into smaller uploads for better performance.';
+    message += "\nConsider breaking this into smaller uploads for better performance.";
 
     const popup = new CurateUi.modals.curatePopup(
       {
-        title: 'Large Upload Volume Detected',
+        title: "Large Upload Volume Detected",
         message: message,
-        type: 'warning',
-        buttonType: 'close'
+        type: "warning",
+        buttonType: "close",
       },
       {
         afterLoaded: () => {
-          console.log('UploadVolumeChecker: Warning modal displayed');
+          console.log("UploadVolumeChecker: Warning modal displayed");
         },
         afterClosed: () => {
-          console.log('UploadVolumeChecker: Warning modal closed');
-        }
-      }
+          console.log("UploadVolumeChecker: Warning modal closed");
+        },
+      },
     );
 
     popup.fire();
   },
 
   // Reset the current upload session
-  resetSession: function() {
+  resetSession: function () {
     this.currentUploadSession = {
       fileCount: 0,
       totalSize: 0,
       files: [],
       isBlocked: false,
     };
-    console.log('UploadVolumeChecker: Session reset');
+    console.log("UploadVolumeChecker: Session reset");
   },
 
   // Get current session statistics
-  getSessionStats: function() {
+  getSessionStats: function () {
     return {
       ...this.currentUploadSession,
-      totalSizeMB: (this.currentUploadSession.totalSize / 1024 / 1024).toFixed(2)
+      totalSizeMB: (this.currentUploadSession.totalSize / 1024 / 1024).toFixed(2),
     };
-  }
+  },
 };

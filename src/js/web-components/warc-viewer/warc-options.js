@@ -80,9 +80,7 @@ export class WarcOptionsModal extends LitElement {
           </md-outlined-text-field>
         </div>
         <div class="actions">
-          <md-filled-button @click=${this.handleOpenViewer}>
-            Open Viewer
-          </md-filled-button>
+          <md-filled-button @click=${this.handleOpenViewer}> Open Viewer </md-filled-button>
         </div>
       </div>
     `;

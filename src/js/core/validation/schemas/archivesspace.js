@@ -15,7 +15,7 @@ const validatedFields = new Set([
   "DateExpression",
   "ExtentNumber",
   "ExtentType",
-  "ExtentPortion"
+  "ExtentPortion",
 ]);
 
 const watchFields = new Set([
@@ -26,7 +26,7 @@ const watchFields = new Set([
   "Publish",
   "ExtentContainerSummary",
   "ExtentPhysicalDetails",
-  "ExtentDimensions"
+  "ExtentDimensions",
 ]);
 
 const suite = create((data = {}) => {
@@ -62,9 +62,7 @@ const suite = create((data = {}) => {
   test("DateBegin", "At least one of begin, end, or expression is required", () => {
     if (!hasAnyDateGroupField) return;
     enforce(
-      isFilled(data.DateBegin) ||
-        isFilled(data.DateEnd) ||
-        isFilled(data.DateExpression)
+      isFilled(data.DateBegin) || isFilled(data.DateEnd) || isFilled(data.DateExpression),
     ).isTruthy();
   });
 
@@ -90,9 +88,7 @@ const archivesspaceValidator = {
   validatedFields,
   shouldValidate: ({ touchedFields, values } = {}) => {
     if (!(touchedFields instanceof Set)) return false;
-    const hasAnyTouched = Array.from(watchFields).some((fieldName) =>
-      touchedFields.has(fieldName)
-    );
+    const hasAnyTouched = Array.from(watchFields).some((fieldName) => touchedFields.has(fieldName));
     if (hasAnyTouched) return true;
 
     return Array.from(validatedFields).some((fieldName) => isFilled(values?.[fieldName]));

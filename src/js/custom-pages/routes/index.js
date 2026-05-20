@@ -4,12 +4,12 @@
  */
 
 // Import route registration functions
-import { registerPureIntegrationRoute } from './pure-integration.js';
-import { registerCalmIntegrationRoute } from './calm-integration.js';
-import { registerEmailViewerRoute } from './email-viewer.js';
-import { registerWarcViewerRoute } from './warc-viewer.js';
-import { registerDemoRoutes } from './demo-routes.js';
-import { registerDashboardRoute } from './dashboard.js';
+import { registerPureIntegrationRoute } from "./pure-integration.js";
+import { registerCalmIntegrationRoute } from "./calm-integration.js";
+import { registerEmailViewerRoute } from "./email-viewer.js";
+import { registerWarcViewerRoute } from "./warc-viewer.js";
+import { registerDemoRoutes } from "./demo-routes.js";
+import { registerDashboardRoute } from "./dashboard.js";
 
 /**
  * Register all production routes
@@ -26,7 +26,7 @@ export function registerAllRoutes() {
   // Demo routes (optional - could be conditionally loaded)
   registerDemoRoutes();
 
-  console.log('All custom routes have been registered');
+  console.log("All custom routes have been registered");
 }
 
 /**
@@ -39,7 +39,7 @@ export function registerProductionRoutes() {
   registerWarcViewerRoute();
   registerDashboardRoute();
 
-  console.log('Production routes have been registered');
+  console.log("Production routes have been registered");
 }
 
 /**
@@ -48,5 +48,5 @@ export function registerProductionRoutes() {
 export function registerDemoRoutesOnly() {
   registerDemoRoutes();
 
-  console.log('Demo routes have been registered');
+  console.log("Demo routes have been registered");
 }

@@ -7,7 +7,7 @@
 Curate.router.initialize();
 
 // Register a simple route
-Curate.router.addRoute('/dashboard', (container, context) => {
+Curate.router.addRoute("/dashboard", (container, context) => {
   container.innerHTML = `
     <div style="padding: 20px;">
       <h1>Dashboard</h1>
@@ -18,15 +18,17 @@ Curate.router.addRoute('/dashboard', (container, context) => {
 });
 
 // Navigate to the route
-Curate.router.navigate('/dashboard');
+Curate.router.navigate("/dashboard");
 ```
 
 ## Advanced Route with Parameters
 
 ```javascript
 // Route with URL parameters
-Curate.router.addRoute('/user/:id/profile/:tab', (container, { params, query, navigate, close }) => {
-  container.innerHTML = `
+Curate.router.addRoute(
+  "/user/:id/profile/:tab",
+  (container, { params, query, navigate, close }) => {
+    container.innerHTML = `
     <div style="padding: 20px;">
       <h1>User Profile: ${params.id}</h1>
       <p>Current tab: ${params.tab}</p>
@@ -38,26 +40,30 @@ Curate.router.addRoute('/user/:id/profile/:tab', (container, { params, query, na
       <button onclick="close()">Close</button>
     </div>
   `;
-}, { title: 'User Profile' });
+  },
+  { title: "User Profile" },
+);
 
 // Navigate to: /custom/user/123/profile/overview?source=menu
-Curate.router.navigate('/user/123/profile/overview?source=menu');
+Curate.router.navigate("/user/123/profile/overview?source=menu");
 ```
 
 ## Route with Cleanup
 
 ```javascript
-Curate.router.addRoute('/live-data', (container, { close }) => {
-  // Setup live data updates
-  const interval = setInterval(() => {
-    const timestamp = new Date().toLocaleTimeString();
-    const dataDiv = container.querySelector('#live-data');
-    if (dataDiv) {
-      dataDiv.textContent = `Last updated: ${timestamp}`;
-    }
-  }, 1000);
+Curate.router.addRoute(
+  "/live-data",
+  (container, { close }) => {
+    // Setup live data updates
+    const interval = setInterval(() => {
+      const timestamp = new Date().toLocaleTimeString();
+      const dataDiv = container.querySelector("#live-data");
+      if (dataDiv) {
+        dataDiv.textContent = `Last updated: ${timestamp}`;
+      }
+    }, 1000);
 
-  container.innerHTML = `
+    container.innerHTML = `
     <div style="padding: 20px;">
       <h1>Live Data Feed</h1>
       <div id="live-data">Loading...</div>
@@ -65,15 +71,17 @@ Curate.router.addRoute('/live-data', (container, { close }) => {
     </div>
   `;
 
-  // Bind close function to button
-  container.querySelector('button').onclick = close;
+    // Bind close function to button
+    container.querySelector("button").onclick = close;
 
-  // Return cleanup function to clear interval when page closes
-  return () => {
-    clearInterval(interval);
-    console.log('Live data feed cleanup completed');
-  };
-}, { title: 'Live Data' });
+    // Return cleanup function to clear interval when page closes
+    return () => {
+      clearInterval(interval);
+      console.log("Live data feed cleanup completed");
+    };
+  },
+  { title: "Live Data" },
+);
 ```
 
 ## Multiple Route Registration
@@ -82,7 +90,7 @@ Curate.router.addRoute('/live-data', (container, { close }) => {
 // Register multiple routes for a complete app
 const routes = [
   {
-    path: '/settings',
+    path: "/settings",
     handler: (container, { navigate }) => {
       container.innerHTML = `
         <div style="padding: 20px;">
@@ -94,18 +102,18 @@ const routes = [
         </div>
       `;
       // Bind navigate function to links
-      container.querySelectorAll('a').forEach(link => {
+      container.querySelectorAll("a").forEach((link) => {
         link.onclick = (e) => {
           e.preventDefault();
-          const path = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+          const path = link.getAttribute("onclick").match(/'([^']+)'/)[1];
           navigate(path);
         };
       });
     },
-    options: { title: 'Settings' }
+    options: { title: "Settings" },
   },
   {
-    path: '/settings/:section',
+    path: "/settings/:section",
     handler: (container, { params, navigate }) => {
       container.innerHTML = `
         <div style="padding: 20px;">
@@ -114,10 +122,10 @@ const routes = [
           <button onclick="arguments[0]('/settings')">Back to Settings</button>
         </div>
       `;
-      container.querySelector('button').onclick = () => navigate('/settings');
+      container.querySelector("button").onclick = () => navigate("/settings");
     },
-    options: { title: 'Settings Details' }
-  }
+    options: { title: "Settings Details" },
+  },
 ];
 
 // Register all routes
@@ -132,9 +140,9 @@ routes.forEach(({ path, handler, options }) => {
 // Add navigation links to existing Pydio UI
 function addCustomNavigation() {
   // This would be integrated with your existing UI framework
-  const navButton = document.createElement('button');
-  navButton.textContent = 'Open Dashboard';
-  navButton.onclick = () => Curate.router.navigate('/dashboard');
+  const navButton = document.createElement("button");
+  navButton.textContent = "Open Dashboard";
+  navButton.onclick = () => Curate.router.navigate("/dashboard");
 
   // Add to appropriate location in Pydio UI
   // document.querySelector('.some-nav-container').appendChild(navButton);
@@ -150,12 +158,12 @@ if (Curate.router.isActive()) {
 ## Error Handling
 
 ```javascript
-Curate.router.addRoute('/async-data', async (container, { params }) => {
-  container.innerHTML = '<div>Loading...</div>';
+Curate.router.addRoute("/async-data", async (container, { params }) => {
+  container.innerHTML = "<div>Loading...</div>";
 
   try {
     // Simulate async data loading
-    const response = await fetch('/api/data');
+    const response = await fetch("/api/data");
     const data = await response.json();
 
     container.innerHTML = `
@@ -180,10 +188,10 @@ Curate.router.addRoute('/async-data', async (container, { params }) => {
 ```javascript
 // Initialize with custom configuration
 Curate.router.initialize({
-  containerSelector: '#my-custom-container',
-  routePrefix: '/my-app',
+  containerSelector: "#my-custom-container",
+  routePrefix: "/my-app",
   showHeader: false,
-  escapeClosesPage: false
+  escapeClosesPage: false,
 });
 ```
 

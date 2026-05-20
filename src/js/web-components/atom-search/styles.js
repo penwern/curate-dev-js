@@ -55,7 +55,8 @@ export const styles = css`
   .info-body {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    transition:
+      max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
       padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0 20px;
   }
@@ -198,58 +199,25 @@ export const styles = css`
   md-outlined-text-field {
     width: 100%;
     --md-outlined-text-field-container-shape: 10px;
-    --md-outlined-text-field-outline-color: var(
-      --md-sys-color-outline-variant,
-      #41484d
-    );
-    --md-outlined-text-field-focus-outline-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
-    --md-outlined-text-field-hover-outline-color: var(
-      --md-sys-color-outline,
-      #8b9198
-    );
-    --md-outlined-text-field-input-text-color: var(
-      --md-sys-color-on-surface,
-      #e2e2e5
-    );
-    --md-outlined-text-field-label-text-color: var(
-      --md-sys-color-on-surface-variant,
-      #c1c7ce
-    );
-    --md-outlined-text-field-focus-label-text-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
+    --md-outlined-text-field-outline-color: var(--md-sys-color-outline-variant, #41484d);
+    --md-outlined-text-field-focus-outline-color: var(--md-sys-color-primary, #85cfff);
+    --md-outlined-text-field-hover-outline-color: var(--md-sys-color-outline, #8b9198);
+    --md-outlined-text-field-input-text-color: var(--md-sys-color-on-surface, #e2e2e5);
+    --md-outlined-text-field-label-text-color: var(--md-sys-color-on-surface-variant, #c1c7ce);
+    --md-outlined-text-field-focus-label-text-color: var(--md-sys-color-primary, #85cfff);
   }
 
   md-outlined-select {
     --md-outlined-select-text-field-container-shape: 10px;
-    --md-outlined-select-text-field-outline-color: var(
-      --md-sys-color-outline-variant,
-      #41484d
-    );
-    --md-outlined-select-text-field-focus-outline-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
-    --md-outlined-select-text-field-hover-outline-color: var(
-      --md-sys-color-outline,
-      #8b9198
-    );
-    --md-outlined-select-text-field-input-text-color: var(
-      --md-sys-color-on-surface,
-      #e2e2e5
-    );
+    --md-outlined-select-text-field-outline-color: var(--md-sys-color-outline-variant, #41484d);
+    --md-outlined-select-text-field-focus-outline-color: var(--md-sys-color-primary, #85cfff);
+    --md-outlined-select-text-field-hover-outline-color: var(--md-sys-color-outline, #8b9198);
+    --md-outlined-select-text-field-input-text-color: var(--md-sys-color-on-surface, #e2e2e5);
     --md-outlined-select-text-field-label-text-color: var(
       --md-sys-color-on-surface-variant,
       #c1c7ce
     );
-    --md-outlined-select-text-field-focus-label-text-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
+    --md-outlined-select-text-field-focus-label-text-color: var(--md-sys-color-primary, #85cfff);
     --md-menu-container-color: var(--md-sys-color-surface-variant, #41484d);
   }
 
@@ -285,29 +253,14 @@ export const styles = css`
 
   md-filled-button {
     --md-filled-button-container-color: var(--md-sys-color-primary, #85cfff);
-    --md-filled-button-label-text-color: var(
-      --md-sys-color-on-primary,
-      #00344c
-    );
-    --md-filled-button-hover-state-layer-color: var(
-      --md-sys-color-on-primary,
-      #00344c
-    );
+    --md-filled-button-label-text-color: var(--md-sys-color-on-primary, #00344c);
+    --md-filled-button-hover-state-layer-color: var(--md-sys-color-on-primary, #00344c);
   }
 
   md-outlined-button {
-    --md-outlined-button-outline-color: var(
-      --md-sys-color-outline-variant,
-      #41484d
-    );
-    --md-outlined-button-label-text-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
-    --md-outlined-button-hover-outline-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
+    --md-outlined-button-outline-color: var(--md-sys-color-outline-variant, #41484d);
+    --md-outlined-button-label-text-color: var(--md-sys-color-primary, #85cfff);
+    --md-outlined-button-hover-outline-color: var(--md-sys-color-primary, #85cfff);
   }
 
   /* ── Loading ── */
@@ -426,8 +379,11 @@ export const styles = css`
     background: var(--md-sys-color-surface-1);
     border: 1px solid var(--md-sys-color-outline-variant, #41484d);
     border-radius: var(--md-sys-color-card-border-radius, 12px);
-    transition: border-color 0.2s ease, background 0.2s ease,
-      transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
     cursor: default;
     animation: resultEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     opacity: 0;
@@ -518,28 +474,16 @@ export const styles = css`
   }
 
   .result-actions md-filled-button {
-    --md-filled-button-container-color: var(
-      --md-sys-color-primary-container,
-      #004c6c
-    );
-    --md-filled-button-label-text-color: var(
-      --md-sys-color-on-primary-container,
-      #c7e7ff
-    );
+    --md-filled-button-container-color: var(--md-sys-color-primary-container, #004c6c);
+    --md-filled-button-label-text-color: var(--md-sys-color-on-primary-container, #c7e7ff);
     --md-filled-button-container-shape: 10px;
     height: 36px;
     font-size: 13px;
   }
 
   .result-actions md-filled-button:hover {
-    --md-filled-button-container-color: var(
-      --md-sys-color-primary,
-      #85cfff
-    );
-    --md-filled-button-label-text-color: var(
-      --md-sys-color-on-primary,
-      #00344c
-    );
+    --md-filled-button-container-color: var(--md-sys-color-primary, #85cfff);
+    --md-filled-button-label-text-color: var(--md-sys-color-on-primary, #00344c);
   }
 
   .result-thumbnail {

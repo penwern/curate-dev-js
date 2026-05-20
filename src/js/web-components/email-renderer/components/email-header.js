@@ -1,11 +1,11 @@
-﻿import { LitElement, html, css } from 'lit';
-import { formatFullDate } from '../utils/dateFormat.js';
+﻿import { LitElement, html, css } from "lit";
+import { formatFullDate } from "../utils/dateFormat.js";
 import { chevronUpIcon, chevronDownIcon, folderIcon } from "../../utils/icons.js";
 
 export class EmailHeader extends LitElement {
   static properties = {
     email: { type: Object },
-    showFullHeaders: { type: Boolean, state: true }
+    showFullHeaders: { type: Boolean, state: true },
   };
 
   constructor() {
@@ -145,7 +145,7 @@ export class EmailHeader extends LitElement {
     }
 
     .code {
-      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-family: "Roboto Mono", "Courier New", monospace;
       font-size: 12px;
       word-break: break-all;
       color: var(--md-sys-color-on-surface-variant);
@@ -167,7 +167,10 @@ export class EmailHeader extends LitElement {
       letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease;
     }
 
     .metadata-toggle:hover {
@@ -191,7 +194,7 @@ export class EmailHeader extends LitElement {
       border: 1px solid var(--md-sys-color-outline-variant);
       background: var(--md-sys-color-surface);
       padding: 16px;
-      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-family: "Roboto Mono", "Courier New", monospace;
       font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
       overflow-x: auto;
@@ -212,7 +215,10 @@ export class EmailHeader extends LitElement {
     }
     return html`
       <div class="value recipients">
-        ${recipients.map(recipient => html`<span class="recipient-chip">${this._formatRecipient(recipient)}</span>`)}
+        ${recipients.map(
+          (recipient) =>
+            html`<span class="recipient-chip">${this._formatRecipient(recipient)}</span>`,
+        )}
       </div>
     `;
   }
@@ -221,7 +227,9 @@ export class EmailHeader extends LitElement {
     if (!this.email) {
       return null;
     }
-    return this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || null;
+    return (
+      this.email.pstFolderBreadcrumb || this.email.pstFolderDisplay || this.email.pstFolder || null
+    );
   }
 
   render() {
@@ -232,12 +240,14 @@ export class EmailHeader extends LitElement {
     const folderLabel = this._getFolderLabel();
 
     return html`
-      <h1 class="email-subject">${this.email.subject || '(No Subject)'}</h1>
+      <h1 class="email-subject">${this.email.subject || "(No Subject)"}</h1>
 
       <div class="header-top">
         <div class="sender-block">
-          <span class="sender-name">${this.email.from?.name || this.email.from?.email || 'Unknown sender'}</span>
-          <span class="sender-email">${this.email.from?.email || ''}</span>
+          <span class="sender-name"
+            >${this.email.from?.name || this.email.from?.email || "Unknown sender"}</span
+          >
+          <span class="sender-email">${this.email.from?.email || ""}</span>
         </div>
         <span class="sent-date">${formatFullDate(this.email.date)}</span>
       </div>
@@ -245,54 +255,66 @@ export class EmailHeader extends LitElement {
       <div class="meta-grid">
         <span class="label">To</span>
         ${this._renderRecipientValue(this.email.to)}
-
-        ${this.email.cc && this.email.cc.length > 0 ? html`
-          <span class="label">Cc</span>
-          ${this._renderRecipientValue(this.email.cc)}
-        ` : ''}
-
-        ${this.email.bcc && this.email.bcc.length > 0 ? html`
-          <span class="label">Bcc</span>
-          ${this._renderRecipientValue(this.email.bcc)}
-        ` : ''}
-
-        ${this.email.replyTo ? html`
-          <span class="label">Reply-To</span>
-          <span class="value">${this._formatRecipient(this.email.replyTo)}</span>
-        ` : ''}
-
-        ${folderLabel ? html`
-          <span class="label">Folder</span>
-          <span class="value">
-            <span class="folder-chip" title=${folderLabel}>
-              ${folderIcon}
-              <span>${folderLabel}</span>
-            </span>
-          </span>
-        ` : ''}
+        ${this.email.cc && this.email.cc.length > 0
+          ? html`
+              <span class="label">Cc</span>
+              ${this._renderRecipientValue(this.email.cc)}
+            `
+          : ""}
+        ${this.email.bcc && this.email.bcc.length > 0
+          ? html`
+              <span class="label">Bcc</span>
+              ${this._renderRecipientValue(this.email.bcc)}
+            `
+          : ""}
+        ${this.email.replyTo
+          ? html`
+              <span class="label">Reply-To</span>
+              <span class="value">${this._formatRecipient(this.email.replyTo)}</span>
+            `
+          : ""}
+        ${folderLabel
+          ? html`
+              <span class="label">Folder</span>
+              <span class="value">
+                <span class="folder-chip" title=${folderLabel}>
+                  ${folderIcon}
+                  <span>${folderLabel}</span>
+                </span>
+              </span>
+            `
+          : ""}
 
         <span class="label">Message ID</span>
-        <span class="value code">${this.email.messageId || 'Unavailable'}</span>
+        <span class="value code">${this.email.messageId || "Unavailable"}</span>
       </div>
 
       <button
         class="metadata-toggle"
-        @click=${() => this.showFullHeaders = !this.showFullHeaders}
+        @click=${() => (this.showFullHeaders = !this.showFullHeaders)}
         type="button"
       >
-        ${this.showFullHeaders ? 'Hide headers' : 'Show headers'}
+        ${this.showFullHeaders ? "Hide headers" : "Show headers"}
         <span class="icon">${this.showFullHeaders ? chevronUpIcon : chevronDownIcon}</span>
       </button>
 
-      ${this.showFullHeaders ? html`
-        <pre class="full-headers">${JSON.stringify(this.email.headers || {
-          'Message-ID': this.email.messageId,
-          'In-Reply-To': this.email.inReplyTo,
-          'References': this.email.references
-        }, null, 2)}</pre>
-      ` : ''}
+      ${this.showFullHeaders
+        ? html`
+            <pre class="full-headers">
+${JSON.stringify(
+                this.email.headers || {
+                  "Message-ID": this.email.messageId,
+                  "In-Reply-To": this.email.inReplyTo,
+                  References: this.email.references,
+                },
+                null,
+                2,
+              )}</pre
+            >
+          `
+        : ""}
     `;
   }
 }
 
-customElements.define('email-header', EmailHeader);
+customElements.define("email-header", EmailHeader);

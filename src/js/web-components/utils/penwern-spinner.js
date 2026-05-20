@@ -107,15 +107,13 @@ class PenwernSpinner extends HTMLElement {
       dasharray = isSnake ? "150 320" : "470 470";
       dashoffsetStart = isSnake ? "470" : "940";
       duration = isSnake ? "1.5s" : "2.4s";
-      easing = isSnake
-        ? "cubic-bezier(0.05, 0, 1, 1)"
-        : "cubic-bezier(0.4, 0, 0.6, 1)";
+      easing = isSnake ? "cubic-bezier(0.05, 0, 1, 1)" : "cubic-bezier(0.4, 0, 0.6, 1)";
       fillAnimation = `fillIn ${duration} ${easing} infinite`;
     }
 
     const ariaAttrs = isDeterminate
       ? `role="progressbar" aria-label="Loading" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="100"`
-        : `role="progressbar" aria-label="Loading"`;
+      : `role="progressbar" aria-label="Loading"`;
 
     const spinnerAnim = isDeterminate
       ? ""

@@ -5,12 +5,7 @@ import "@material/web/list/list-item.js";
 import "@material/web/checkbox/checkbox.js";
 import "@material/web/icon/icon.js";
 import "./as-pagination.js";
-import {
-  databaseIcon,
-  layersIcon,
-  documentIcon,
-  folderIcon,
-} from "../../utils/icons.js";
+import { databaseIcon, layersIcon, documentIcon, folderIcon } from "../../utils/icons.js";
 import { highlightText } from "../utils/search-helpers.js";
 
 /**
@@ -149,8 +144,8 @@ class AsFlatList extends LitElement {
     const ancestors = Array.isArray(item.ancestors)
       ? item.ancestors
       : item.path
-      ? item.path.slice(0, -1)
-      : [];
+        ? item.path.slice(0, -1)
+        : [];
     const pathLabel = ancestors.join(" / ") || type;
 
     return html`
@@ -171,15 +166,11 @@ class AsFlatList extends LitElement {
           <span class="type-icon">${this._getTypeIcon(type)}</span>
         </div>
         <div slot="headline">
-          ${this.searchQuery
-            ? highlightText(title, this.searchQuery)
-            : title}
+          ${this.searchQuery ? highlightText(title, this.searchQuery) : title}
         </div>
         <div slot="supporting-text">${pathLabel}</div>
         ${item.extent || item.node?.extent
-          ? html`<div slot="trailing-supporting-text">
-              ${item.extent || item.node?.extent}
-            </div>`
+          ? html`<div slot="trailing-supporting-text">${item.extent || item.node?.extent}</div>`
           : nothing}
       </md-list-item>
     `;
@@ -208,7 +199,7 @@ class AsFlatList extends LitElement {
         detail: { index },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -220,7 +211,7 @@ class AsFlatList extends LitElement {
         detail: { nodeId },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -231,7 +222,7 @@ class AsFlatList extends LitElement {
         detail: e.detail,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

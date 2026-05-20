@@ -113,21 +113,19 @@ export class WarcViewerModal extends LitElement {
                 </div>
               `
             : this.isLoading
-            ? html`
-                <div class="loading-state">
-                  <md-circular-progress indeterminate></md-circular-progress>
-                  <p>Loading archive viewer...</p>
-                </div>
-              `
-            : ""}
+              ? html`
+                  <div class="loading-state">
+                    <md-circular-progress indeterminate></md-circular-progress>
+                    <p>Loading archive viewer...</p>
+                  </div>
+                `
+              : ""}
 
           <replay-web-page
             source=${this.fileUrl}
             replaybase="/workers/"
             newwindowbase=${window.location.origin + "/"}
-            style=${this.isLoading || this.errorMessage
-              ? "display: none;"
-              : "display: block;"}
+            style=${this.isLoading || this.errorMessage ? "display: none;" : "display: block;"}
           >
           </replay-web-page>
         </div>
@@ -171,9 +169,7 @@ export class WarcViewerModal extends LitElement {
         this.isLoading = false;
         this.requestUpdate();
 
-        console.log(
-          "ReplayWeb.page ready - letting it handle service worker automatically"
-        );
+        console.log("ReplayWeb.page ready - letting it handle service worker automatically");
       } catch (error) {
         console.error("❌ Element definition failed:", error);
         this.showError("Failed to initialize archive viewer");

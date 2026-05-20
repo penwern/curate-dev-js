@@ -14,7 +14,7 @@ import "./components/as-card.js";
 import "./components/as-empty-state.js";
 import "./components/as-pagination.js";
 import "../utils/penwern-spinner.js";
-import {Curate} from "../../core/CurateFunctions/CurateFunctions.js";
+import { Curate } from "../../core/CurateFunctions/CurateFunctions.js";
 
 // Import utilities
 import {
@@ -307,7 +307,7 @@ class ArchivespaceBrowser extends LitElement {
     // API configuration
     this.apiHost = window.origin + "/api/archivesspace";
     this.curateBasePath = "";
-    this.curateParentPath = "/"+Curate.workspaces.getOpenWorkspace()
+    this.curateParentPath = "/" + Curate.workspaces.getOpenWorkspace();
 
     // Internal state
     this._visibleTreeRows = [];
@@ -384,8 +384,7 @@ class ArchivespaceBrowser extends LitElement {
   render() {
     return html`
       <div class="container">
-        ${this._renderHeader()}
-        ${this._renderBreadcrumb()}
+        ${this._renderHeader()} ${this._renderBreadcrumb()}
         ${this.currentView === "tree" ? this._renderFilterSummary() : nothing}
         ${this.currentView === "browse" ? this._renderBrowseTabs() : nothing}
         ${this._renderMainContent()}
@@ -404,8 +403,7 @@ class ArchivespaceBrowser extends LitElement {
     const showSearchNavigation =
       ((isTreeView && this.recordViewMode === "flat") || isGlobalSearch) &&
       this.searchResults?.length > 0;
-    const hasActiveSearchOrFilters =
-      this.searchQuery.trim().length > 0 || this._hasActiveFilters();
+    const hasActiveSearchOrFilters = this.searchQuery.trim().length > 0 || this._hasActiveFilters();
     const showBackToSearch =
       isTreeView &&
       this.recordViewMode === "tree" &&
@@ -417,9 +415,7 @@ class ArchivespaceBrowser extends LitElement {
     const page = this.searchCurrentPage || 1;
     const indexInPage = this.activeSearchIndex >= 0 ? this.activeSearchIndex : 0;
     const searchCurrent =
-      searchTotal > 0 && this.activeSearchIndex >= 0
-        ? (page - 1) * pageSize + indexInPage + 1
-        : 0;
+      searchTotal > 0 && this.activeSearchIndex >= 0 ? (page - 1) * pageSize + indexInPage + 1 : 0;
 
     const selectedNode = this.selectedNodeId
       ? findNodeByLogicalId(this.archiveData, this.selectedNodeId)
@@ -473,10 +469,7 @@ class ArchivespaceBrowser extends LitElement {
     if (crumbs.length === 0) return nothing;
 
     return html`
-      <as-breadcrumb
-        .crumbs=${crumbs}
-        @navigate=${this._handleBreadcrumbNavigate}
-      ></as-breadcrumb>
+      <as-breadcrumb .crumbs=${crumbs} @navigate=${this._handleBreadcrumbNavigate}></as-breadcrumb>
     `;
   }
 
@@ -546,7 +539,7 @@ class ArchivespaceBrowser extends LitElement {
   _renderRepositoryList() {
     const query = this.collectionFilter.trim().toLowerCase();
     const filtered = this.repositories.filter((repo) =>
-      query ? matchesRepositorySearch(repo, query, this.browseSearchField) : true
+      query ? matchesRepositorySearch(repo, query, this.browseSearchField) : true,
     );
 
     if (this.repositoriesLoading && !this.repositories.length) {
@@ -585,13 +578,11 @@ class ArchivespaceBrowser extends LitElement {
                   .cardTitle=${repo.name}
                   .code=${repo.code}
                   .icon=${databaseIcon}
-                  .meta=${[
-                    { icon: pinIcon, label: repo.location },
-                  ]}
+                  .meta=${[{ icon: pinIcon, label: repo.location }]}
                   .query=${this.collectionFilter}
                   @card-click=${() => this._selectRepository(repo)}
                 ></as-card>
-              `
+              `,
             )}
           </div>
           ${totalPages > 1
@@ -649,14 +640,13 @@ class ArchivespaceBrowser extends LitElement {
                   .cardTitle=${coll.title}
                   .code=${coll.code}
                   .icon=${layersIcon}
-                  .meta=${[
-                    { label: coll.extent },
-                    { label: coll.dateRange },
-                  ].filter((m) => m.label)}
+                  .meta=${[{ label: coll.extent }, { label: coll.dateRange }].filter(
+                    (m) => m.label,
+                  )}
                   .query=${this.collectionFilter}
                   @card-click=${() => this._selectCollection(coll)}
                 ></as-card>
-              `
+              `,
             )}
           </div>
           ${totalPages > 1
@@ -680,8 +670,7 @@ class ArchivespaceBrowser extends LitElement {
   }
 
   _renderGlobalSearchView() {
-    const hasQueryOrFilters =
-      this.searchQuery.trim().length > 0 || this._hasActiveFilters();
+    const hasQueryOrFilters = this.searchQuery.trim().length > 0 || this._hasActiveFilters();
 
     if (this.treeSearchLoading) {
       return html`
@@ -710,9 +699,7 @@ class ArchivespaceBrowser extends LitElement {
 
     return html`
       <div class="content single-panel">
-        <div class="main-panel">
-          ${this._renderFlatSearchResults()}
-        </div>
+        <div class="main-panel">${this._renderFlatSearchResults()}</div>
       </div>
     `;
   }
@@ -762,8 +749,7 @@ class ArchivespaceBrowser extends LitElement {
         `;
       }
     } else {
-      const isActivelyFiltering =
-        this.searchQuery.trim().length > 0 || this._hasActiveFilters();
+      const isActivelyFiltering = this.searchQuery.trim().length > 0 || this._hasActiveFilters();
 
       if (this.treeSearchLoading) {
         mainPanelContent = html`
@@ -802,9 +788,7 @@ class ArchivespaceBrowser extends LitElement {
       this.activeSearchIndex >= 0
     ) {
       const result = this.searchResults[this.activeSearchIndex];
-      const nodeFromTree = result?.uri
-        ? findNode(this.archiveData, result.uri)
-        : null;
+      const nodeFromTree = result?.uri ? findNode(this.archiveData, result.uri) : null;
       if (nodeFromTree) {
         const crumbs = getBreadcrumbs(this.archiveData, nodeFromTree.id);
         detailPanelContent = html`
@@ -925,15 +909,14 @@ class ArchivespaceBrowser extends LitElement {
     const clickedSearchField = path.some(
       (node) =>
         node?.tagName?.toLowerCase() === "as-search-field-selector" ||
-        node?.dataset?.popover === "search-field"
+        node?.dataset?.popover === "search-field",
     );
     if (!clickedSearchField && this.searchFieldMenuOpen) {
       this.searchFieldMenuOpen = false;
     }
     const clickedFilter = path.some(
       (node) =>
-        node?.tagName?.toLowerCase() === "as-filter-popover" ||
-        node?.dataset?.popover === "filter"
+        node?.tagName?.toLowerCase() === "as-filter-popover" || node?.dataset?.popover === "filter",
     );
     if (!clickedFilter && this.filterMenuOpen) {
       this.filterMenuOpen = false;
@@ -1194,9 +1177,9 @@ class ArchivespaceBrowser extends LitElement {
   }
 
   _handleRecordToggle(e) {
-    console.log('[ArchivespaceBrowser] _handleRecordToggle called', {
+    console.log("[ArchivespaceBrowser] _handleRecordToggle called", {
       nodeId: e.detail?.nodeId,
-      currentSelectedRecordIds: this.selectedRecordIds
+      currentSelectedRecordIds: this.selectedRecordIds,
     });
 
     const nodeId = e.detail?.nodeId;
@@ -1206,7 +1189,7 @@ class ArchivespaceBrowser extends LitElement {
       const index = this.selectedRecordIds.indexOf(nodeId);
       const updated = this.selectedRecordIds.filter((id) => id !== nodeId);
       this.selectedRecordIds = updated;
-      console.log('[ArchivespaceBrowser] Removed from selection, new list:', updated);
+      console.log("[ArchivespaceBrowser] Removed from selection, new list:", updated);
       if (this.selectedNodeId === nodeId && updated.length > 0) {
         const fallbackIndex = Math.min(index, updated.length - 1);
         this.selectedNodeId = updated[fallbackIndex];
@@ -1214,7 +1197,7 @@ class ArchivespaceBrowser extends LitElement {
     } else {
       this.selectedRecordIds = [...this.selectedRecordIds, nodeId];
       this.selectedNodeId = nodeId;
-      console.log('[ArchivespaceBrowser] Added to selection, new list:', this.selectedRecordIds);
+      console.log("[ArchivespaceBrowser] Added to selection, new list:", this.selectedRecordIds);
     }
   }
 
@@ -1298,9 +1281,7 @@ class ArchivespaceBrowser extends LitElement {
         if (Array.isArray(this.searchResults) && this.searchResults.length) {
           const nextIndex = this.searchResults.findIndex(
             (result) =>
-              result?.uri === targetId ||
-              result?.id === targetId ||
-              result?.node?.id === targetId
+              result?.uri === targetId || result?.id === targetId || result?.node?.id === targetId,
           );
           if (nextIndex !== -1) {
             this.activeSearchIndex = nextIndex;
@@ -1308,8 +1289,7 @@ class ArchivespaceBrowser extends LitElement {
         } else {
           const flatRecords = flattenTree(this._getFilteredTreeData());
           const nextIndex = flatRecords.findIndex(
-            (record) =>
-              record?.node?.id === targetId || record?.node?.uri === targetId
+            (record) => record?.node?.id === targetId || record?.node?.uri === targetId,
           );
           if (nextIndex !== -1) {
             this.selectedNodeId = flatRecords[nextIndex].node.id;
@@ -1350,10 +1330,7 @@ class ArchivespaceBrowser extends LitElement {
     if (action !== "create-folders") return;
     if (this.createFoldersLoading) return;
     if (this._isFolderCreationDisabled()) {
-      this._setCreateFoldersFeedback(
-        "error",
-        this._getFolderCreationDisabledReason()
-      );
+      this._setCreateFoldersFeedback("error", this._getFolderCreationDisabledReason());
       return;
     }
 
@@ -1366,7 +1343,7 @@ class ArchivespaceBrowser extends LitElement {
     if (this.containerType === "archival_object" && selectedIds.length > 1) {
       this._setCreateFoldersFeedback(
         "error",
-        "Archival Object mode requires a single selected record."
+        "Archival Object mode requires a single selected record.",
       );
       return;
     }
@@ -1420,20 +1397,17 @@ class ArchivespaceBrowser extends LitElement {
           this.apiHost,
           this.curateBasePath,
           this.curateParentPath,
-          folders
+          folders,
         );
         const created = res?.folders || [];
         const count = Array.isArray(created) ? created.length : 0;
         this._setCreateFoldersFeedback(
           "success",
-          `Created ${count} folder${count === 1 ? "" : "s"} in Curate.`
+          `Created ${count} folder${count === 1 ? "" : "s"} in Curate.`,
         );
       } catch (err) {
         console.error(err);
-        this._setCreateFoldersFeedback(
-          "error",
-          err?.message || "Failed to create folders."
-        );
+        this._setCreateFoldersFeedback("error", err?.message || "Failed to create folders.");
       } finally {
         this.createFoldersLoading = false;
       }
@@ -1542,15 +1516,13 @@ class ArchivespaceBrowser extends LitElement {
     let filtered = this.collections;
 
     if (this.selectedRepository) {
-      filtered = filtered.filter(
-        (coll) => coll.repositoryId === this.selectedRepository.id
-      );
+      filtered = filtered.filter((coll) => coll.repositoryId === this.selectedRepository.id);
     }
 
     const query = this.collectionFilter.trim().toLowerCase();
     if (query) {
       filtered = filtered.filter((coll) =>
-        matchesCollectionSearch(coll, query, this.browseSearchField)
+        matchesCollectionSearch(coll, query, this.browseSearchField),
       );
     }
 
@@ -1620,11 +1592,7 @@ class ArchivespaceBrowser extends LitElement {
   }
 
   _selectSearchResult(index) {
-    if (
-      !Array.isArray(this.searchResults) ||
-      index < 0 ||
-      index >= this.searchResults.length
-    ) {
+    if (!Array.isArray(this.searchResults) || index < 0 || index >= this.searchResults.length) {
       return;
     }
     this.activeSearchIndex = index;
@@ -1856,19 +1824,13 @@ class ArchivespaceBrowser extends LitElement {
     const allResults = [];
 
     while (true) {
-      const response = await fetchRepositoryResources(
-        this.apiHost,
-        repositoryId,
-        page,
-        pageSize
-      );
+      const response = await fetchRepositoryResources(this.apiHost, repositoryId, page, pageSize);
       const results = response?.results || [];
       if (!Array.isArray(results) || results.length === 0) break;
 
       allResults.push(...results);
 
-      const totalPages =
-        response?.total_pages ?? response?.last_page ?? response?.pages ?? null;
+      const totalPages = response?.total_pages ?? response?.last_page ?? response?.pages ?? null;
       if (typeof totalPages === "number" && page >= totalPages) break;
 
       if (results.length < pageSize) break;
@@ -1898,7 +1860,7 @@ class ArchivespaceBrowser extends LitElement {
     this.repositories = this.repositories.map((repo) =>
       repo.id === repositoryId
         ? { ...repo, collectionCount: Number.isFinite(count) ? count : repo.collectionCount }
-        : repo
+        : repo,
     );
   }
 
@@ -1909,7 +1871,7 @@ class ArchivespaceBrowser extends LitElement {
       const { root, children } = await fetchResourceTreeRoot(
         this.apiHost,
         this.resourceId,
-        this.repositoryId
+        this.repositoryId,
       );
       const rootNode = this._normalizeApiTreeNode(root);
       const childNodes = (children || []).map((c) => this._normalizeApiTreeNode(c));
@@ -1947,7 +1909,7 @@ class ArchivespaceBrowser extends LitElement {
         this.resourceId,
         this.repositoryId,
         parentNode.uri,
-        offset
+        offset,
       );
       const normalized = (children || []).map((c) => this._normalizeApiTreeNode(c));
       parentNode.children = [...(parentNode.children || []), ...normalized];
@@ -1980,7 +1942,7 @@ class ArchivespaceBrowser extends LitElement {
         rawQuery,
         page,
         pageSize,
-        searchOptions
+        searchOptions,
       );
       const results = response?.results || [];
       const totalHits =
@@ -2012,7 +1974,7 @@ class ArchivespaceBrowser extends LitElement {
         rawQuery,
         page,
         pageSize,
-        searchOptions
+        searchOptions,
       );
       const results = response?.results || [];
       const totalHits =
@@ -2051,7 +2013,7 @@ class ArchivespaceBrowser extends LitElement {
           "*",
           1,
           20,
-          searchOptions
+          searchOptions,
         );
       }
 
@@ -2083,7 +2045,7 @@ class ArchivespaceBrowser extends LitElement {
         this.apiHost,
         this.resourceId,
         this.repositoryId,
-        [result.uri]
+        [result.uri],
       );
       const paths = pathResponse?.paths || [];
       const steps = paths[0] || [];

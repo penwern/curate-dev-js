@@ -1,5 +1,5 @@
 // api-service.js
-import CurateApi from '../../core/CurateFunctions/CurateApi.js';
+import CurateApi from "../../core/CurateFunctions/CurateApi.js";
 
 class ApiService {
   constructor(baseUrl = `${window.location.origin}/api/pure`) {
@@ -8,7 +8,7 @@ class ApiService {
   }
 
   async _makeRequest(endpoint, options = {}) {
-    const method = options.method || 'GET';
+    const method = options.method || "GET";
     let body = null;
 
     if (options.body) {
@@ -91,12 +91,9 @@ class ApiService {
 
   // Remove field from whitelist
   async removeWhitelistField(fieldName) {
-    return this._makeRequest(
-      `/metadata/whitelist/fields/${encodeURIComponent(fieldName)}`,
-      {
-        method: "DELETE",
-      }
-    );
+    return this._makeRequest(`/metadata/whitelist/fields/${encodeURIComponent(fieldName)}`, {
+      method: "DELETE",
+    });
   }
 
   // Reset whitelist to defaults
@@ -110,9 +107,7 @@ class ApiService {
 
   // Get discovered fields queue
   async getDiscoveredFieldsQueue(unreviwedOnly = true) {
-    return this._makeRequest(
-      `/metadata/discovered-fields?unreviewed_only=${unreviwedOnly}`
-    );
+    return this._makeRequest(`/metadata/discovered-fields?unreviewed_only=${unreviwedOnly}`);
   }
 
   // Review a single discovered field
@@ -141,12 +136,9 @@ class ApiService {
 
   // Cleanup old reviewed discovered fields
   async cleanupDiscoveredFields(daysOld = 30) {
-    return this._makeRequest(
-      `/metadata/discovered-fields/cleanup?days_old=${daysOld}`,
-      {
-        method: "DELETE",
-      }
-    );
+    return this._makeRequest(`/metadata/discovered-fields/cleanup?days_old=${daysOld}`, {
+      method: "DELETE",
+    });
   }
 
   // === FIELD MAPPING (for whitelisted fields) ===
@@ -262,11 +254,7 @@ class ApiService {
   }
 
   // Legacy single mapping save (use bulk instead)
-  async saveMetadataMapping(
-    pureField,
-    curateField,
-    transformationLogic = null
-  ) {
+  async saveMetadataMapping(pureField, curateField, transformationLogic = null) {
     const mappings = {};
     if (curateField) {
       mappings[pureField] = {

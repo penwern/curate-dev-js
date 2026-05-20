@@ -23,7 +23,9 @@ class StatCard extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      transition: box-shadow 0.2s ease, transform 0.15s ease;
+      transition:
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
       position: relative;
       overflow: hidden;
     }
@@ -120,8 +122,12 @@ class StatCard extends LitElement {
     }
 
     @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
     }
 
     .icon-slot {

@@ -76,10 +76,10 @@ class AtomConfigReadonly extends LitElement {
     this.loadError = false;
     try {
       const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
-      const response = await fetch(
-        `${window.location.origin}/api/v1/atom-configs/public`,
-        { method: "GET", headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await fetch(`${window.location.origin}/api/v1/atom-configs/public`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -106,13 +106,11 @@ class AtomConfigReadonly extends LitElement {
     }
     if (!this.configured) {
       return html`<div class="status">
-        AtoM is not yet configured for this site. Penwern manages this
-        configuration — please contact support.
+        AtoM is not yet configured for this site. Penwern manages this configuration — please
+        contact support.
       </div>`;
     }
-    const maskedKey = this.apiKeyLast4
-      ? `${"•".repeat(8)}${this.apiKeyLast4}`
-      : "Not set";
+    const maskedKey = this.apiKeyLast4 ? `${"•".repeat(8)}${this.apiKeyLast4}` : "Not set";
     return html`
       <div class="panel">
         <div class="row">
@@ -124,8 +122,8 @@ class AtomConfigReadonly extends LitElement {
           <span class="value">${maskedKey}</span>
         </div>
         <div class="note">
-          AtoM is configured and managed by Penwern. To change these settings,
-          please contact support.
+          AtoM is configured and managed by Penwern. To change these settings, please contact
+          support.
         </div>
       </div>
     `;

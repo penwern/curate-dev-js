@@ -11,29 +11,29 @@
  * Pydio from redirecting away from /custom/* routes.
  */
 
-(function() {
-  'use strict';
+(function () {
+  "use strict";
 
   const initialPath = window.location.pathname;
 
   // Only set up protection if we're on a custom route
-  if (!initialPath.startsWith('/custom')) {
+  if (!initialPath.startsWith("/custom")) {
     return;
   }
 
-  sessionStorage.setItem('curate_protected_route', initialPath);
+  sessionStorage.setItem("curate_protected_route", initialPath);
 
   // Store original history methods before anyone can override them
   const originalReplaceState = history.replaceState.bind(history);
   const originalPushState = history.pushState.bind(history);
 
   // Override history.replaceState to block Pydio redirects
-  history.replaceState = function(state, title, url) {
+  history.replaceState = function (state, title, url) {
     const currentPath = window.location.pathname;
-    const protectedRoute = sessionStorage.getItem('curate_protected_route');
+    const protectedRoute = sessionStorage.getItem("curate_protected_route");
 
     // Block redirects away from custom routes
-    if (protectedRoute && currentPath.startsWith('/custom') && url && !url.startsWith('/custom')) {
+    if (protectedRoute && currentPath.startsWith("/custom") && url && !url.startsWith("/custom")) {
       return;
     }
 
@@ -41,12 +41,12 @@
   };
 
   // Override history.pushState to block Pydio navigation
-  history.pushState = function(state, title, url) {
+  history.pushState = function (state, title, url) {
     const currentPath = window.location.pathname;
-    const protectedRoute = sessionStorage.getItem('curate_protected_route');
+    const protectedRoute = sessionStorage.getItem("curate_protected_route");
 
     // Block navigation away from custom routes
-    if (protectedRoute && currentPath.startsWith('/custom') && url && !url.startsWith('/custom')) {
+    if (protectedRoute && currentPath.startsWith("/custom") && url && !url.startsWith("/custom")) {
       return;
     }
 
@@ -60,7 +60,7 @@
   const urlMonitor = setInterval(() => {
     monitorCount++;
     const currentPath = window.location.pathname;
-    const protectedRoute = sessionStorage.getItem('curate_protected_route');
+    const protectedRoute = sessionStorage.getItem("curate_protected_route");
 
     if (!protectedRoute) {
       clearInterval(urlMonitor);
@@ -68,31 +68,32 @@
     }
 
     // If we've been redirected away from the custom route, restore it
-    if (currentPath !== protectedRoute && !currentPath.startsWith('/custom')) {
-      originalReplaceState(null, '', protectedRoute);
+    if (currentPath !== protectedRoute && !currentPath.startsWith("/custom")) {
+      originalReplaceState(null, "", protectedRoute);
 
       // Trigger a custom event that the router can listen for
-      window.dispatchEvent(new CustomEvent('curate-route-restored', {
-        detail: { path: protectedRoute }
-      }));
+      window.dispatchEvent(
+        new CustomEvent("curate-route-restored", {
+          detail: { path: protectedRoute },
+        }),
+      );
 
-      sessionStorage.removeItem('curate_protected_route');
+      sessionStorage.removeItem("curate_protected_route");
       clearInterval(urlMonitor);
       return;
     }
 
     // If we've successfully stayed on the custom route for 2 seconds, clear protection
     if (currentPath === protectedRoute && monitorCount > 20) {
-      sessionStorage.removeItem('curate_protected_route');
+      sessionStorage.removeItem("curate_protected_route");
       clearInterval(urlMonitor);
       return;
     }
 
     // Timeout after 5 seconds
     if (monitorCount >= maxMonitorChecks) {
-      sessionStorage.removeItem('curate_protected_route');
+      sessionStorage.removeItem("curate_protected_route");
       clearInterval(urlMonitor);
     }
   }, 100);
-
 })();

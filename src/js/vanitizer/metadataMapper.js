@@ -90,28 +90,20 @@ function connectElements(element1, element2, instantDraw = false) {
     var y2 = rect2.top + rect2.height / 2;
     if (rect1.top < ceil) {
       // Calculate the new left position maintaining the same slope
-      x1 +=
-        ((ceil - rect1.top) * (rect2.left - rect1.left)) /
-        (rect2.top - rect1.top);
+      x1 += ((ceil - rect1.top) * (rect2.left - rect1.left)) / (rect2.top - rect1.top);
       y1 = ceil;
     }
     if (rect2.top < ceil) {
-      x2 +=
-        ((ceil - rect2.top) * (rect1.left - rect2.left)) /
-        (rect1.top - rect2.top);
+      x2 += ((ceil - rect2.top) * (rect1.left - rect2.left)) / (rect1.top - rect2.top);
       y2 = ceil;
     }
     if (rect1.top > lowCeil) {
       y1 = lowCeil;
-      x1 +=
-        ((lowCeil - rect1.top) * (rect2.left - rect1.left)) /
-        (rect2.top - rect1.top); // angle correction
+      x1 += ((lowCeil - rect1.top) * (rect2.left - rect1.left)) / (rect2.top - rect1.top); // angle correction
     }
     if (rect2.top > lowCeil) {
       y2 = lowCeil;
-      x2 +=
-        ((lowCeil - rect2.top) * (rect1.left - rect2.left)) /
-        (rect1.top - rect2.top); // angle correction
+      x2 += ((lowCeil - rect2.top) * (rect1.left - rect2.left)) / (rect1.top - rect2.top); // angle correction
     }
 
     ctx.moveTo(x1, y1);
@@ -134,30 +126,22 @@ function connectElements(element1, element2, instantDraw = false) {
 
     // Angle correction for rect1
     if (rect1.top < ceil) {
-      x1 +=
-        ((ceil - rect1.top) * (rect2.left - rect1.left)) /
-        (rect2.top - rect1.top);
+      x1 += ((ceil - rect1.top) * (rect2.left - rect1.left)) / (rect2.top - rect1.top);
       y1 = ceil;
     }
     if (rect1.top > lowCeil) {
       y1 = lowCeil;
-      x1 +=
-        ((lowCeil - rect1.top) * (rect2.left - rect1.left)) /
-        (rect2.top - rect1.top); // angle correction
+      x1 += ((lowCeil - rect1.top) * (rect2.left - rect1.left)) / (rect2.top - rect1.top); // angle correction
     }
 
     // Angle correction for rect2
     if (rect2.top < ceil) {
-      x2 +=
-        ((ceil - rect2.top) * (rect1.left - rect2.left)) /
-        (rect1.top - rect2.top);
+      x2 += ((ceil - rect2.top) * (rect1.left - rect2.left)) / (rect1.top - rect2.top);
       y2 = ceil;
     }
     if (rect2.top > lowCeil) {
       y2 = lowCeil;
-      x2 +=
-        ((lowCeil - rect2.top) * (rect1.left - rect2.left)) /
-        (rect1.top - rect2.top); // angle correction
+      x2 += ((lowCeil - rect2.top) * (rect1.left - rect2.left)) / (rect1.top - rect2.top); // angle correction
     }
 
     function animateLine() {
@@ -263,8 +247,7 @@ async function csvToNodes(csvFile, destinationMap) {
             let s = sourceNode.querySelector(".nodeConnector");
             s.classList.remove("connected");
             s.textContent = "+";
-            s.previousSibling.querySelector(".mdi-delete").style.visibility =
-              "hidden";
+            s.previousSibling.querySelector(".mdi-delete").style.visibility = "hidden";
           }
         });
       });
@@ -285,13 +268,11 @@ async function csvToNodes(csvFile, destinationMap) {
         });
         nodeConnector.classList.add("chooseConnection");
         nodeConnector.textContent = "";
-        document
-          .querySelectorAll("#destinationList .nodeConnector")
-          .forEach((n) => {
-            if (!n.classList.contains("connected")) {
-              n.classList.add("chooseDestination");
-            }
-          });
+        document.querySelectorAll("#destinationList .nodeConnector").forEach((n) => {
+          if (!n.classList.contains("connected")) {
+            n.classList.add("chooseDestination");
+          }
+        });
       });
       sourceNode.appendChild(nodeConnector);
       sourceList.appendChild(sourceNode);
@@ -304,29 +285,20 @@ async function csvToNodes(csvFile, destinationMap) {
       const nodeConnector = document.createElement("span");
       nodeConnector.classList.add("nodeConnector");
       nodeConnector.style.cursor = "pointer";
-      nodeConnector.setAttribute(
-        "forNode",
-        "node_" + (columnHeadings.length + index + 1)
-      );
+      nodeConnector.setAttribute("forNode", "node_" + (columnHeadings.length + index + 1));
       nodeConnector.addEventListener("click", (e) => {
         if (nodeConnector.classList.contains("connected")) {
           return;
         }
-        const startNode = document.querySelector(
-          ".nodeConnector.chooseConnection"
-        );
+        const startNode = document.querySelector(".nodeConnector.chooseConnection");
         connectElements(startNode, nodeConnector);
         startNode.classList.remove("chooseConnection");
         startNode.classList.add("connected");
-        startNode.previousSibling.querySelector(
-          ".mdi-delete"
-        ).style.visibility = "visible";
+        startNode.previousSibling.querySelector(".mdi-delete").style.visibility = "visible";
         nodeConnector.classList.add("connected");
-        document
-          .querySelectorAll("#destinationList .nodeConnector")
-          .forEach((n) => {
-            n.classList.remove("chooseDestination");
-          });
+        document.querySelectorAll("#destinationList .nodeConnector").forEach((n) => {
+          n.classList.remove("chooseDestination");
+        });
       });
       destinationNode.appendChild(nodeConnector);
       const destinationItem = document.createElement("div");
@@ -343,9 +315,7 @@ async function csvToNodes(csvFile, destinationMap) {
     container.appendChild(sourceList);
     container.appendChild(destinationList);
     document.querySelector("#metadata-mapper-dropzone").style.display = "none";
-    document.querySelector(
-      "#metadata-mapper .curate-select-container"
-    ).style.display = "none";
+    document.querySelector("#metadata-mapper .curate-select-container").style.display = "none";
     return container;
   } catch (error) {
     console.error(error);
@@ -360,11 +330,7 @@ function setupCSV() {
       // Do something with the returned data
       data.Namespaces.forEach((obj) => {
         const nsSet = obj.Label.split("-")[0];
-        if (
-          nsSet !== nsSet.toUpperCase() ||
-          nsSet === "IMPORT" ||
-          nsSet === "EXPORT"
-        ) {
+        if (nsSet !== nsSet.toUpperCase() || nsSet === "IMPORT" || nsSet === "EXPORT") {
           return;
         }
         const label = obj.Label.replace(/ /g, ""); // remove spaces from label for field name
@@ -373,9 +339,7 @@ function setupCSV() {
           props: {},
         };
 
-        const destinationSchema = destinationSchemas.find(
-          (item) => item.schema === nsSet
-        );
+        const destinationSchema = destinationSchemas.find((item) => item.schema === nsSet);
         if (!destinationSchema) {
           destinationSchemas.push({ schema: nsSet, fields: [field] });
         } else {
@@ -392,10 +356,8 @@ function setupCSV() {
         csvToNodes(
           file,
           destinationSchemas.find(
-            (schema) =>
-              schema.schema ===
-              document.querySelector("#destinationSchema").value
-          ).fields
+            (schema) => schema.schema === document.querySelector("#destinationSchema").value,
+          ).fields,
         );
       });
       const controlsContainer = document.createElement("div");
@@ -445,15 +407,13 @@ function activateDropZone(e) {
   document.querySelector('.drop-zone input[type="file"]').click();
 }
 function getMapping() {
-  return Array.from(document.querySelectorAll("#connectorCanvas canvas")).map(
-    (c) => {
-      let from = document
-        .getElementById(c.getAttribute("fromNode"))
-        .querySelector("label").textContent;
-      let to = document.getElementById(c.getAttribute("toNode")).textContent;
-      return { field: from, mapsTo: to };
-    }
-  );
+  return Array.from(document.querySelectorAll("#connectorCanvas canvas")).map((c) => {
+    let from = document
+      .getElementById(c.getAttribute("fromNode"))
+      .querySelector("label").textContent;
+    let to = document.getElementById(c.getAttribute("toNode")).textContent;
+    return { field: from, mapsTo: to };
+  });
 }
 
 // Usage
@@ -469,16 +429,13 @@ const metdataMapperPopup = new Curate.ui.modals.curatePopup(
       p.style.display = "flex";
       p.style.justifyContent = "space-between";
       popup.querySelector(".config-main-options-container").appendChild(p);
-      p.querySelector("#metadata-mapper-dropzone").addEventListener(
-        "click",
-        (e) => {
-          activateDropZone(e);
-        }
-      );
+      p.querySelector("#metadata-mapper-dropzone").addEventListener("click", (e) => {
+        activateDropZone(e);
+      });
       setupCSV();
     },
     afterClosed: function () {},
-  }
+  },
 );
 
 // To spawn the popup

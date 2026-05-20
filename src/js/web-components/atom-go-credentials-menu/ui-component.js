@@ -7,9 +7,7 @@ export const atomGoConfigUI = (component) => html`
     <div class="single-panel-wrapper">
       <!-- Form Section -->
       <div class="form-section">
-        <div class="section-title">
-          ${icon(mdiCog)} AtoM Configuration
-        </div>
+        <div class="section-title">${icon(mdiCog)} AtoM Configuration</div>
 
         <div class="form-scroll-container">
           <!-- Details Category -->
@@ -88,18 +86,11 @@ export const atomGoConfigUI = (component) => html`
         </div>
 
         <div class="form-actions">
-          <md-filled-button
-            @click=${component.saveConfig}
-            ?disabled=${!component.canSave}
-          >
-            ${component.saveInProgress
-              ? html`<div class="spinner"></div>`
-              : ""}
+          <md-filled-button @click=${component.saveConfig} ?disabled=${!component.canSave}>
+            ${component.saveInProgress ? html`<div class="spinner"></div>` : ""}
             ${component.saveButtonText}
           </md-filled-button>
-          <md-outlined-button @click=${component.clearForm}>
-            Clear Form
-          </md-outlined-button>
+          <md-outlined-button @click=${component.clearForm}> Clear Form </md-outlined-button>
         </div>
       </div>
     </div>

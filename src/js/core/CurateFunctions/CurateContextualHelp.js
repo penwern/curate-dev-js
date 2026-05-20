@@ -1,16 +1,14 @@
-
-
 // Initialize a variable to hold the reference to the last right-clicked element
 let lastRightClickedElement = null;
 let page = window.location.pathname;
 let selection = null;
 
 const CurateContextualHelp = {
-    context:{
-        page,
-        lastRightClickedElement,
-        selection
-    }
+  context: {
+    page,
+    lastRightClickedElement,
+    selection,
+  },
 };
 
 function handleRightClick(event) {
@@ -23,6 +21,6 @@ function handleRightClick(event) {
 }
 
 // Add the event listener to the document
-window.addEventListener("load", ()=>document.addEventListener("mousedown", handleRightClick));
+window.addEventListener("load", () => document.addEventListener("mousedown", handleRightClick));
 
 export default CurateContextualHelp;

@@ -158,8 +158,7 @@ const CurateModalDock = (() => {
 
   function createDockEntry(id, labelText, iconClass, onRestore, ariaLabel) {
     ensureDock();
-    const displayLabel =
-      typeof labelText === "string" ? labelText.trim() : "";
+    const displayLabel = typeof labelText === "string" ? labelText.trim() : "";
     let accessibleLabel =
       typeof ariaLabel === "string" && ariaLabel.trim()
         ? ariaLabel.trim()
@@ -212,8 +211,7 @@ const CurateModalDock = (() => {
       iconClass: resolvedIcon,
       accessibleLabel,
       updateLabel(newLabel, newAriaLabel) {
-        const nextLabel =
-          typeof newLabel === "string" ? newLabel.trim() : "";
+        const nextLabel = typeof newLabel === "string" ? newLabel.trim() : "";
         labelSpan.textContent = nextLabel;
         labelSpan.hidden = !nextLabel;
 
@@ -333,22 +331,16 @@ const CurateUi = {
       const content = props.content;
       const buttonType = props.buttonType || "close";
       const minimizable = Boolean(props.minimizable);
-      let dockLabelText =
-        typeof props.minimizeLabel === "string"
-          ? props.minimizeLabel.trim()
-          : "";
+      let dockLabelText = typeof props.minimizeLabel === "string" ? props.minimizeLabel.trim() : "";
       let dockAriaLabel =
-        typeof props.minimizeAriaLabel === "string" &&
-        props.minimizeAriaLabel.trim()
+        typeof props.minimizeAriaLabel === "string" && props.minimizeAriaLabel.trim()
           ? props.minimizeAriaLabel.trim()
           : dockLabelText || title || "Modal";
       let dockIconClass = props.minimizeIcon || DEFAULT_DOCK_ICON_CLASS;
       const minimizeButtonText = props.minimizeButtonText || "Minimize";
       const modalId =
         props.id ||
-        `curate-modal-${Date.now().toString(36)}-${Math.random()
-          .toString(36)
-          .slice(2, 8)}`;
+        `curate-modal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
       const initialBadge = Number(props.badgeCount);
       let badgeCount = Number.isFinite(initialBadge) ? initialBadge : 0;
 
@@ -396,7 +388,7 @@ const CurateUi = {
           function (e) {
             clickAway(e, container);
           },
-          { once: true }
+          { once: true },
         );
 
         // Add event listener to close the popup when the user presses the Escape key
@@ -462,7 +454,7 @@ const CurateUi = {
           minimizeActionButton.type = "button";
           minimizeActionButton.classList.add(
             "config-modal-action-button",
-            "config-modal-minimize-button"
+            "config-modal-minimize-button",
           );
           minimizeActionButton.textContent = minimizeButtonText;
           minimizeActionButton.setAttribute("aria-label", "Minimize modal");
@@ -475,10 +467,7 @@ const CurateUi = {
         // Create buttons based on buttonType
         if (buttonType === "okCancel") {
           const okButton = document.createElement("button");
-          okButton.classList.add(
-            "config-modal-action-button",
-            "config-modal-ok-button"
-          );
+          okButton.classList.add("config-modal-action-button", "config-modal-ok-button");
           okButton.textContent = "OK";
           okButton.addEventListener("click", () => {
             onOk();
@@ -486,10 +475,7 @@ const CurateUi = {
           });
 
           const cancelButton = document.createElement("button");
-          cancelButton.classList.add(
-            "config-modal-action-button",
-            "config-modal-cancel-button"
-          );
+          cancelButton.classList.add("config-modal-action-button", "config-modal-cancel-button");
           cancelButton.textContent = "Cancel";
           cancelButton.addEventListener("click", () => {
             onCancel();
@@ -501,10 +487,7 @@ const CurateUi = {
         } else {
           // Default to 'close' button
           const closeButton = document.createElement("button");
-          closeButton.classList.add(
-            "config-modal-action-button",
-            "config-modal-close-button"
-          );
+          closeButton.classList.add("config-modal-action-button", "config-modal-close-button");
           closeButton.textContent = "Close";
           closeButton.addEventListener("click", () => {
             closePopup();
@@ -577,7 +560,7 @@ const CurateUi = {
               function (e) {
                 clickAway(e, containerElement);
               },
-              { once: true }
+              { once: true },
             );
           }
         }
@@ -595,7 +578,7 @@ const CurateUi = {
             dockLabelText,
             dockIconClass,
             restore,
-            dockAriaLabel
+            dockAriaLabel,
           );
         } else {
           CurateModalDock.updateLabel(modalId, dockLabelText, dockAriaLabel);
@@ -693,14 +676,3 @@ const CurateUi = {
   },
 };
 export default CurateUi;
-
-
-
-
-
-
-
-
-
-
-

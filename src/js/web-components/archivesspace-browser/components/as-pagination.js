@@ -129,7 +129,6 @@ class AsPagination extends LitElement {
                 ${startPage > 2 ? html`<span class="ellipsis">...</span>` : nothing}
               `
             : nothing}
-
           ${map(
             pages,
             (page) => html`
@@ -139,9 +138,8 @@ class AsPagination extends LitElement {
               >
                 ${page}
               </button>
-            `
+            `,
           )}
-
           ${endPage < this.totalPages
             ? html`
                 ${endPage < this.totalPages - 1 ? html`<span class="ellipsis">...</span>` : nothing}
@@ -172,7 +170,7 @@ class AsPagination extends LitElement {
         detail: { page },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }

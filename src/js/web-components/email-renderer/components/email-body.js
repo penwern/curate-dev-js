@@ -1,6 +1,6 @@
-﻿import { LitElement, html, css } from 'lit';
-import DOMPurify from 'dompurify';
-import { resolveInlineImage } from '../data/dataService.js';
+﻿import { LitElement, html, css } from "lit";
+import DOMPurify from "dompurify";
+import { resolveInlineImage } from "../data/dataService.js";
 import { imageIcon } from "../../utils/icons.js";
 
 export class EmailBody extends LitElement {
@@ -9,13 +9,13 @@ export class EmailBody extends LitElement {
     textContent: { type: String },
     attachments: { type: Array },
     hasExternalImages: { type: Boolean },
-    showExternalImages: { type: Boolean, state: true }
+    showExternalImages: { type: Boolean, state: true },
   };
 
   constructor() {
     super();
-    this.htmlContent = '';
-    this.textContent = '';
+    this.htmlContent = "";
+    this.textContent = "";
     this.attachments = [];
     this.hasExternalImages = false;
     this.showExternalImages = true;
@@ -89,7 +89,7 @@ export class EmailBody extends LitElement {
 
     .email-body-content.plain-text {
       white-space: pre-wrap;
-      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-family: "Roboto Mono", "Courier New", monospace;
       background: var(--md-sys-color-surface);
       border-radius: 12px;
       border: 1px solid var(--md-sys-color-outline-variant);
@@ -187,10 +187,14 @@ export class EmailBody extends LitElement {
         if (!item.contentId) {
           return false;
         }
-        return item.contentId.replace(/[<>]/g, '').trim() === contentId.replace(/[<>]/g, '').trim();
+        return item.contentId.replace(/[<>]/g, "").trim() === contentId.replace(/[<>]/g, "").trim();
       });
 
-      if (attachment && typeof attachment.path === 'string' && (attachment.path.startsWith('blob:') || attachment.path.startsWith('data:'))) {
+      if (
+        attachment &&
+        typeof attachment.path === "string" &&
+        (attachment.path.startsWith("blob:") || attachment.path.startsWith("data:"))
+      ) {
         result = result.replace(match[0], `src="${attachment.path}"`);
         continue;
       }
@@ -206,36 +210,75 @@ export class EmailBody extends LitElement {
 
   async _getSanitizedHtml() {
     if (!this.htmlContent) {
-      return '';
+      return "";
     }
 
     const htmlWithImages = await this._resolveInlineImages(this.htmlContent);
 
     const config = {
       ALLOWED_TAGS: [
-        'a', 'b', 'i', 'u', 'strong', 'em', 'p', 'br', 'div', 'span',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
-        'table', 'thead', 'tbody', 'tr', 'th', 'td',
-        'img', 'hr'
+        "a",
+        "b",
+        "i",
+        "u",
+        "strong",
+        "em",
+        "p",
+        "br",
+        "div",
+        "span",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "ul",
+        "ol",
+        "li",
+        "blockquote",
+        "pre",
+        "code",
+        "table",
+        "thead",
+        "tbody",
+        "tr",
+        "th",
+        "td",
+        "img",
+        "hr",
       ],
       ALLOWED_ATTR: [
-        'href', 'src', 'alt', 'title', 'class', 'id',
-        'width', 'height', 'style', 'colspan', 'rowspan'
+        "href",
+        "src",
+        "alt",
+        "title",
+        "class",
+        "id",
+        "width",
+        "height",
+        "style",
+        "colspan",
+        "rowspan",
       ],
-      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|data|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+      ALLOWED_URI_REGEXP:
+        /^(?:(?:(?:f|ht)tps?|mailto|tel|data|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     };
 
     return DOMPurify.sanitize(htmlWithImages, config);
   }
 
   async updated(changedProperties) {
-    if (changedProperties.has('hasExternalImages')) {
+    if (changedProperties.has("hasExternalImages")) {
       this.showExternalImages = !this.hasExternalImages;
     }
 
-    if (changedProperties.has('htmlContent') || changedProperties.has('attachments') || changedProperties.has('showExternalImages')) {
-      const contentDiv = this.shadowRoot.querySelector('.email-body-content');
+    if (
+      changedProperties.has("htmlContent") ||
+      changedProperties.has("attachments") ||
+      changedProperties.has("showExternalImages")
+    ) {
+      const contentDiv = this.shadowRoot.querySelector(".email-body-content");
       if (contentDiv && this.htmlContent && this.htmlContent.trim()) {
         const sanitized = await this._getSanitizedHtml();
         contentDiv.innerHTML = sanitized;
@@ -248,23 +291,24 @@ export class EmailBody extends LitElement {
     const hasText = this.textContent && this.textContent.trim().length > 0;
 
     return html`
-      ${this.hasExternalImages && !this.showExternalImages ? html`
-        <div class="external-images-warning">
-          <span class="icon">${imageIcon}</span>
-          <span>External images are blocked for your privacy.</span>
-          <button @click=${() => this.showExternalImages = true}>Dismiss</button>
-        </div>
-      ` : ''}
-
-      ${hasHtml ? html`
-        <div class="email-body-content"></div>
-      ` : html`
-        <div class="email-body-content plain-text">
-          ${hasText ? this.textContent : 'No content available'}
-        </div>
-      `}
+      ${this.hasExternalImages && !this.showExternalImages
+        ? html`
+            <div class="external-images-warning">
+              <span class="icon">${imageIcon}</span>
+              <span>External images are blocked for your privacy.</span>
+              <button @click=${() => (this.showExternalImages = true)}>Dismiss</button>
+            </div>
+          `
+        : ""}
+      ${hasHtml
+        ? html` <div class="email-body-content"></div> `
+        : html`
+            <div class="email-body-content plain-text">
+              ${hasText ? this.textContent : "No content available"}
+            </div>
+          `}
     `;
   }
 }
 
-customElements.define('email-body', EmailBody);
+customElements.define("email-body", EmailBody);
