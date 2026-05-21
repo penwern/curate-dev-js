@@ -105,7 +105,7 @@ const CurateRouter = (function () {
     });
   }
 
-  function handlePopState(event) {
+  function handlePopState(_event) {
     // Use requestAnimationFrame to ensure the URL has fully updated and DOM is ready
     requestAnimationFrame(() => {
       checkCurrentRoute();
@@ -357,7 +357,7 @@ const CurateRouter = (function () {
     }
   }
 
-  function navigateToRoute(route, params, updateHistory = true) {
+  function navigateToRoute(route, params, _updateHistory = true) {
     try {
       if (currentPage) {
         closePage();
@@ -628,7 +628,7 @@ const CurateRouter = (function () {
     ) {
       try {
         originalContent.activeElement.focus();
-      } catch (e) {
+      } catch (_e) {
         console.warn("CurateRouter: Could not restore focus");
       }
     }

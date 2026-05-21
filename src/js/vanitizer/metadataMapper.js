@@ -55,8 +55,6 @@ function connectElements(element1, element2, instantDraw = false) {
     drawLineAnimated(ctx, rect1, rect2);
   }
 
-  // Debounce scroll event handler to approximately 30 times per second
-  let timeout;
   cont.addEventListener("scroll", function () {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = requestAnimationFrame(function () {
@@ -172,13 +170,6 @@ function connectElements(element1, element2, instantDraw = false) {
     // Redraw line with updated positions
     drawLineInstantly(ctx, rect1, rect2);
   }
-  function getCenterPointFromBoundRect(rect) {
-    // Calculate the center point of the bounding box
-    var centerX = rect.left + rect.width / 2;
-    var centerY = rect.top + rect.height / 2;
-
-    return { x: centerX, y: centerY };
-  }
 }
 
 async function csvToNodes(csvFile, destinationMap) {
@@ -236,7 +227,7 @@ async function csvToNodes(csvFile, destinationMap) {
       deleteConnections.style.color = "var(--md-sys-color-error)";
       deleteConnections.style.cursor = "pointer";
       deleteConnections.style.visibility = "hidden";
-      deleteConnections.addEventListener("click", (e) => {
+      deleteConnections.addEventListener("click", () => {
         document.querySelectorAll("#connectorCanvas canvas").forEach((c) => {
           if (c.getAttribute("fromNode") == sourceItem.id) {
             document
@@ -259,7 +250,7 @@ async function csvToNodes(csvFile, destinationMap) {
       nodeConnector.setAttribute("forNode", sourceItem.id);
       nodeConnector.textContent = "+";
       nodeConnector.style.cursor = "pointer";
-      nodeConnector.addEventListener("click", (e) => {
+      nodeConnector.addEventListener("click", () => {
         document.querySelectorAll("#sourceList .nodeConnector").forEach((n) => {
           if (n.classList.contains("chooseConnection")) {
             n.classList.remove("chooseConnection");
@@ -279,14 +270,14 @@ async function csvToNodes(csvFile, destinationMap) {
     });
 
     // Create nodes for destination list based on destination map
-    Object.entries(destinationMap).forEach(([key, value], index) => {
+    Object.entries(destinationMap).forEach(([_key, value], index) => {
       const destinationNode = document.createElement("div");
       destinationNode.classList.add("node");
       const nodeConnector = document.createElement("span");
       nodeConnector.classList.add("nodeConnector");
       nodeConnector.style.cursor = "pointer";
       nodeConnector.setAttribute("forNode", "node_" + (columnHeadings.length + index + 1));
-      nodeConnector.addEventListener("click", (e) => {
+      nodeConnector.addEventListener("click", () => {
         if (nodeConnector.classList.contains("connected")) {
           return;
         }
@@ -333,7 +324,6 @@ function setupCSV() {
         if (nsSet !== nsSet.toUpperCase() || nsSet === "IMPORT" || nsSet === "EXPORT") {
           return;
         }
-        const label = obj.Label.replace(/ /g, ""); // remove spaces from label for field name
         const field = {
           field: `${obj.Label}`,
           props: {},
@@ -386,7 +376,7 @@ function setupCSV() {
       genIcon.classList.add("mdi");
       genIcon.classList.add("mdi-format-list-checks");
       generateMapButton.textContent = "Generate Map";
-      generateMapButton.addEventListener("click", (e) => {
+      generateMapButton.addEventListener("click", () => {
         console.log(getMapping());
       });
       generateMapButton.prepend(genIcon);

@@ -1,7 +1,7 @@
 const getMetaItem = (item) => {
   try {
     return pydio._dataModel._selectedNodes[0]._metadata.get(item) || null;
-  } catch (err) {
+  } catch (_err) {
     return null;
   }
 };
@@ -77,7 +77,6 @@ function addFileInfo(fileInfoPanel) {
   if (tag.endsWith("-1")) {
     tag = "Local hash";
   }
-  var mime = getMetaItem("mime");
   const scanTag = getMetaItem("usermeta-virus-scan");
   const firstScanDate = getMetaItem("usermeta-virus-scan-passed-date");
   var status = getQuarantineStatus(...scans, scanTag, firstScanDate);
@@ -90,21 +89,20 @@ function addFileInfo(fileInfoPanel) {
     if (pid !== "File has not been characterised") {
       newinfodivPronom.style.cursor = "pointer";
       newinfodivPronom.style.transition = "all 0.2s ease-in-out";
-      newinfodivPronom.addEventListener("mouseenter", (e) => {
+      newinfodivPronom.addEventListener("mouseenter", () => {
         newinfodivPronom.style.textDecoration = "underline";
         newinfodivPronom.style.backgroundColor = "rgba(153, 153, 153, 0.2)";
       });
-      newinfodivPronom.addEventListener("mouseleave", (e) => {
+      newinfodivPronom.addEventListener("mouseleave", () => {
         newinfodivPronom.style.textDecoration = "none";
         newinfodivPronom.style.backgroundColor = "transparent";
       });
-      newinfodivPronom.addEventListener("click", (e) => {
+      newinfodivPronom.addEventListener("click", () => {
         window.open(`https://www.nationalarchives.gov.uk/pronom/${pid}`);
       });
     }
     let newinfodivScan = genNewRow("First virus scan result", scans[0]);
     let newinfodivScan2 = genNewRow("Second virus scan result", scans[1]);
-    let newinfodivMime = genNewRow("Mimetype", mime);
     let newinfodivStatus = genNewRow("Status", status);
 
     fileInfoPanel.querySelector(".panelContent").childNodes.forEach((row) => {
@@ -143,7 +141,7 @@ function addFileInfo(fileInfoPanel) {
   }, 5);
 }
 const selectHandler = (e, fileInfoPanel) => {
-  var fileInfoPanel = Array.from(document.querySelectorAll(".panelCard")).find((el) =>
+  fileInfoPanel = Array.from(document.querySelectorAll(".panelCard")).find((el) =>
     el.textContent.includes("File Info"),
   );
 
@@ -170,7 +168,7 @@ const processFileInfoPanel = (fileInfoPanel) => {
         selectHandler(e);
       });
     }
-    fileInfoPanel.firstElementChild.addEventListener("click", (e) => {
+    fileInfoPanel.firstElementChild.addEventListener("click", () => {
       if (
         fileInfoPanel.querySelector('[class*="mdi-chevron-"]').classList.contains("mdi-chevron-up")
       ) {
@@ -192,7 +190,7 @@ const processFileInfoPanel = (fileInfoPanel) => {
     return;
   }
 };
-const fileInfoObserver = new MutationObserver((mutationsList, observer) => {
+const fileInfoObserver = new MutationObserver((mutationsList, _observer) => {
   for (const mutation of mutationsList) {
     if (mutation.type === "childList") {
       for (const node of mutation.addedNodes) {

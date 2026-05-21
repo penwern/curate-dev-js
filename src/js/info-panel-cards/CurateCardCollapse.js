@@ -44,7 +44,7 @@ function useCurateCollapse(storageKey, defaultOpen = true) {
       const raw = window.localStorage.getItem(storageKey);
       if (raw === null) return defaultOpen;
       return raw !== "false";
-    } catch (e) {
+    } catch (_e) {
       return defaultOpen;
     }
   });
@@ -52,7 +52,9 @@ function useCurateCollapse(storageKey, defaultOpen = true) {
   React.useEffect(() => {
     try {
       window.localStorage.setItem(storageKey, String(open));
-    } catch (e) {}
+    } catch (_e) {
+      // noop — localStorage may be unavailable (private browsing); non-critical
+    }
   }, [open, storageKey]);
 
   return [open, setOpen];
@@ -81,7 +83,9 @@ function readPinState(marker) {
       }
       cur = cur.return;
     }
-  } catch (e) {}
+  } catch (_e) {
+    // noop — React fiber traversal may fail in non-standard environments; fall through to null return
+  }
   return { currentPin: null, setColumnPin: null, identifier: null };
 }
 

@@ -1,38 +1,4 @@
-async function createTree(body) {
-  try {
-    const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
-    const response = await fetch("https://" + window.location.hostname + "/a/tree/create", {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "accept-language": navigator.language + ",en-GB,en-US;q=0.9,en;q=0.8",
-        authorization: "Bearer " + token,
-        "content-type": "application/json",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "x-pydio-language": pydio.user.getPreference("lang"),
-      },
-      referrer: window.location.href,
-      referrerPolicy: "strict-origin-when-cross-origin",
-      body: JSON.stringify(body),
-      mode: "cors",
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const serverNodes = await response.json();
-    // Here we'll do the UUID association
-    return serverNodes;
-  } catch (error) {
-    console.error("Error creating tree:", error);
-    throw error;
-  }
-}
-
+/* global Papa, he */
 async function mapISADGToNodes(csvData) {
   const results = Papa.parse(csvData, {
     header: true, // Indicates your CSV has a header row
@@ -96,7 +62,7 @@ async function handleCSVData(csvData) {
     const jsonData = await mapISADGToNodes(csvData);
     const treeData = {
       Nodes: jsonData.Nodes.map((obj) => {
-        const { IsadMetadata, RelationIds, ...rest } = obj; // Destructuring and rest syntax
+        const { IsadMetadata: _IsadMetadata, RelationIds: _RelationIds, ...rest } = obj; // Destructuring to omit these fields from rest
         return rest;
       }),
     };
@@ -187,7 +153,7 @@ async function handleCSVData(csvData) {
 
 async function getCsvData(node) {
   try {
-    const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
+    await PydioApi._PydioRestClient.getOrUpdateJwt(); // ensure JWT is fresh before presigned URL request
     const downloadUrl = await pydio.ApiClient.buildPresignedGetUrl(node);
     const response = await fetch(downloadUrl);
 
@@ -203,7 +169,7 @@ async function getCsvData(node) {
   }
 }
 
-async function handleImportCsv(e) {
+async function handleImportCsv(_e) {
   var selectedNodes = pydio._dataModel._selectedNodes;
   if (!selectedNodes || selectedNodes.length > 1) {
     window.alert("You must select only one import document");

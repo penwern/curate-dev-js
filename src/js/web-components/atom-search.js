@@ -214,8 +214,6 @@ class AtoMSearchInterface extends HTMLElement {
     const delta = 2;
     const left = currentPage - delta;
     const right = currentPage + delta + 1;
-    let l;
-
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= left && i < right)) {
         range.push(i);

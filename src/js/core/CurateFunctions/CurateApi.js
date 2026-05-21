@@ -116,7 +116,6 @@ const CurateApi = {
 
       // Step 1: Create the file
       const promises = nodes.nodes.map(async (node) => {
-        const filename = node.path.split("/").pop(); // Extract filename from path
         const createData = await Curate.api.fetchCurate("/a/tree/create", "POST", {
           Nodes: [{ Path: node.path, Type: "LEAF" }],
           TemplateUUID: "",
@@ -129,18 +128,14 @@ const CurateApi = {
         }); // Use the path of the created file
 
         const uuid = getData.Nodes[0].Uuid; // UUID of the created file
-        return { filename, uuid, node };
+        return { uuid, node };
       });
 
       const uuids = await Promise.all(promises);
       // Step 2: Update nodes
-      for (const { filename, uuid, node } of uuids) {
+      for (const { uuid, node } of uuids) {
         const updatedObject = await convertObject(node, uuid);
-        const updateResponse = await Curate.api.fetchCurate(
-          "/a/user-meta/update",
-          "PUT",
-          updatedObject,
-        );
+        await Curate.api.fetchCurate("/a/user-meta/update", "PUT", updatedObject);
       }
     },
     /**
@@ -154,7 +149,7 @@ const CurateApi = {
         throw new Error("No node provided");
       }
       try {
-        const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
+        await PydioApi._PydioRestClient.getOrUpdateJwt(); // ensure JWT is fresh before presigned URL request
         const downloadUrl = await pydio.ApiClient.buildPresignedGetUrl(node);
         const response = await fetch(downloadUrl);
 

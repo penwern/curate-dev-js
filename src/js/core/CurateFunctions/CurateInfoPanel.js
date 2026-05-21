@@ -23,7 +23,7 @@ function _registerWithSystem(namespace) {
     moduleExports.default = window[namespace];
     window.System.set(namespace, window.System.newModule(moduleExports));
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -79,7 +79,7 @@ function _getCurrentMimeCategory() {
     if (node.isRoot && node.isRoot()) return "ajxp_root_node";
     if (node.isLeaf && node.isLeaf()) return "generic_file";
     return "generic_dir";
-  } catch (e) {
+  } catch (_e) {
     return "generic_file";
   }
 }
@@ -101,7 +101,7 @@ function _mergeCards(templates) {
         const nodes = window.pydio._dataModel._selectedNodes;
         const node = nodes && nodes[0];
         if (!card.condition(node, nodes)) continue;
-      } catch (e) {
+      } catch (_e) {
         continue;
       }
     }
@@ -225,7 +225,7 @@ const CurateInfoPanel = {
   getInfoPanelCard() {
     try {
       return window.PydioWorkspaces.default.InfoPanelCard;
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   },

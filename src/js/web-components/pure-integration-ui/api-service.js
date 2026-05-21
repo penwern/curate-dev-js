@@ -254,7 +254,7 @@ class ApiService {
   }
 
   // Legacy single mapping save (use bulk instead)
-  async saveMetadataMapping(pureField, curateField, transformationLogic = null) {
+  async saveMetadataMapping(pureField, curateField, _transformationLogic = null) {
     const mappings = {};
     if (curateField) {
       mappings[pureField] = {

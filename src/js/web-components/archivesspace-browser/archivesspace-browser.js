@@ -45,7 +45,6 @@ import {
 
 // Import icons
 import { databaseIcon, layersIcon, pinIcon } from "../utils/icons.js";
-import CurateApi from "../../core/CurateFunctions/CurateApi.js";
 
 /**
  * Main ArchivesSpace Browser component.

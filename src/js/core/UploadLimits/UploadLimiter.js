@@ -1,3 +1,4 @@
+/* global maxUploadFiles */
 import eventDelegator from "../CurateFunctions/CurateEvents.js";
 import CurateUi from "../CurateFunctions/CurateUi.js";
 
@@ -12,7 +13,7 @@ function getMaxUploadFiles() {
   let configuredLimit;
   try {
     configuredLimit = maxUploadFiles; // Will throw ReferenceError if not declared
-  } catch (e) {
+  } catch (_e) {
     configuredLimit = undefined;
   }
   if (typeof configuredLimit === "number" && configuredLimit > 0) {
@@ -187,7 +188,7 @@ function monitorUploadProgress(store) {
           enableFileInUI(relativePath);
         }
       },
-      (item) => true,
+      (_item) => true,
       "file",
     );
   });

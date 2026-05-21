@@ -1,3 +1,4 @@
+/* global importScripts, SparkMD5 */
 // Load the bundled spark-md5 library
 importScripts("/spark-md5.js");
 
@@ -55,9 +56,6 @@ const calculateMultipartChecksum = (file, partSize) =>
 
 const incrementalMD5 = (file) =>
   new Promise((resolve, reject) => {
-    var loaded = 0;
-    var startTime = performance.now();
-    var tSize = file.size;
     const fileReader = new FileReader();
     const spark = new SparkMD5.ArrayBuffer();
     const chunkSize = 2097152; // Read in chunks of 2MB
@@ -73,20 +71,6 @@ const incrementalMD5 = (file) =>
         resolve(spark.end()); // Compute hash
       }
     };
-
-    fileReader.addEventListener("progress", (event) => {
-      loaded += event.loaded;
-      let pE = Math.round((loaded / tSize) * 100);
-      let rS = pE + "%";
-      // console.log(rS)
-    });
-
-    fileReader.addEventListener("loadend", (event) => {
-      if (event.total > 0) {
-        var endTime = performance.now();
-        // console.log(`Took ${endTime - startTime} milliseconds`)
-      }
-    });
 
     fileReader.onerror = () => reject(fileReader.error);
 

@@ -1,9 +1,10 @@
+/* global AWS */
 function createPresignedDownloadUrl(path) {
   return new Promise((resolve, reject) => {
     PydioApi.getRestClient()
       .getOrUpdateJwt()
       .then((jwt) => {
-        PydioApi._PydioClient.buildPresignedGetUrl(pydio._dataModel._selectedNodes[0]).then((e) => {
+        PydioApi._PydioClient.buildPresignedGetUrl(pydio._dataModel._selectedNodes[0]).then(() => {
           AWS.config.update({
             accessKeyId: "gateway",
             secretAccessKey: "gatewaysecret",
@@ -30,7 +31,7 @@ function createPresignedDownloadUrl(path) {
 
 PydioApi.getRestClient()
   .getOrUpdateJwt()
-  .then((jwt) => {
+  .then(() => {
     var paths = pydio._dataModel._selectedNodes.map(
       (node) => Curate.workspaces.getOpenWorkspace() + node._path,
     );

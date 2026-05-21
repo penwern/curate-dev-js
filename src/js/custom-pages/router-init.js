@@ -13,7 +13,7 @@ function initializeRouter() {
   });
 
   // Listen for route restoration events from RouteProtection module
-  window.addEventListener("curate-route-restored", (event) => {
+  window.addEventListener("curate-route-restored", () => {
     // Give the router a moment to be fully initialized
     setTimeout(() => {
       Curate.router.checkRoute();

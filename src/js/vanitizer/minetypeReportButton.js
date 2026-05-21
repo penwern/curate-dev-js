@@ -1,19 +1,14 @@
+/* global Swal, Chart, MimeChart */
 var lbs = [];
 var dats = [];
 var tokenP;
 let counter = 0;
-let lastcount;
-let noChanges = 0;
-let numChecks = 0;
 var uniquetypes = [];
 var nooftypes = {};
-var sizeTypes = {};
 let repSize = 0;
-let lastRep = 0;
 let re = /(?:\.([^.]+))?$/;
 let glob = [];
 var tempy = [];
-var dataarr = [];
 
 function rBadMeta(inputArr) {
   for (var c in inputArr.MetaStore) {
@@ -29,7 +24,7 @@ function rBadMeta(inputArr) {
       inputArr.MetaStore.mime = "Directory";
     }
   }
-  if (inputArr.hasOwnProperty("Type") && inputArr.Type == "COLLECTION") {
+  if (Object.hasOwn(inputArr, "Type") && inputArr.Type == "COLLECTION") {
     inputArr.MetaStore.mime = "Directory";
   }
   if (inputArr.MetaStore.mime == undefined) {
@@ -112,8 +107,6 @@ function getFirstLayer(tokenvar, jsn) {
 function getLayer(tokenvar, jsn) {
   loadspinner.style.display = "block";
   let u = window.location.origin + "/a/meta/bulk/get";
-  var metaArr = [];
-  var pArr = [];
   var bReq = new XMLHttpRequest();
   bReq.addEventListener("load", bListener);
   bReq.open("POST", u);
@@ -127,17 +120,18 @@ function selectionToPaths(rec) {
   var appendage;
   var nodeList = [];
   selectedNodes.forEach(function (node) {
+    var tpath;
     if (!node._isLeaf && rec == 1) {
       //if the node is a directory and recursive mode is enabled make it's search recursive
       //nodeList.push("appraisal-space"+node._path)
       appendage = "/*";
-      var tpath = Curate.workspaces.getOpenWorkspace() + node._path + appendage;
+      tpath = Curate.workspaces.getOpenWorkspace() + node._path + appendage;
       nodeList.push(tpath); //add node path to array
     } else {
       appendage = "";
     }
     if (rec !== 1) {
-      var tpath = Curate.workspaces.getOpenWorkspace() + node._path + appendage;
+      tpath = Curate.workspaces.getOpenWorkspace() + node._path + appendage;
       nodeList.push(tpath); //add node path to array
     }
   });
@@ -153,16 +147,6 @@ function buildJsn(nodeList) {
   return jsnBody;
 }
 
-function f(array, value) {
-  var n = 0;
-  for (i = 0; i < array.length; i++) {
-    if (array[i] == value) {
-      n++;
-    }
-  }
-  return n;
-}
-
 function createStringArray(arr, prop) {
   var result = [];
   for (var i = 0; i < arr.length; i += 1) {
@@ -170,23 +154,6 @@ function createStringArray(arr, prop) {
   }
   return result;
 }
-function check() {
-  if (lastcount == counter && counter > 0) {
-    if (repSize == lastRep) {
-      noChanges = noChanges + (2 - repSize / 1000);
-    }
-
-    if (noChanges >= 15) {
-    }
-  } else {
-    noChanges = 0;
-  }
-
-  lastcount = counter;
-  lastRep = repSize;
-  numChecks = numChecks + 1;
-}
-
 function getty() {
   var grapharr = [];
   document.querySelector(
@@ -196,16 +163,12 @@ function getty() {
   for (var i in grapharr) {
     delete grapharr[i].filename;
   }
-  var temp = createStringArray(grapharr, "mime");
-  let tarr = [...new Set(temp)];
-
   for (var type in grapharr) {
     if (!uniquetypes.includes(grapharr[type].mime)) {
       uniquetypes.push(grapharr[type].mime);
     }
     //nooftypes.push(f(grapharr, uniquetypes[type]))
     var numOfTrue = 0;
-    var tS = 0;
     for (var studentAge of grapharr) {
       if (studentAge.mime == grapharr[type].mime) {
         numOfTrue++;
@@ -215,8 +178,6 @@ function getty() {
       nooftypes[grapharr[type].mime] = numOfTrue;
     }
   }
-  var combgraphobj = {};
-  combgraphobj = Object.fromEntries(uniquetypes.map((_, i) => [uniquetypes[i], nooftypes[i]]));
   var lA = Object.keys(nooftypes);
   for (let t in lA) {
     lA[t] = lA[t] + ":" + grapharr[t].Size;
@@ -262,7 +223,6 @@ function dlCSV() {
 }
 
 function loadc() {
-  var guesstime = window.pydio._dataModel._selectedNodes;
   var firstLayerJson = buildJsn(selectionToPaths(0));
   var jsnBody = buildJsn(selectionToPaths(1));
 
@@ -287,7 +247,7 @@ function waitForElm(selector) {
       return resolve(document.querySelector(selector));
     }
 
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver((_mutations) => {
       if (document.querySelector(selector)) {
         resolve(document.querySelector(selector));
         observer.disconnect();
@@ -346,7 +306,7 @@ window.colourArray = [
   "rosybrown",
   "salmon",
 ];
-window.colourArray.sort((a, b) => 0.5 - Math.random());
+window.colourArray.sort(() => 0.5 - Math.random());
 var displaycanv = document.createElement("canvas");
 displaycanv.id = "displaycanv";
 displaycanv.style.cssText = "width: 650px height: 650px !important";
@@ -358,7 +318,7 @@ loadspinner.style.display = "none";
 loadspinner.style.position = "relative";
 loadspinner.style.top = "-73px";
 loadspinner.style.left = "-20px";
-waitForElm("#displaycanv").then((elm) => {
+waitForElm("#displaycanv").then(() => {
   var ctx = document.querySelector("#displaycanv").getContext("2d");
   lbs = [1];
   dats = [1];
@@ -368,7 +328,7 @@ waitForElm("#displaycanv").then((elm) => {
       labels: lbs,
       datasets: [
         {
-          backgroundColor: colourArray,
+          backgroundColor: window.colourArray,
           data: dats,
         },
       ],

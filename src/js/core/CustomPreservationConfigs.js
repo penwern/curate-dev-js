@@ -32,7 +32,7 @@ async function submitPreservationRequest(configId) {
       }
       return response.json();
     })
-    .then((data) => {
+    .then(() => {
       // Handle the successful response data here
       console.info("Preservation config initiated successfully");
     })
@@ -128,10 +128,10 @@ function createDivBesideElement(targetElement, content, childItems) {
   noConfigs.addEventListener("mouseleave", (e) => {
     e.target.style.background = "none";
   });
-  noConfigs.addEventListener("click", (e) => {
+  noConfigs.addEventListener("click", () => {
     document.querySelector("#preservationConfigsSubMenu").remove();
 
-    const preservationConfigsPopup = new Curate.ui.modals.curatePopup(
+    new Curate.ui.modals.curatePopup(
       { title: "Preservation Configs" },
       {
         afterLoaded: (popup) => {
@@ -152,7 +152,8 @@ function createDivBesideElement(targetElement, content, childItems) {
   const distanceFromLeftEdge = rect2.left;
   const distanceFromRightEdge = window.innerWidth - rect2.right;
   var newTop;
-  var newLeft;
+  var newLeft; // eslint-disable-line no-unused-vars -- reserved for left-positioned variant
+  var newRight;
   // Compare the distances and determine the closest edge
   if (distanceFromLeftEdge < distanceFromRightEdge) {
     newTop = rect2.top;
@@ -209,8 +210,8 @@ function addPreservationWorkflows(menu) {
         const placedDiv = document.querySelector("#preservationConfigDropdown");
         const clickCodes = [1, 3];
 
-        document.addEventListener("mousedown", (e) => {}, { once: true });
-        placedDiv.addEventListener("click", (e) => {
+        document.addEventListener("mousedown", () => {}, { once: true });
+        placedDiv.addEventListener("click", () => {
           const content =
             '<div style="color: var(--md-sys-color-inverse-surface); background-color: transparent; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; box-sizing: border-box; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px; border-radius: 20px; position: fixed; z-index: 2100; opacity: 1; transform: scale(1, 1); transform-origin: left top; max-height: 963px; overflow-y: auto;"><div style="max-height: 100%; overflow-y: auto; transform: scaleX(1); opacity: 1; transform-origin: left top; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div style="opacity: 1; transform: scaleY(1); transform-origin: left top; transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div role="presentation" style="z-index: 1000; position: relative; width: 192px;max-height:10em;"><div role="menu" style="padding: 16px 0px; display: table-cell; user-select: none; width: 192px;"></div></div></div></div></div>';
           const subMenuDiv = createDivBesideElement(placedDiv, content, savedConfigs); //create submenu
@@ -274,7 +275,7 @@ function handleMutations(e) {
   });
 }
 
-window.addEventListener("load", (e) => {
+window.addEventListener("load", () => {
   (async function () {
     const waitForGlobalVariable = (varName, interval = 50) => {
       return new Promise((resolve) => {
@@ -288,7 +289,7 @@ window.addEventListener("load", (e) => {
     };
 
     try {
-      const glob = await waitForGlobalVariable("PydioApi");
+      await waitForGlobalVariable("PydioApi");
       getPreservationConfigs();
     } catch (error) {
       console.error("An error occurred:", error);
