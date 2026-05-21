@@ -66,6 +66,7 @@ async function pL() {
     await waitFor(100);
     let t = document.querySelector("#workspace_toolbar");
     if (t == null) {
+      // noop — toolbar not yet rendered; wait and retry
     } else {
       v = 0;
       let u = window.location.href;
@@ -98,10 +99,11 @@ async function pL() {
           let msg1 =
             "Welcome to Curate, here you can view or download files shared with you by your collaborators.";
           let msg2 = " You can also create folders and upload new files.";
+          var msg;
           if (uP == false) {
-            var msg = msg1 + msg2;
+            msg = msg1 + msg2;
           } else {
-            var msg = msg1;
+            msg = msg1;
           }
           sugIPrompt(msg);
         }
@@ -124,7 +126,9 @@ function oMc() {
           null,
         ).singleNodeValue;
         matchingElement.parentElement.parentElement.parentElement.parentElement.remove();
-      } catch (e) {}
+      } catch (_e) {
+        // noop — element may not exist on this page layout; safe to ignore
+      }
     }
   }, 1);
 }
@@ -133,7 +137,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let sF;
   try {
     sF = document.querySelector("#pydio_shared_folder");
-  } catch (nSF) {}
+  } catch (_nSF) {
+    // noop — querySelector throws only if document is not ready; safe to ignore
+  }
   if (sF) {
     setTimeout(function () {
       document.querySelector(".toolbars-button-menu").addEventListener("click", oMc);

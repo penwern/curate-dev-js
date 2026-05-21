@@ -1,7 +1,7 @@
 function convertJSON(inputJSON) {
   const nodePaths = [];
   for (const key in inputJSON) {
-    if (inputJSON.hasOwnProperty(key)) {
+    if (Object.hasOwn(inputJSON, key)) {
       nodePaths.push(`quarantine/${key}`);
     }
   }
@@ -12,7 +12,7 @@ function compareChecksum(inputJSON, responseJSON) {
   const failedResults = {};
 
   for (const key in inputJSON) {
-    if (inputJSON.hasOwnProperty(key)) {
+    if (Object.hasOwn(inputJSON, key)) {
       const path = `quarantine/${key}`;
       const checksum = inputJSON[key];
 
@@ -39,7 +39,7 @@ const result = convertJSON(manifestData);
 console.log(result);
 Curate.api.fetchCurate("/a/tree/stats", "POST", result).then((result) => {
   // Call the function with input and response JSON
-  const { successfulResults, failedResults } = compareChecksum(jsonData, result);
+  const { successfulResults, failedResults } = compareChecksum(manifestData, result);
   console.log("Successful results:", successfulResults);
   console.log("Failed results:", failedResults);
   //todo emulate webuploader style feedback

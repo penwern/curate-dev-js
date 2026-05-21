@@ -262,7 +262,7 @@ export class EmailBody extends LitElement {
         "rowspan",
       ],
       ALLOWED_URI_REGEXP:
-        /^(?:(?:(?:f|ht)tps?|mailto|tel|data|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+        /^(?:(?:(?:f|ht)tps?|mailto|tel|data|blob):|[^a-z]|[a-z+.-]+(?:[^a-z+.:-]|$))/i,
     };
 
     return DOMPurify.sanitize(htmlWithImages, config);

@@ -1,3 +1,4 @@
+/* global pydioBootstrap */
 const systemName = window.curateDistrobution || "Soteria+"; // could be replaced with something that figures out whether we're in Soteria+ or Curate
 
 const welcomeMessage = () => {

@@ -3,7 +3,7 @@ import { LitElement, html, css } from "lit";
 import { when } from "lit/directives/when.js";
 import ApiService from "./api-service.js";
 
-import { tuneIcon, dbImportIcon, historyIcon, chartLineIcon, sitemapIcon } from "../utils/icons.js";
+import { dbImportIcon, historyIcon, chartLineIcon, sitemapIcon } from "../utils/icons.js";
 
 // Material Web Components
 import "@material/web/tabs/tabs.js";
@@ -619,7 +619,7 @@ class PureIntegrationInterface extends LitElement {
         month: "short",
         day: "numeric",
       });
-    } catch (error) {
+    } catch (_error) {
       return "Unknown";
     }
   }

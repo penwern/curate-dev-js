@@ -1,5 +1,4 @@
 import { LitElement, html, css, nothing } from "lit";
-import { map } from "lit/directives/map.js";
 
 /**
  * Breadcrumb navigation component.

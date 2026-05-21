@@ -925,7 +925,7 @@ export class EmailViewer extends LitElement {
     if (!emailId) {
       return null;
     }
-    for (const [threadId, emailIds] of Object.entries(this.threads)) {
+    for (const [_threadId, emailIds] of Object.entries(this.threads)) {
       if (emailIds.includes(emailId)) {
         return emailIds;
       }

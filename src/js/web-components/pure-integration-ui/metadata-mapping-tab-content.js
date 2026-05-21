@@ -27,14 +27,11 @@ import "@material/web/select/outlined-select.js";
 import {
   checkCircleIcon,
   checkboxBlankCircleIcon,
-  lockIcon,
   searchIcon,
   blockIcon,
   cachedIcon,
   plusIcon,
   deleteIcon,
-  pencilIcon,
-  playIcon,
 } from "../utils/icons.js";
 
 class MetadataMappingTabContent extends LitElement {

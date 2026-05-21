@@ -9,7 +9,7 @@ import "@material/web/switch/switch.js";
 import "@material/web/slider/slider.js";
 import "@material/web/divider/divider.js";
 import "@material/web/iconbutton/icon-button.js";
-import { mdiStar, mdiStarOutline, mdiDelete, mdiCog } from "@mdi/js";
+import { mdiStar, mdiStarOutline, mdiCog } from "@mdi/js";
 import { PreservationConfigAPI } from "./api-client.js";
 import { icon } from "../utils/icons.js";
 import { styles } from "./styles.js";

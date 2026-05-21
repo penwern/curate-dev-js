@@ -36,7 +36,7 @@ function createCuratePopup(title, inputs) {
   const clearButton = document.createElement("button");
   clearButton.classList.add("config-clear-form");
   clearButton.textContent = "Clear Form";
-  clearButton.addEventListener("click", (e) => {
+  clearButton.addEventListener("click", () => {
     modalScrollContainer.querySelectorAll("input").forEach((input) => {
       if (input.type == "text") {
         input.value = "";
@@ -68,7 +68,7 @@ function createCuratePopup(title, inputs) {
   const saveConfig = document.createElement("button");
   saveConfig.classList.add("config-save-button");
   saveConfig.textContent = "Save Config";
-  saveConfig.addEventListener("click", (e) => {
+  saveConfig.addEventListener("click", () => {
     //validate save
     const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]");
     const saveName = optionsContainer.querySelector("#name").value;
@@ -127,7 +127,7 @@ function createCuratePopup(title, inputs) {
         console.log(r);
         if (r) {
           const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]");
-          getPreservationConfigs().then((r) => {
+          getPreservationConfigs().then(() => {
             const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]");
             console.log(newConfigs);
             if (curConfig.id) {
@@ -153,7 +153,7 @@ function createCuratePopup(title, inputs) {
           if (r) {
             console.log("saved new config");
             const curConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]");
-            getPreservationConfigs().then((r) => {
+            getPreservationConfigs().then(() => {
               const newConfigs = JSON.parse(sessionStorage.getItem("preservationConfigs") || "[]");
               console.log(newConfigs);
 
@@ -168,7 +168,7 @@ function createCuratePopup(title, inputs) {
   });
   optionsContainer.appendChild(saveConfig);
   mainOptionsContainer.appendChild(optionsContainer);
-  optionsContainer.addEventListener("input", (e) => {
+  optionsContainer.addEventListener("input", () => {
     let cname = optionsContainer.querySelector("#name").value;
     if (cname.length == 0) {
       saveConfig.style.display = "none";
@@ -347,10 +347,10 @@ function createConfigsBox(target, container, configs) {
     configItem.id = "config-" + config.id;
     configItem.classList.add("saved-config-item");
     configItem.style.opacity = "0";
-    configItem.addEventListener("mouseenter", (e) => {
+    configItem.addEventListener("mouseenter", () => {
       configItem.style.backgroundColor = "var(--md-sys-color-outline-variant)";
     });
-    configItem.addEventListener("mouseleave", (e) => {
+    configItem.addEventListener("mouseleave", () => {
       configItem.style.backgroundColor = "var(--md-sys-color-on-secondary)";
     });
     configItem.addEventListener("click", (e) => {
@@ -367,7 +367,7 @@ function createConfigsBox(target, container, configs) {
       }
       // Iterate through the object properties and populate the corresponding fields
       for (var prop in config) {
-        if (config.hasOwnProperty(prop)) {
+        if (Object.hasOwn(config, prop)) {
           // Construct the input field ID using the object property key
           var inputFieldId = "#" + prop; // Assuming the input IDs have a "#" prefix
           var inputField = document.querySelector(inputFieldId);
@@ -428,7 +428,7 @@ function createConfigsBox(target, container, configs) {
     configInfo.appendChild(configDetails);
     const configDelete = document.createElement("button");
     configDelete.classList.add("saved-config-delete");
-    configDelete.addEventListener("mouseenter", (e) => {
+    configDelete.addEventListener("mouseenter", () => {
       configItem.style.backgroundColor = "var(--md-sys-color-on-secondary)";
       configDelete.style.backgroundColor = "#ff2c2c";
     });
@@ -443,7 +443,7 @@ function createConfigsBox(target, container, configs) {
         configItem.style.backgroundColor = "var(--md-sys-color-on-secondary)";
       }
     });
-    configDelete.addEventListener("click", (e) => {
+    configDelete.addEventListener("click", () => {
       if (
         !confirm("Deleting a config is permanent and cannot be reverted, do you wish to continue?")
       ) {
@@ -457,7 +457,7 @@ function createConfigsBox(target, container, configs) {
           configItem.style.animation = "none"; // Reset the animation
           void configItem.offsetWidth; // Trigger reflow to reset animation
           configItem.style.animation = "config-slide-and-fade-in 0.4s forwards reverse"; // Reverse and play animation
-          setTimeout((e) => {
+          setTimeout(() => {
             configItem.remove();
           }, 400);
         })
@@ -508,7 +508,7 @@ function createConfigsBox(target, container, configs) {
   savedItems?.forEach(
     (el, index) => (el.style.animationDelay = `${(index * 0.55) / savedItems.length}s`),
   );
-  savedItems?.forEach((el, index, array) => {
+  savedItems?.forEach((el, index) => {
     const delay = 0.05 * (index + 1);
     const duration = 1.0 - delay;
     el.style.animationDelay = `${delay}s`;
@@ -672,7 +672,7 @@ function createInput(input, target) {
   if (input.suboptions) {
     input.suboptions.forEach((subinput) => {
       createInput(subinput, inputContainer);
-      setTimeout((e) => {
+      setTimeout(() => {
         if (subinput.type == "info") {
           return;
         }
@@ -729,7 +729,7 @@ const inputs = [
             name: "atom_config",
             type: "button",
             text: "Go to AtoM Configuration",
-            onclick: (e) => {
+            onclick: () => {
               const readonly = window.curateAtomReadonly === true;
               const p = Curate.ui.modals.curatePopup(
                 { title: readonly ? "AtoM Configuration" : "Connect to Your AtoM Instance" },

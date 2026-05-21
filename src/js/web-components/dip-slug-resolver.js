@@ -1,5 +1,3 @@
-import CurateUi from "../core/CurateFunctions/CurateUi";
-
 class DipSlugResolver extends HTMLElement {
   constructor() {
     super();
@@ -112,7 +110,7 @@ class DipSlugResolver extends HTMLElement {
                   this.nodes.find((node) => node._path == button.getAttribute("data-path")),
                 );
                 c.querySelector(".config-main-options-container").appendChild(t);
-                t.addEventListener("description-linked", (e) => {
+                t.addEventListener("description-linked", () => {
                   console.log("description linked");
                   c.remove();
                   const linked = document.createElement("div");

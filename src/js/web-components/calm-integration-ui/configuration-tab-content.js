@@ -11,14 +11,7 @@ import "@material/web/select/select-option.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/iconbutton/icon-button.js";
 
-import {
-  helpCircleIcon,
-  plusIcon,
-  powerPlugIcon,
-  restartIcon,
-  saveIcon,
-  deleteIcon,
-} from "../utils/icons.js";
+import { helpCircleIcon, plusIcon, restartIcon, saveIcon, deleteIcon } from "../utils/icons.js";
 
 class QueryFilterRow extends LitElement {
   static properties = {

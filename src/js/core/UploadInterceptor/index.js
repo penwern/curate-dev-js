@@ -7,7 +7,6 @@
 
 import UploadInterceptor from "./UploadInterceptor.js";
 import ChecksumValidationPlugin from "./plugins/ChecksumValidation/ChecksumValidation.js";
-import UploadVolumeChecker from "./plugins/UploadVolumeChecker/UploadVolumeChecker.js";
 
 // Initialize the upload interceptor system when DOM loads
 window.addEventListener("load", () => {
@@ -15,7 +14,6 @@ window.addEventListener("load", () => {
 
   // Register plugins
   UploadInterceptor.register(ChecksumValidationPlugin);
-  //UploadInterceptor.register(UploadVolumeChecker);
 
   console.log(
     "UploadInterceptor: System initialized with plugins:",

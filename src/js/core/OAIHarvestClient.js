@@ -1,4 +1,4 @@
-async function harvestOAI({ baseUrl, verb, identifier, metadataPrefix, oaiVersion }) {
+async function harvestOAI({ baseUrl, verb, identifier, metadataPrefix, oaiVersion: _oaiVersion }) {
   var parser = new DOMParser();
   const encodedVerb = encodeURIComponent(verb);
   const encodedIdentifier = encodeURIComponent(identifier);
@@ -12,7 +12,6 @@ async function harvestOAI({ baseUrl, verb, identifier, metadataPrefix, oaiVersio
   const availableSchemas = await schemaResponse.text();
   const schemaXml = parser.parseFromString(availableSchemas, "text/xml");
   const schemas = Array.from(schemaXml.getElementsByTagName("metadataFormat"));
-  var activeSchema;
   for (let x = 0; x < schemas.length; x++) {
     if (
       schemas[x]
@@ -20,7 +19,6 @@ async function harvestOAI({ baseUrl, verb, identifier, metadataPrefix, oaiVersio
         .textContent.includes(metadataPrefix.toLowerCase())
     ) {
       metadataPrefix = schemas[x].getElementsByTagName("metadataPrefix")[0].textContent;
-      activeSchema = schemas[x].getElementsByTagName("schema")[0].textContent;
     }
   }
   const encodedMetadataPrefix = encodeURIComponent(metadataPrefix);
@@ -152,3 +150,6 @@ function xmlToJson(xml, prefix) {
     console.log("err: ", err);
   }
 }
+
+// Expose for external callers (e.g. oai-harvest-updates web component)
+window.harvestOAI = harvestOAI;

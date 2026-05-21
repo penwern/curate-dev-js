@@ -1,3 +1,4 @@
+/* global pydioBootstrap */
 window.addEventListener("load", tour);
 var newTour = {
   "ajax_gui.tour.welcomemodal.title": "Welcome to Curate",

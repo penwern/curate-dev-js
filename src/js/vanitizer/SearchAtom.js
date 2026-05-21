@@ -21,7 +21,7 @@ if (selection.length <= 0) {
           const t = document.createElement("atom-search-interface");
           t.setNode(node);
           c.querySelector(".config-main-options-container").appendChild(t);
-          t.addEventListener("description-linked", (e) => {
+          t.addEventListener("description-linked", () => {
             c.remove();
           });
         },

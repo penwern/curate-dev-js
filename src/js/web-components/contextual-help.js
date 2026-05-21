@@ -39,12 +39,8 @@ class ContextualHelp extends HTMLElement {
   }
 
   getHelpContent(context) {
-    const { page, lastRightClickedElement, selection } = context;
+    const { page, selection } = context;
     const hasSelection = selection && selection.length > 0;
-    const clickedElementType = lastRightClickedElement
-      ? lastRightClickedElement.tagName.toLowerCase()
-      : null;
-
     // Series of switch cases to determine the appropriate help content
     switch (true) {
       // Case 1: Has selection
