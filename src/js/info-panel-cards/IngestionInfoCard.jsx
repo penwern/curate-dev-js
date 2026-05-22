@@ -43,6 +43,13 @@ function formatBytes(bytes) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+const RISK_STATUS = {
+  label: "At Risk",
+  sub: "Quarantine period incomplete",
+  color: "#E53935",
+  icon: "mdi-shield-alert",
+};
+
 const STATUS_CFG = {
   ReleaseTag: {
     label: "Cleared",
@@ -62,12 +69,8 @@ const STATUS_CFG = {
     color: "#FB8C00",
     icon: "mdi-shield-lock-outline",
   },
-  Risk: {
-    label: "At Risk",
-    sub: "Quarantine period incomplete",
-    color: "#E53935",
-    icon: "mdi-shield-alert",
-  },
+  Risk: RISK_STATUS,
+  FailTag: RISK_STATUS,
   "Scan Limit Exceeded": {
     label: "Too Large",
     sub: "File exceeds scan size limit",
