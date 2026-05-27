@@ -17,7 +17,8 @@
 /**icon for linked AtoM tag**/
 .metadata_chunk.metadata_chunk_other.metadata_chunk_usermeta-atom-linked-description::before {
   content: "\F0337" " Linked Description:"; /* Unicode for the desired icon and custom text */
-  font-family: "Material Design Icons", sans-serif; /* Use the icon font for the icon and fallback to sans-serif for text */
+  font-family:
+    "Material Design Icons", sans-serif; /* Use the icon font for the icon and fallback to sans-serif for text */
   margin-right: 5px; /* Adjust spacing as needed */
   display: inline-block; /* Ensure it displays inline */
   font-weight: normal; /* Ensure the text uses regular weight */
@@ -856,7 +857,8 @@ line {
 }
 .popup {
   border: 0.3em solid transparent;
-  background-image: linear-gradient(#fff, #fff),
+  background-image:
+    linear-gradient(#fff, #fff),
     linear-gradient(
       120deg,
       var(--customerColourPrimary) 0%,
@@ -1070,7 +1072,8 @@ line {
   width: 100%;
   padding: 1em !important;
   border: 0.25em solid transparent;
-  background-image: linear-gradient(#fff, #fff),
+  background-image:
+    linear-gradient(#fff, #fff),
     linear-gradient(
       120deg,
       var(--customerColourPrimary) 0%,
