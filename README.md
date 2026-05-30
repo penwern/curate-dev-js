@@ -255,3 +255,9 @@ npm run serve
 # Container deployment with docker
 npm run docker:up
 ```
+
+## Testing & CI
+
+CI runs **lint only** (ESLint + Prettier via penwern-ci, gate mode) and the production webpack build (deployed to `gh-pages` / `dist/@latest/`).
+
+There is **no automated test suite yet**. The web components are browser-coupled (they extend the Cells `window.Curate` runtime), so adding tests requires a `vitest` + `jsdom` harness — not yet set up. (When added, the repo can be onboarded to penwern-ci's `reusable-test.yml` with `language: js-vanilla`.)
