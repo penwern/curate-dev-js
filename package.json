@@ -1,6 +1,6 @@
 {
   "name": "curate-js",
-  "version": "4.5.0",
+  "version": "1.2.0",
   "scripts": {
     "build": "webpack --mode production --config ./webpack.config.js",
     "serve": "npx webpack serve --mode development --config ./webpack.config.js",
