@@ -4,13 +4,15 @@ const CurateWorkspaces = {
    * @returns {string} slug of the currently open workspace.
    */
   getOpenWorkspace: function () {
-    if (pydio._dataModel._rootNode._label.toLowerCase() == pydio.user.id.toLowerCase()) {
+    const wsLabel = pydio._dataModel._rootNode._label
+        .toLowerCase()
+        .trimStart()
+        .replaceAll(" ", "-")
+
+    if (wsLabel == pydio.user.id.toLowerCase()) {
       return "personal-files";
     }
-    return pydio._dataModel._rootNode._label
-      .toLowerCase()
-      .replace(/^\d+\.\s*/, "")
-      .replace(" ", "-");
+    return wsLabel;
   },
 };
 export default CurateWorkspaces;
