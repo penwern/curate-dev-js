@@ -5,9 +5,9 @@ const CurateWorkspaces = {
    */
   getOpenWorkspace: function () {
     const wsLabel = pydio._dataModel._rootNode._label
-        .toLowerCase()
-        .trimStart()
-        .replaceAll(" ", "-")
+      .toLowerCase()
+      .trimStart()
+      .replaceAll(" ", "-");
 
     if (wsLabel == pydio.user.id.toLowerCase()) {
       return "personal-files";
