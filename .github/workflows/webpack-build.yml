@@ -6,6 +6,13 @@ on:
       - main
     tags:
       - 'v*'
+  # Build (but do NOT deploy) on PRs so a broken build is caught before it reaches
+  # main and auto-publishes to the rolling gh-pages/latest/ bundle prod tracks. The
+  # deploy steps below are gated on refs/heads/main and refs/tags/v*, so on a
+  # pull_request event (github.ref = refs/pull/N/merge) neither fires.
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -18,11 +25,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "22"   # match NODE_VERSION in penwern-ci so build == lint runtime
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci   # reproducible install from package-lock.json (was: npm install)
 
       - name: Build with Webpack
         run: npm run build
