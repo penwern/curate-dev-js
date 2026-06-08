@@ -1,0 +1,16 @@
+---
+name: security
+# Advisory security tier (penwern-ci): gitleaks + dependency vuln scan + trivy config.
+# Mode resolved centrally from penwern-ci/registry.tsv (security-mode=advisory):
+# findings are reported but do NOT block. Flip to gate in the registry once clear.
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+jobs:
+  security:
+    uses: penwern/penwern-ci/.github/workflows/reusable-security.yml@v1
+    with:
+      language: js-vanilla
+    secrets:
+      PENWERN_CI_APP_CLIENT_ID: ${{ secrets.PENWERN_CI_APP_CLIENT_ID }}
+      PENWERN_CI_APP_PRIVATE_KEY: ${{ secrets.PENWERN_CI_APP_PRIVATE_KEY }}
