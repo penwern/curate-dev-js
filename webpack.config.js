@@ -43,6 +43,14 @@ module.exports = (env, argv) => {
             from: path.resolve(__dirname, "node_modules/spark-md5/spark-md5.js"),
             to: path.resolve(__dirname, "dist/spark-md5.js"),
           },
+          {
+            // Changelog content, deployed next to main.js so the bundle can
+            // fetch it at runtime from its own published directory (latest/ or a
+            // versioned tag dir). Edit + push this file to update release notes
+            // with no code change. See core/changelogModifier.js.
+            from: path.resolve(__dirname, "changelog.json"),
+            to: path.resolve(__dirname, "dist/changelog.json"),
+          },
         ],
       }),
     ],
