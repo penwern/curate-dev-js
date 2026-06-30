@@ -656,13 +656,15 @@ class CalmIntegrationInterface extends LitElement {
         </md-tabs>
 
         <div class="tab-content">
-          ${this.isLoadingConfig && this.activeTab === 0
-            ? html`
-                <div class="loading-overlay">
-                  <md-circular-progress indeterminate></md-circular-progress>
-                </div>
-              `
-            : ""}
+          ${
+            this.isLoadingConfig && this.activeTab === 0
+              ? html`
+                  <div class="loading-overlay">
+                    <md-circular-progress indeterminate></md-circular-progress>
+                  </div>
+                `
+              : ""
+          }
           ${when(
             this.activeTab === -1,
             () =>
@@ -773,16 +775,18 @@ class CalmIntegrationInterface extends LitElement {
       </md-dialog>
 
       <!-- Error Toast (Custom implementation since Material Web doesn't have snackbar yet) -->
-      ${this.showErrorSnackbar
-        ? html`
-            <div class="error-toast ${this.showErrorSnackbar ? "" : "hide"}">
-              <span>⚠️ ${this.errorMessage}</span>
-              <md-text-button @click=${() => (this.showErrorSnackbar = false)}>
-                Dismiss
-              </md-text-button>
-            </div>
-          `
-        : ""}
+      ${
+        this.showErrorSnackbar
+          ? html`
+              <div class="error-toast ${this.showErrorSnackbar ? "" : "hide"}">
+                <span>⚠️ ${this.errorMessage}</span>
+                <md-text-button @click=${() => (this.showErrorSnackbar = false)}>
+                  Dismiss
+                </md-text-button>
+              </div>
+            `
+          : ""
+      }
     `;
   }
 }

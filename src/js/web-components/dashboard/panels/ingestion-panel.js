@@ -521,20 +521,22 @@ class IngestionPanel extends LitElement {
             }}
           />
         </div>
-        ${this._dateFrom || this._dateTo
-          ? html`
-              <button
-                class="clear-dates"
-                @click=${() => {
-                  this._dateFrom = "";
-                  this._dateTo = "";
-                  this._loadTable(0);
-                }}
-              >
-                Clear dates
-              </button>
-            `
-          : ""}
+        ${
+          this._dateFrom || this._dateTo
+            ? html`
+                <button
+                  class="clear-dates"
+                  @click=${() => {
+                    this._dateFrom = "";
+                    this._dateTo = "";
+                    this._loadTable(0);
+                  }}
+                >
+                  Clear dates
+                </button>
+              `
+            : ""
+        }
       </div>
       <data-table
         .columns=${columns}

@@ -881,9 +881,9 @@ class CalmHarvestInterface extends LitElement {
                 <h4>${harvest.date}</h4>
                 <div class="harvest-meta">
                   <span
-                    >${harvest.success
-                      ? `${harvest.records} records`
-                      : `Error: ${harvest.error}`}</span
+                    >${
+                      harvest.success ? `${harvest.records} records` : `Error: ${harvest.error}`
+                    }</span
                   >
                   <span>Duration: ${harvest.duration}</span>
                 </div>

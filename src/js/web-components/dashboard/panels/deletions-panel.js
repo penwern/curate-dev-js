@@ -1023,9 +1023,11 @@ class DeletionsPanel extends LitElement {
           <div class="requester-avatar">${initials}</div>
           <span class="requester-name">${row.requester}</span>
         </div>
-        ${row.requesterTs
-          ? html`<span class="requester-ts">${formatDate(row.requesterTs)}</span>`
-          : ""}
+        ${
+          row.requesterTs
+            ? html`<span class="requester-ts">${formatDate(row.requesterTs)}</span>`
+            : ""
+        }
       </div>
     `;
   }
@@ -1289,9 +1291,11 @@ class DeletionsPanel extends LitElement {
         <div>
           <div class="section-header">
             <span class="section-title">Review Queue</span>
-            ${this._totalDeleted > 0
-              ? html`<span class="section-badge">${this._totalDeleted}</span>`
-              : ""}
+            ${
+              this._totalDeleted > 0
+                ? html`<span class="section-badge">${this._totalDeleted}</span>`
+                : ""
+            }
             <div class="section-rule"></div>
           </div>
           <div class="queue-card">${this._renderActionArea()} ${this._renderQueueTable()}</div>

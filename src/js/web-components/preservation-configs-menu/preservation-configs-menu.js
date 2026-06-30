@@ -451,57 +451,64 @@ class PreservationConfigManager extends LitElement {
             <div class="section-title">${icon(mdiStar)} Saved Configs</div>
 
             <div class="scroll-container">
-              ${this.isLoading
-                ? html`<div class="loading">
-                    <div class="spinner"></div>
-                    Loading configurations...
-                  </div>`
-                : this.savedConfigs.length === 0
-                  ? html`<div class="no-configs">No Saved Preservation Configs Found</div>`
-                  : this.savedConfigs.map(
-                      (config, index) => html`
-                        <div
-                          class="config-item"
-                          style="animation-delay: ${index * 0.1}s"
-                          @click=${() => this.loadConfig(config)}
-                        >
-                          <div class="config-header">
-                            <div class="config-name">${config.name}</div>
-                            <div class="config-actions">
-                              <md-icon-button
-                                class="${this.isBookmarked(config.id) ? "starred" : ""}"
-                                @click=${(e) => {
-                                  e.stopPropagation();
-                                  this.toggleBookmark(config.id);
-                                }}
-                              >
-                                ${this.isBookmarked(config.id)
-                                  ? icon(mdiStar)
-                                  : icon(mdiStarOutline)}
-                              </md-icon-button>
-                              ${when(config.user !== "System" && config.name !== "Default", () => {
-                                return html`<md-outlined-button
-                                  class="delete-btn"
+              ${
+                this.isLoading
+                  ? html`<div class="loading">
+                      <div class="spinner"></div>
+                      Loading configurations...
+                    </div>`
+                  : this.savedConfigs.length === 0
+                    ? html`<div class="no-configs">No Saved Preservation Configs Found</div>`
+                    : this.savedConfigs.map(
+                        (config, index) => html`
+                          <div
+                            class="config-item"
+                            style="animation-delay: ${index * 0.1}s"
+                            @click=${() => this.loadConfig(config)}
+                          >
+                            <div class="config-header">
+                              <div class="config-name">${config.name}</div>
+                              <div class="config-actions">
+                                <md-icon-button
+                                  class="${this.isBookmarked(config.id) ? "starred" : ""}"
                                   @click=${(e) => {
                                     e.stopPropagation();
-                                    this.deleteConfig(config.id);
+                                    this.toggleBookmark(config.id);
                                   }}
                                 >
-                                  Delete
-                                </md-outlined-button>`;
-                              })}
+                                  ${
+                                    this.isBookmarked(config.id)
+                                      ? icon(mdiStar)
+                                      : icon(mdiStarOutline)
+                                  }
+                                </md-icon-button>
+                                ${when(
+                                  config.user !== "System" && config.name !== "Default",
+                                  () => {
+                                    return html`<md-outlined-button
+                                      class="delete-btn"
+                                      @click=${(e) => {
+                                        e.stopPropagation();
+                                        this.deleteConfig(config.id);
+                                      }}
+                                    >
+                                      Delete
+                                    </md-outlined-button>`;
+                                  },
+                                )}
+                              </div>
+                            </div>
+                            <div class="config-details">
+                              <div class="config-description">
+                                <strong>Description:</strong>
+                                ${config.description || "No description"}
+                              </div>
+                              <div><strong>User:</strong> ${config.user}</div>
                             </div>
                           </div>
-                          <div class="config-details">
-                            <div class="config-description">
-                              <strong>Description:</strong>
-                              ${config.description || "No description"}
-                            </div>
-                            <div><strong>User:</strong> ${config.user}</div>
-                          </div>
-                        </div>
-                      `,
-                    )}
+                        `,
+                      )
+              }
             </div>
           </div>
         </div>

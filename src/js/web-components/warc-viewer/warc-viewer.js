@@ -105,21 +105,23 @@ export class WarcViewerModal extends LitElement {
         </div>
 
         <div class="viewer-content">
-          ${this.errorMessage
-            ? html`
-                <div class="error-state">
-                  <h4>Error Loading Archive</h4>
-                  <p>${this.errorMessage}</p>
-                </div>
-              `
-            : this.isLoading
+          ${
+            this.errorMessage
               ? html`
-                  <div class="loading-state">
-                    <md-circular-progress indeterminate></md-circular-progress>
-                    <p>Loading archive viewer...</p>
+                  <div class="error-state">
+                    <h4>Error Loading Archive</h4>
+                    <p>${this.errorMessage}</p>
                   </div>
                 `
-              : ""}
+              : this.isLoading
+                ? html`
+                    <div class="loading-state">
+                      <md-circular-progress indeterminate></md-circular-progress>
+                      <p>Loading archive viewer...</p>
+                    </div>
+                  `
+                : ""
+          }
 
           <replay-web-page
             source=${this.fileUrl}

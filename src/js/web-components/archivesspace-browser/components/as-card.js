@@ -135,21 +135,23 @@ class AsCard extends LitElement {
             ${this.code ? html`<div class="card-code">${displayCode}</div>` : nothing}
           </div>
         </div>
-        ${this.meta && this.meta.length
-          ? html`
-              <div class="card-meta">
-                ${map(
-                  this.meta,
-                  (item) => html`
-                    <div class="meta-item">
-                      ${item.icon ? html`<span class="meta-icon">${item.icon}</span>` : nothing}
-                      ${item.label}
-                    </div>
-                  `,
-                )}
-              </div>
-            `
-          : nothing}
+        ${
+          this.meta && this.meta.length
+            ? html`
+                <div class="card-meta">
+                  ${map(
+                    this.meta,
+                    (item) => html`
+                      <div class="meta-item">
+                        ${item.icon ? html`<span class="meta-icon">${item.icon}</span>` : nothing}
+                        ${item.label}
+                      </div>
+                    `,
+                  )}
+                </div>
+              `
+            : nothing
+        }
       </div>
     `;
   }

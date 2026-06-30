@@ -458,22 +458,26 @@ export class ArchiveProcessingStatus extends LitElement {
 
     return html`
       <section class="resource-links">
-        ${output
-          ? html`
-              <div class="link-row">
-                <span class="mdi mdi-folder-outline"></span>
-                <span class="wrap-path"><strong>Output directory:</strong> ${output}</span>
-              </div>
-            `
-          : ""}
-        ${manifest
-          ? html`
-              <div class="link-row">
-                <span class="mdi mdi-file-document-outline"></span>
-                <span class="wrap-path"><strong>Manifest:</strong> ${manifest}</span>
-              </div>
-            `
-          : ""}
+        ${
+          output
+            ? html`
+                <div class="link-row">
+                  <span class="mdi mdi-folder-outline"></span>
+                  <span class="wrap-path"><strong>Output directory:</strong> ${output}</span>
+                </div>
+              `
+            : ""
+        }
+        ${
+          manifest
+            ? html`
+                <div class="link-row">
+                  <span class="mdi mdi-file-document-outline"></span>
+                  <span class="wrap-path"><strong>Manifest:</strong> ${manifest}</span>
+                </div>
+              `
+            : ""
+        }
       </section>
     `;
   }

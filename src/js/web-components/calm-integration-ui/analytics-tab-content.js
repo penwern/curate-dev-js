@@ -500,13 +500,15 @@ class AnalyticsTabContent extends LitElement {
 
     return html`
       <div class="analytics-container">
-        ${this.isLoadingStats
-          ? html`
-              <div class="loading-overlay">
-                <md-circular-progress indeterminate></md-circular-progress>
-              </div>
-            `
-          : ""}
+        ${
+          this.isLoadingStats
+            ? html`
+                <div class="loading-overlay">
+                  <md-circular-progress indeterminate></md-circular-progress>
+                </div>
+              `
+            : ""
+        }
 
         <div class="stats-cards">
           <!-- Harvest Statistics -->

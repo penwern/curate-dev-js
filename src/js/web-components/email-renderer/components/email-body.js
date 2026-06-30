@@ -291,22 +291,26 @@ export class EmailBody extends LitElement {
     const hasText = this.textContent && this.textContent.trim().length > 0;
 
     return html`
-      ${this.hasExternalImages && !this.showExternalImages
-        ? html`
-            <div class="external-images-warning">
-              <span class="icon">${imageIcon}</span>
-              <span>External images are blocked for your privacy.</span>
-              <button @click=${() => (this.showExternalImages = true)}>Dismiss</button>
-            </div>
-          `
-        : ""}
-      ${hasHtml
-        ? html` <div class="email-body-content"></div> `
-        : html`
-            <div class="email-body-content plain-text">
-              ${hasText ? this.textContent : "No content available"}
-            </div>
-          `}
+      ${
+        this.hasExternalImages && !this.showExternalImages
+          ? html`
+              <div class="external-images-warning">
+                <span class="icon">${imageIcon}</span>
+                <span>External images are blocked for your privacy.</span>
+                <button @click=${() => (this.showExternalImages = true)}>Dismiss</button>
+              </div>
+            `
+          : ""
+      }
+      ${
+        hasHtml
+          ? html` <div class="email-body-content"></div> `
+          : html`
+              <div class="email-body-content plain-text">
+                ${hasText ? this.textContent : "No content available"}
+              </div>
+            `
+      }
     `;
   }
 }

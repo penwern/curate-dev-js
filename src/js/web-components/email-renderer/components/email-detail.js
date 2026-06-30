@@ -508,9 +508,11 @@ export class EmailDetail extends LitElement {
                         <div class="toggle-preview">${this._getTextPreview(body)}</div>
                       </div>
                       <div class="toggle-indicators">
-                        ${regularAttachments.length > 0
-                          ? html`<span class="icon">${attachmentIcon}</span>`
-                          : ""}
+                        ${
+                          regularAttachments.length > 0
+                            ? html`<span class="icon">${attachmentIcon}</span>`
+                            : ""
+                        }
                       </div>
                     </button>
                   </article>
@@ -519,69 +521,77 @@ export class EmailDetail extends LitElement {
 
               return html`
                 <article
-                  class="thread-message ${isSelected ? "highlighted" : ""} ${isFirst
-                    ? "thread-root"
-                    : ""}"
+                  class="thread-message ${isSelected ? "highlighted" : ""} ${
+                    isFirst ? "thread-root" : ""
+                  }"
                   data-thread-message=${threadEmail.id}
                 >
-                  ${isFirst
-                    ? html`
-                        <div class="email-card">
-                          <email-header .email=${threadEmail}></email-header>
-                          ${regularAttachments.length > 0
-                            ? html`
-                                <attachment-list
-                                  .attachments=${regularAttachments}
-                                ></attachment-list>
-                              `
-                            : ""}
-                          <email-body
-                            .htmlContent=${body?.html || ""}
-                            .textContent=${body?.text || ""}
-                            .attachments=${threadEmail.attachments || []}
-                            .hasExternalImages=${threadEmail.hasExternalImages || false}
-                          ></email-body>
-                        </div>
-                      `
-                    : html`
-                        <button
-                          class="message-toggle"
-                          type="button"
-                          @click=${() => this._toggleMessageCollapse(threadEmail.id)}
-                        >
-                          <span class="chevron">${chevronDownIcon}</span>
-                          <div class="toggle-content">
-                            <span class="toggle-from"
-                              >${threadEmail.from.name || threadEmail.from.email}</span
-                            >
-                            <div class="toggle-meta">
-                              <span>To: ${this._formatRecipients(threadEmail.to)}</span>
-                              <span>${formatEmailDate(threadEmail.date)}</span>
+                  ${
+                    isFirst
+                      ? html`
+                          <div class="email-card">
+                            <email-header .email=${threadEmail}></email-header>
+                            ${
+                              regularAttachments.length > 0
+                                ? html`
+                                    <attachment-list
+                                      .attachments=${regularAttachments}
+                                    ></attachment-list>
+                                  `
+                                : ""
+                            }
+                            <email-body
+                              .htmlContent=${body?.html || ""}
+                              .textContent=${body?.text || ""}
+                              .attachments=${threadEmail.attachments || []}
+                              .hasExternalImages=${threadEmail.hasExternalImages || false}
+                            ></email-body>
+                          </div>
+                        `
+                      : html`
+                          <button
+                            class="message-toggle"
+                            type="button"
+                            @click=${() => this._toggleMessageCollapse(threadEmail.id)}
+                          >
+                            <span class="chevron">${chevronDownIcon}</span>
+                            <div class="toggle-content">
+                              <span class="toggle-from"
+                                >${threadEmail.from.name || threadEmail.from.email}</span
+                              >
+                              <div class="toggle-meta">
+                                <span>To: ${this._formatRecipients(threadEmail.to)}</span>
+                                <span>${formatEmailDate(threadEmail.date)}</span>
+                              </div>
                             </div>
+                            <div class="toggle-indicators">
+                              ${
+                                regularAttachments.length > 0
+                                  ? html`<span class="icon">${attachmentIcon}</span>`
+                                  : ""
+                              }
+                            </div>
+                          </button>
+                          ${this._renderThreadMeta(threadEmail)}
+                          <div class="thread-message-body">
+                            ${
+                              regularAttachments.length > 0
+                                ? html`
+                                    <attachment-list
+                                      .attachments=${regularAttachments}
+                                    ></attachment-list>
+                                  `
+                                : ""
+                            }
+                            <email-body
+                              .htmlContent=${body?.html || ""}
+                              .textContent=${body?.text || ""}
+                              .attachments=${threadEmail.attachments || []}
+                              .hasExternalImages=${threadEmail.hasExternalImages || false}
+                            ></email-body>
                           </div>
-                          <div class="toggle-indicators">
-                            ${regularAttachments.length > 0
-                              ? html`<span class="icon">${attachmentIcon}</span>`
-                              : ""}
-                          </div>
-                        </button>
-                        ${this._renderThreadMeta(threadEmail)}
-                        <div class="thread-message-body">
-                          ${regularAttachments.length > 0
-                            ? html`
-                                <attachment-list
-                                  .attachments=${regularAttachments}
-                                ></attachment-list>
-                              `
-                            : ""}
-                          <email-body
-                            .htmlContent=${body?.html || ""}
-                            .textContent=${body?.text || ""}
-                            .attachments=${threadEmail.attachments || []}
-                            .hasExternalImages=${threadEmail.hasExternalImages || false}
-                          ></email-body>
-                        </div>
-                      `}
+                        `
+                  }
                 </article>
               `;
             })}
@@ -598,9 +608,11 @@ export class EmailDetail extends LitElement {
       <div class="email-content">
         <div class="email-card">
           <email-header .email=${this.email}></email-header>
-          ${regularAttachments.length > 0
-            ? html` <attachment-list .attachments=${regularAttachments}></attachment-list> `
-            : ""}
+          ${
+            regularAttachments.length > 0
+              ? html` <attachment-list .attachments=${regularAttachments}></attachment-list> `
+              : ""
+          }
           <email-body
             .htmlContent=${this.emailBody?.html || ""}
             .textContent=${this.emailBody?.text || ""}

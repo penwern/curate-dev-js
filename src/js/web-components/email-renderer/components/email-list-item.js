@@ -227,26 +227,34 @@ export class EmailListItem extends LitElement {
         </div>
         <div class="item-subject">
           <span class="subject">${subject}</span>
-          ${this.threadCount > 1 && this.threadIndex === 0
-            ? html` <span class="thread-pill">${this.threadCount}</span> `
-            : ""}
+          ${
+            this.threadCount > 1 && this.threadIndex === 0
+              ? html` <span class="thread-pill">${this.threadCount}</span> `
+              : ""
+          }
         </div>
         <div class="item-snippet">${this.email.snippet}</div>
         <div class="item-meta">
-          ${this.threadCount > 1 && this.threadIndex === 0
-            ? html` <span class="meta-pill">${forumIcon}<span>Conversation</span></span> `
-            : ""}
-          ${this.email.hasAttachments
-            ? html` <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span> `
-            : ""}
-          ${folderLabel
-            ? html`
-                <span class="meta-pill folder" title=${folderLabel}>
-                  ${folderIcon}
-                  <span class="folder-label">${folderLabel}</span>
-                </span>
-              `
-            : ""}
+          ${
+            this.threadCount > 1 && this.threadIndex === 0
+              ? html` <span class="meta-pill">${forumIcon}<span>Conversation</span></span> `
+              : ""
+          }
+          ${
+            this.email.hasAttachments
+              ? html` <span class="meta-pill">${attachmentIcon}<span>Attachments</span></span> `
+              : ""
+          }
+          ${
+            folderLabel
+              ? html`
+                  <span class="meta-pill folder" title=${folderLabel}>
+                    ${folderIcon}
+                    <span class="folder-label">${folderLabel}</span>
+                  </span>
+                `
+              : ""
+          }
         </div>
       </article>
     `;

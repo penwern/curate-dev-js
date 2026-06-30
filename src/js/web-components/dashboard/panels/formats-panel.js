@@ -591,11 +591,13 @@ class FormatsPanel extends LitElement {
     const maxFiles = this._aggregated[0]?.file_count ?? 1;
 
     return html`
-      ${this._snapshotAt
-        ? html`<div class="snapshot-badge">
-            Data from snapshot: <span>${new Date(this._snapshotAt).toLocaleString("en-GB")}</span>
-          </div>`
-        : ""}
+      ${
+        this._snapshotAt
+          ? html`<div class="snapshot-badge">
+              Data from snapshot: <span>${new Date(this._snapshotAt).toLocaleString("en-GB")}</span>
+            </div>`
+          : ""
+      }
 
       <div class="stats-grid">
         <stat-card
@@ -762,34 +764,38 @@ class FormatsPanel extends LitElement {
               Per datasource
             </button>
           </div>
-          ${this._tsView === "format"
-            ? html`
-                <div class="ctrl-sep"></div>
-                <input
-                  class="ts-filter-input"
-                  type="search"
-                  placeholder="Filter formats…"
-                  .value=${this._tsFilter}
-                  @input=${(e) => {
-                    this._tsFilter = e.target.value;
-                  }}
-                />
-                ${!this._tsFilter.trim()
-                  ? html`
-                      <select
-                        @change=${(e) => {
-                          this._tsTopN = Number(e.target.value);
-                        }}
-                      >
-                        <option value="5" ?selected=${this._tsTopN === 5}>Top 5</option>
-                        <option value="10" ?selected=${this._tsTopN === 10}>Top 10</option>
-                        <option value="20" ?selected=${this._tsTopN === 20}>Top 20</option>
-                        <option value="9999" ?selected=${this._tsTopN === 9999}>All</option>
-                      </select>
-                    `
-                  : ""}
-              `
-            : ""}
+          ${
+            this._tsView === "format"
+              ? html`
+                  <div class="ctrl-sep"></div>
+                  <input
+                    class="ts-filter-input"
+                    type="search"
+                    placeholder="Filter formats…"
+                    .value=${this._tsFilter}
+                    @input=${(e) => {
+                      this._tsFilter = e.target.value;
+                    }}
+                  />
+                  ${
+                    !this._tsFilter.trim()
+                      ? html`
+                          <select
+                            @change=${(e) => {
+                              this._tsTopN = Number(e.target.value);
+                            }}
+                          >
+                            <option value="5" ?selected=${this._tsTopN === 5}>Top 5</option>
+                            <option value="10" ?selected=${this._tsTopN === 10}>Top 10</option>
+                            <option value="20" ?selected=${this._tsTopN === 20}>Top 20</option>
+                            <option value="9999" ?selected=${this._tsTopN === 9999}>All</option>
+                          </select>
+                        `
+                      : ""
+                  }
+                `
+              : ""
+          }
         </div>
       </chart-card>
     `;

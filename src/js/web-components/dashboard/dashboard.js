@@ -642,31 +642,33 @@ class Dashboard extends LitElement {
               ?disabled=${this._refreshing}
               title="Refresh all data"
             >
-              ${this._refreshing
-                ? html`<penwern-spinner size="22"></penwern-spinner>`
-                : refreshIcon}
+              ${
+                this._refreshing ? html`<penwern-spinner size="22"></penwern-spinner>` : refreshIcon
+              }
             </button>
           </div>
         </div>
       </nav>
 
       <main class="content-shell">
-        ${this._hasPermission
-          ? html`
-              <div class="content-inner">
-                <div class="panel-container" .key=${this._activeTab}>${this._renderPanel()}</div>
-              </div>
-            `
-          : html`
-              <div class="permission-gate">
-                ${eyeIcon}
-                <p class="permission-gate-title">Access restricted</p>
-                <p class="permission-gate-body">
-                  You don't have permission to view dashboard data. Contact your administrator if
-                  you believe this is an error.
-                </p>
-              </div>
-            `}
+        ${
+          this._hasPermission
+            ? html`
+                <div class="content-inner">
+                  <div class="panel-container" .key=${this._activeTab}>${this._renderPanel()}</div>
+                </div>
+              `
+            : html`
+                <div class="permission-gate">
+                  ${eyeIcon}
+                  <p class="permission-gate-title">Access restricted</p>
+                  <p class="permission-gate-body">
+                    You don't have permission to view dashboard data. Contact your administrator if
+                    you believe this is an error.
+                  </p>
+                </div>
+              `
+        }
       </main>
     `;
   }

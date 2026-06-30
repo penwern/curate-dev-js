@@ -1079,125 +1079,149 @@ export class EmailViewer extends LitElement {
 
     return html`
       <div class="viewer-page">
-        ${this.loading && !this.manifestError
-          ? html`
-              <div class="viewer-shell">
-                <div class="loading-state">Loading emails...</div>
-              </div>
-            `
-          : ""}
-        ${!this.loading && this.manifestError
-          ? html`
-              <div class="error-state">
-                <div class="error-card">
-                  <h2 class="error-title">Unable to load archive</h2>
-                  <p class="error-message">
-                    ${this.manifestError.message ||
-                    "An unexpected error occurred while reading the archive."}
-                  </p>
-                  <button class="retry-btn" type="button" @click=${this._retryLoad}>Retry</button>
+        ${
+          this.loading && !this.manifestError
+            ? html`
+                <div class="viewer-shell">
+                  <div class="loading-state">Loading emails...</div>
                 </div>
-              </div>
-            `
-          : ""}
-        ${!this.loading && !this.manifestError
-          ? html`
-              <div class="viewer-shell">
-                ${!isSingleEmailMode
-                  ? html`
-                      <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
-                        ${this.listCollapsed
-                          ? html`
-                              <button
-                                class="expand-toggle"
-                                type="button"
-                                @click=${this._expandList}
-                                aria-label="Expand email list"
-                                aria-expanded="false"
-                                title="Expand email list"
-                              >
-                                <span class="icon">${chevronRightIcon}</span>
-                                <span class="label">Emails</span>
-                              </button>
-                            `
-                          : html`
-                              <div class="list-shell">
-                                <email-list
-                                  .emails=${this.emails}
-                                  .threads=${this.threads}
-                                  .selectedId=${this.selectedEmailId}
-                                  .folderTree=${this.folderTree}
-                                  .selectedFolderPath=${this.selectedFolderPath}
-                                  @email-selected=${this._handleEmailSelected}
-                                  @folder-selected=${this._handleFolderSelected}
-                                ></email-list>
-                              </div>
-                            `}
-                      </section>
+              `
+            : ""
+        }
+        ${
+          !this.loading && this.manifestError
+            ? html`
+                <div class="error-state">
+                  <div class="error-card">
+                    <h2 class="error-title">Unable to load archive</h2>
+                    <p class="error-message">
+                      ${
+                        this.manifestError.message ||
+                        "An unexpected error occurred while reading the archive."
+                      }
+                    </p>
+                    <button class="retry-btn" type="button" @click=${this._retryLoad}>Retry</button>
+                  </div>
+                </div>
+              `
+            : ""
+        }
+        ${
+          !this.loading && !this.manifestError
+            ? html`
+                <div class="viewer-shell">
+                  ${
+                    !isSingleEmailMode
+                      ? html`
+                          <section class=${listPaneClasses} style=${styleMap(listPaneStyles)}>
+                            ${
+                              this.listCollapsed
+                                ? html`
+                                    <button
+                                      class="expand-toggle"
+                                      type="button"
+                                      @click=${this._expandList}
+                                      aria-label="Expand email list"
+                                      aria-expanded="false"
+                                      title="Expand email list"
+                                    >
+                                      <span class="icon">${chevronRightIcon}</span>
+                                      <span class="label">Emails</span>
+                                    </button>
+                                  `
+                                : html`
+                                    <div class="list-shell">
+                                      <email-list
+                                        .emails=${this.emails}
+                                        .threads=${this.threads}
+                                        .selectedId=${this.selectedEmailId}
+                                        .folderTree=${this.folderTree}
+                                        .selectedFolderPath=${this.selectedFolderPath}
+                                        @email-selected=${this._handleEmailSelected}
+                                        @folder-selected=${this._handleFolderSelected}
+                                      ></email-list>
+                                    </div>
+                                  `
+                            }
+                          </section>
 
-                      <div
-                        class=${classMap({
-                          "pane-divider": true,
-                          "is-hidden": this.isMobile || this.listCollapsed,
-                        })}
-                        role="separator"
-                        aria-label="Resize email list"
-                        aria-orientation="vertical"
-                        aria-valuemin=${this._minListWidth}
-                        aria-valuemax=${this._maxListWidth}
-                        aria-valuenow=${Math.round(this.listWidth)}
-                        tabindex="0"
-                        @pointerdown=${this._startResize}
-                        @keydown=${this._handleDividerKeydown}
-                      >
-                        <span class="divider-grip" aria-hidden="true"></span>
-                        ${!this.listCollapsed
-                          ? html`
-                              <button
-                                class="collapse-handle"
-                                type="button"
-                                aria-label="Collapse email list"
-                                aria-expanded="true"
-                                title="Collapse email list"
-                                @click=${this._collapseList}
-                              >
-                                <span class="icon">${chevronLeftIcon}</span>
-                              </button>
-                            `
-                          : ""}
-                      </div>
-                    `
-                  : ""}
-
-                <section class=${detailPaneClasses}>
-                  ${this.messageLoading
-                    ? html`
-                        <div class="message-loading-overlay" aria-live="polite" aria-busy="true">
-                          <md-circular-progress indeterminate></md-circular-progress>
-                        </div>
-                      `
-                    : ""}
-                  ${this.isMobile
-                    ? html`
-                        <div class="mobile-controls">
-                          <button class="mobile-back" @click=${this._handleBackToList}>Back</button>
-                          <div class="mobile-title">
-                            ${this.selectedEmail?.subject || "Email details"}
+                          <div
+                            class=${classMap({
+                              "pane-divider": true,
+                              "is-hidden": this.isMobile || this.listCollapsed,
+                            })}
+                            role="separator"
+                            aria-label="Resize email list"
+                            aria-orientation="vertical"
+                            aria-valuemin=${this._minListWidth}
+                            aria-valuemax=${this._maxListWidth}
+                            aria-valuenow=${Math.round(this.listWidth)}
+                            tabindex="0"
+                            @pointerdown=${this._startResize}
+                            @keydown=${this._handleDividerKeydown}
+                          >
+                            <span class="divider-grip" aria-hidden="true"></span>
+                            ${
+                              !this.listCollapsed
+                                ? html`
+                                    <button
+                                      class="collapse-handle"
+                                      type="button"
+                                      aria-label="Collapse email list"
+                                      aria-expanded="true"
+                                      title="Collapse email list"
+                                      @click=${this._collapseList}
+                                    >
+                                      <span class="icon">${chevronLeftIcon}</span>
+                                    </button>
+                                  `
+                                : ""
+                            }
                           </div>
-                        </div>
-                      `
-                    : ""}
-                  <email-detail
-                    .email=${this.selectedEmail}
-                    .emailBody=${this.emailBody}
-                    .threadEmails=${this.threadEmails}
-                    .threadBodies=${this.threadBodies}
-                    .selectedEmailId=${this.selectedEmailId}
-                  ></email-detail>
-                </section>
-              </div>
-            `
-          : ""}
+                        `
+                      : ""
+                  }
+
+                  <section class=${detailPaneClasses}>
+                    ${
+                      this.messageLoading
+                        ? html`
+                            <div
+                              class="message-loading-overlay"
+                              aria-live="polite"
+                              aria-busy="true"
+                            >
+                              <md-circular-progress indeterminate></md-circular-progress>
+                            </div>
+                          `
+                        : ""
+                    }
+                    ${
+                      this.isMobile
+                        ? html`
+                            <div class="mobile-controls">
+                              <button class="mobile-back" @click=${this._handleBackToList}>
+                                Back
+                              </button>
+                              <div class="mobile-title">
+                                ${this.selectedEmail?.subject || "Email details"}
+                              </div>
+                            </div>
+                          `
+                        : ""
+                    }
+                    <email-detail
+                      .email=${this.selectedEmail}
+                      .emailBody=${this.emailBody}
+                      .threadEmails=${this.threadEmails}
+                      .threadBodies=${this.threadBodies}
+                      .selectedEmailId=${this.selectedEmailId}
+                    ></email-detail>
+                  </section>
+                </div>
+              `
+            : ""
+        }
       </div>
     `;
   }

@@ -123,12 +123,14 @@ class AsPagination extends LitElement {
         </md-text-button>
 
         <div class="pagination-pages">
-          ${startPage > 1
-            ? html`
-                <button class="page-button" @click=${() => this._handlePageChange(1)}>1</button>
-                ${startPage > 2 ? html`<span class="ellipsis">...</span>` : nothing}
-              `
-            : nothing}
+          ${
+            startPage > 1
+              ? html`
+                  <button class="page-button" @click=${() => this._handlePageChange(1)}>1</button>
+                  ${startPage > 2 ? html`<span class="ellipsis">...</span>` : nothing}
+                `
+              : nothing
+          }
           ${map(
             pages,
             (page) => html`
@@ -140,14 +142,19 @@ class AsPagination extends LitElement {
               </button>
             `,
           )}
-          ${endPage < this.totalPages
-            ? html`
-                ${endPage < this.totalPages - 1 ? html`<span class="ellipsis">...</span>` : nothing}
-                <button class="page-button" @click=${() => this._handlePageChange(this.totalPages)}>
-                  ${this.totalPages}
-                </button>
-              `
-            : nothing}
+          ${
+            endPage < this.totalPages
+              ? html`
+                  ${endPage < this.totalPages - 1 ? html`<span class="ellipsis">...</span>` : nothing}
+                  <button
+                    class="page-button"
+                    @click=${() => this._handlePageChange(this.totalPages)}
+                  >
+                    ${this.totalPages}
+                  </button>
+                `
+              : nothing
+          }
         </div>
 
         <span class="pagination-info">${startItem}-${endItem} of ${this.totalItems}</span>

@@ -202,29 +202,31 @@ class QueryFilterRow extends LitElement {
           .value=${this.filter.condition}
           @change=${(e) => this._updateFilter(e, "condition")}
         >
-          ${showDateHelp
-            ? html`
-                <md-select-option value="since">
-                  <div slot="headline">Is After</div>
-                </md-select-option>
-                <md-select-option value="before">
-                  <div slot="headline">Is Before</div>
-                </md-select-option>
-                <md-select-option value="on">
-                  <div slot="headline">Is On</div>
-                </md-select-option>
-              `
-            : html`
-                <md-select-option value="contains">
-                  <div slot="headline">Contains</div>
-                </md-select-option>
-                <md-select-option value="equals">
-                  <div slot="headline">Equals</div>
-                </md-select-option>
-                <md-select-option value="starts_with">
-                  <div slot="headline">Starts With</div>
-                </md-select-option>
-              `}
+          ${
+            showDateHelp
+              ? html`
+                  <md-select-option value="since">
+                    <div slot="headline">Is After</div>
+                  </md-select-option>
+                  <md-select-option value="before">
+                    <div slot="headline">Is Before</div>
+                  </md-select-option>
+                  <md-select-option value="on">
+                    <div slot="headline">Is On</div>
+                  </md-select-option>
+                `
+              : html`
+                  <md-select-option value="contains">
+                    <div slot="headline">Contains</div>
+                  </md-select-option>
+                  <md-select-option value="equals">
+                    <div slot="headline">Equals</div>
+                  </md-select-option>
+                  <md-select-option value="starts_with">
+                    <div slot="headline">Starts With</div>
+                  </md-select-option>
+                `
+          }
         </md-outlined-select>
 
         <md-outlined-text-field
@@ -233,13 +235,15 @@ class QueryFilterRow extends LitElement {
           @input=${(e) => this._updateFilter(e, "value")}
         ></md-outlined-text-field>
 
-        ${this.index > 0
-          ? html`
-              <md-icon-button @click=${this._removeFilter} title="Remove filter">
-                ${deleteIcon}
-              </md-icon-button>
-            `
-          : html`<div class="remove-placeholder"></div>`}
+        ${
+          this.index > 0
+            ? html`
+                <md-icon-button @click=${this._removeFilter} title="Remove filter">
+                  ${deleteIcon}
+                </md-icon-button>
+              `
+            : html`<div class="remove-placeholder"></div>`
+        }
       </div>
     `;
   }
@@ -491,30 +495,32 @@ class ConfigurationTabContent extends LitElement {
     const validationMessage = this._getValidationMessage();
 
     return html`
-      ${!this.hasConfig
-        ? html`
-            <div class="no-config-banner">
-              <div class="icon">⚙️</div>
-              <div class="content">
-                <h4>No Automated Harvest Configuration Found</h4>
-                <p>
-                  Automated harvesting is not currently set up. You need to create harvest criteria
-                  and save your configuration before the system can automatically harvest records
-                  from CALM into Soteria+.
-                </p>
-                <p>
-                  <strong>What happens next:</strong> Once you set up your criteria and save the
-                  configuration, the system will run daily harvests based on your rules.
-                </p>
-                <div class="action">
-                  <md-filled-button @click=${this._handleGetStarted}>
-                    <span>${plusIcon} Get Started - Add First Criteria</span>
-                  </md-filled-button>
+      ${
+        !this.hasConfig
+          ? html`
+              <div class="no-config-banner">
+                <div class="icon">⚙️</div>
+                <div class="content">
+                  <h4>No Automated Harvest Configuration Found</h4>
+                  <p>
+                    Automated harvesting is not currently set up. You need to create harvest
+                    criteria and save your configuration before the system can automatically harvest
+                    records from CALM into Soteria+.
+                  </p>
+                  <p>
+                    <strong>What happens next:</strong> Once you set up your criteria and save the
+                    configuration, the system will run daily harvests based on your rules.
+                  </p>
+                  <div class="action">
+                    <md-filled-button @click=${this._handleGetStarted}>
+                      <span>${plusIcon} Get Started - Add First Criteria</span>
+                    </md-filled-button>
+                  </div>
                 </div>
               </div>
-            </div>
-          `
-        : ""}
+            `
+          : ""
+      }
 
       <div class="form-section">
         <h3>
@@ -551,21 +557,25 @@ class ConfigurationTabContent extends LitElement {
             <span>${plusIcon} Add Criteria</span>
           </md-text-button>
 
-          ${this._hasDateFields()
-            ? html`
-                <div class="criteria-hint">
-                  💡 Click the help icon above to see available date variables (LAST_HARVEST, TODAY,
-                  etc.)
-                </div>
-              `
-            : ""}
+          ${
+            this._hasDateFields()
+              ? html`
+                  <div class="criteria-hint">
+                    💡 Click the help icon above to see available date variables (LAST_HARVEST,
+                    TODAY, etc.)
+                  </div>
+                `
+              : ""
+          }
         </div>
       </div>
 
       <div class="button-group">
-        ${validationMessage
-          ? html` <div class="validation-message">⚠️ ${validationMessage}</div> `
-          : ""}
+        ${
+          validationMessage
+            ? html` <div class="validation-message">⚠️ ${validationMessage}</div> `
+            : ""
+        }
 
         <md-outlined-button
           @click=${() => this._dispatch("reset-configuration")}

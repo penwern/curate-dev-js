@@ -584,17 +584,19 @@ class ArchivespaceBrowser extends LitElement {
               `,
             )}
           </div>
-          ${totalPages > 1
-            ? html`
-                <as-pagination
-                  .currentPage=${this.currentPage}
-                  .totalPages=${totalPages}
-                  .totalItems=${filtered.length}
-                  .itemsPerPage=${this.itemsPerPage}
-                  @page-change=${this._handlePageChange}
-                ></as-pagination>
-              `
-            : nothing}
+          ${
+            totalPages > 1
+              ? html`
+                  <as-pagination
+                    .currentPage=${this.currentPage}
+                    .totalPages=${totalPages}
+                    .totalItems=${filtered.length}
+                    .itemsPerPage=${this.itemsPerPage}
+                    @page-change=${this._handlePageChange}
+                  ></as-pagination>
+                `
+              : nothing
+          }
         </div>
       </div>
     `;
@@ -648,17 +650,19 @@ class ArchivespaceBrowser extends LitElement {
               `,
             )}
           </div>
-          ${totalPages > 1
-            ? html`
-                <as-pagination
-                  .currentPage=${this.currentPage}
-                  .totalPages=${totalPages}
-                  .totalItems=${filtered.length}
-                  .itemsPerPage=${this.itemsPerPage}
-                  @page-change=${this._handlePageChange}
-                ></as-pagination>
-              `
-            : nothing}
+          ${
+            totalPages > 1
+              ? html`
+                  <as-pagination
+                    .currentPage=${this.currentPage}
+                    .totalPages=${totalPages}
+                    .totalItems=${filtered.length}
+                    .itemsPerPage=${this.itemsPerPage}
+                    @page-change=${this._handlePageChange}
+                  ></as-pagination>
+                `
+              : nothing
+          }
         </div>
       </div>
     `;
@@ -687,9 +691,11 @@ class ArchivespaceBrowser extends LitElement {
           <div class="main-panel">
             <as-empty-state
               title="Search records"
-              message=${this.resourceId
-                ? "Enter a term to search across this collection's records."
-                : "Select a collection first, then enter a term to search its records."}
+              message=${
+                this.resourceId
+                  ? "Enter a term to search across this collection's records."
+                  : "Select a collection first, then enter a term to search its records."
+              }
             ></as-empty-state>
           </div>
         </div>

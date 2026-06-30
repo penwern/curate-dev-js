@@ -966,18 +966,20 @@ export class EmailList extends LitElement {
         aria-expanded=${hasChildren ? String(isExpanded) : nothing}
       >
         <div class="folder-row">
-          ${hasChildren
-            ? html`
-                <button
-                  class="folder-toggle"
-                  type="button"
-                  aria-label="${isExpanded ? "Collapse" : "Expand"} ${node.name}"
-                  @click=${(event) => this._toggleFolder(node.path, event)}
-                >
-                  <span class="icon">${isExpanded ? chevronDownIcon : chevronRightIcon}</span>
-                </button>
-              `
-            : html`<span class="folder-toggle spacer"></span>`}
+          ${
+            hasChildren
+              ? html`
+                  <button
+                    class="folder-toggle"
+                    type="button"
+                    aria-label="${isExpanded ? "Collapse" : "Expand"} ${node.name}"
+                    @click=${(event) => this._toggleFolder(node.path, event)}
+                  >
+                    <span class="icon">${isExpanded ? chevronDownIcon : chevronRightIcon}</span>
+                  </button>
+                `
+              : html`<span class="folder-toggle spacer"></span>`
+          }
           <button
             class=${`folder-label ${isSelected ? "is-selected" : ""}`}
             type="button"
@@ -989,13 +991,15 @@ export class EmailList extends LitElement {
             <span class="folder-count">${node.emailCount ?? 0}</span>
           </button>
         </div>
-        ${hasChildren && isExpanded
-          ? html`
-              <div class="folder-children" role="group">
-                ${node.children.map((child) => this._renderFolderNode(child, depth + 1))}
-              </div>
-            `
-          : ""}
+        ${
+          hasChildren && isExpanded
+            ? html`
+                <div class="folder-children" role="group">
+                  ${node.children.map((child) => this._renderFolderNode(child, depth + 1))}
+                </div>
+              `
+            : ""
+        }
       </div>
     `;
   }
@@ -1015,23 +1019,27 @@ export class EmailList extends LitElement {
           <div>
             <p class="folder-panel-title">Folders</p>
             <p class="folder-panel-caption">
-              ${selectedLabel
-                ? `Viewing ${selectedLabel}`
-                : "Browse folders captured from the PST archive"}
+              ${
+                selectedLabel
+                  ? `Viewing ${selectedLabel}`
+                  : "Browse folders captured from the PST archive"
+              }
             </p>
           </div>
           <div class="folder-panel-actions">
-            ${this.selectedFolderPath
-              ? html`
-                  <button
-                    class="clear-folder-btn"
-                    type="button"
-                    @click=${this._clearFolderSelection}
-                  >
-                    Show all
-                  </button>
-                `
-              : nothing}
+            ${
+              this.selectedFolderPath
+                ? html`
+                    <button
+                      class="clear-folder-btn"
+                      type="button"
+                      @click=${this._clearFolderSelection}
+                    >
+                      Show all
+                    </button>
+                  `
+                : nothing
+            }
             <button
               class="folder-panel-close"
               type="button"
@@ -1246,9 +1254,11 @@ export class EmailList extends LitElement {
         <p class="list-summary">
           Showing ${visibleCount} of ${totalCount} ${this._pluralize("message", totalCount)}
           ${folderLabel ? html`<span class="summary-highlight">in ${folderLabel}</span>` : ""}
-          ${this.searchQuery
-            ? html`<span class="summary-highlight">matching "${this.searchQuery}"</span>`
-            : ""}
+          ${
+            this.searchQuery
+              ? html`<span class="summary-highlight">matching "${this.searchQuery}"</span>`
+              : ""
+          }
         </p>
         <div class="list-toolbar">
           <div class="search-bar">
@@ -1259,46 +1269,56 @@ export class EmailList extends LitElement {
               .value=${this.searchQuery}
               @input=${(event) => (this.searchQuery = event.target.value)}
             />
-            ${this.searchQuery
-              ? html`
-                  <button
-                    class="search-clear"
-                    type="button"
-                    @click=${this._clearSearch}
-                    aria-label="Clear search"
-                  >
-                    <span class="icon">${closeIcon}</span>
-                  </button>
-                `
-              : ""}
+            ${
+              this.searchQuery
+                ? html`
+                    <button
+                      class="search-clear"
+                      type="button"
+                      @click=${this._clearSearch}
+                      aria-label="Clear search"
+                    >
+                      <span class="icon">${closeIcon}</span>
+                    </button>
+                  `
+                : ""
+            }
           </div>
 
-          ${hasFolders
-            ? html`
-                <div class="folder-filter">
-                  <button
-                    class=${folderButtonClasses}
-                    type="button"
-                    aria-haspopup="dialog"
-                    aria-expanded=${String(this.folderPanelOpen)}
-                    @click=${this._toggleFolderPanel}
-                  >
-                    <span class="icon">${folderIcon}</span>
-                    <span class="text">
-                      <span class="title">Folders</span>
-                      <span class="subtitle">${folderLabel || "All mail"}</span>
-                    </span>
-                  </button>
-                  ${this.folderPanelOpen
-                    ? html`
-                        <div class="folder-panel-popover" role="dialog" aria-label="Choose folder">
-                          ${this._renderFolderSection()}
-                        </div>
-                      `
-                    : nothing}
-                </div>
-              `
-            : nothing}
+          ${
+            hasFolders
+              ? html`
+                  <div class="folder-filter">
+                    <button
+                      class=${folderButtonClasses}
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-expanded=${String(this.folderPanelOpen)}
+                      @click=${this._toggleFolderPanel}
+                    >
+                      <span class="icon">${folderIcon}</span>
+                      <span class="text">
+                        <span class="title">Folders</span>
+                        <span class="subtitle">${folderLabel || "All mail"}</span>
+                      </span>
+                    </button>
+                    ${
+                      this.folderPanelOpen
+                        ? html`
+                            <div
+                              class="folder-panel-popover"
+                              role="dialog"
+                              aria-label="Choose folder"
+                            >
+                              ${this._renderFolderSection()}
+                            </div>
+                          `
+                        : nothing
+                    }
+                  </div>
+                `
+              : nothing
+          }
 
           <div class="sort-controls">
             <span class="sort-label">Sort</span>
@@ -1330,26 +1350,30 @@ export class EmailList extends LitElement {
 
       <div class="list-body">
         <div class="list-body-scroll">
-          ${grouped.length === 0
-            ? html`
-                <div class="no-results">
-                  ${this.searchQuery
-                    ? "No emails match your search"
-                    : "There are no emails to display yet."}
-                </div>
-              `
-            : html`
-                <lit-virtualizer
-                  class="list-virtualizer"
-                  scroller
-                  style=${styleMap({ height: "100%" })}
-                  role="list"
-                  layout="vertical"
-                  .items=${grouped}
-                  .renderItem=${this._renderGroupItem}
-                  .keyFunction=${this._groupKey}
-                ></lit-virtualizer>
-              `}
+          ${
+            grouped.length === 0
+              ? html`
+                  <div class="no-results">
+                    ${
+                      this.searchQuery
+                        ? "No emails match your search"
+                        : "There are no emails to display yet."
+                    }
+                  </div>
+                `
+              : html`
+                  <lit-virtualizer
+                    class="list-virtualizer"
+                    scroller
+                    style=${styleMap({ height: "100%" })}
+                    role="list"
+                    layout="vertical"
+                    .items=${grouped}
+                    .renderItem=${this._renderGroupItem}
+                    .keyFunction=${this._groupKey}
+                  ></lit-virtualizer>
+                `
+          }
         </div>
       </div>
     `;
