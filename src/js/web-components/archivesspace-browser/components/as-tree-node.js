@@ -308,13 +308,15 @@ class AsTreeNode extends LitElement {
       <div class="${nodeClasses.join(" ")}" style=${indentStyles} @click=${this._handleSelect}>
         <div class="node-row-1">
           <div class="node-indent">
-            ${isExpandable
-              ? html`
-                  <md-icon-button @click=${this._handleToggleExpand}>
-                    ${this.isExpanded ? chevronDownIcon : chevronRightIcon}
-                  </md-icon-button>
-                `
-              : html`<span class="leaf-spacer"></span>`}
+            ${
+              isExpandable
+                ? html`
+                    <md-icon-button @click=${this._handleToggleExpand}>
+                      ${this.isExpanded ? chevronDownIcon : chevronRightIcon}
+                    </md-icon-button>
+                  `
+                : html`<span class="leaf-spacer"></span>`
+            }
           </div>
           <md-checkbox
             class="node-select-checkbox"
@@ -330,37 +332,43 @@ class AsTreeNode extends LitElement {
           <div class="node-meta">
             ${this._renderStatusBadge(this.node.status, this.node.statusType)}
             ${this.node.extent ? html`<div class="meta-chip">${this.node.extent}</div>` : nothing}
-            ${this.node.location
-              ? html`<div class="meta-chip">
-                  <span class="chip-icon">${pinIcon}</span>
-                  ${this.searchQuery.trim().length > 0
-                    ? highlightText(this.node.location, this.searchQuery)
-                    : this.node.location}
-                </div>`
-              : nothing}
+            ${
+              this.node.location
+                ? html`<div class="meta-chip">
+                    <span class="chip-icon">${pinIcon}</span>
+                    ${
+                      this.searchQuery.trim().length > 0
+                        ? highlightText(this.node.location, this.searchQuery)
+                        : this.node.location
+                    }
+                  </div>`
+                : nothing
+            }
           </div>
-          ${hasKnownChildren
-            ? html`
-                <div class="node-branch-controls">
-                  <md-icon-button
-                    class="branch-control"
-                    aria-label="Expand entire branch"
-                    title="Expand branch"
-                    @click=${this._handleExpandBranch}
-                  >
-                    ${expandAllIcon}
-                  </md-icon-button>
-                  <md-icon-button
-                    class="branch-control"
-                    aria-label="Collapse entire branch"
-                    title="Collapse branch"
-                    @click=${this._handleCollapseBranch}
-                  >
-                    ${collapseAllIcon}
-                  </md-icon-button>
-                </div>
-              `
-            : nothing}
+          ${
+            hasKnownChildren
+              ? html`
+                  <div class="node-branch-controls">
+                    <md-icon-button
+                      class="branch-control"
+                      aria-label="Expand entire branch"
+                      title="Expand branch"
+                      @click=${this._handleExpandBranch}
+                    >
+                      ${expandAllIcon}
+                    </md-icon-button>
+                    <md-icon-button
+                      class="branch-control"
+                      aria-label="Collapse entire branch"
+                      title="Collapse branch"
+                      @click=${this._handleCollapseBranch}
+                    >
+                      ${collapseAllIcon}
+                    </md-icon-button>
+                  </div>
+                `
+              : nothing
+          }
           ${this.isLoading ? html`<penwern-spinner size="32"></penwern-spinner>` : nothing}
         </div>
       </div>

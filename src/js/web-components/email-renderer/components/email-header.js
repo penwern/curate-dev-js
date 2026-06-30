@@ -255,35 +255,43 @@ export class EmailHeader extends LitElement {
       <div class="meta-grid">
         <span class="label">To</span>
         ${this._renderRecipientValue(this.email.to)}
-        ${this.email.cc && this.email.cc.length > 0
-          ? html`
-              <span class="label">Cc</span>
-              ${this._renderRecipientValue(this.email.cc)}
-            `
-          : ""}
-        ${this.email.bcc && this.email.bcc.length > 0
-          ? html`
-              <span class="label">Bcc</span>
-              ${this._renderRecipientValue(this.email.bcc)}
-            `
-          : ""}
-        ${this.email.replyTo
-          ? html`
-              <span class="label">Reply-To</span>
-              <span class="value">${this._formatRecipient(this.email.replyTo)}</span>
-            `
-          : ""}
-        ${folderLabel
-          ? html`
-              <span class="label">Folder</span>
-              <span class="value">
-                <span class="folder-chip" title=${folderLabel}>
-                  ${folderIcon}
-                  <span>${folderLabel}</span>
+        ${
+          this.email.cc && this.email.cc.length > 0
+            ? html`
+                <span class="label">Cc</span>
+                ${this._renderRecipientValue(this.email.cc)}
+              `
+            : ""
+        }
+        ${
+          this.email.bcc && this.email.bcc.length > 0
+            ? html`
+                <span class="label">Bcc</span>
+                ${this._renderRecipientValue(this.email.bcc)}
+              `
+            : ""
+        }
+        ${
+          this.email.replyTo
+            ? html`
+                <span class="label">Reply-To</span>
+                <span class="value">${this._formatRecipient(this.email.replyTo)}</span>
+              `
+            : ""
+        }
+        ${
+          folderLabel
+            ? html`
+                <span class="label">Folder</span>
+                <span class="value">
+                  <span class="folder-chip" title=${folderLabel}>
+                    ${folderIcon}
+                    <span>${folderLabel}</span>
+                  </span>
                 </span>
-              </span>
-            `
-          : ""}
+              `
+            : ""
+        }
 
         <span class="label">Message ID</span>
         <span class="value code">${this.email.messageId || "Unavailable"}</span>
@@ -298,21 +306,22 @@ export class EmailHeader extends LitElement {
         <span class="icon">${this.showFullHeaders ? chevronUpIcon : chevronDownIcon}</span>
       </button>
 
-      ${this.showFullHeaders
-        ? html`
-            <pre class="full-headers">
+      ${
+        this.showFullHeaders
+          ? html`
+              <pre class="full-headers">
 ${JSON.stringify(
-                this.email.headers || {
-                  "Message-ID": this.email.messageId,
-                  "In-Reply-To": this.email.inReplyTo,
-                  References: this.email.references,
-                },
-                null,
-                2,
-              )}</pre
-            >
-          `
-        : ""}
+  this.email.headers || {
+    "Message-ID": this.email.messageId,
+    "In-Reply-To": this.email.inReplyTo,
+    References: this.email.references,
+  },
+  null,
+  2,
+)}</pre>
+            `
+          : ""
+      }
     `;
   }
 }

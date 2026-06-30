@@ -159,9 +159,11 @@ class ManualHarvestByIdsPanel extends LitElement {
         >
           <span>
             ${playIcon}
-            ${this.isManualHarvesting
-              ? "Harvesting..."
-              : `Harvest ${idCount > 0 ? idCount : ""} Record${idCount === 1 ? "" : "s"}`}
+            ${
+              this.isManualHarvesting
+                ? "Harvesting..."
+                : `Harvest ${idCount > 0 ? idCount : ""} Record${idCount === 1 ? "" : "s"}`
+            }
           </span>
         </md-filled-button>
       </div>

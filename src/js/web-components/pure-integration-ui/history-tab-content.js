@@ -159,11 +159,11 @@ class HarvestHistoryItem extends LitElement {
           <h4>${this.harvest.date}</h4>
           <div class="harvest-meta">
             <span>
-              ${this.harvest.success
-                ? `${this.harvest.records_successful || this.harvest.records || 0} successful`
-                : `Error: ${this.harvest.error}`}${this.harvest.records_cached > 0
-                ? `, ${this.harvest.records_cached} cached`
-                : ""}
+              ${
+                this.harvest.success
+                  ? `${this.harvest.records_successful || this.harvest.records || 0} successful`
+                  : `Error: ${this.harvest.error}`
+              }${this.harvest.records_cached > 0 ? `, ${this.harvest.records_cached} cached` : ""}
             </span>
             <span>Duration: ${this.harvest.duration}</span>
           </div>

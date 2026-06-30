@@ -224,83 +224,74 @@ class DataTable extends LitElement {
                       style=${this.sortable ? "" : "cursor: default"}
                     >
                       ${col.label}
-                      ${this.sortable
-                        ? this.sortField === col.field
-                          ? html`<span class="sort-indicator active"
-                              >${this.sortDesc ? "▼" : "▲"}</span
-                            >`
-                          : html`<span class="sort-indicator"></span>`
-                        : ""}
+                      ${
+                        this.sortable
+                          ? this.sortField === col.field
+                            ? html`<span class="sort-indicator active"
+                                >${this.sortDesc ? "▼" : "▲"}</span
+                              >`
+                            : html`<span class="sort-indicator"></span>`
+                          : ""
+                      }
                     </th>
                   `,
                 )}
               </tr>
             </thead>
             <tbody>
-              ${this.loading
-                ? Array.from({ length: 5 }).map(
-                    () => html`
-                      <tr class="loading-row">
-                        ${this.columns.map(() => html`<td></td>`)}
-                      </tr>
-                    `,
-                  )
-                : this._displayRows.length === 0
-                  ? html`
-                      <tr class="empty-row">
-                        <td colspan=${this.columns.length}>No data to display</td>
-                      </tr>
-                    `
-                  : this._displayRows.map(
-                      (row) => html`
-                        <tr>
-                          ${this.columns.map(
-                            (col) => html`
-                              <td
-                                title=${col.format
-                                  ? col.format(row[col.field], row)
-                                  : (row[col.field] ?? "")}
-                              >
-                                ${col.format
-                                  ? col.format(row[col.field], row)
-                                  : (row[col.field] ?? "")}
-                              </td>
-                            `,
-                          )}
+              ${
+                this.loading
+                  ? Array.from({ length: 5 }).map(
+                      () => html`
+                        <tr class="loading-row">
+                          ${this.columns.map(() => html`<td></td>`)}
                         </tr>
                       `,
-                    )}
+                    )
+                  : this._displayRows.length === 0
+                    ? html`
+                        <tr class="empty-row">
+                          <td colspan=${this.columns.length}>No data to display</td>
+                        </tr>
+                      `
+                    : this._displayRows.map(
+                        (row) => html`
+                          <tr>
+                            ${this.columns.map(
+                              (col) => html`
+                                <td
+                                  title=${
+                                    col.format
+                                      ? col.format(row[col.field], row)
+                                      : (row[col.field] ?? "")
+                                  }
+                                >
+                                  ${
+                                    col.format
+                                      ? col.format(row[col.field], row)
+                                      : (row[col.field] ?? "")
+                                  }
+                                </td>
+                              `,
+                            )}
+                          </tr>
+                        `,
+                      )
+              }
             </tbody>
           </table>
         </div>
-        ${this.serverPaginated
-          ? html`
-              <div class="footer">
-                <span>Page ${this.page + 1}</span>
-                <div class="page-info">
-                  <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
-                    ${chevronLeftIcon}
-                  </md-icon-button>
-                  <md-icon-button
-                    ?disabled=${this.rows.length < this.pageSize}
-                    @click=${this._nextPage}
-                  >
-                    ${chevronRightIcon}
-                  </md-icon-button>
-                </div>
-              </div>
-            `
-          : total > 0
+        ${
+          this.serverPaginated
             ? html`
                 <div class="footer">
-                  <span>${startRow}–${endRow} of ${total.toLocaleString()}</span>
+                  <span>Page ${this.page + 1}</span>
                   <div class="page-info">
                     <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
                       ${chevronLeftIcon}
                     </md-icon-button>
-                    <span>Page ${this.page + 1} of ${this._totalPages}</span>
                     <md-icon-button
-                      ?disabled=${this.page >= this._totalPages - 1}
+                      ?disabled=${this.rows.length < this.pageSize}
                       @click=${this._nextPage}
                     >
                       ${chevronRightIcon}
@@ -308,7 +299,26 @@ class DataTable extends LitElement {
                   </div>
                 </div>
               `
-            : ""}
+            : total > 0
+              ? html`
+                  <div class="footer">
+                    <span>${startRow}–${endRow} of ${total.toLocaleString()}</span>
+                    <div class="page-info">
+                      <md-icon-button ?disabled=${this.page === 0} @click=${this._prevPage}>
+                        ${chevronLeftIcon}
+                      </md-icon-button>
+                      <span>Page ${this.page + 1} of ${this._totalPages}</span>
+                      <md-icon-button
+                        ?disabled=${this.page >= this._totalPages - 1}
+                        @click=${this._nextPage}
+                      >
+                        ${chevronRightIcon}
+                      </md-icon-button>
+                    </div>
+                  </div>
+                `
+              : ""
+        }
       </div>
     `;
   }

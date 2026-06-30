@@ -388,9 +388,11 @@ class AsFilterPopover extends LitElement {
             <div>
               <div>Only under ${this.hasSelection ? `"${selectionLabel}"` : "selected node"}</div>
               <small>
-                ${this.hasSelection
-                  ? "Search is limited to this node's descendants"
-                  : "Select a node in the tree to enable subtree search"}
+                ${
+                  this.hasSelection
+                    ? "Search is limited to this node's descendants"
+                    : "Select a node in the tree to enable subtree search"
+                }
               </small>
             </div>
           </label>
@@ -412,45 +414,49 @@ class AsFilterPopover extends LitElement {
             ${this._showAdvancedFilters ? chevronUpIcon : chevronDownIcon}
           </span>
         </button>
-        ${this._showAdvancedFilters
-          ? html`
-              <div class="filter-helper">
-                Add custom Lucene query filters. Examples: <code>condition:"good"</code>,
-                <code>identifier:ABC*</code>, <code>primary_type:archival_object</code>
-              </div>
-              <div class="advanced-filters-list">
-                ${this.advancedFilters?.length === 0
-                  ? html`<div class="empty-state">No advanced filters added</div>`
-                  : map(
-                      this.advancedFilters,
-                      (filter, idx) => html`
-                        <div class="advanced-filter-chip">
-                          <code>${filter}</code>
-                          <button
-                            type="button"
-                            class="remove-filter"
-                            @click=${() => this._handleRemoveAdvanced(idx)}
-                            aria-label="Remove filter"
-                          >
-                            ${closeIcon}
-                          </button>
-                        </div>
-                      `,
-                    )}
-              </div>
-              <div class="advanced-filter-input-row">
-                <input
-                  type="text"
-                  class="advanced-filter-input"
-                  placeholder='e.g., condition:"good"'
-                  @keydown=${this._handleAdvancedKeydown}
-                />
-                <md-filled-tonal-button @click=${this._handleAddAdvanced}>
-                  Add
-                </md-filled-tonal-button>
-              </div>
-            `
-          : nothing}
+        ${
+          this._showAdvancedFilters
+            ? html`
+                <div class="filter-helper">
+                  Add custom Lucene query filters. Examples: <code>condition:"good"</code>,
+                  <code>identifier:ABC*</code>, <code>primary_type:archival_object</code>
+                </div>
+                <div class="advanced-filters-list">
+                  ${
+                    this.advancedFilters?.length === 0
+                      ? html`<div class="empty-state">No advanced filters added</div>`
+                      : map(
+                          this.advancedFilters,
+                          (filter, idx) => html`
+                            <div class="advanced-filter-chip">
+                              <code>${filter}</code>
+                              <button
+                                type="button"
+                                class="remove-filter"
+                                @click=${() => this._handleRemoveAdvanced(idx)}
+                                aria-label="Remove filter"
+                              >
+                                ${closeIcon}
+                              </button>
+                            </div>
+                          `,
+                        )
+                  }
+                </div>
+                <div class="advanced-filter-input-row">
+                  <input
+                    type="text"
+                    class="advanced-filter-input"
+                    placeholder='e.g., condition:"good"'
+                    @keydown=${this._handleAdvancedKeydown}
+                  />
+                  <md-filled-tonal-button @click=${this._handleAddAdvanced}>
+                    Add
+                  </md-filled-tonal-button>
+                </div>
+              `
+            : nothing
+        }
       </div>
     `;
   }

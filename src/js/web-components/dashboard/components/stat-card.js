@@ -161,20 +161,24 @@ class StatCard extends LitElement {
           <slot name="icon"></slot>
         </div>
         <div class="label">${this.label}</div>
-        ${this.loading
-          ? html`
-              <div class="loading-shimmer loading-value"></div>
-              <div class="loading-shimmer loading-subtitle"></div>
-            `
-          : html`
-              <div class="value-row">
-                <span class="value">${this.value}</span>
-                ${this.trend
-                  ? html`<span class="trend ${this.trendDirection}">${this.trend}</span>`
-                  : ""}
-              </div>
-              ${this.subtitle ? html`<div class="subtitle">${this.subtitle}</div>` : ""}
-            `}
+        ${
+          this.loading
+            ? html`
+                <div class="loading-shimmer loading-value"></div>
+                <div class="loading-shimmer loading-subtitle"></div>
+              `
+            : html`
+                <div class="value-row">
+                  <span class="value">${this.value}</span>
+                  ${
+                    this.trend
+                      ? html`<span class="trend ${this.trendDirection}">${this.trend}</span>`
+                      : ""
+                  }
+                </div>
+                ${this.subtitle ? html`<div class="subtitle">${this.subtitle}</div>` : ""}
+              `
+        }
       </div>
     `;
   }

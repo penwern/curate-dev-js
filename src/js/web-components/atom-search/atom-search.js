@@ -271,30 +271,32 @@ class AtoMSearchInterface extends LitElement {
             <div class="criterion-row" style="animation-delay: ${index * 0.05}s">
               <div class="criterion-number">${index + 1}</div>
 
-              ${index > 0
-                ? html`
-                    <div class="operator-select">
-                      <md-outlined-select
-                        label="Operator"
-                        .value=${criterion.operator}
-                        @change=${(e) =>
-                          this._updateCriterion(criterion.id, "operator", e.target.value)}
-                      >
-                        ${map(
-                          OPERATORS,
-                          (op) => html`
-                            <md-select-option
-                              value=${op.value}
-                              ?selected=${criterion.operator === op.value}
-                            >
-                              <div slot="headline">${op.label}</div>
-                            </md-select-option>
-                          `,
-                        )}
-                      </md-outlined-select>
-                    </div>
-                  `
-                : nothing}
+              ${
+                index > 0
+                  ? html`
+                      <div class="operator-select">
+                        <md-outlined-select
+                          label="Operator"
+                          .value=${criterion.operator}
+                          @change=${(e) =>
+                            this._updateCriterion(criterion.id, "operator", e.target.value)}
+                        >
+                          ${map(
+                            OPERATORS,
+                            (op) => html`
+                              <md-select-option
+                                value=${op.value}
+                                ?selected=${criterion.operator === op.value}
+                              >
+                                <div slot="headline">${op.label}</div>
+                              </md-select-option>
+                            `,
+                          )}
+                        </md-outlined-select>
+                      </div>
+                    `
+                  : nothing
+              }
 
               <div class="query-field">
                 <md-outlined-text-field
@@ -323,17 +325,19 @@ class AtoMSearchInterface extends LitElement {
                 </md-outlined-select>
               </div>
 
-              ${this.criteria.length > 1
-                ? html`
-                    <md-icon-button
-                      class="remove-btn"
-                      title="Remove criterion"
-                      @click=${() => this._removeCriterion(criterion.id)}
-                    >
-                      ${this._svg(mdiClose)}
-                    </md-icon-button>
-                  `
-                : nothing}
+              ${
+                this.criteria.length > 1
+                  ? html`
+                      <md-icon-button
+                        class="remove-btn"
+                        title="Remove criterion"
+                        @click=${() => this._removeCriterion(criterion.id)}
+                      >
+                        ${this._svg(mdiClose)}
+                      </md-icon-button>
+                    `
+                  : nothing
+              }
             </div>
           `,
         )}
@@ -408,43 +412,53 @@ class AtoMSearchInterface extends LitElement {
                 <div class="result-content">
                   <div class="result-title">${result.title}</div>
                   <div class="result-meta">
-                    ${result.reference_code
-                      ? html`<span class="result-tag tag-ref-code">${result.reference_code}</span>`
-                      : nothing}
-                    ${result.level_of_description
-                      ? html`<span class="result-tag tag-level"
-                          >${result.level_of_description}</span
-                        >`
-                      : nothing}
+                    ${
+                      result.reference_code
+                        ? html`<span class="result-tag tag-ref-code"
+                            >${result.reference_code}</span
+                          >`
+                        : nothing
+                    }
+                    ${
+                      result.level_of_description
+                        ? html`<span class="result-tag tag-level"
+                            >${result.level_of_description}</span
+                          >`
+                        : nothing
+                    }
                   </div>
-                  ${this.atomUrl
-                    ? html`
-                        <a
-                          class="result-url"
-                          href="${this.atomUrl}/${result.slug}"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          ${this.atomUrl}/${result.slug}
-                        </a>
-                      `
-                    : nothing}
+                  ${
+                    this.atomUrl
+                      ? html`
+                          <a
+                            class="result-url"
+                            href="${this.atomUrl}/${result.slug}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            ${this.atomUrl}/${result.slug}
+                          </a>
+                        `
+                      : nothing
+                  }
                   <div class="result-actions">
                     <md-filled-button @click=${() => this._handleLink(result.slug)}>
                       ${this._svg(mdiLinkVariant)} Link to this description
                     </md-filled-button>
                   </div>
                 </div>
-                ${result.thumbnail_url
-                  ? html`
-                      <img
-                        class="result-thumbnail"
-                        src="${result.thumbnail_url.replace(/^http:\/\/[^/]+/, this.atomUrl)}"
-                        alt="Thumbnail for ${result.title}"
-                        loading="lazy"
-                      />
-                    `
-                  : nothing}
+                ${
+                  result.thumbnail_url
+                    ? html`
+                        <img
+                          class="result-thumbnail"
+                          src="${result.thumbnail_url.replace(/^http:\/\/[^/]+/, this.atomUrl)}"
+                          alt="Thumbnail for ${result.title}"
+                          loading="lazy"
+                        />
+                      `
+                    : nothing
+                }
               </div>
             `,
           )}

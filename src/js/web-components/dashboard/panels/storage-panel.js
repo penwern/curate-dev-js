@@ -557,73 +557,77 @@ class StoragePanel extends LitElement {
         represent current usage only.
       </div>
 
-      ${this.storageReportingUrl
-        ? html`
-            <div class="history-section">
-              <chart-card
-                heading="Storage Over Time"
-                type="line"
-                .data=${this._historyData}
-                .loading=${this._historyLoading}
-                .height=${280}
-                .options=${{
-                  plugins: {
-                    legend: { display: this._historyView === "datasource", position: "bottom" },
-                    tooltip: {
-                      callbacks: {
-                        label: (ctx) => ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`,
+      ${
+        this.storageReportingUrl
+          ? html`
+              <div class="history-section">
+                <chart-card
+                  heading="Storage Over Time"
+                  type="line"
+                  .data=${this._historyData}
+                  .loading=${this._historyLoading}
+                  .height=${280}
+                  .options=${{
+                    plugins: {
+                      legend: { display: this._historyView === "datasource", position: "bottom" },
+                      tooltip: {
+                        callbacks: {
+                          label: (ctx) => ` ${ctx.dataset.label}: ${formatBytes(ctx.raw)}`,
+                        },
                       },
                     },
-                  },
-                  scales: {
-                    x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } },
-                    y: { ticks: { callback: (v) => formatBytes(v) } },
-                  },
-                }}
-              >
-                <div slot="actions" class="history-controls">
-                  <select
-                    @change=${(e) => {
-                      this._bucket = e.target.value;
-                    }}
-                  >
-                    <option value="day" ?selected=${this._bucket === "day"}>Day</option>
-                    <option value="week" ?selected=${this._bucket === "week"}>Week</option>
-                    <option value="month" ?selected=${this._bucket === "month"}>Month</option>
-                  </select>
-                  <select
-                    @change=${(e) => {
-                      this._rangeKey = e.target.value;
-                    }}
-                  >
-                    <option value="30d" ?selected=${this._rangeKey === "30d"}>Last 30 days</option>
-                    <option value="6m" ?selected=${this._rangeKey === "6m"}>Last 6 months</option>
-                    <option value="1y" ?selected=${this._rangeKey === "1y"}>Last year</option>
-                  </select>
-                  <div class="ctrl-sep"></div>
-                  <div class="toggle-group">
-                    <button
-                      class="toggle-btn ${this._historyView === "total" ? "active" : ""}"
-                      @click=${() => {
-                        this._historyView = "total";
+                    scales: {
+                      x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+                      y: { ticks: { callback: (v) => formatBytes(v) } },
+                    },
+                  }}
+                >
+                  <div slot="actions" class="history-controls">
+                    <select
+                      @change=${(e) => {
+                        this._bucket = e.target.value;
                       }}
                     >
-                      Total
-                    </button>
-                    <button
-                      class="toggle-btn ${this._historyView === "datasource" ? "active" : ""}"
-                      @click=${() => {
-                        this._historyView = "datasource";
+                      <option value="day" ?selected=${this._bucket === "day"}>Day</option>
+                      <option value="week" ?selected=${this._bucket === "week"}>Week</option>
+                      <option value="month" ?selected=${this._bucket === "month"}>Month</option>
+                    </select>
+                    <select
+                      @change=${(e) => {
+                        this._rangeKey = e.target.value;
                       }}
                     >
-                      Per datasource
-                    </button>
+                      <option value="30d" ?selected=${this._rangeKey === "30d"}>
+                        Last 30 days
+                      </option>
+                      <option value="6m" ?selected=${this._rangeKey === "6m"}>Last 6 months</option>
+                      <option value="1y" ?selected=${this._rangeKey === "1y"}>Last year</option>
+                    </select>
+                    <div class="ctrl-sep"></div>
+                    <div class="toggle-group">
+                      <button
+                        class="toggle-btn ${this._historyView === "total" ? "active" : ""}"
+                        @click=${() => {
+                          this._historyView = "total";
+                        }}
+                      >
+                        Total
+                      </button>
+                      <button
+                        class="toggle-btn ${this._historyView === "datasource" ? "active" : ""}"
+                        @click=${() => {
+                          this._historyView = "datasource";
+                        }}
+                      >
+                        Per datasource
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </chart-card>
-            </div>
-          `
-        : html``}
+                </chart-card>
+              </div>
+            `
+          : html``
+      }
     `;
   }
 }

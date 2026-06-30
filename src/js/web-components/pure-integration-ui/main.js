@@ -838,16 +838,18 @@ class PureIntegrationInterface extends LitElement {
       </md-dialog>
 
       <!-- Error Toast (Custom implementation since Material Web doesn't have snackbar yet) -->
-      ${this.showErrorSnackbar
-        ? html`
-            <div class="error-toast ${this.showErrorSnackbar ? "" : "hide"}">
-              <span>⚠️ ${this.errorMessage}</span>
-              <md-text-button @click=${() => (this.showErrorSnackbar = false)}>
-                Dismiss
-              </md-text-button>
-            </div>
-          `
-        : ""}
+      ${
+        this.showErrorSnackbar
+          ? html`
+              <div class="error-toast ${this.showErrorSnackbar ? "" : "hide"}">
+                <span>⚠️ ${this.errorMessage}</span>
+                <md-text-button @click=${() => (this.showErrorSnackbar = false)}>
+                  Dismiss
+                </md-text-button>
+              </div>
+            `
+          : ""
+      }
     `;
   }
 }

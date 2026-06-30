@@ -1283,22 +1283,26 @@ class MetadataMappingTabContent extends LitElement {
             ?selected=${this._discoveredSortBy === "field_name"}
           >
             Name
-            ${this._discoveredSortBy === "field_name"
-              ? this._discoveredSortDirection === "asc"
-                ? "↑"
-                : "↓"
-              : ""}
+            ${
+              this._discoveredSortBy === "field_name"
+                ? this._discoveredSortDirection === "asc"
+                  ? "↑"
+                  : "↓"
+                : ""
+            }
           </md-outlined-button>
           <md-outlined-button
             @click=${() => this._handleDiscoveredSortChange("occurrence_count")}
             ?selected=${this._discoveredSortBy === "occurrence_count"}
           >
             Count
-            ${this._discoveredSortBy === "occurrence_count"
-              ? this._discoveredSortDirection === "asc"
-                ? "↑"
-                : "↓"
-              : ""}
+            ${
+              this._discoveredSortBy === "occurrence_count"
+                ? this._discoveredSortDirection === "asc"
+                  ? "↑"
+                  : "↓"
+                : ""
+            }
           </md-outlined-button>
         </div>
       </div>
@@ -1307,9 +1311,11 @@ class MetadataMappingTabContent extends LitElement {
       <div class="discovered-results-info">
         <span>
           Showing ${pagination.startIndex}-${pagination.endIndex} of ${pagination.totalCount} fields
-          ${this._discoveredSearchTerm
-            ? `(filtered from ${this._discoveredQueue.length} total)`
-            : ""}
+          ${
+            this._discoveredSearchTerm
+              ? `(filtered from ${this._discoveredQueue.length} total)`
+              : ""
+          }
         </span>
       </div>
 
@@ -1340,62 +1346,72 @@ class MetadataMappingTabContent extends LitElement {
 
       <!-- Fields List -->
       <md-list class="field-list checkbox-list discovered-fields-list">
-        ${pagination.fields.length === 0
-          ? html`
-              <md-list-item noninteractive>
-                <span slot="headline">
-                  ${this._discoveredSearchTerm
-                    ? "No fields match your search"
-                    : "No discovered fields waiting for review"}
-                </span>
-                <span slot="supporting-text">
-                  ${this._discoveredSearchTerm
-                    ? "Try a different search term or clear the search"
-                    : "Run field discovery to find new fields that aren't whitelisted"}
-                </span>
-              </md-list-item>
-            `
-          : map(
-              pagination.fields,
-              (field) => html`
-                <md-list-item
-                  @click=${() => this._toggleQueueFieldSelection(field.field_name)}
-                  ?selected=${this._selectedQueueFields.has(field.field_name)}
-                >
-                  <span slot="headline">${field.field_name}</span>
-                  <span slot="supporting-text">
-                    <span class="field-stats">
-                      Seen ${field.occurrence_count} times
-                      ${field.sample_value
-                        ? html`
-                            <span class="sample-value">
-                              • Example:
-                              "${field.sample_value.length > 50
-                                ? field.sample_value.substring(0, 50) + "..."
-                                : field.sample_value}"</span
-                            >
-                          `
-                        : ""}
-                    </span>
+        ${
+          pagination.fields.length === 0
+            ? html`
+                <md-list-item noninteractive>
+                  <span slot="headline">
+                    ${
+                      this._discoveredSearchTerm
+                        ? "No fields match your search"
+                        : "No discovered fields waiting for review"
+                    }
                   </span>
-                  <div slot="end" @click=${(e) => e.stopPropagation()}>
-                    <md-icon-button
-                      @click=${() =>
-                        this._reviewQueueField(field.discovered_id, "whitelisted", true)}
-                      title="Add to whitelist"
-                    >
-                      ${checkCircleIcon}
-                    </md-icon-button>
-                    <md-icon-button
-                      @click=${() => this._reviewQueueField(field.discovered_id, "ignored", false)}
-                      title="Ignore this field"
-                    >
-                      ${blockIcon}
-                    </md-icon-button>
-                  </div>
+                  <span slot="supporting-text">
+                    ${
+                      this._discoveredSearchTerm
+                        ? "Try a different search term or clear the search"
+                        : "Run field discovery to find new fields that aren't whitelisted"
+                    }
+                  </span>
                 </md-list-item>
-              `,
-            )}
+              `
+            : map(
+                pagination.fields,
+                (field) => html`
+                  <md-list-item
+                    @click=${() => this._toggleQueueFieldSelection(field.field_name)}
+                    ?selected=${this._selectedQueueFields.has(field.field_name)}
+                  >
+                    <span slot="headline">${field.field_name}</span>
+                    <span slot="supporting-text">
+                      <span class="field-stats">
+                        Seen ${field.occurrence_count} times
+                        ${
+                          field.sample_value
+                            ? html`
+                                <span class="sample-value">
+                                  • Example:
+                                  "${
+                                    field.sample_value.length > 50
+                                      ? field.sample_value.substring(0, 50) + "..."
+                                      : field.sample_value
+                                  }"</span
+                                >
+                              `
+                            : ""
+                        }
+                      </span>
+                    </span>
+                    <div slot="end" @click=${(e) => e.stopPropagation()}>
+                      <md-icon-button
+                        @click=${() =>
+                          this._reviewQueueField(field.discovered_id, "whitelisted", true)}
+                        title="Add to whitelist"
+                      >
+                        ${checkCircleIcon}
+                      </md-icon-button>
+                      <md-icon-button
+                        @click=${() => this._reviewQueueField(field.discovered_id, "ignored", false)}
+                        title="Ignore this field"
+                      >
+                        ${blockIcon}
+                      </md-icon-button>
+                    </div>
+                  </md-list-item>
+                `,
+              )
+        }
       </md-list>
 
       <!-- Pagination -->
@@ -1510,24 +1526,26 @@ class MetadataMappingTabContent extends LitElement {
               <md-outlined-button
                 @click=${this._handleProcessCachedRecords}
                 ?disabled=${this._isProcessingCached || hasUnmappedFields}
-                title=${hasUnmappedFields
-                  ? "Cannot process cached records while there are unmapped fields"
-                  : ""}
+                title=${
+                  hasUnmappedFields
+                    ? "Cannot process cached records while there are unmapped fields"
+                    : ""
+                }
               >
                 <span style="display: flex; align-items: center; gap: 8px;">
-                  ${hasUnmappedFields ? blockIcon : cachedIcon}${this._isProcessingCached
-                    ? "Processing..."
-                    : hasUnmappedFields
-                      ? "Resolve Unmapped Fields First"
-                      : "Process Cached Records"}
+                  ${hasUnmappedFields ? blockIcon : cachedIcon}${
+                    this._isProcessingCached
+                      ? "Processing..."
+                      : hasUnmappedFields
+                        ? "Resolve Unmapped Fields First"
+                        : "Process Cached Records"
+                  }
                 </span>
               </md-outlined-button>
               <span
-                class="cached-badge ${this._isProcessingCached
-                  ? "processing"
-                  : hasUnmappedFields
-                    ? "blocked"
-                    : ""}"
+                class="cached-badge ${
+                  this._isProcessingCached ? "processing" : hasUnmappedFields ? "blocked" : ""
+                }"
               >
                 <span style="display: flex; align-items: center; gap: 8px;">
                   ${when(
@@ -1538,11 +1556,13 @@ class MetadataMappingTabContent extends LitElement {
                         style="--md-circular-progress-size: 16px;"
                       ></md-circular-progress>`,
                   )}
-                  ${this._isProcessingCached
-                    ? this._processingMessage || "Processing cached records..."
-                    : hasUnmappedFields
-                      ? `${this.cachedRecordsCount} records blocked by ${unmappedCount} unmapped field${unmappedCount === 1 ? "" : "s"}`
-                      : `${this.cachedRecordsCount} records waiting to be processed`}
+                  ${
+                    this._isProcessingCached
+                      ? this._processingMessage || "Processing cached records..."
+                      : hasUnmappedFields
+                        ? `${this.cachedRecordsCount} records blocked by ${unmappedCount} unmapped field${unmappedCount === 1 ? "" : "s"}`
+                        : `${this.cachedRecordsCount} records waiting to be processed`
+                  }
                 </span>
               </span>
             </div>
@@ -1560,24 +1580,30 @@ class MetadataMappingTabContent extends LitElement {
             <md-list-item lines="three" class=${action === "rejected" ? "rejected" : ""}>
               <div
                 slot="start"
-                class="list-item-start-icon ${action === "mapped"
-                  ? "mapped-icon-color"
-                  : action === "rejected"
-                    ? "rejected-icon-color"
-                    : ""}"
+                class="list-item-start-icon ${
+                  action === "mapped"
+                    ? "mapped-icon-color"
+                    : action === "rejected"
+                      ? "rejected-icon-color"
+                      : ""
+                }"
               >
                 <md-icon
-                  title="${action === "mapped"
-                    ? "Mapped"
-                    : action === "rejected"
-                      ? "Rejected"
-                      : "Not Mapped"}"
+                  title="${
+                    action === "mapped"
+                      ? "Mapped"
+                      : action === "rejected"
+                        ? "Rejected"
+                        : "Not Mapped"
+                  }"
                 >
-                  ${action === "mapped"
-                    ? checkCircleIcon
-                    : action === "rejected"
-                      ? blockIcon
-                      : checkboxBlankCircleIcon}
+                  ${
+                    action === "mapped"
+                      ? checkCircleIcon
+                      : action === "rejected"
+                        ? blockIcon
+                        : checkboxBlankCircleIcon
+                  }
                 </md-icon>
               </div>
 
@@ -1585,60 +1611,64 @@ class MetadataMappingTabContent extends LitElement {
 
               <div slot="supporting-text" class="supporting-text-wrapper">
                 <div class="mapping-details ${action}">
-                  ${action === "mapped" && mappings.length > 0
-                    ? html`
-                        <span class="mapped-to-label"
-                          >Mapped to
-                          ${mappings.filter((m) => m.action === "mapped" && m.curate_field).length}
-                          field${mappings.filter((m) => m.action === "mapped" && m.curate_field)
-                            .length > 1
-                            ? "s"
-                            : ""}:</span
-                        >
-                        <div class="multiple-mappings">
-                          ${mappings
-                            .filter((m) => m.action === "mapped" && m.curate_field)
-                            .map(
-                              (mapping) => html`
-                                <div class="mapping-item">
-                                  <span class="mapped-to-value">
-                                    ${this._getCurateFieldDisplayInfo(mapping.curate_field, "full")}
-                                  </span>
-                                  <md-icon-button
-                                    title="Remove this mapping"
-                                    @click=${(e) => this._deleteMappingById(mapping.mapping_id, e)}
-                                    style="--md-icon-button-size: 32px; margin-left: 4px;"
-                                  >
-                                    ${deleteIcon}
-                                  </md-icon-button>
-                                </div>
-                              `,
-                            )}
-                        </div>
-                      `
-                    : action === "rejected"
+                  ${
+                    action === "mapped" && mappings.length > 0
                       ? html`
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <span>Rejected - will not be included in harvest</span>
+                          <span class="mapped-to-label"
+                            >Mapped to
+                            ${mappings.filter((m) => m.action === "mapped" && m.curate_field).length}
+                            field${
+                              mappings.filter((m) => m.action === "mapped" && m.curate_field)
+                                .length > 1
+                                ? "s"
+                                : ""
+                            }:</span
+                          >
+                          <div class="multiple-mappings">
                             ${mappings
-                              .filter((m) => m.action === "rejected")
+                              .filter((m) => m.action === "mapped" && m.curate_field)
                               .map(
                                 (mapping) => html`
-                                  <md-icon-button
-                                    title="Remove rejection"
-                                    @click=${(e) => this._deleteMappingById(mapping.mapping_id, e)}
-                                    style="--md-icon-button-size: 32px;"
-                                  >
-                                    ${deleteIcon}
-                                  </md-icon-button>
+                                  <div class="mapping-item">
+                                    <span class="mapped-to-value">
+                                      ${this._getCurateFieldDisplayInfo(mapping.curate_field, "full")}
+                                    </span>
+                                    <md-icon-button
+                                      title="Remove this mapping"
+                                      @click=${(e) => this._deleteMappingById(mapping.mapping_id, e)}
+                                      style="--md-icon-button-size: 32px; margin-left: 4px;"
+                                    >
+                                      ${deleteIcon}
+                                    </md-icon-button>
+                                  </div>
                                 `,
                               )}
                           </div>
                         `
-                      : html`<span
-                          style="color: var(--md-sys-color-on-surface-variant); font-style: italic;"
-                          >No mappings configured</span
-                        >`}
+                      : action === "rejected"
+                        ? html`
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                              <span>Rejected - will not be included in harvest</span>
+                              ${mappings
+                                .filter((m) => m.action === "rejected")
+                                .map(
+                                  (mapping) => html`
+                                    <md-icon-button
+                                      title="Remove rejection"
+                                      @click=${(e) => this._deleteMappingById(mapping.mapping_id, e)}
+                                      style="--md-icon-button-size: 32px;"
+                                    >
+                                      ${deleteIcon}
+                                    </md-icon-button>
+                                  `,
+                                )}
+                            </div>
+                          `
+                        : html`<span
+                            style="color: var(--md-sys-color-on-surface-variant); font-style: italic;"
+                            >No mappings configured</span
+                          >`
+                  }
                 </div>
                 ${when(
                   field.preview,
@@ -1891,18 +1921,21 @@ class MetadataMappingTabContent extends LitElement {
               <md-text-button @click=${this._closeMappingDialog}>Cancel</md-text-button>
               <md-filled-button
                 @click=${this._saveMappingFromDialog}
-                ?disabled=${this._currentDialogAction === "mapped" &&
-                this._selectedCurateFields.size === 0}
+                ?disabled=${
+                  this._currentDialogAction === "mapped" && this._selectedCurateFields.size === 0
+                }
               >
-                ${this._currentDialogAction === "mapped"
-                  ? this._selectedCurateFields.size > 1
-                    ? `Add ${this._selectedCurateFields.size} Mappings`
-                    : this._selectedCurateFields.size === 1
-                      ? "Add Mapping"
-                      : "Select Fields"
-                  : this._currentDialogAction === "rejected"
-                    ? "Mark as Rejected"
-                    : "Leave Unmapped"}
+                ${
+                  this._currentDialogAction === "mapped"
+                    ? this._selectedCurateFields.size > 1
+                      ? `Add ${this._selectedCurateFields.size} Mappings`
+                      : this._selectedCurateFields.size === 1
+                        ? "Add Mapping"
+                        : "Select Fields"
+                    : this._currentDialogAction === "rejected"
+                      ? "Mark as Rejected"
+                      : "Leave Unmapped"
+                }
               </md-filled-button>
             </div>
           </md-dialog>

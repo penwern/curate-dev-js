@@ -405,9 +405,11 @@ class ManualHarvestBySearchPanel extends LitElement {
         () => html`
           <div class="search-results-container">
             <h4 class="results-header">
-              ${hasResults && hasFilteredResults
-                ? `Showing ${this.filteredResults.length} filtered records`
-                : `Found ${this.filteredResults.length} record${this.filteredResults.length === 1 ? "" : "s"}`}
+              ${
+                hasResults && hasFilteredResults
+                  ? `Showing ${this.filteredResults.length} filtered records`
+                  : `Found ${this.filteredResults.length} record${this.filteredResults.length === 1 ? "" : "s"}`
+              }
             </h4>
             <div class="results-container">
               <search-results-table

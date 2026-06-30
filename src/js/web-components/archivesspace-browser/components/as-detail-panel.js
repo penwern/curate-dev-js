@@ -527,63 +527,75 @@ class AsDetailPanel extends LitElement {
               <span class="type-badge ${this.node.type}">${this.node.type}</span>
             </div>
           </div>
-          ${this.node.location
-            ? html`
-                <div class="info-row">
-                  <div class="info-label">Location</div>
-                  <div class="info-value">
-                    <span class="value-icon">${pinIcon}</span>
-                    <span class="info-value-text">${locationContent}</span>
+          ${
+            this.node.location
+              ? html`
+                  <div class="info-row">
+                    <div class="info-label">Location</div>
+                    <div class="info-value">
+                      <span class="value-icon">${pinIcon}</span>
+                      <span class="info-value-text">${locationContent}</span>
+                    </div>
                   </div>
-                </div>
-              `
-            : nothing}
-          ${this.node.extent
-            ? html`
-                <div class="info-row">
-                  <div class="info-label">Extent</div>
-                  <div class="info-value">${this.node.extent}</div>
-                </div>
-              `
-            : nothing}
-          ${this.node.updated
-            ? html`
-                <div class="info-row">
-                  <div class="info-label">Last Updated</div>
-                  <div class="info-value">${this.node.updated}</div>
-                </div>
-              `
-            : nothing}
+                `
+              : nothing
+          }
+          ${
+            this.node.extent
+              ? html`
+                  <div class="info-row">
+                    <div class="info-label">Extent</div>
+                    <div class="info-value">${this.node.extent}</div>
+                  </div>
+                `
+              : nothing
+          }
+          ${
+            this.node.updated
+              ? html`
+                  <div class="info-row">
+                    <div class="info-label">Last Updated</div>
+                    <div class="info-value">${this.node.updated}</div>
+                  </div>
+                `
+              : nothing
+          }
         </div>
       </div>
 
-      ${this.breadcrumbs?.length
-        ? html`
-            <div class="detail-section">
-              <h3>
-                <span class="section-icon">${hierarchyIcon}</span>
-                Hierarchy
-              </h3>
-              <div class="breadcrumb">
-                ${map(
-                  this.breadcrumbs,
-                  (crumb) => html`<span class="breadcrumb-item">${crumb}</span> `,
-                )}
+      ${
+        this.breadcrumbs?.length
+          ? html`
+              <div class="detail-section">
+                <h3>
+                  <span class="section-icon">${hierarchyIcon}</span>
+                  Hierarchy
+                </h3>
+                <div class="breadcrumb">
+                  ${map(
+                    this.breadcrumbs,
+                    (crumb) => html`<span class="breadcrumb-item">${crumb}</span> `,
+                  )}
+                </div>
               </div>
-            </div>
-          `
-        : nothing}
+            `
+          : nothing
+      }
 
       <div class="detail-section">
         <h3>Quick Actions</h3>
-        ${hasMultipleSelection
-          ? html`<div class="multi-action-note">
-              Applies to all ${this.selectedRecordIds.length} selected records.
-            </div>`
-          : nothing}
-        ${foldersDisabled && this.createFoldersDisabledReason
-          ? html`<div class="multi-action-note">${this.createFoldersDisabledReason}</div>`
-          : nothing}
+        ${
+          hasMultipleSelection
+            ? html`<div class="multi-action-note">
+                Applies to all ${this.selectedRecordIds.length} selected records.
+              </div>`
+            : nothing
+        }
+        ${
+          foldersDisabled && this.createFoldersDisabledReason
+            ? html`<div class="multi-action-note">${this.createFoldersDisabledReason}</div>`
+            : nothing
+        }
         <div class="actions">
           <div class="action-settings">
             <div class="radio-group">
@@ -593,19 +605,21 @@ class AsDetailPanel extends LitElement {
                 ${this._renderContainerTypeOption("archival_object", "Archival Object")}
               </div>
             </div>
-            ${showFolderName
-              ? html`
-                  <div class="text-field-group">
-                    <md-outlined-text-field
-                      class="folder-name-field"
-                      label="Folder name"
-                      placeholder="Title"
-                      .value=${this.folderName || ""}
-                      @input=${this._handleFolderNameInput}
-                    ></md-outlined-text-field>
-                  </div>
-                `
-              : nothing}
+            ${
+              showFolderName
+                ? html`
+                    <div class="text-field-group">
+                      <md-outlined-text-field
+                        class="folder-name-field"
+                        label="Folder name"
+                        placeholder="Title"
+                        .value=${this.folderName || ""}
+                        @input=${this._handleFolderNameInput}
+                      ></md-outlined-text-field>
+                    </div>
+                  `
+                : nothing
+            }
             <div class="radio-group">
               <div class="radio-group-label">File Detail Level</div>
               <div class="radio-options">
@@ -621,46 +635,54 @@ class AsDetailPanel extends LitElement {
               </div>
             </div>
           </div>
-          ${requiresSingleSelection
-            ? html`
-                <div class="selection-guard">
-                  <span>Archival Object mode requires a single record.</span>
-                  <md-text-button @click=${this._handleKeepActiveOnly}>
-                    Keep active only
-                  </md-text-button>
-                </div>
-              `
-            : nothing}
+          ${
+            requiresSingleSelection
+              ? html`
+                  <div class="selection-guard">
+                    <span>Archival Object mode requires a single record.</span>
+                    <md-text-button @click=${this._handleKeepActiveOnly}>
+                      Keep active only
+                    </md-text-button>
+                  </div>
+                `
+              : nothing
+          }
           <div class="actions">
             <md-filled-button
               class="create-folders-button"
               ?disabled=${this.createFoldersLoading || requiresSingleSelection || foldersDisabled}
               @click=${() => this._handleAction("create-folders")}
             >
-              ${this.createFoldersLoading
-                ? html`<span class="create-folders-spinner"
-                    ><penwern-spinner size="20"></penwern-spinner
-                  ></span>`
-                : "Create folders"}
+              ${
+                this.createFoldersLoading
+                  ? html`<span class="create-folders-spinner"
+                      ><penwern-spinner size="20"></penwern-spinner
+                    ></span>`
+                  : "Create folders"
+              }
             </md-filled-button>
             <md-outlined-button @click=${() => this._handleAction("open-archivesspace")}>
               Open in ArchivesSpace
             </md-outlined-button>
           </div>
-          ${this.createFoldersFeedback?.message
-            ? html`
-                <div class="action-feedback ${this.createFoldersFeedback.type || "info"}">
-                  <span class="feedback-icon">
-                    ${this.createFoldersFeedback.type === "success"
-                      ? checkCircleIcon
-                      : this.createFoldersFeedback.type === "error"
-                        ? alertCircleIcon
-                        : pinIcon}
-                  </span>
-                  <span>${this.createFoldersFeedback.message}</span>
-                </div>
-              `
-            : nothing}
+          ${
+            this.createFoldersFeedback?.message
+              ? html`
+                  <div class="action-feedback ${this.createFoldersFeedback.type || "info"}">
+                    <span class="feedback-icon">
+                      ${
+                        this.createFoldersFeedback.type === "success"
+                          ? checkCircleIcon
+                          : this.createFoldersFeedback.type === "error"
+                            ? alertCircleIcon
+                            : pinIcon
+                      }
+                    </span>
+                    <span>${this.createFoldersFeedback.message}</span>
+                  </div>
+                `
+              : nothing
+          }
         </div>
       </div>
     `;
@@ -705,32 +727,34 @@ class AsDetailPanel extends LitElement {
           <span>${this.selectedRecordIds.length} selected</span>
           <md-text-button @click=${this._handleClearSelection}>Clear</md-text-button>
         </div>
-        ${this.selectedRecordIds.length > 1
-          ? html`
-              <div class="selection-carousel">
-                <md-icon-button ?disabled=${disablePrev} @click=${this._handlePrevSelection}>
-                  ${chevronLeftIcon}
-                </md-icon-button>
-                <div class="selection-pips">
-                  ${map(this.selectedRecordIds.slice(startIndex, endIndex), (id, idx) => {
-                    const globalIndex = startIndex + idx;
-                    return html`
-                      <button
-                        type="button"
-                        class="selection-pip ${globalIndex === safeIndex ? "active" : ""}"
-                        @click=${() => this._handleNavigateSelection(globalIndex)}
-                      >
-                        <span class="visually-hidden">Selected record ${globalIndex + 1}</span>
-                      </button>
-                    `;
-                  })}
+        ${
+          this.selectedRecordIds.length > 1
+            ? html`
+                <div class="selection-carousel">
+                  <md-icon-button ?disabled=${disablePrev} @click=${this._handlePrevSelection}>
+                    ${chevronLeftIcon}
+                  </md-icon-button>
+                  <div class="selection-pips">
+                    ${map(this.selectedRecordIds.slice(startIndex, endIndex), (id, idx) => {
+                      const globalIndex = startIndex + idx;
+                      return html`
+                        <button
+                          type="button"
+                          class="selection-pip ${globalIndex === safeIndex ? "active" : ""}"
+                          @click=${() => this._handleNavigateSelection(globalIndex)}
+                        >
+                          <span class="visually-hidden">Selected record ${globalIndex + 1}</span>
+                        </button>
+                      `;
+                    })}
+                  </div>
+                  <md-icon-button ?disabled=${disableNext} @click=${this._handleNextSelection}>
+                    ${chevronRightIcon}
+                  </md-icon-button>
                 </div>
-                <md-icon-button ?disabled=${disableNext} @click=${this._handleNextSelection}>
-                  ${chevronRightIcon}
-                </md-icon-button>
-              </div>
-            `
-          : nothing}
+              `
+            : nothing
+        }
       </div>
     `;
   }

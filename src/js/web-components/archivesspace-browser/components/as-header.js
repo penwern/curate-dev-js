@@ -323,30 +323,34 @@ class AsHeader extends LitElement {
                   .value=${this.searchQuery}
                   @input=${this._handleSearchInput}
                 />
-                ${isSearchActive
-                  ? html`
-                      <button
-                        type="button"
-                        class="search-clear-button"
-                        @click=${this._handleClearSearch}
-                        aria-label="Clear search"
-                      >
-                        ${closeIcon}
-                      </button>
-                    `
-                  : nothing}
+                ${
+                  isSearchActive
+                    ? html`
+                        <button
+                          type="button"
+                          class="search-clear-button"
+                          @click=${this._handleClearSearch}
+                          aria-label="Clear search"
+                        >
+                          ${closeIcon}
+                        </button>
+                      `
+                    : nothing
+                }
               </label>
               ${this.showFilters ? this._renderFilterPopover() : nothing}
               ${this.showViewToggle ? this._renderViewToggle() : nothing}
               ${this.showNavigation ? this._renderSearchNavigation() : nothing}
             </div>
-            ${this.showBackToSearch
-              ? html`
-                  <md-text-button @click=${this._handleBackToSearch}>
-                    Back to search results
-                  </md-text-button>
-                `
-              : nothing}
+            ${
+              this.showBackToSearch
+                ? html`
+                    <md-text-button @click=${this._handleBackToSearch}>
+                      Back to search results
+                    </md-text-button>
+                  `
+                : nothing
+            }
           </div>
         </div>
       </div>

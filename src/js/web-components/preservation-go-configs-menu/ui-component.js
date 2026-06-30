@@ -269,74 +269,80 @@ export const preservationGoConfigUI = (component) => html`
         <div class="section-title">${icon(mdiStar)} Saved Configs</div>
 
         <div class="scroll-container">
-          ${component.isLoading
-            ? html`
-                <div class="loading">
-                  <div class="spinner"></div>
-                  Loading configurations...
-                </div>
-              `
-            : component.savedConfigs.length === 0
+          ${
+            component.isLoading
               ? html`
-                  <div class="no-configs">
-                    ${component.loadError
-                      ? "Failed to load preservation configs. Please try refreshing or check your connection."
-                      : "No Saved Preservation Configs Found"}
+                  <div class="loading">
+                    <div class="spinner"></div>
+                    Loading configurations...
                   </div>
                 `
-              : component.savedConfigs.map(
-                  (config, index) => html`
-                    <div
-                      class="config-item"
-                      style="animation-delay: ${index * 0.1}s"
-                      @click=${() => component.loadConfig(config)}
-                    >
-                      <div class="config-header">
-                        <div class="config-name">${config.name}</div>
-                        <div class="config-actions">
-                          <md-icon-button
-                            class="${component.isBookmarked(config.id) ? "starred" : ""}"
-                            @click=${(e) => {
-                              e.stopPropagation();
-                              component.toggleBookmark(config.id);
-                            }}
-                          >
-                            ${component.isBookmarked(config.id)
-                              ? icon(mdiStar)
-                              : icon(mdiStarOutline)}
-                          </md-icon-button>
-                          ${when(config.id !== defaultConfigId, () => {
-                            return html`
-                              <md-outlined-button
-                                class="delete-btn"
-                                @click=${(e) => {
-                                  e.stopPropagation();
-                                  component.deleteConfig(config.id);
-                                }}
-                              >
-                                Delete
-                              </md-outlined-button>
-                            `;
-                          })}
-                        </div>
-                      </div>
-                      <div class="config-details">
-                        <div class="config-description">
-                          <strong>Description:</strong>
-                          ${config.description || "No description"}
-                        </div>
-                        <div>
-                          <strong>Normalize:</strong>
-                          ${config.a3m_config?.normalize ? "Yes" : "No"}
-                        </div>
-                        <div>
-                          <strong>Compress AIP:</strong>
-                          ${config.compress_aip ? "Yes" : "No"}
-                        </div>
-                      </div>
+              : component.savedConfigs.length === 0
+                ? html`
+                    <div class="no-configs">
+                      ${
+                        component.loadError
+                          ? "Failed to load preservation configs. Please try refreshing or check your connection."
+                          : "No Saved Preservation Configs Found"
+                      }
                     </div>
-                  `,
-                )}
+                  `
+                : component.savedConfigs.map(
+                    (config, index) => html`
+                      <div
+                        class="config-item"
+                        style="animation-delay: ${index * 0.1}s"
+                        @click=${() => component.loadConfig(config)}
+                      >
+                        <div class="config-header">
+                          <div class="config-name">${config.name}</div>
+                          <div class="config-actions">
+                            <md-icon-button
+                              class="${component.isBookmarked(config.id) ? "starred" : ""}"
+                              @click=${(e) => {
+                                e.stopPropagation();
+                                component.toggleBookmark(config.id);
+                              }}
+                            >
+                              ${
+                                component.isBookmarked(config.id)
+                                  ? icon(mdiStar)
+                                  : icon(mdiStarOutline)
+                              }
+                            </md-icon-button>
+                            ${when(config.id !== defaultConfigId, () => {
+                              return html`
+                                <md-outlined-button
+                                  class="delete-btn"
+                                  @click=${(e) => {
+                                    e.stopPropagation();
+                                    component.deleteConfig(config.id);
+                                  }}
+                                >
+                                  Delete
+                                </md-outlined-button>
+                              `;
+                            })}
+                          </div>
+                        </div>
+                        <div class="config-details">
+                          <div class="config-description">
+                            <strong>Description:</strong>
+                            ${config.description || "No description"}
+                          </div>
+                          <div>
+                            <strong>Normalize:</strong>
+                            ${config.a3m_config?.normalize ? "Yes" : "No"}
+                          </div>
+                          <div>
+                            <strong>Compress AIP:</strong>
+                            ${config.compress_aip ? "Yes" : "No"}
+                          </div>
+                        </div>
+                      </div>
+                    `,
+                  )
+          }
         </div>
       </div>
     </div>

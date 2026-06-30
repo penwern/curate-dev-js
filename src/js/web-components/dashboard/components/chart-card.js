@@ -203,15 +203,17 @@ class ChartCard extends LitElement {
           </div>
         </div>
         <div class="chart-container" style="height:${this.height}px">
-          ${this.loading
-            ? html`<div class="loading-container" style="height:${this.height}px">
-                <penwern-spinner size="56"></penwern-spinner>
-              </div>`
-            : isEmpty
-              ? html`<div class="empty-state" style="height:${this.height}px">
-                  No data available
+          ${
+            this.loading
+              ? html`<div class="loading-container" style="height:${this.height}px">
+                  <penwern-spinner size="56"></penwern-spinner>
                 </div>`
-              : html`<canvas></canvas>`}
+              : isEmpty
+                ? html`<div class="empty-state" style="height:${this.height}px">
+                    No data available
+                  </div>`
+                : html`<canvas></canvas>`
+          }
         </div>
       </div>
     `;

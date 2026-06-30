@@ -386,13 +386,15 @@ class ManualHarvestBySearchPanel extends LitElement {
           </md-filled-button>
         </div>
 
-        ${this.manualSearchTerm.trim()
-          ? html`
-              <div class="search-hint">
-                Press Enter or click Search to find records matching "${this.manualSearchTerm}"
-              </div>
-            `
-          : ""}
+        ${
+          this.manualSearchTerm.trim()
+            ? html`
+                <div class="search-hint">
+                  Press Enter or click Search to find records matching "${this.manualSearchTerm}"
+                </div>
+              `
+            : ""
+        }
       </div>
 
       ${when(

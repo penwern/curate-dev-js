@@ -120,17 +120,19 @@ class AsFlatList extends LitElement {
         <md-list class="flat-records-list">
           ${map(this.items, (item, index) => this._renderListItem(item, index))}
         </md-list>
-        ${this.totalPages > 1
-          ? html`
-              <as-pagination
-                .currentPage=${this.currentPage}
-                .totalPages=${this.totalPages}
-                .totalItems=${this.totalItems}
-                .itemsPerPage=${this.itemsPerPage}
-                @page-change=${this._handlePageChange}
-              ></as-pagination>
-            `
-          : nothing}
+        ${
+          this.totalPages > 1
+            ? html`
+                <as-pagination
+                  .currentPage=${this.currentPage}
+                  .totalPages=${this.totalPages}
+                  .totalItems=${this.totalItems}
+                  .itemsPerPage=${this.itemsPerPage}
+                  @page-change=${this._handlePageChange}
+                ></as-pagination>
+              `
+            : nothing
+        }
       </div>
     `;
   }
@@ -169,9 +171,11 @@ class AsFlatList extends LitElement {
           ${this.searchQuery ? highlightText(title, this.searchQuery) : title}
         </div>
         <div slot="supporting-text">${pathLabel}</div>
-        ${item.extent || item.node?.extent
-          ? html`<div slot="trailing-supporting-text">${item.extent || item.node?.extent}</div>`
-          : nothing}
+        ${
+          item.extent || item.node?.extent
+            ? html`<div slot="trailing-supporting-text">${item.extent || item.node?.extent}</div>`
+            : nothing
+        }
       </md-list-item>
     `;
   }

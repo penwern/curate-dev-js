@@ -176,19 +176,21 @@ class ExportButton extends LitElement {
         ${this.label}
         <span class="chevron-wrap">${chevronDownIcon}</span>
       </button>
-      ${this._open
-        ? html`
-            <div class="dropdown">
-              ${this.formats.map(
-                (f) => html`
-                  <button class="dropdown-item" @click=${() => this._select(f.value)}>
-                    ${f.label}
-                  </button>
-                `,
-              )}
-            </div>
-          `
-        : ""}
+      ${
+        this._open
+          ? html`
+              <div class="dropdown">
+                ${this.formats.map(
+                  (f) => html`
+                    <button class="dropdown-item" @click=${() => this._select(f.value)}>
+                      ${f.label}
+                    </button>
+                  `,
+                )}
+              </div>
+            `
+          : ""
+      }
     `;
   }
 }

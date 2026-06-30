@@ -83,13 +83,15 @@ class AsBreadcrumb extends LitElement {
     this.crumbs.forEach((crumb, idx) => {
       items.push(html`
         <div class="breadcrumb-item">
-          ${idx < this.crumbs.length - 1
-            ? html`
-                <button class="breadcrumb-link" @click=${() => this._handleNavigate(idx)}>
-                  ${crumb.label}
-                </button>
-              `
-            : html`<span class="breadcrumb-current">${crumb.label}</span>`}
+          ${
+            idx < this.crumbs.length - 1
+              ? html`
+                  <button class="breadcrumb-link" @click=${() => this._handleNavigate(idx)}>
+                    ${crumb.label}
+                  </button>
+                `
+              : html`<span class="breadcrumb-current">${crumb.label}</span>`
+          }
         </div>
       `);
 
