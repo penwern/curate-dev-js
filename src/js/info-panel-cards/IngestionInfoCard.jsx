@@ -9,7 +9,7 @@ const WARNING_EXPLANATIONS = {
   "match on text only; extension mismatch":
     "Format was identified from text content only (lower confidence) and the file extension doesn't match either.",
   "match on text only":
-    "Format identified from text content only — byte-level signatures were not matched. Confidence is lower than a signature-based match.",
+    "Format identified from text content only. Byte-level signatures were not matched, so confidence is lower than a signature-based match.",
   "filename mismatch": "The filename doesn't match the expected naming pattern for this format.",
 };
 
