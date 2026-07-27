@@ -106,7 +106,7 @@ class AtomConfigReadonly extends LitElement {
     }
     if (!this.configured) {
       return html`<div class="status">
-        AtoM is not yet configured for this site. Penwern manages this configuration — please
+        AtoM is not yet configured for this site. Penwern manages this configuration, so please
         contact support.
       </div>`;
     }
