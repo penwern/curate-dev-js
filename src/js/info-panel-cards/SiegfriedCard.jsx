@@ -409,7 +409,7 @@ function SiegfriedCard(props) {
   useHeaderControls(markerRef, effectiveOpen, setOpen, "File Identification", pinState);
 
   const { node } = props;
-  const raw = node._metadata.get("Siegfried");
+  const raw = node._metadata.get("usermeta-siegfried") ?? node._metadata.get("Siegfried");
   if (!InfoPanelCard || !raw) return null;
 
   let sf;
@@ -519,6 +519,7 @@ Curate.infoPanel.registerCard({
   identifier: "curate-siegfried",
   component: SiegfriedCard,
   mime: ["generic_file"],
-  condition: (node) => !!node?._metadata?.get("Siegfried"),
+  condition: (node) =>
+    !!(node?._metadata?.get("usermeta-siegfried") ?? node?._metadata?.get("Siegfried")),
   weight: 2,
 });
