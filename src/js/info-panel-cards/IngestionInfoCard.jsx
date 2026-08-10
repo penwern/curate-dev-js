@@ -232,7 +232,7 @@ function IngestionInfoCard(props) {
   let sf = null;
   let sfMatch = null;
   try {
-    const sfRaw = meta.get("Siegfried");
+    const sfRaw = meta.get("usermeta-siegfried") ?? meta.get("Siegfried");
     if (sfRaw) {
       sf = typeof sfRaw === "string" ? JSON.parse(sfRaw) : sfRaw;
       sfMatch = sf?.files?.[0]?.matches?.[0] ?? null;
@@ -246,7 +246,7 @@ function IngestionInfoCard(props) {
   const mime = sfMatch?.mime || meta.get("mime") || null;
   const basisLabel = humaniseBasis(sfMatch?.basis ?? null);
   const warningExplanation = getWarningExplanation(sfMatch?.warning ?? null);
-  const premis = meta.get("Premis") || [];
+  const premis = meta.get("usermeta-premis-data") ?? meta.get("Premis") ?? [];
   const accession = premis.find((event) => event.event_type === "Accession");
   const accessioned = accession?.event_date_time
     ? new Date(accession.event_date_time).toLocaleDateString(undefined, {

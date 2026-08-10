@@ -292,7 +292,7 @@ function PremisEventsCard(props) {
   }, []);
   useHeaderControls(markerRef, effectiveOpen, setOpen, "Preservation Events", pinState);
 
-  const raw = node._metadata.get("Premis") || [];
+  const raw = node._metadata.get("usermeta-premis-data") ?? node._metadata.get("Premis") ?? [];
   const events = processEvents(raw);
   const count = raw.length;
   const [visibleCount, setVisibleCount] = React.useState(() =>
@@ -408,7 +408,7 @@ Curate.infoPanel.registerCard({
   component: PremisEventsCard,
   mime: ["generic_file"],
   condition: (node) => {
-    const premis = node?._metadata?.get("Premis");
+    const premis = node?._metadata?.get("usermeta-premis-data") ?? node?._metadata?.get("Premis");
     return Array.isArray(premis) && premis.length > 0;
   },
   weight: 11,
