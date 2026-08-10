@@ -662,14 +662,22 @@ function SubmissionInfoCard(props) {
   );
 }
 
-Curate.infoPanel.registerCard({
-  namespace: "CurateCustom",
-  name: "SubmissionInfo",
-  identifier: "curate-submission-info",
-  component: SubmissionInfoCard,
-  mime: ["generic_file", "generic_dir"],
-  condition: (_node, nodes) =>
-    (!nodes || nodes.length === 1) &&
-    String(Curate.workspaces.getOpenWorkspace() || "").replace(/^\/+|\/+$/g, "") === "quarantine",
-  weight: 2,
-});
+// Gated on window.curateSubmissionPanel, set by the Cells custom header from
+// curate_submission_panel_enabled. Declaring a submission root only has an
+// effect where the curation flow selects on Meta.usermeta-submission.enabled,
+// and the browser cannot see which flow version a host runs, so the deployment
+// decides where this card appears. Defaults off, so hosts tracking the rolling
+// bundle get nothing until they opt in.
+if (window.curateSubmissionPanel === true) {
+  Curate.infoPanel.registerCard({
+    namespace: "CurateCustom",
+    name: "SubmissionInfo",
+    identifier: "curate-submission-info",
+    component: SubmissionInfoCard,
+    mime: ["generic_file", "generic_dir"],
+    condition: (_node, nodes) =>
+      (!nodes || nodes.length === 1) &&
+      String(Curate.workspaces.getOpenWorkspace() || "").replace(/^\/+|\/+$/g, "") === "quarantine",
+    weight: 2,
+  });
+}
