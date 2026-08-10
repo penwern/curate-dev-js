@@ -531,7 +531,8 @@ function SubmissionInfoCard(props) {
                   Submission context unavailable
                 </div>
                 <div className="curate-submission-unresolved-copy">
-                  Parent folders could not be resolved completely, so no movement assumption was made.
+                  Parent folders could not be resolved completely, so no movement assumption was
+                  made.
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <button type="button" className="curate-submission-button" onClick={loadContext}>
@@ -559,7 +560,9 @@ function SubmissionInfoCard(props) {
                   <>
                     <div className="curate-submission-control">
                       <div className="curate-submission-control-copy">
-                        <div className="curate-submission-control-label">Move as one submission</div>
+                        <div className="curate-submission-control-label">
+                          Move as one submission
+                        </div>
                         <div className="curate-submission-control-help">
                           {getControlHelp(context.declaration)}
                         </div>
@@ -589,10 +592,12 @@ function SubmissionInfoCard(props) {
 
                     {confirmingDisable && (
                       <div className="curate-submission-confirm" role="alert">
-                        <div className="curate-submission-confirm-title">Remove this submission boundary?</div>
+                        <div className="curate-submission-confirm-title">
+                          Remove this submission boundary?
+                        </div>
                         <div className="curate-submission-confirm-copy">
-                          Nested declarations will take over where present. Other eligible files may begin moving
-                          independently.
+                          Nested declarations will take over where present. Other eligible files may
+                          begin moving independently.
                         </div>
                         <div className="curate-submission-actions">
                           <button
@@ -626,7 +631,8 @@ function SubmissionInfoCard(props) {
                         </div>
                         {context.declaredPaths.length > 1 && (
                           <div className="curate-submission-chain">
-                            {context.declaredPaths.length} declarations on this path; the outermost applies.
+                            {context.declaredPaths.length} declarations on this path; the outermost
+                            applies.
                           </div>
                         )}
                       </div>
@@ -642,7 +648,9 @@ function SubmissionInfoCard(props) {
                 {saveError && (
                   <div className="curate-submission-error" role="alert">
                     <i className="mdi mdi-alert-circle-outline" />
-                    <div>The change could not be saved. The previous setting has been restored.</div>
+                    <div>
+                      The change could not be saved. The previous setting has been restored.
+                    </div>
                   </div>
                 )}
               </>
