@@ -43,11 +43,11 @@ function parseSubmissionValue(raw) {
     return { valid: false, submission: null };
   }
 
-  if (typeof value?.submission !== "boolean") {
+  if (typeof value?.enabled !== "boolean") {
     return { valid: false, submission: null };
   }
 
-  return { valid: true, submission: value.submission };
+  return { valid: true, submission: value.enabled };
 }
 
 function readSubmissionFlag(node) {
@@ -196,7 +196,7 @@ export async function setSubmissionDeclaration(node, enabled) {
   const nodeUuid = getNodeUuid(node);
   if (!nodeUuid) throw new Error("The selected folder has no node UUID.");
 
-  const value = { submission: Boolean(enabled) };
+  const value = { enabled: Boolean(enabled) };
   await Curate.api.fetchCurate("/a/user-meta/update", "PUT", {
     MetaDatas: [
       {
