@@ -664,7 +664,7 @@ function SubmissionInfoCard(props) {
 
 // Gated on window.curateSubmissionPanel, set by the Cells custom header from
 // curate_submission_panel_enabled. Declaring a submission root only has an
-// effect where the curation flow selects on Meta.usermeta-submission.enabled,
+// effect where the curation flow selects on Meta.usermeta-submission,
 // and the browser cannot see which flow version a host runs, so the deployment
 // decides where this card appears. Defaults off, so hosts tracking the rolling
 // bundle get nothing until they opt in.

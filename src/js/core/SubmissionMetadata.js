@@ -43,11 +43,18 @@ function parseSubmissionValue(raw) {
     return { valid: false, submission: null };
   }
 
-  if (typeof value?.enabled !== "boolean") {
-    return { valid: false, submission: null };
+  // usermeta-submission is a boolean namespace. It briefly held {"enabled": bool}
+  // (curation v1.3.2); that shape is still read here so a node written before the
+  // revert resolves instead of showing as invalid.
+  if (typeof value === "boolean") {
+    return { valid: true, submission: value };
   }
 
-  return { valid: true, submission: value.enabled };
+  if (typeof value?.enabled === "boolean") {
+    return { valid: true, submission: value.enabled };
+  }
+
+  return { valid: false, submission: null };
 }
 
 function readSubmissionFlag(node) {
@@ -196,7 +203,7 @@ export async function setSubmissionDeclaration(node, enabled) {
   const nodeUuid = getNodeUuid(node);
   if (!nodeUuid) throw new Error("The selected folder has no node UUID.");
 
-  const value = { enabled: Boolean(enabled) };
+  const value = Boolean(enabled);
   await Curate.api.fetchCurate("/a/user-meta/update", "PUT", {
     MetaDatas: [
       {
