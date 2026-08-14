@@ -40,7 +40,7 @@ function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) 
   const retryDelay = 3000; // Delay in ms before retrying
 
   // Check if both required metadata exist on the node
-  const hasPremis = node.MetaStore && node.MetaStore.Premis;
+  const hasPremis = node.MetaStore && node.MetaStore["usermeta-premis-data"];
   const hasVirusScan = node.MetaStore && node.MetaStore["usermeta-virus-scan-first"];
 
   if (hasPremis && hasVirusScan) {
@@ -50,7 +50,7 @@ function waitForPremisAndApplyTag(node, filePath, integrityTag, retryCount = 0) 
   } else if (retryCount < maxRetries) {
     // Required metadata not yet available, retry after delay
     const missing = [];
-    if (!hasPremis) missing.push("Premis");
+    if (!hasPremis) missing.push("premis");
     if (!hasVirusScan) missing.push("virus-scan");
     console.log(
       `Waiting for metadata (${missing.join(", ")}) on ${filePath}. Retrying (${
