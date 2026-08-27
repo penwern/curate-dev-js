@@ -1,0 +1,14 @@
+# BEGIN penwern-ci canonical block. Managed centrally, do not edit by hand.
+# Source of truth: penwern-ci/configs/gitattributes
+# Normalise every text file to LF in the index and on checkout, so that an
+# editor on Windows cannot re-introduce CRLF through a commit. Enforced by the
+# weekly config-drift-audit in penwern-ci.
+* text=auto eol=lf
+
+# Exceptions: formats whose parser or specification requires CRLF, and formats
+# whose bytes must survive a round trip unmodified.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.mbox -text
+*.eml  -text
+# END penwern-ci canonical block
