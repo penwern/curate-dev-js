@@ -32,14 +32,6 @@ module.exports = (env, argv) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: path.resolve(__dirname, "node_modules/replaywebpage/sw.js"),
-            to: path.resolve(__dirname, "dist/replaywebpage-sw.js"),
-          },
-          {
-            from: path.resolve(__dirname, "node_modules/replaywebpage/ui.js"),
-            to: path.resolve(__dirname, "dist/replaywebpage-ui.js"),
-          },
-          {
             from: path.resolve(__dirname, "node_modules/spark-md5/spark-md5.js"),
             to: path.resolve(__dirname, "dist/spark-md5.js"),
           },
@@ -62,6 +54,22 @@ module.exports = (env, argv) => {
               cacheDirectory: true,
             },
           },
+        },
+        {
+          // pdfjs-dist ships ESM that references import.meta.url; we bundle to a
+          // classic script, so strip it. See webpack.import-meta-mjs.loader.js.
+          test: /pdfjs-dist[\\/].*\.mjs$/,
+          use: path.resolve(__dirname, "webpack.import-meta-mjs.loader.js"),
+        },
+        {
+          // openjpeg.wasm is inlined as a base64 data URL rather than emitted as
+          // a file. The bundle is served from penwern.github.io while the app runs
+          // on the Curate host, and the deployed CSP is connect-src 'self', so a
+          // fetch for the wasm from our own origin would be blocked in production.
+          // Inlining removes the fetch entirely. 250KB raw, ~334KB base64, and it
+          // lands in the lazily-imported pdf viewer chunk, not main.js.
+          test: /pdfjs-dist[\\/]wasm[\\/]openjpeg\.wasm$/,
+          type: "asset/inline",
         },
         {
           test: /\.worker\.js$/,
