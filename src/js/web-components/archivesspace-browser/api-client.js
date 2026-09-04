@@ -1,3 +1,24 @@
+// Curate proxies this service behind an nginx `auth_request` gate that validates
+// the caller against Cells `/oidc/userinfo`. That gate accepts a Bearer JWT and
+// nothing else, so every request below has to carry one or it is answered with
+// `{"error":"authentication required"}` before reaching the integration.
+async function getToken() {
+  if (window.CURATE_API_TOKEN) return window.CURATE_API_TOKEN;
+  try {
+    return await PydioApi._PydioRestClient.getOrUpdateJwt();
+  } catch {
+    console.warn("Could not get JWT, running without auth");
+    return null;
+  }
+}
+
+async function authedFetch(url, options = {}) {
+  const token = await getToken();
+  const headers = { Accept: "application/json", ...(options.headers || {}) };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return fetch(url, { ...options, headers });
+}
+
 function buildApiUrl(apiHost, pathAndQuery) {
   const host = (apiHost || "").replace(/\/+$/, "");
   const base = host;
@@ -18,7 +39,7 @@ export async function fetchResourceTreeRoot(apiHost, resourceId, repositoryId) {
   if (repositoryId) {
     params.set("repository_id", repositoryId);
   }
-  const res = await fetch(
+  const res = await authedFetch(
     buildApiUrl(
       apiHost,
       `/resources/${encodeURIComponent(resourceId)}/tree/root?${params.toString()}`,
@@ -31,7 +52,7 @@ export async function fetchResourceTreeRoot(apiHost, resourceId, repositoryId) {
 }
 
 export async function fetchRepositories(apiHost) {
-  const res = await fetch(buildApiUrl(apiHost, "/repositories"));
+  const res = await authedFetch(buildApiUrl(apiHost, "/repositories"));
   if (!res.ok) {
     throw new Error(`Failed to load repositories: ${res.status}`);
   }
@@ -39,7 +60,7 @@ export async function fetchRepositories(apiHost) {
 }
 
 export async function createCurateFolders(apiHost, curateBasePath, parentPath, folders) {
-  const res = await fetch(buildCurateUrl(apiHost, curateBasePath, "/folders"), {
+  const res = await authedFetch(buildCurateUrl(apiHost, curateBasePath, "/folders"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -73,7 +94,7 @@ export async function fetchRepositoryResources(apiHost, repositoryId, page, page
   if (q) {
     params.set("q", q);
   }
-  const res = await fetch(
+  const res = await authedFetch(
     buildApiUrl(
       apiHost,
       `/repositories/${encodeURIComponent(repositoryId)}/resources?${params.toString()}`,
@@ -100,7 +121,7 @@ export async function fetchResourceTreeChildren(
     params.set("parent_uri", parentUri);
   }
   params.set("offset", String(offset ?? 0));
-  const res = await fetch(
+  const res = await authedFetch(
     buildApiUrl(
       apiHost,
       `/resources/${encodeURIComponent(resourceId)}/tree/children?${params.toString()}`,
@@ -158,7 +179,7 @@ export async function searchGlobal(apiHost, repositoryId, q, page, pageSize, opt
     }
   }
 
-  const res = await fetch(buildApiUrl(apiHost, `/search?${params.toString()}`));
+  const res = await authedFetch(buildApiUrl(apiHost, `/search?${params.toString()}`));
   if (!res.ok) {
     throw new Error(`Failed to perform global search: ${res.status}`);
   }
@@ -218,7 +239,7 @@ export async function searchResource(
       }
     }
   }
-  const res = await fetch(
+  const res = await authedFetch(
     buildApiUrl(
       apiHost,
       `/resources/${encodeURIComponent(resourceId)}/search?${params.toString()}`,
@@ -238,7 +259,7 @@ export async function fetchResourcePaths(apiHost, resourceId, repositoryId, node
   for (const id of nodeIds || []) {
     params.append("node_id[]", id);
   }
-  const res = await fetch(
+  const res = await authedFetch(
     buildApiUrl(apiHost, `/resources/${encodeURIComponent(resourceId)}/path?${params.toString()}`),
   );
   if (!res.ok) {
