@@ -64,6 +64,22 @@ module.exports = (env, argv) => {
           },
         },
         {
+          // pdfjs-dist ships ESM that references import.meta.url; we bundle to a
+          // classic script, so strip it. See webpack.import-meta-mjs.loader.js.
+          test: /pdfjs-dist[\\/].*\.mjs$/,
+          use: path.resolve(__dirname, "webpack.import-meta-mjs.loader.js"),
+        },
+        {
+          // openjpeg.wasm is inlined as a base64 data URL rather than emitted as
+          // a file. The bundle is served from penwern.github.io while the app runs
+          // on the Curate host, and the deployed CSP is connect-src 'self', so a
+          // fetch for the wasm from our own origin would be blocked in production.
+          // Inlining removes the fetch entirely. 250KB raw, ~334KB base64, and it
+          // lands in the lazily-imported pdf viewer chunk, not main.js.
+          test: /pdfjs-dist[\\/]wasm[\\/]openjpeg\.wasm$/,
+          type: "asset/inline",
+        },
+        {
           test: /\.worker\.js$/,
           include: [path.resolve(__dirname, "src/js/workers")],
           use: {

@@ -12,6 +12,8 @@ import {
   mdiContentSave,
   mdiFormTextbox,
   mdiMagnify,
+  mdiMagnifyPlusOutline,
+  mdiMagnifyMinusOutline,
   mdiPlay,
   mdiCheckCircleOutline,
   mdiAlertCircleOutline,
@@ -81,6 +83,8 @@ export const restartIcon = icon(mdiRestart, "icon");
 export const saveIcon = icon(mdiContentSave, "icon");
 export const textboxIcon = icon(mdiFormTextbox, "icon");
 export const searchIcon = icon(mdiMagnify, "icon");
+export const zoomInIcon = icon(mdiMagnifyPlusOutline);
+export const zoomOutIcon = icon(mdiMagnifyMinusOutline);
 export const playIcon = icon(mdiPlay, "icon");
 export const checkCircleIcon = icon(mdiCheckCircleOutline);
 export const alertCircleIcon = icon(mdiAlertCircleOutline);

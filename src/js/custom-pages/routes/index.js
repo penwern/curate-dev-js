@@ -8,6 +8,7 @@ import { registerPureIntegrationRoute } from "./pure-integration.js";
 import { registerCalmIntegrationRoute } from "./calm-integration.js";
 import { registerEmailViewerRoute } from "./email-viewer.js";
 import { registerWarcViewerRoute } from "./warc-viewer.js";
+import { registerPdfViewerRoute } from "./pdf-viewer.js";
 import { registerDemoRoutes } from "./demo-routes.js";
 import { registerDashboardRoute } from "./dashboard.js";
 
@@ -21,6 +22,7 @@ export function registerAllRoutes() {
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
   registerWarcViewerRoute();
+  registerPdfViewerRoute();
   registerDashboardRoute();
 
   // Demo routes (optional - could be conditionally loaded)
@@ -37,6 +39,7 @@ export function registerProductionRoutes() {
   registerCalmIntegrationRoute();
   registerEmailViewerRoute();
   registerWarcViewerRoute();
+  registerPdfViewerRoute();
   registerDashboardRoute();
 
   console.log("Production routes have been registered");

@@ -21,6 +21,7 @@ import "./web-components/pure-integration-ui/main.js";
 import "./web-components/calm-integration-ui/main.js";
 import "./web-components/archive-processing/archive-processing-status.js";
 import "./web-components/email-renderer/components/email-viewer.js";
+import "./web-components/pdf-viewer/pdf-viewer.js";
 import "./web-components/archivesspace-browser/archivesspace-browser.js";
 import "./web-components/dashboard/dashboard.js";
 
