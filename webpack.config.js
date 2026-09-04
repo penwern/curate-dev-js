@@ -32,14 +32,6 @@ module.exports = (env, argv) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: path.resolve(__dirname, "node_modules/replaywebpage/sw.js"),
-            to: path.resolve(__dirname, "dist/replaywebpage-sw.js"),
-          },
-          {
-            from: path.resolve(__dirname, "node_modules/replaywebpage/ui.js"),
-            to: path.resolve(__dirname, "dist/replaywebpage-ui.js"),
-          },
-          {
             from: path.resolve(__dirname, "node_modules/spark-md5/spark-md5.js"),
             to: path.resolve(__dirname, "dist/spark-md5.js"),
           },
