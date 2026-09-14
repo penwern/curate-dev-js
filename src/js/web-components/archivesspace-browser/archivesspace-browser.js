@@ -114,6 +114,8 @@ class ArchivespaceBrowser extends LitElement {
   static styles = css`
     :host {
       display: block;
+      width: 1100px;
+      max-width: calc(100vw - 48px);
       --panel-padding: 16px;
       --header-height: 64px;
       --tabs-height: 48px;
@@ -125,6 +127,8 @@ class ArchivespaceBrowser extends LitElement {
     }
 
     :host([fill]) {
+      width: 100%;
+      max-width: 100%;
       height: 100%;
       min-height: 0;
     }

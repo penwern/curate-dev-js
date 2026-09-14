@@ -13,6 +13,26 @@ const MODAL_STYLE_CONTENT = `
   gap: 1em;
   width: 100%;
 }
+.config-modal-content:has(archivesspace-browser) {
+  box-sizing: border-box;
+  width: 1100px;
+  max-width: calc(100vw - 48px);
+  height: 720px;
+  max-height: calc(100vh - 48px);
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+}
+.config-modal-content:has(archivesspace-browser) .config-main-options-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.config-modal-content:has(archivesspace-browser) .config-main-options-container > div {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
 .config-modal-action-button {
   flex: 1 1 0;
   width: auto !important;
