@@ -81,11 +81,14 @@ const TTL_LONG = 15 * 60 * 1000;
 const TTL_SHORT = 5 * 60 * 1000;
 const TTL_SESSION = 30 * 60 * 1000;
 
-async function getToken() {
+async function getToken({ required = false } = {}) {
   if (window.CURATE_API_TOKEN) return window.CURATE_API_TOKEN;
   try {
-    return await PydioApi._PydioRestClient.getOrUpdateJwt();
-  } catch {
+    const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
+    if (required && !token) throw new Error("Authentication is not ready");
+    return token;
+  } catch (error) {
+    if (required) throw error;
     console.warn("Could not get JWT — running without auth");
     return null;
   }
@@ -466,10 +469,46 @@ export function invalidateCache(pattern) {
   cache.invalidate(pattern);
 }
 
-export function currentUserCanViewDashboard() {
-  const user = window.pydio?.user;
-  if (!user) return false;
-  return user.isAdmin || user.idmUser?.Roles?.some((r) => r.Label === "SuperUser");
+async function probeDashboardAccess() {
+  const token = await getToken({ required: true });
+  const res = await fetch(`${getBasePath()}/tree/admin/list`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      Node: { Path: "/" },
+      StatFlags: [5],
+    }),
+    credentials: "include",
+  });
+
+  if (res.ok) return true;
+  if (res.status === 403) return false;
+
+  const error = new Error(`Dashboard access check failed: API ${res.status} ${res.statusText}`);
+  error.status = res.status;
+  throw error;
+}
+
+export async function currentUserCanViewDashboard() {
+  const maxAttempts = 4;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await probeDashboardAccess();
+    } catch (error) {
+      if (attempt === maxAttempts) {
+        if (error.status === 401) return false;
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, attempt * 250));
+    }
+  }
+
+  return false;
 }
 
 export function formatBytes(bytes) {

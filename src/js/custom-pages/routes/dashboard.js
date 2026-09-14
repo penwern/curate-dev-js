@@ -35,7 +35,7 @@ export function registerDashboardRoute() {
       };
     },
     {
-      title: `${pydio?.appTitle} Dashboard`,
+      title: `${globalThis.pydio?.appTitle || "Soteria+"} Dashboard`,
       showHeader: true,
     },
   );

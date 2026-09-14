@@ -64,7 +64,7 @@ class Dashboard extends LitElement {
     _wsLoading: { state: true },
     _refreshing: { state: true },
     _mounted: { state: true },
-    _hasPermission: { state: true },
+    _permissionStatus: { state: true },
     _exportLoading: { state: true },
   };
 
@@ -304,17 +304,31 @@ class Dashboard extends LitElement {
     this._wsLoading = true;
     this._refreshing = false;
     this._mounted = false;
-    this._hasPermission = false;
+    this._permissionStatus = "checking";
     this._exportLoading = false;
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this._hasPermission = currentUserCanViewDashboard();
-    if (this._hasPermission) this._loadWorkspaces();
+    this._checkAccess();
     requestAnimationFrame(() => {
       this._mounted = true;
     });
+  }
+
+  async _checkAccess() {
+    this._permissionStatus = "checking";
+    try {
+      const allowed = await currentUserCanViewDashboard();
+      if (!this.isConnected) return;
+
+      this._permissionStatus = allowed ? "granted" : "denied";
+      if (allowed) await this._loadWorkspaces();
+    } catch (err) {
+      if (!this.isConnected) return;
+      console.error("Failed to check dashboard access:", err);
+      this._permissionStatus = "error";
+    }
   }
 
   async _loadWorkspaces() {
@@ -652,22 +666,43 @@ class Dashboard extends LitElement {
 
       <main class="content-shell">
         ${
-          this._hasPermission
+          this._permissionStatus === "granted"
             ? html`
                 <div class="content-inner">
                   <div class="panel-container" .key=${this._activeTab}>${this._renderPanel()}</div>
                 </div>
               `
-            : html`
-                <div class="permission-gate">
-                  ${eyeIcon}
-                  <p class="permission-gate-title">Access restricted</p>
-                  <p class="permission-gate-body">
-                    You don't have permission to view dashboard data. Contact your administrator if
-                    you believe this is an error.
-                  </p>
-                </div>
-              `
+            : this._permissionStatus === "checking"
+              ? html`
+                  <div class="permission-gate">
+                    <penwern-spinner size="36"></penwern-spinner>
+                    <p class="permission-gate-title">Checking dashboard access</p>
+                  </div>
+                `
+              : this._permissionStatus === "error"
+                ? html`
+                    <div class="permission-gate">
+                      ${eyeIcon}
+                      <p class="permission-gate-title">Unable to verify access</p>
+                      <p class="permission-gate-body">
+                        The dashboard access check could not be completed. Check your connection and
+                        try again.
+                      </p>
+                      <button class="refresh-btn" @click=${this._checkAccess} title="Try again">
+                        ${refreshIcon}
+                      </button>
+                    </div>
+                  `
+                : html`
+                    <div class="permission-gate">
+                      ${eyeIcon}
+                      <p class="permission-gate-title">Access restricted</p>
+                      <p class="permission-gate-body">
+                        You don't have permission to view dashboard data. Contact your administrator
+                        if you believe this is an error.
+                      </p>
+                    </div>
+                  `
         }
       </main>
     `;

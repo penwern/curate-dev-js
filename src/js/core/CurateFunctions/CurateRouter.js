@@ -17,6 +17,10 @@ const CurateRouter = (function () {
   let isInitialized = false;
   let lastNonCustomUrl = "/"; // Track last non-custom URL for close button
   let pydioInitCheckCount = 0; // Track how many times we've checked for pydio.user
+  let desktopContainerResizeObserver = null;
+  let desktopContainerMutationObserver = null;
+  let observedDesktopContainer = null;
+  let repositionFrame = null;
   let configuration = {
     routePrefix: "/custom",
     showHeader: true,
@@ -97,12 +101,53 @@ const CurateRouter = (function () {
       setTimeout(urlChangeListener, 10);
     };
 
-    // Listen for window resize to reposition custom pages
-    window.addEventListener("resize", () => {
-      if (currentPage && currentPage.container && currentPage.container.element) {
-        repositionCurrentPage();
-      }
+    observeDesktopContainer();
+
+    // React can mount or replace the desktop container after the router starts.
+    // Keep the ResizeObserver attached to whichever instance is currently live.
+    if (typeof MutationObserver !== "undefined") {
+      desktopContainerMutationObserver = new MutationObserver(() => {
+        const desktopContainer = document.querySelector(".desktop-container");
+        if (desktopContainer !== observedDesktopContainer) {
+          observeDesktopContainer();
+        } else if (typeof ResizeObserver === "undefined") {
+          // Older browsers need DOM mutations as a fallback for layout changes.
+          scheduleRepositionCurrentPage();
+        }
+      });
+      desktopContainerMutationObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Window resize also covers viewport-driven changes and browsers without ResizeObserver.
+    window.addEventListener("resize", scheduleRepositionCurrentPage);
+  }
+
+  function scheduleRepositionCurrentPage() {
+    if (repositionFrame !== null) return;
+
+    repositionFrame = requestAnimationFrame(() => {
+      repositionFrame = null;
+      repositionCurrentPage();
     });
+  }
+
+  function observeDesktopContainer() {
+    const desktopContainer = document.querySelector(".desktop-container");
+    if (desktopContainer === observedDesktopContainer) return;
+
+    if (desktopContainerResizeObserver) {
+      desktopContainerResizeObserver.disconnect();
+      desktopContainerResizeObserver = null;
+    }
+
+    observedDesktopContainer = desktopContainer;
+
+    if (desktopContainer && typeof ResizeObserver !== "undefined") {
+      desktopContainerResizeObserver = new ResizeObserver(scheduleRepositionCurrentPage);
+      desktopContainerResizeObserver.observe(desktopContainer);
+    }
+
+    scheduleRepositionCurrentPage();
   }
 
   function handlePopState(_event) {
