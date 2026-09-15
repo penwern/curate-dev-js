@@ -50,6 +50,13 @@ const RISK_STATUS = {
   icon: "mdi-shield-alert",
 };
 
+const SCAN_LIMIT_STATUS = {
+  label: "Too Large",
+  sub: "File exceeds scan size limit",
+  color: "#78909C",
+  icon: "mdi-shield-off-outline",
+};
+
 const STATUS_CFG = {
   ReleaseTag: {
     label: "Cleared",
@@ -71,12 +78,8 @@ const STATUS_CFG = {
   },
   Risk: RISK_STATUS,
   FailTag: RISK_STATUS,
-  "Scan Limit Exceeded": {
-    label: "Too Large",
-    sub: "File exceeds scan size limit",
-    color: "#78909C",
-    icon: "mdi-shield-off-outline",
-  },
+  SizeLimitTag: SCAN_LIMIT_STATUS,
+  "Scan Limit Exceeded": SCAN_LIMIT_STATUS,
 };
 
 function getStatus(scanTag, openWs, scan1, scan2) {
