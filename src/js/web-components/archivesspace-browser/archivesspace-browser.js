@@ -44,7 +44,7 @@ import {
 } from "./api-client.js";
 
 // Import icons
-import { databaseIcon, layersIcon, pinIcon } from "../utils/icons.js";
+import { alertCircleIcon, databaseIcon, layersIcon, pinIcon } from "../utils/icons.js";
 
 /**
  * Main ArchivesSpace Browser component.
@@ -105,6 +105,7 @@ class ArchivespaceBrowser extends LitElement {
     // Data
     repositories: { state: true },
     collections: { state: true },
+    incompleteIndexRepositories: { state: true },
     archiveData: { state: true },
     resourceId: { type: String },
     repositoryId: { type: String },
@@ -160,6 +161,35 @@ class ArchivespaceBrowser extends LitElement {
 
     .content.single-panel {
       grid-template-columns: 1fr;
+    }
+
+    .index-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(146, 90, 0, 0.3);
+      background: rgba(146, 90, 0, 0.1);
+      color: #4d3000;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .index-notice svg {
+      flex: none;
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .index-notice p {
+      margin: 0;
+    }
+
+    .index-notice p + p {
+      margin-top: 4px;
     }
 
     .main-panel {
@@ -305,6 +335,9 @@ class ArchivespaceBrowser extends LitElement {
     // Data
     this.repositories = [];
     this.collections = [];
+    // Repository id -> { found, expected } when the ArchivesSpace search index and the
+    // repository disagree on how many collections exist.
+    this.incompleteIndexRepositories = {};
     this.archiveData = [];
 
     // API configuration
@@ -623,6 +656,7 @@ class ArchivespaceBrowser extends LitElement {
       return html`
         <div class="content single-panel">
           <div class="main-panel">
+            ${this._renderIncompleteIndexNotice()}
             <as-empty-state
               title="No collections found"
               message="Try adjusting your search."
@@ -637,6 +671,7 @@ class ArchivespaceBrowser extends LitElement {
     return html`
       <div class="content single-panel">
         <div class="main-panel">
+          ${this._renderIncompleteIndexNotice()}
           <div class="collection-grid">
             ${map(
               paginatedItems,
@@ -674,6 +709,35 @@ class ArchivespaceBrowser extends LitElement {
 
   _renderAllCollections() {
     return this._renderCollectionsView();
+  }
+
+  _renderIncompleteIndexNotice() {
+    const affected = (this.repositories || []).filter(
+      (repo) =>
+        this.incompleteIndexRepositories[repo.id] &&
+        (!this.selectedRepository || this.selectedRepository.id === repo.id),
+    );
+    if (!affected.length) return nothing;
+
+    return html`
+      <div class="index-notice" role="status">
+        ${alertCircleIcon}
+        <div>
+          <p>
+            <strong>This list may be incomplete.</strong> The ArchivesSpace search index does not
+            match the repository, so some collections may be missing or out of date.
+          </p>
+          ${map(affected, (repo) => {
+            const { found, expected } = this.incompleteIndexRepositories[repo.id];
+            return html`<p>
+              ${repo.name}: ${found.toLocaleString()} in the index, ${expected.toLocaleString()} in
+              the repository.
+            </p>`;
+          })}
+          <p>An ArchivesSpace administrator may need to rebuild the search index.</p>
+        </div>
+      </div>
+    `;
   }
 
   _renderGlobalSearchView() {
@@ -1834,6 +1898,9 @@ class ArchivespaceBrowser extends LitElement {
 
     while (true) {
       const response = await fetchRepositoryResources(this.apiHost, repositoryId, page, pageSize);
+      if (page === 1) {
+        this._recordIndexCompleteness(repositoryId, response);
+      }
       const results = response?.results || [];
       if (!Array.isArray(results) || results.length === 0) break;
 
@@ -1849,6 +1916,20 @@ class ArchivespaceBrowser extends LitElement {
     }
 
     return allResults;
+  }
+
+  _recordIndexCompleteness(repositoryId, response) {
+    // Only the first page of an unfiltered listing carries the completeness check.
+    const { [repositoryId]: _previous, ...others } = this.incompleteIndexRepositories;
+    this.incompleteIndexRepositories = response?.index_incomplete
+      ? {
+          ...others,
+          [repositoryId]: {
+            found: response.total_hits ?? 0,
+            expected: response.expected_total_hits ?? 0,
+          },
+        }
+      : others;
   }
 
   _upsertCollections(incoming) {
