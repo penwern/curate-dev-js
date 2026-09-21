@@ -311,14 +311,14 @@ export class EmailHeader extends LitElement {
           ? html`
               <pre class="full-headers">
 ${JSON.stringify(
-  this.email.headers || {
-    "Message-ID": this.email.messageId,
-    "In-Reply-To": this.email.inReplyTo,
-    References: this.email.references,
-  },
-  null,
-  2,
-)}</pre>
+                  this.email.headers || {
+                    "Message-ID": this.email.messageId,
+                    "In-Reply-To": this.email.inReplyTo,
+                    References: this.email.references,
+                  },
+                  null,
+                  2,
+                )}</pre>
             `
           : ""
       }
