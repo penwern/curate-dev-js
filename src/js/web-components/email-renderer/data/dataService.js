@@ -410,8 +410,16 @@ function sanitiseHtml(html) {
   return html;
 }
 
+// postal-mime 3 stops parsing nested message/rfc822 parts at
+// maxRfc822NestingDepth (default 10) and emits the remainder as an attachment
+// flagged rfc822DepthExceeded, so a deeply forwarded chain would render as an
+// unnamed message/rfc822 attachment instead of readable content. Archived mail
+// is the whole point of this renderer, so the limit is raised well above any
+// realistic chain while staying bounded.
+const RFC822_NESTING_DEPTH = 100;
+
 async function parseEmlContent(emlText) {
-  const parser = new PostalMime();
+  const parser = new PostalMime({ maxRfc822NestingDepth: RFC822_NESTING_DEPTH });
   const payload = typeof emlText === "string" ? new TextEncoder().encode(emlText) : emlText;
 
   const parsed = await parser.parse(payload);
@@ -425,7 +433,7 @@ async function parseEmlContent(emlText) {
 }
 
 async function parseEmlWithMetadata(emlText) {
-  const parser = new PostalMime();
+  const parser = new PostalMime({ maxRfc822NestingDepth: RFC822_NESTING_DEPTH });
   const payload = typeof emlText === "string" ? new TextEncoder().encode(emlText) : emlText;
 
   const parsed = await parser.parse(payload);
