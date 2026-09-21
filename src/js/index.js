@@ -38,6 +38,7 @@ import "../js/core/UploadInterceptor/index.js";
 import "../js/core/UploadLimits/UploadLimiter.js";
 import "../js/core/PassOaiToChildren.js";
 import "../js/core/consoleModifier.js";
+import "../js/core/changelogModifier.js";
 import "../js/core/messageModifier.js";
 //fixes
 import "../js/core/fixes/FixInfoPanelScroll.js";
