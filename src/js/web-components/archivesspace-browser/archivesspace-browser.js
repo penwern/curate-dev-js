@@ -15,6 +15,7 @@ import "./components/as-empty-state.js";
 import "./components/as-pagination.js";
 import "../utils/penwern-spinner.js";
 import { Curate } from "../../core/CurateFunctions/CurateFunctions.js";
+import { setSubmissionDeclaration } from "../../core/SubmissionMetadata.js";
 
 // Import utilities
 import {
@@ -1474,6 +1475,17 @@ class ArchivespaceBrowser extends LitElement {
         );
         const created = res?.folders || [];
         const count = Array.isArray(created) ? created.length : 0;
+        if (window.curateSubmissionPanel === true) {
+          try {
+            await Promise.all(
+              created.map((folder) => setSubmissionDeclaration({ _uuid: folder.uuid }, true)),
+            );
+          } catch (err) {
+            throw new Error(
+              `Created ${count} folder${count === 1 ? "" : "s"} in Curate, but failed to set submission boundaries: ${err.message}`,
+            );
+          }
+        }
         this._setCreateFoldersFeedback(
           "success",
           `Created ${count} folder${count === 1 ? "" : "s"} in Curate.`,
