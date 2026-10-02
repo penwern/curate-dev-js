@@ -244,7 +244,10 @@ function constructFilePath(uploadItem) {
   filename += fileComponent;
   filename = filename.replace(/\/+/g, "/");
 
-  return filename;
+  // Cells stores names as NFC and the uploader normalises the key to NFC, but
+  // webkitRelativePath and the label keep the OS spelling (NFD from macOS), so
+  // normalise here or the stats lookup misses the stored node.
+  return filename.normalize("NFC");
 }
 
 // Export the plugin
