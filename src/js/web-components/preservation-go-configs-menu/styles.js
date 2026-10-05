@@ -299,6 +299,18 @@ export const styles = css`
     line-height: 1.3;
   }
 
+  .readonly-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    vertical-align: middle;
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    border: 1px solid var(--md-sys-color-outline-variant, #c7c5d0);
+  }
+
   .config-actions {
     display: flex;
     gap: 8px;
