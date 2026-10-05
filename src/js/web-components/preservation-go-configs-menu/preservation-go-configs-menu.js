@@ -8,11 +8,9 @@ import "@material/web/switch/switch.js";
 import "@material/web/slider/slider.js";
 import "@material/web/divider/divider.js";
 import "@material/web/iconbutton/icon-button.js";
-import { PreservationConfigAPI } from "./api-client.js";
+import { PreservationConfigAPI, isDefaultConfigId } from "./api-client.js";
 import { styles } from "./styles.js";
 import { preservationGoConfigUI } from "./ui-component.js";
-
-const defaultConfigId = 1;
 
 class PreservationGoConfigManager extends LitElement {
   static properties = {
@@ -123,6 +121,19 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   async saveConfig() {
+    // Never send an update for the default config, even if the UI guard is bypassed
+    if (this.isDefaultConfig) {
+      Curate.ui.modals
+        .curatePopup({
+          title: "Cannot Edit Default Config",
+          message:
+            "The default config is read-only. Press Clear Form to create a new config instead.",
+          type: "warning",
+        })
+        .fire();
+      return;
+    }
+
     if (!this.configName || this.configName.trim().length < 3) {
       Curate.ui.modals
         .curatePopup({
@@ -295,7 +306,7 @@ class PreservationGoConfigManager extends LitElement {
 
   async deleteConfig(configId) {
     // Prevent deletion of the default config (id: 1)
-    if (configId === defaultConfigId) {
+    if (isDefaultConfigId(configId)) {
       Curate.ui.modals
         .curatePopup({
           title: "Cannot Delete Default Config",
@@ -378,12 +389,22 @@ class PreservationGoConfigManager extends LitElement {
       .fire();
   }
 
+  get isDefaultConfig() {
+    return this.isEditMode && isDefaultConfigId(this.editConfigId);
+  }
+
   get canSave() {
-    return this.configName && this.configName.trim().length >= 3 && !this.saveInProgress;
+    return (
+      this.configName &&
+      this.configName.trim().length >= 3 &&
+      !this.saveInProgress &&
+      !this.isDefaultConfig
+    );
   }
 
   get saveButtonText() {
     if (this.saveInProgress) return "Saving...";
+    if (this.isDefaultConfig) return "Default config is read-only";
     if (!this.configName) return "Save Config";
     if (this.configName.trim().length < 3) return "Add a name 3 characters or longer";
     return this.isEditMode ? "Update Config" : "Save Config";

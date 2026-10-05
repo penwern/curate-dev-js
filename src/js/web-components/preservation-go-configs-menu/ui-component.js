@@ -2,8 +2,7 @@ import { html } from "lit";
 import { when } from "lit/directives/when.js";
 import { mdiStar, mdiStarOutline, mdiCog } from "@mdi/js";
 import { icon } from "../utils/icons.js";
-
-const defaultConfigId = 1;
+import { isDefaultConfigId } from "./api-client.js";
 
 export const preservationGoConfigUI = (component) => html`
   <div class="main-container">
@@ -13,6 +12,15 @@ export const preservationGoConfigUI = (component) => html`
         <div class="section-title">${icon(mdiCog)} Create or Edit Configs</div>
 
         <div class="form-scroll-container">
+          ${when(
+            component.isDefaultConfig,
+            () => html`
+              <div class="info-panel">
+                The default configuration can't be edited. Press Clear Form to create a new config.
+              </div>
+            `,
+          )}
+
           <!-- Details Category -->
           <div class="category">
             <div class="category-header">Details</div>
@@ -23,6 +31,7 @@ export const preservationGoConfigUI = (component) => html`
                 .value=${component.configName}
                 @input=${(e) => (component.configName = e.target.value)}
                 required
+                ?disabled=${component.isDefaultConfig}
               ></md-outlined-text-field>
             </div>
 
@@ -31,6 +40,7 @@ export const preservationGoConfigUI = (component) => html`
                 label="Config Description"
                 .value=${component.configDescription}
                 @input=${(e) => (component.configDescription = e.target.value)}
+                ?disabled=${component.isDefaultConfig}
               ></md-outlined-text-field>
             </div>
           </div>
@@ -44,6 +54,7 @@ export const preservationGoConfigUI = (component) => html`
                 .selected=${component.AssignUuidsToDirectories}
                 @change=${() =>
                   (component.AssignUuidsToDirectories = !component.AssignUuidsToDirectories)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Assign UUIDs to Directories</label>
             </div>
@@ -52,6 +63,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.ExamineContents}
                 @change=${() => (component.ExamineContents = !component.ExamineContents)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Examine Contents</label>
             </div>
@@ -62,6 +74,7 @@ export const preservationGoConfigUI = (component) => html`
                 @change=${() =>
                   (component.GenerateTransferStructureReport =
                     !component.GenerateTransferStructureReport)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Generate Transfer Structure Report</label>
             </div>
@@ -71,6 +84,7 @@ export const preservationGoConfigUI = (component) => html`
                 .selected=${component.DocumentEmptyDirectories}
                 @change=${() =>
                   (component.DocumentEmptyDirectories = !component.DocumentEmptyDirectories)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Document Empty Directories</label>
             </div>
@@ -84,6 +98,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.ExtractPackages}
                 @change=${() => (component.ExtractPackages = !component.ExtractPackages)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Extract Packages</label>
             </div>
@@ -95,7 +110,7 @@ export const preservationGoConfigUI = (component) => html`
                   @change=${() =>
                     (component.DeletePackagesAfterExtraction =
                       !component.DeletePackagesAfterExtraction)}
-                  ?disabled=${!component.ExtractPackages}
+                  ?disabled=${!component.ExtractPackages || component.isDefaultConfig}
                 ></md-switch>
                 <label>Delete Packages After Extraction</label>
               </div>
@@ -110,6 +125,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.IdentifyTransfer}
                 @change=${() => (component.IdentifyTransfer = !component.IdentifyTransfer)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Identify Transfer</label>
             </div>
@@ -120,6 +136,7 @@ export const preservationGoConfigUI = (component) => html`
                 @change=${() =>
                   (component.IdentifySubmissionAndMetadata =
                     !component.IdentifySubmissionAndMetadata)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Identify Submission and Metadata</label>
             </div>
@@ -129,6 +146,7 @@ export const preservationGoConfigUI = (component) => html`
                 .selected=${component.IdentifyBeforeNormalization}
                 @change=${() =>
                   (component.IdentifyBeforeNormalization = !component.IdentifyBeforeNormalization)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Identify Before Normalization</label>
             </div>
@@ -142,6 +160,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.Normalize}
                 @change=${() => (component.Normalize = !component.Normalize)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Normalize Files</label>
             </div>
@@ -150,6 +169,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.TranscribeFiles}
                 @change=${() => (component.TranscribeFiles = !component.TranscribeFiles)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Transcribe Files</label>
             </div>
@@ -165,6 +185,7 @@ export const preservationGoConfigUI = (component) => html`
                 @change=${() =>
                   (component.PerformPolicyChecksOnOriginals =
                     !component.PerformPolicyChecksOnOriginals)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Perform Policy Checks on Originals</label>
             </div>
@@ -175,6 +196,7 @@ export const preservationGoConfigUI = (component) => html`
                 @change=${() =>
                   (component.PerformPolicyChecksOnPreservationDerivatives =
                     !component.PerformPolicyChecksOnPreservationDerivatives)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label> Perform Policy Checks on Preservation Derivatives </label>
             </div>
@@ -185,6 +207,7 @@ export const preservationGoConfigUI = (component) => html`
                 @change=${() =>
                   (component.PerformPolicyChecksOnAccessDerivatives =
                     !component.PerformPolicyChecksOnAccessDerivatives)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Perform Policy Checks on Access Derivatives</label>
             </div>
@@ -199,6 +222,7 @@ export const preservationGoConfigUI = (component) => html`
                 label="Thumbnail Mode"
                 .value=${component.ThumbnailMode.toString()}
                 @change=${(e) => (component.ThumbnailMode = parseInt(e.target.value))}
+                ?disabled=${component.isDefaultConfig}
               >
                 <md-select-option value="1">
                   <div slot="headline">Generate</div>
@@ -221,6 +245,7 @@ export const preservationGoConfigUI = (component) => html`
               <md-switch
                 .selected=${component.CompressAip}
                 @change=${() => (component.CompressAip = !component.CompressAip)}
+                ?disabled=${component.isDefaultConfig}
               ></md-switch>
               <label>Compress AIP</label>
             </div>
@@ -238,7 +263,7 @@ export const preservationGoConfigUI = (component) => html`
                   label="Compression Algorithm"
                   .value=${component.AipCompressionAlgorithm}
                   @change=${(e) => (component.AipCompressionAlgorithm = e.target.value)}
-                  ?disabled=${!component.CompressAip}
+                  ?disabled=${!component.CompressAip || component.isDefaultConfig}
                 >
                   <md-select-option value="ZIP">
                     <div slot="headline">ZIP</div>
@@ -295,7 +320,13 @@ export const preservationGoConfigUI = (component) => html`
                         @click=${() => component.loadConfig(config)}
                       >
                         <div class="config-header">
-                          <div class="config-name">${config.name}</div>
+                          <div class="config-name">
+                            ${config.name}
+                            ${when(
+                              isDefaultConfigId(config.id),
+                              () => html`<span class="readonly-badge">Read-only</span>`,
+                            )}
+                          </div>
                           <div class="config-actions">
                             <md-icon-button
                               class="${component.isBookmarked(config.id) ? "starred" : ""}"
@@ -310,7 +341,7 @@ export const preservationGoConfigUI = (component) => html`
                                   : icon(mdiStarOutline)
                               }
                             </md-icon-button>
-                            ${when(config.id !== defaultConfigId, () => {
+                            ${when(!isDefaultConfigId(config.id), () => {
                               return html`
                                 <md-outlined-button
                                   class="delete-btn"

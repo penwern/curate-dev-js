@@ -1,3 +1,13 @@
+// Id of the "Default Configuration" row seeded by the preservation API migration
+const DEFAULT_CONFIG_ID = 1;
+
+/**
+ * Check whether an id belongs to the seeded default config
+ * @param {number|string} id - Config id
+ * @returns {boolean} True if the id is the default config
+ */
+const isDefaultConfigId = (id) => Number(id) === DEFAULT_CONFIG_ID;
+
 /**
  * Preservation Config API Client
  * Handles all API interactions for preservation configurations
@@ -248,4 +258,4 @@ class PreservationConfigAPI {
 }
 
 // Export the class
-export { PreservationConfigAPI };
+export { PreservationConfigAPI, DEFAULT_CONFIG_ID, isDefaultConfigId };
