@@ -287,12 +287,15 @@ export const configPayload = (values, { name, description }) => {
 
 /**
  * Keys of the settings whose value differs from the defaults, essentials first.
+ * Settings that only apply with normalisation are skipped while normalise is off.
  * @param {Object} values - Values to compare
  * @param {Object} defaults - Default values
  * @returns {string[]} Setting keys
  */
 export const differences = (values, defaults) =>
-  SETTINGS.filter((s) => values[s.key] !== defaults[s.key]).map((s) => s.key);
+  SETTINGS.filter(
+    (s) => values[s.key] !== defaults[s.key] && !(s.needsNormalise && !values.normalize),
+  ).map((s) => s.key);
 
 const optionFor = (key, value) => getSetting(key)?.options.find((o) => o.value === value);
 

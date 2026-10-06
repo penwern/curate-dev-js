@@ -172,8 +172,8 @@ const essentialCard = (component, setting) => {
 
 const advancedRow = (component, setting) => {
   const { values } = component.draft;
-  const differs = values[setting.key] !== component.defaultValues[setting.key];
   const disabled = !!setting.needsNormalise && !values.normalize;
+  const differs = !disabled && values[setting.key] !== component.defaultValues[setting.key];
 
   return html`
     <div class="adv-row ${differs ? "differs" : ""} ${disabled ? "disabled" : ""}">
@@ -181,7 +181,7 @@ const advancedRow = (component, setting) => {
         <span class="adv-label">${setting.label}</span>
         <span class="adv-desc">${setting.description}</span>
         ${disabled ? html`<span class="adv-note">Only applies when Normalise is on</span>` : nothing}
-        ${differs && !disabled ? resetLink(component, setting.key) : nothing}
+        ${differs ? resetLink(component, setting.key) : nothing}
       </div>
       <md-switch
         aria-label=${setting.label}

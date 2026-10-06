@@ -236,6 +236,17 @@ test("diffChips: remaining choice and boolean chips", () => {
   assert.deepEqual(chips({ assign_uuids_to_directories: false }), ["No folder UUIDs"]);
 });
 
+test("differences: ignores normalisation dependants while normalise is off", () => {
+  const values = {
+    ...FALLBACK_DEFAULTS,
+    normalize: false,
+    identify_before_normalization: false,
+    perform_policy_checks_on_access_derivatives: false,
+  };
+  assert.deepEqual(differences(values, FALLBACK_DEFAULTS), ["normalize"]);
+  assert.deepEqual(diffChips(values, FALLBACK_DEFAULTS), ["No normalisation"]);
+});
+
 test("differences: compares against a non-fallback default", () => {
   const def = { ...FALLBACK_DEFAULTS, normalize: false, compress_aip: true };
   assert.deepEqual(differences(def, def), []);
