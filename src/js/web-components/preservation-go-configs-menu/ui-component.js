@@ -390,16 +390,12 @@ const viewer = (component) => {
       </div>
 
       ${
-        isDefault
+        pinned
           ? html`<p class="pin-info">
-              Always in the right-click menu: "Preserve" runs this config.
+              ${icon(mdiPin)} Shown in the right-click menu, so it can be run without opening
+              Preservation Configs.
             </p>`
-          : pinned
-            ? html`<p class="pin-info">
-                ${icon(mdiPin)} Shown in the right-click menu, so it can be run without opening
-                Preservation Configs.
-              </p>`
-            : nothing
+          : nothing
       }
 
       <div class="summary-grid">
