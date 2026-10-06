@@ -100,6 +100,8 @@ class PreservationGoConfigManager extends LitElement {
   // ---- Pins (stored per config id, shared with the right-click menu) ----
 
   isPinned(configId) {
+    // The default config is always in the right-click menu, as "Preserve"
+    if (isDefaultConfigId(configId)) return false;
     try {
       return !!JSON.parse(localStorage.getItem(String(configId)) || "{}").bookmarked;
     } catch (_error) {

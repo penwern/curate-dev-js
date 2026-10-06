@@ -379,19 +379,27 @@ const viewer = (component) => {
         <md-outlined-button @click=${() => component.startCreate(true)}>
           ${icon(mdiContentCopy, "icon")} Duplicate
         </md-outlined-button>
-        <md-outlined-button @click=${() => component.togglePin(config)}>
-          ${icon(pinned ? mdiPinOff : mdiPin, "icon")}
-          ${pinned ? "Remove from right-click menu" : "Show in right-click menu"}
-        </md-outlined-button>
+        ${
+          isDefault
+            ? nothing
+            : html`<md-outlined-button @click=${() => component.togglePin(config)}>
+                ${icon(pinned ? mdiPinOff : mdiPin, "icon")}
+                ${pinned ? "Remove from right-click menu" : "Show in right-click menu"}
+              </md-outlined-button>`
+        }
       </div>
 
       ${
-        pinned
+        isDefault
           ? html`<p class="pin-info">
-              ${icon(mdiPin)} Shown in the right-click menu, so it can be run without opening
-              Preservation Configs.
+              Always in the right-click menu: "Preserve" runs this config.
             </p>`
-          : nothing
+          : pinned
+            ? html`<p class="pin-info">
+                ${icon(mdiPin)} Shown in the right-click menu, so it can be run without opening
+                Preservation Configs.
+              </p>`
+            : nothing
       }
 
       <div class="summary-grid">
