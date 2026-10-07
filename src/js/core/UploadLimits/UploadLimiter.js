@@ -94,23 +94,23 @@ function patchUploadStore(store) {
 }
 
 // Helper function to recursively count files in folders
-function traverseFileTree(item, files) {
-  return new Promise((resolve) => {
-    if (item.isFile) {
-      files.push(item);
-      resolve();
-    } else if (item.isDirectory) {
-      const dirReader = item.createReader();
-      dirReader.readEntries(async (entries) => {
-        for (let i = 0; i < entries.length; i++) {
-          await traverseFileTree(entries[i], files);
-        }
-        resolve();
+async function traverseFileTree(item, files) {
+  if (item.isFile) {
+    files.push(item);
+  } else if (item.isDirectory) {
+    const dirReader = item.createReader();
+    // A reader may return only part of a directory (100 entries in Chromium).
+    // Keep reading the same reader until it returns an empty batch.
+    while (true) {
+      const entries = await new Promise((resolve, reject) => {
+        dirReader.readEntries(resolve, reject);
       });
-    } else {
-      resolve();
+      if (entries.length === 0) break;
+      for (const entry of entries) {
+        await traverseFileTree(entry, files);
+      }
     }
-  });
+  }
 }
 
 // Function to disable a specific file in the UI
@@ -236,40 +236,74 @@ const handleDropEvent = async (e) => {
   e.stopPropagation();
   e.stopImmediatePropagation();
 
-  // Count files (handles folders properly via async traversal)
-  let fileCount = 0;
-
-  if (e.dataTransfer?.items) {
-    const files = [];
-    for (let i = 0; i < e.dataTransfer.items.length; i++) {
-      const item = e.dataTransfer.items[i].webkitGetAsEntry();
-      if (item) {
-        await traverseFileTree(item, files);
-      }
-    }
-    fileCount = files.length;
-  } else if (e.dataTransfer?.files) {
-    fileCount = e.dataTransfer.files.length;
-  }
-
-  // Check limit
-  if (activeUploadsCount + fileCount > getMaxUploadFiles()) {
-    showUploadLimitModal(fileCount);
-    return;
-  }
-
-  // Manually call Pydio's upload handler
+  // The browser's drag data store is readable only during the synchronous
+  // drop handler. Capture entries, not just DataTransferItem references, before
+  // awaiting directory traversal or the upload store.
+  const droppedFiles = Array.from(dataTransfer.files || []);
+  const droppedItems = Array.from(dataTransfer.items || [])
+    .filter((item) => item.kind === "file")
+    .map((item) => {
+      const entry = item.getAsEntry?.() || item.webkitGetAsEntry?.();
+      const file = item.getAsFile?.();
+      const capturedEntry =
+        entry ||
+        (file && {
+          isFile: true,
+          isDirectory: false,
+          fullPath: "/" + file.name,
+          file: (resolve) => resolve(file),
+        });
+      return capturedEntry
+        ? {
+            kind: "file",
+            webkitGetAsEntry: () => capturedEntry,
+            getAsFile: () => file,
+          }
+        : null;
+    })
+    .filter(Boolean);
   const targetNode = pydio.getContextHolder().getContextNode();
 
-  const store = await waitForUploadStore();
-  if (!store) {
-    console.error("UploadLimiter: Unable to resolve upload store.");
-    return;
+  try {
+    // Count files (handles folders properly via async traversal)
+    let fileCount = 0;
+
+    if (droppedItems.length > 0) {
+      const files = [];
+      for (const item of droppedItems) {
+        await traverseFileTree(item.webkitGetAsEntry(), files);
+      }
+      fileCount = files.length;
+    } else {
+      fileCount = droppedFiles.length;
+    }
+
+    const store = await waitForUploadStore();
+
+    // Check limit
+    if (activeUploadsCount + fileCount > getMaxUploadFiles()) {
+      showUploadLimitModal(fileCount);
+      return;
+    }
+
+    // Manually call Pydio's upload handler
+    if (!store) {
+      console.error("UploadLimiter: Unable to resolve upload store.");
+      return;
+    }
+
+    store.handleDropEventResults(droppedItems, droppedFiles, targetNode);
+
+    activeUploadsCount += fileCount;
+  } catch (error) {
+    console.error("UploadLimiter: Unable to process dropped files.", error);
+    new CurateUi.modals.curatePopup({
+      title: "Unable to Read Upload",
+      type: "error",
+      message: "Could not read the dropped files or directory. Please try again.",
+      buttonType: "close",
+    }).fire();
   }
-
-  store.handleDropEventResults(e.dataTransfer.items, e.dataTransfer.files, targetNode);
-
-  activeUploadsCount += fileCount;
 };
 
 const handleFileInputChange = (e) => {
