@@ -33,6 +33,29 @@ const MODAL_STYLE_CONTENT = `
   min-width: 0;
   min-height: 0;
 }
+.config-modal-content:has(preservation-go-config-manager) {
+  box-sizing: border-box;
+  width: min(70vw, 1248px);
+  height: 85vh;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.config-modal-content:has(preservation-go-config-manager) .config-main-options-container {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+.config-modal-content:has(preservation-go-config-manager) preservation-go-config-manager {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.config-modal-content:has(preservation-go-config-manager) .config-modal-header,
+.config-modal-content:has(preservation-go-config-manager) .action-buttons {
+  flex: none;
+}
 .config-modal-action-button {
   flex: 1 1 0;
   width: auto !important;

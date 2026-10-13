@@ -6,6 +6,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
+  const fprPreview = !isProduction && (env?.fprPreview === true || env?.fprPreview === "true");
 
   return {
     entry: "./src/js/index.js",
@@ -27,6 +28,10 @@ module.exports = (env, argv) => {
     plugins: [
       new webpack.DefinePlugin({
         "process.env.VERSION": JSON.stringify(packageJson.version),
+        // Explicit development-only snapshot mode for testing inside Curate.
+        "process.env.FPR_PREVIEW_REGISTRY": fprPreview
+          ? JSON.stringify(require("./preview/fpr-registry.json"))
+          : "null",
       }),
 
       new CopyWebpackPlugin({

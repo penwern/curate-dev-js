@@ -2,10 +2,14 @@ import { css } from "lit";
 
 export const styles = css`
   :host {
-    display: block;
-    /* The popup is at most 70% of the viewport wide and sizes itself to its content */
+    display: flex;
+    flex-direction: column;
+    /* The popup constrains the height; each pane scrolls its own content. */
     width: min(70vw, 1200px);
     max-width: 100%;
+    height: min(calc(85vh - 190px), 720px);
+    min-height: 0;
+    overflow: hidden;
     box-sizing: border-box;
     font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
     color: var(--md-sys-color-on-surface, #1d1b20);
@@ -20,8 +24,8 @@ export const styles = css`
   .layout {
     display: flex;
     gap: 16px;
-    height: min(calc(85vh - 190px), 720px);
-    min-height: 440px;
+    height: 100%;
+    min-height: 0;
   }
 
   /* Left pane */
@@ -39,6 +43,7 @@ export const styles = css`
   }
 
   .config-list {
+    overscroll-behavior: contain;
     flex: 1;
     min-height: 0;
     margin: 0;
@@ -185,6 +190,7 @@ export const styles = css`
   }
 
   .pane-scroll {
+    overscroll-behavior: contain;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -615,17 +621,16 @@ export const styles = css`
   @media (max-width: 700px) {
     .layout {
       flex-direction: column;
-      height: auto;
     }
 
     .list-pane {
-      flex: none;
+      flex: 0 1 30%;
       width: auto;
       max-height: 240px;
     }
 
     .pane {
-      min-height: 480px;
+      min-height: 0;
     }
   }
 `;

@@ -5,6 +5,8 @@
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/**/*.test.js\"",
     "build": "webpack --mode production --config ./webpack.config.js",
     "serve": "npx webpack serve --mode development --config ./webpack.config.js",
+    "preview:fpr": "webpack serve --mode development --config ./webpack.fpr-preview.config.js",
+    "fixture:fpr": "node preview/generate-fpr-fixture.cjs",
     "docker:build": "DOCKER_BUILDKIT=1 docker compose build",
     "docker:up": "DOCKER_BUILDKIT=1 docker compose up -d --build"
   },
