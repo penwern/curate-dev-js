@@ -25,6 +25,30 @@ class PreservationConfigAPI {
     return await PydioApi._PydioRestClient.getOrUpdateJwt();
   }
 
+  async getFPR() {
+    const previewRegistry = process.env.FPR_PREVIEW_REGISTRY;
+    if (previewRegistry) {
+      return { registry: previewRegistry, commandBodies: "omitted", preview: true };
+    }
+    const token = await this.getAuthToken();
+    const response = await fetch(`${this.baseUrl}/fpr`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      const error = new Error("Could not load the format policy registry.");
+      error.code = body.code;
+      error.status = response.status;
+      throw error;
+    }
+    return {
+      registry: await response.json(),
+      commandBodies: response.headers.get("X-FPR-Command-Bodies") || "unknown",
+    };
+  }
+
   /**
    * Health check endpoint
    * @returns {Promise<Object>} Health status response
