@@ -141,7 +141,8 @@ async function generateChecksum(uploadItem) {
 
   try {
     // Calculate checksum: use multipart calculation for large files, single MD5 for smaller ones.
-    if (uploadItem._file.size > multipartDecisionThreshold) {
+    // >= matches Cells' UploadItem.uploadPresigned, which sends size == threshold as multipart.
+    if (uploadItem._file.size >= multipartDecisionThreshold) {
       // Multipart checksum logic:
       const partSize = multipartPartSize;
       const parts = Math.ceil(uploadItem._file.size / partSize);
