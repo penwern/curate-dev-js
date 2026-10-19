@@ -25,7 +25,7 @@
     "postal-mime": "^3.0.0",
     "spark-md5": "^3.0.2",
     "sweetalert2": "^11.26.25",
-    "vest": "^5.4.6",
+    "vest": "^6.3.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
