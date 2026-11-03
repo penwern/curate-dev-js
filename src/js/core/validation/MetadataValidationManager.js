@@ -243,9 +243,18 @@ class MetadataValidationManager {
     if (!this._saveClickHandler) {
       // Capture phase on document runs before React's handlers, so a re-render cannot undo the block.
       this._saveClickHandler = (event) => {
+        // Resolve the clicked button directly: React may have replaced the cached button.
+        const button = event.target?.closest?.("button");
+        const saveText = this._getSaveButtonText()?.trim();
+        if (!button || !saveText || (button.textContent || "").trim() !== saveText) return;
+
+        // Save must use current values, even before the debounced validation runs.
+        if (this._timer) {
+          clearTimeout(this._timer);
+          this._timer = null;
+        }
+        this.validateAll();
         if (!this.hasErrors()) return;
-        const button = this._findSaveButton();
-        if (!button || !button.contains(event.target)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         this.showValidationErrorsModal();

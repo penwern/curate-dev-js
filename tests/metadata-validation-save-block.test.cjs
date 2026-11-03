@@ -27,6 +27,10 @@ function setup() {
     child: {},
     insertAdjacentElement() {},
   };
+  saveButton.closest = () => saveButton;
+  saveButton.child.closest = () => saveButton;
+  const timers = new Map();
+  let timerId = 0;
   const listeners = [];
   const document = {
     addEventListener: (type, fn, capture) => listeners.push({ type, fn, capture }),
@@ -52,6 +56,11 @@ function setup() {
     window: { pydio: { MessageHash: { "meta.user.15": "Save" } } },
     Node: { ELEMENT_NODE: 1, TEXT_NODE: 3 },
     console,
+    setTimeout: (fn) => {
+      timers.set(++timerId, fn);
+      return timerId;
+    },
+    clearTimeout: (id) => timers.delete(id),
     globalThis: null,
   };
   ctx.globalThis = ctx;
@@ -76,7 +85,35 @@ function setup() {
     listeners.filter((l) => l.type === "click" && l.capture).forEach((l) => l.fn(ev));
     return ev;
   };
-  return { manager, saveButton, attrs, classes, listeners, click, modals: () => modals };
+  return {
+    manager,
+    saveButton,
+    attrs,
+    classes,
+    listeners,
+    click,
+    document,
+    timers,
+    modals: () => modals,
+  };
+}
+
+function useDateValidator(manager) {
+  let label = "creation";
+  manager.validators.push({
+    id: "aspace",
+    watchFields: new Set(["date_label"]),
+    validatedFields: new Set(["date_label"]),
+    validate: (values) => (values.date_label ? null : "Date label is required"),
+    getFirstError: (_field, result) => result,
+  });
+  manager._collectFieldElementsAndValues = () => ({
+    values: { date_label: label },
+    elementsByField: new Map([["date_label", null]]),
+  });
+  return (value) => {
+    label = value;
+  };
 }
 
 test("Save click is blocked and opens the modal while errors exist", () => {
@@ -115,4 +152,56 @@ test("detach removes the listener", () => {
   const t = setup();
   t.manager.detach();
   assert.equal(t.listeners.length, 0);
+});
+
+test("replacement Save is blocked even while the cached button search is throttled", () => {
+  const t = setup();
+  t.manager.errors.set("aspace:date_label", "Date label is required");
+  const replacement = { textContent: "Save" };
+  replacement.closest = () => replacement;
+  const child = { closest: () => replacement };
+  t.document.contains = (element) => element !== t.saveButton;
+  t.document.querySelectorAll = (selector) => (selector === "button" ? [replacement] : []);
+  t.manager._lastSaveButtonSearchAt = Date.now();
+  const ev = t.click(child);
+  assert.ok(ev.prevented && ev.stopped);
+  assert.equal(t.modals(), 1);
+});
+
+test("Save validates the latest edit before the debounce expires", () => {
+  const t = setup();
+  const setLabel = useDateValidator(t.manager);
+  t.manager.validateAll();
+  assert.equal(t.manager.hasErrors(), false);
+  setLabel("");
+  t.manager._scheduleValidation();
+  assert.equal(t.timers.size, 1);
+  const ev = t.click(t.saveButton.child);
+  assert.ok(ev.prevented && ev.stopped);
+  assert.equal(t.modals(), 1);
+  assert.equal(t.timers.size, 0);
+  assert.equal(t.manager._timer, null);
+});
+
+test("Save immediately accepts a corrected value despite stale errors", () => {
+  const t = setup();
+  const setLabel = useDateValidator(t.manager);
+  setLabel("");
+  t.manager.validateAll();
+  assert.equal(t.manager.hasErrors(), true);
+  setLabel("creation");
+  t.manager._scheduleValidation();
+  const ev = t.click(t.saveButton);
+  assert.ok(!ev.prevented && !ev.stopped);
+  assert.equal(t.manager.hasErrors(), false);
+  assert.equal(t.modals(), 0);
+  assert.equal(t.timers.size, 0);
+});
+
+test("unrelated clicks leave pending validation alone", () => {
+  const t = setup();
+  t.manager._scheduleValidation();
+  const ev = t.click({ closest: () => ({ textContent: "Cancel" }) });
+  assert.ok(!ev.prevented && !ev.stopped);
+  assert.equal(t.timers.size, 1);
 });
