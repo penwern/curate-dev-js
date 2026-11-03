@@ -163,3 +163,98 @@ test("non-file drops continue through the normal event flow", async () => {
   assert.equal(app.uploads.length, 0);
   assert.equal(app.popups.length, 0);
 });
+
+function limiterApp({ limit = 2, preserveHook }) {
+  const handlers = new Map();
+  const observers = new Map();
+  const popups = [];
+  const items = [];
+  const session = {
+    observe() {},
+    getStatus: () => "ready",
+    walk(visit) {
+      items.forEach(visit);
+    },
+  };
+  const store = { _sessions: [session], pushSession() {}, handleDropEventResults() {} };
+  const registry = {
+    querySelector: (sel) => (preserveHook && sel === 'action[name="preserve"]' ? {} : null),
+  };
+  const timers = [];
+  vm.runInNewContext(source, {
+    maxUploadFiles: limit,
+    eventDelegator: { addEventListener: (_s, event, handler) => handlers.set(event, handler) },
+    CurateUi: {
+      modals: {
+        curatePopup: class {
+          constructor(o) {
+            popups.push(o);
+          }
+          fire() {}
+        },
+      },
+    },
+    window: { UploaderModel: { Store: { getInstance: () => store } } },
+    document: { getElementById: () => null },
+    pydio: {
+      user: { id: "alice" },
+      observe: (name, fn) => observers.set(name, fn),
+      getXmlRegistry: () => registry,
+      getContextHolder: () => ({ getContextNode: () => ({}) }),
+    },
+    console: { error() {} },
+    setTimeout: (fn) => timers.push(fn),
+  });
+  const input = (n) =>
+    handlers.get("change")({
+      target: { type: "file", files: { length: n } },
+      preventDefault() {},
+      stopPropagation() {},
+      stopImmediatePropagation() {},
+    });
+  const addItem = () => {
+    const listeners = [];
+    const item = {
+      status: "new",
+      getLabel: () => "f" + items.length,
+      getStatus: () => item.status,
+      observe: (_e, fn) => listeners.push(fn),
+    };
+    item.set = (s) => {
+      item.status = s;
+      listeners.forEach((fn) => fn(s));
+    };
+    items.push(item);
+    timers.splice(0).forEach((fn) => fn()); // checkPreparationComplete, which attaches the item observers
+    return item;
+  };
+  const curationFinished = () =>
+    observers.get("task_message")({
+      TaskUpdated: { JobID: "curate-curation", Status: "Finished", TriggerOwner: "alice" },
+    });
+  return { input, addItem, curationFinished, popups };
+}
+
+test("without the flows, a finished upload frees its slot", () => {
+  const app = limiterApp({ preserveHook: false });
+  app.input(2);
+  const a = app.addItem();
+  app.addItem();
+  a.set("loaded");
+  a.set("loaded");
+  app.input(1);
+  assert.equal(app.popups.length, 0);
+  app.input(1);
+  assert.equal(app.popups.length, 1);
+});
+
+test("with the flows, only finished curation frees a slot", () => {
+  const app = limiterApp({ preserveHook: true });
+  app.input(2);
+  app.addItem().set("loaded");
+  app.input(1);
+  assert.equal(app.popups.length, 1);
+  app.curationFinished();
+  app.input(1);
+  assert.equal(app.popups.length, 1);
+});

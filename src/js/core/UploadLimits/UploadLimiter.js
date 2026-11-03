@@ -155,6 +155,18 @@ if (typeof pydio !== "undefined") {
   });
 }
 
+// Hosts without the Penwern flows (no scheduler "preserve" hook) never finish a curate-curation
+// task, so there a slot is freed when the upload itself completes.
+function releaseSlotWithoutFlows(item) {
+  if (item._limiterReleased || pydio.getXmlRegistry?.()?.querySelector('action[name="preserve"]')) {
+    return;
+  }
+  item._limiterReleased = true;
+  if (activeUploadsCount > 0) {
+    activeUploadsCount--;
+  }
+}
+
 // Monitor upload progress and disable/enable files using PREPARED names
 function monitorUploadProgress(store) {
   if (!store || !Array.isArray(store._sessions)) {
@@ -177,6 +189,7 @@ function monitorUploadProgress(store) {
               disableFileInUI(relativePath);
             } else if (newStatus === "loaded") {
               enableFileInUI(relativePath);
+              releaseSlotWithoutFlows(item);
             }
           });
         }
