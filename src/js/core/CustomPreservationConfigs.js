@@ -1,9 +1,91 @@
+/* global PydioCore */
+// Without the scheduler "preserve" hook the Preserve action is registered here and posts to the event watcher.
+var preserveHookPresent = true;
+var builtinPreserveRegistered = false;
+
+function registryHasPreserveHook(registry) {
+  return !!(registry && registry.querySelector('action[name="preserve"]'));
+}
+
+function syncPreserveAction(registry) {
+  if (!pydio.user) {
+    return;
+  }
+  preserveHookPresent = registryHasPreserveHook(registry);
+  if (preserveHookPresent || builtinPreserveRegistered) {
+    return;
+  }
+  const action = new PydioCore.Action(
+    {
+      name: "preserve",
+      icon_class: "mdi mdi-console",
+      text: "Preserve",
+      title: "Preserve",
+      callback: () => submitPreservationRequest("1"),
+    },
+    {
+      selection: true,
+      dir: false,
+      actionBar: true,
+      actionBarGroup: "change_main",
+      contextMenu: true,
+    },
+    { dir: true, file: true, unique: false, multipleOnly: false },
+    { read: true, userLogged: true, write: true },
+  );
+  pydio.getController().updateGuiActions(new Map([["preserve", action]]));
+  builtinPreserveRegistered = true;
+}
+
+async function submitViaWatcher(configId, paths, token) {
+  let status;
+  let deniedPath;
+  try {
+    const response = await fetch(`${window.location.origin}/curate/preserve`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ paths, configId: configId.toString() }),
+    });
+    status = response.status;
+    if (status === 403 && typeof response.json === "function") {
+      deniedPath = await response.json().then(
+        (b) => b.path,
+        () => undefined,
+      );
+    }
+  } catch (error) {
+    console.error("Fetch error:", error);
+    pydio.displayMessage("ERROR", "Preservation request failed: network error");
+    return;
+  }
+  if (status === 202) {
+    pydio.displayMessage("SUCCESS", `Preservation started for ${paths.length} item(s)`);
+  } else if (status === 401) {
+    pydio.displayMessage("ERROR", "Preservation request rejected: sign in again and retry");
+  } else if (status === 403) {
+    pydio.displayMessage(
+      "ERROR",
+      `You do not have permission to preserve: ${deniedPath || paths.join(", ")}`,
+    );
+  } else {
+    pydio.displayMessage("ERROR", `Preservation request failed (HTTP ${status})`);
+  }
+}
+
+function watchPreserveHook() {
+  syncPreserveAction(pydio.getXmlRegistry());
+  pydio.observe("registry_loaded", syncPreserveAction);
+}
+
 async function submitPreservationRequest(configId) {
   const token = await PydioApi._PydioRestClient.getOrUpdateJwt();
   const url = `${window.location.origin}/a/scheduler/hooks/preserve`;
   const paths = pydio._dataModel._selectedNodes.map(
     (n) => Curate.workspaces.getOpenWorkspace() + n._path,
   );
+  if (!preserveHookPresent) {
+    return submitViaWatcher(configId, paths, token);
+  }
   const bodyData = JSON.stringify({
     Paths: paths,
     JobParameters: { ConfigId: configId.toString() },
@@ -286,6 +368,9 @@ window.addEventListener("load", () => {
     try {
       await waitForGlobalVariable("PydioApi");
       getPreservationConfigs();
+      await waitForGlobalVariable("pydio");
+      await waitForGlobalVariable("PydioCore");
+      watchPreserveHook();
     } catch (error) {
       console.error("An error occurred:", error);
     }
