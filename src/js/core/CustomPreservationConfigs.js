@@ -260,7 +260,7 @@ function createMenuItem(label, iconClass, fontSize = "16px", padding = "5px") {
   });
   clone.id = "preservationConfigDropdown";
   clone.innerHTML =
-    '<span role="menuitem" tabindex="0" style="border: 10px; box-sizing: border-box; display: block; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); cursor: pointer; text-decoration: none; margin: 0px; padding: 0px; outline: none; font-size: 15px; font-weight: inherit; position: relative; color:  color: var(--md-sys-color-inverse-surface); line-height: 32px; transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; min-height: 32px; white-space: nowrap; background: none;"><div><div style="margin-left: 0px; padding: 0px 64px 0px 24px; position: relative;"><span class="mdi ' +
+    '<span role="menuitem" tabindex="0" style="border: 10px; box-sizing: border-box; display: block; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); cursor: pointer; text-decoration: none; margin: 0px; padding: 0px; outline: none; font-size: 15px; font-weight: inherit; position: relative; color: var(--md-sys-color-inverse-surface); line-height: 32px; transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; min-height: 32px; white-space: nowrap; background: none;"><div><div style="margin-left: 0px; padding: 0px 64px 0px 24px; position: relative;"><span class="mdi ' +
     iconClass +
     ' menu-icons" color="#757575" style="color: rgb(117, 117, 117); position: absolute; font-size:' +
     fontSize +
