@@ -1,5 +1,7 @@
+/* global PydioCore */
 // Without the scheduler "preserve" hook, requests post to the event watcher. On those hosts the
-// Preserve button is a vanitizer button (deployed by ansible) that calls Curate.preservation.submit.
+// toolbar Preserve button is a vanitizer button (deployed by ansible) that calls
+// Curate.preservation.submit; vanitizer buttons cannot go in the right-click menu, so that entry is registered here.
 var preserveHookPresent = true;
 
 function registryHasPreserveHook(registry) {
@@ -11,6 +13,23 @@ function syncPreserveHook(registry) {
     return;
   }
   preserveHookPresent = registryHasPreserveHook(registry);
+  if (preserveHookPresent) {
+    return;
+  }
+  // Re-registered on every registry load, which rebuilds the GUI actions.
+  const action = new PydioCore.Action(
+    {
+      name: "preserve",
+      icon_class: "mdi mdi-console",
+      text: "Preserve",
+      title: "Preserve",
+      callback: () => submitPreservationRequest("1"),
+    },
+    { selection: true, dir: false, actionBar: false, contextMenu: true },
+    { dir: true, file: true, unique: false, multipleOnly: false },
+    { read: true, userLogged: true, write: true },
+  );
+  pydio.getController().updateGuiActions(new Map([["preserve", action]]));
 }
 
 async function submitViaWatcher(configId, paths, token) {
@@ -130,8 +149,6 @@ async function getPreservationConfigs() {
 function createDivBesideElement(targetElement, content, childItems) {
   const div = document.createElement("div");
   div.id = "preservationConfigsSubMenu";
-  div.style.maxHeight = "8em";
-  div.style.overflowY = "scroll";
   div.innerHTML = content;
   childItems.forEach((item) => {
     let c = document.createElement("div");
@@ -199,35 +216,25 @@ function createDivBesideElement(targetElement, content, childItems) {
   });
   div.querySelector('[role="menu"]').appendChild(noConfigs);
   document.body.appendChild(div);
-  // Get the position and dimensions of the second element
-  const rect1 = div.firstChild.getBoundingClientRect();
-  const rect2 = targetElement.getBoundingClientRect();
-  const distanceFromLeftEdge = rect2.left;
-  const distanceFromRightEdge = window.innerWidth - rect2.right;
-  var newTop;
-  var newLeft; // eslint-disable-line no-unused-vars -- reserved for left-positioned variant
-  var newRight;
-  // Compare the distances and determine the closest edge
-  if (distanceFromLeftEdge < distanceFromRightEdge) {
-    newTop = rect2.top;
-    newRight = window.innerWidth - rect2.right;
-    div.style.position = "absolute";
-    div.style.top = `${newTop}px`;
-    div.style.right = `${newRight}px`;
-  } else if (distanceFromLeftEdge > distanceFromRightEdge) {
-    newTop = rect2.top;
-    newRight = window.innerWidth - rect2.left + rect1.width;
-    div.style.position = "absolute";
-    div.style.top = `${newTop}px`;
-    div.style.right = `${newRight}px`;
-  } else {
-    newTop = rect2.top;
-    newRight = window.innerWidth - rect2.right;
-    div.style.position = "absolute";
-    div.style.top = `${newTop}px`;
-    div.style.right = `${newRight}px`;
-  }
+  const item = targetElement.getBoundingClientRect();
+  const menu = (targetElement.closest('[role="menu"]') || targetElement).getBoundingClientRect();
+  placeInViewport(div, div.firstChild, { top: item.top, left: menu.left, right: menu.right });
   return div;
+}
+
+// Opens beside the anchor (right if it fits, else left) and grows to the viewport, scrolling only beyond it.
+function placeInViewport(div, card, anchor, margin = 8) {
+  div.style.position = "fixed";
+  div.style.zIndex = "2100";
+  card.style.position = "relative";
+  card.style.maxHeight = `${window.innerHeight - 2 * margin}px`;
+  card.style.overflowY = "auto";
+  const { width, height } = card.getBoundingClientRect();
+  const left =
+    anchor.right + width + margin <= window.innerWidth ? anchor.right : anchor.left - width;
+  const top = Math.min(anchor.top, window.innerHeight - height - margin);
+  div.style.left = `${Math.max(margin, Math.min(left, window.innerWidth - width - margin))}px`;
+  div.style.top = `${Math.max(margin, top)}px`;
 }
 function createMenuItem(label, iconClass, fontSize = "16px", padding = "5px") {
   const clone = document.createElement("div");
@@ -241,7 +248,7 @@ function createMenuItem(label, iconClass, fontSize = "16px", padding = "5px") {
   });
   clone.id = "preservationConfigDropdown";
   clone.innerHTML =
-    '<span role="menuitem" tabindex="0" style="border: 10px; box-sizing: border-box; display: block; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); cursor: pointer; text-decoration: none; margin: 0px; padding: 0px; outline: none; font-size: 15px; font-weight: inherit; position: relative; color:  color: var(--md-sys-color-inverse-surface); line-height: 32px; transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; min-height: 32px; white-space: nowrap; background: none;"><div><div style="margin-left: 0px; padding: 0px 64px 0px 24px; position: relative;"><span class="mdi ' +
+    '<span role="menuitem" tabindex="0" style="border: 10px; box-sizing: border-box; display: block; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); cursor: pointer; text-decoration: none; margin: 0px; padding: 0px; outline: none; font-size: 15px; font-weight: inherit; position: relative; color: var(--md-sys-color-inverse-surface); line-height: 32px; transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; min-height: 32px; white-space: nowrap; background: none;"><div><div style="margin-left: 0px; padding: 0px 64px 0px 24px; position: relative;"><span class="mdi ' +
     iconClass +
     ' menu-icons" color="#757575" style="color: rgb(117, 117, 117); position: absolute; font-size:' +
     fontSize +
@@ -264,10 +271,25 @@ function addPreservationWorkflows(menu) {
         const clickCodes = [1, 3];
 
         document.addEventListener("mousedown", () => {}, { once: true });
-        placedDiv.addEventListener("click", () => {
+        // Hover opens the submenu; leaving both the item and the submenu closes it after a short grace.
+        let closeTimer;
+        const scheduleClose = () => {
+          clearTimeout(closeTimer);
+          closeTimer = setTimeout(
+            () => document.querySelector("#preservationConfigsSubMenu")?.remove(),
+            300,
+          );
+        };
+        const openSubMenu = () => {
+          clearTimeout(closeTimer);
+          if (document.querySelector("#preservationConfigsSubMenu")) {
+            return;
+          }
           const content =
-            '<div style="color: var(--md-sys-color-inverse-surface); background-color: transparent; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; box-sizing: border-box; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px; border-radius: 20px; position: fixed; z-index: 2100; opacity: 1; transform: scale(1, 1); transform-origin: left top; max-height: 963px; overflow-y: auto;"><div style="max-height: 100%; overflow-y: auto; transform: scaleX(1); opacity: 1; transform-origin: left top; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div style="opacity: 1; transform: scaleY(1); transform-origin: left top; transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div role="presentation" style="z-index: 1000; position: relative; width: 192px;max-height:10em;"><div role="menu" style="padding: 16px 0px; display: table-cell; user-select: none; width: 192px;"></div></div></div></div></div>';
+            '<div style="color: var(--md-sys-color-inverse-surface); background-color: transparent; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; box-sizing: border-box; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px; border-radius: 20px; position: fixed; z-index: 2100; opacity: 1; transform: scale(1, 1); transform-origin: left top; max-height: 963px; overflow-y: auto;"><div style="max-height: 100%; overflow-y: auto; transform: scaleX(1); opacity: 1; transform-origin: left top; transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div style="opacity: 1; transform: scaleY(1); transform-origin: left top; transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;"><div role="presentation" style="z-index: 1000; position: relative; width: 192px;"><div role="menu" style="padding: 16px 0px; display: table-cell; user-select: none; width: 192px;"></div></div></div></div></div>';
           const subMenuDiv = createDivBesideElement(placedDiv, content, savedConfigs); //create submenu
+          subMenuDiv.addEventListener("mouseenter", () => clearTimeout(closeTimer));
+          subMenuDiv.addEventListener("mouseleave", scheduleClose);
           setTimeout(() => {
             document.addEventListener(
               "mousedown",
@@ -281,7 +303,10 @@ function addPreservationWorkflows(menu) {
               { once: true },
             );
           }, 100);
-        });
+        };
+        placedDiv.addEventListener("click", openSubMenu);
+        placedDiv.addEventListener("mouseenter", openSubMenu);
+        placedDiv.addEventListener("mouseleave", scheduleClose);
         savedConfigs.forEach((config) => {
           const bookmark = JSON.parse(localStorage.getItem(config.id.toString()) || "{}");
           if (bookmark && bookmark.bookmarked) {
@@ -349,6 +374,7 @@ window.addEventListener("load", () => {
       await waitForGlobalVariable("PydioApi");
       getPreservationConfigs();
       await waitForGlobalVariable("pydio");
+      await waitForGlobalVariable("PydioCore");
       watchPreserveHook();
     } catch (error) {
       console.error("An error occurred:", error);

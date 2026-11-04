@@ -12,6 +12,12 @@ const source = fs.readFileSync(
 function setup({ status = 202, user = {}, curateOnWindow = false } = {}) {
   const fetches = [];
   const messages = [];
+  const registered = [];
+  class Action {
+    constructor(...args) {
+      this.args = args;
+    }
+  }
   const sandbox = {
     window: { location: { origin: "https://curate.test" }, addEventListener() {} },
     fetch: async (url, opts) => {
@@ -19,11 +25,15 @@ function setup({ status = 202, user = {}, curateOnWindow = false } = {}) {
       return { ok: status >= 200 && status < 300, status, json: async () => ({}) };
     },
     console: { info() {}, error() {}, log() {} },
+    PydioCore: { Action },
     PydioApi: { _PydioRestClient: { getOrUpdateJwt: async () => "tok" } },
     Curate: { workspaces: { getOpenWorkspace: () => "personal-files" } },
     pydio: {
       user,
       _dataModel: { _selectedNodes: [{ _path: "/a.pdf" }, { _path: "/b.pdf" }] },
+      getController: () => ({
+        updateGuiActions: (m) => registered.push(m),
+      }),
       displayMessage: (type, msg) => messages.push([type, msg]),
     },
   };
@@ -31,7 +41,7 @@ function setup({ status = 202, user = {}, curateOnWindow = false } = {}) {
     sandbox.window.Curate = sandbox.Curate;
   }
   vm.runInNewContext(source, sandbox);
-  return { ctx: sandbox, fetches, messages };
+  return { ctx: sandbox, fetches, messages, registered };
 }
 
 const withHook = { querySelector: () => ({}) };
@@ -48,9 +58,28 @@ test("hook present: hook URL and body unchanged", async () => {
   });
 });
 
-test("no decision before login: hook assumed present", async () => {
-  const { ctx, fetches } = setup({ user: null });
+test("hook present: no right-click action registered", () => {
+  const { ctx, registered } = setup();
+  ctx.syncPreserveHook(withHook);
+  assert.equal(registered.length, 0);
+});
+
+test("no hook: right-click-only Preserve action registered", () => {
+  const { ctx, registered } = setup();
   ctx.syncPreserveHook(noHook);
+  const [props, gui, selection, rights] = registered[0].get("preserve").args;
+  assert.equal(props.name, "preserve");
+  assert.equal(typeof props.callback, "function");
+  assert.equal(gui.contextMenu, true);
+  assert.equal(gui.actionBar, false);
+  assert.equal(selection.unique, false);
+  assert.equal(rights.write, true);
+});
+
+test("no decision before login: hook assumed present", async () => {
+  const { ctx, fetches, registered } = setup({ user: null });
+  ctx.syncPreserveHook(noHook);
+  assert.equal(registered.length, 0);
   await ctx.submitPreservationRequest("1");
   assert.equal(fetches[0].url, "https://curate.test/a/scheduler/hooks/preserve");
 });
