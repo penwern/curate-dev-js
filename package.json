@@ -2,6 +2,7 @@
   "name": "curate-js",
   "version": "1.2.0",
   "scripts": {
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/**/*.test.js\"",
     "build": "webpack --mode production --config ./webpack.config.js",
     "serve": "npx webpack serve --mode development --config ./webpack.config.js",
     "docker:build": "DOCKER_BUILDKIT=1 docker compose build",
