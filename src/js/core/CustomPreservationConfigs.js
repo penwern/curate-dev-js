@@ -1,40 +1,16 @@
-/* global PydioCore */
-// Without the scheduler "preserve" hook the Preserve action is registered here and posts to the event watcher.
+// Without the scheduler "preserve" hook, requests post to the event watcher. On those hosts the
+// Preserve button is a vanitizer button (deployed by ansible) that calls Curate.preservation.submit.
 var preserveHookPresent = true;
-var builtinPreserveRegistered = false;
 
 function registryHasPreserveHook(registry) {
   return !!(registry && registry.querySelector('action[name="preserve"]'));
 }
 
-function syncPreserveAction(registry) {
+function syncPreserveHook(registry) {
   if (!pydio.user) {
     return;
   }
   preserveHookPresent = registryHasPreserveHook(registry);
-  if (preserveHookPresent || builtinPreserveRegistered) {
-    return;
-  }
-  const action = new PydioCore.Action(
-    {
-      name: "preserve",
-      icon_class: "mdi mdi-console",
-      text: "Preserve",
-      title: "Preserve",
-      callback: () => submitPreservationRequest("1"),
-    },
-    {
-      selection: true,
-      dir: false,
-      actionBar: true,
-      actionBarGroup: "change_main",
-      contextMenu: true,
-    },
-    { dir: true, file: true, unique: false, multipleOnly: false },
-    { read: true, userLogged: true, write: true },
-  );
-  pydio.getController().updateGuiActions(new Map([["preserve", action]]));
-  builtinPreserveRegistered = true;
 }
 
 async function submitViaWatcher(configId, paths, token) {
@@ -73,8 +49,8 @@ async function submitViaWatcher(configId, paths, token) {
 }
 
 function watchPreserveHook() {
-  syncPreserveAction(pydio.getXmlRegistry());
-  pydio.observe("registry_loaded", syncPreserveAction);
+  syncPreserveHook(pydio.getXmlRegistry());
+  pydio.observe("registry_loaded", syncPreserveHook);
 }
 
 async function submitPreservationRequest(configId) {
@@ -352,6 +328,10 @@ function handleMutations(e) {
   });
 }
 
+if (window.Curate && typeof window.Curate === "object") {
+  window.Curate.preservation = { submit: submitPreservationRequest };
+}
+
 window.addEventListener("load", () => {
   (async function () {
     const waitForGlobalVariable = (varName, interval = 50) => {
@@ -369,7 +349,6 @@ window.addEventListener("load", () => {
       await waitForGlobalVariable("PydioApi");
       getPreservationConfigs();
       await waitForGlobalVariable("pydio");
-      await waitForGlobalVariable("PydioCore");
       watchPreserveHook();
     } catch (error) {
       console.error("An error occurred:", error);
