@@ -1,5 +1,7 @@
+/* global PydioCore */
 // Without the scheduler "preserve" hook, requests post to the event watcher. On those hosts the
-// Preserve button is a vanitizer button (deployed by ansible) that calls Curate.preservation.submit.
+// toolbar Preserve button is a vanitizer button (deployed by ansible) that calls
+// Curate.preservation.submit; vanitizer buttons cannot go in the right-click menu, so that entry is registered here.
 var preserveHookPresent = true;
 
 function registryHasPreserveHook(registry) {
@@ -11,6 +13,23 @@ function syncPreserveHook(registry) {
     return;
   }
   preserveHookPresent = registryHasPreserveHook(registry);
+  if (preserveHookPresent) {
+    return;
+  }
+  // Re-registered on every registry load, which rebuilds the GUI actions.
+  const action = new PydioCore.Action(
+    {
+      name: "preserve",
+      icon_class: "mdi mdi-console",
+      text: "Preserve",
+      title: "Preserve",
+      callback: () => submitPreservationRequest("1"),
+    },
+    { selection: true, dir: false, actionBar: false, contextMenu: true },
+    { dir: true, file: true, unique: false, multipleOnly: false },
+    { read: true, userLogged: true, write: true },
+  );
+  pydio.getController().updateGuiActions(new Map([["preserve", action]]));
 }
 
 async function submitViaWatcher(configId, paths, token) {
@@ -349,6 +368,7 @@ window.addEventListener("load", () => {
       await waitForGlobalVariable("PydioApi");
       getPreservationConfigs();
       await waitForGlobalVariable("pydio");
+      await waitForGlobalVariable("PydioCore");
       watchPreserveHook();
     } catch (error) {
       console.error("An error occurred:", error);
