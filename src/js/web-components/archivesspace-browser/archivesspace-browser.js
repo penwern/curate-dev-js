@@ -42,6 +42,7 @@ import {
   fetchRepositories,
   fetchRepositoryResources,
   createCurateFolders,
+  fetchRecordIdentity,
 } from "./api-client.js";
 
 // Import icons
@@ -100,6 +101,7 @@ class ArchivespaceBrowser extends LitElement {
     perFileMode: { state: true },
     containerType: { state: true },
     folderName: { state: true },
+    includeTitleInFolderName: { state: true },
     createFoldersLoading: { state: true },
     createFoldersFeedback: { state: true },
 
@@ -330,6 +332,7 @@ class ArchivespaceBrowser extends LitElement {
     this.perFileMode = "components";
     this.containerType = "digital_object";
     this.folderName = "";
+    this.includeTitleInFolderName = false;
     this.createFoldersLoading = false;
     this.createFoldersFeedback = null;
 
@@ -874,6 +877,7 @@ class ArchivespaceBrowser extends LitElement {
             .perFileMode=${this.perFileMode}
             .containerType=${this.containerType}
             .folderName=${this.folderName}
+            .includeTitleInFolderName=${this.includeTitleInFolderName}
             .createFoldersDisabled=${this._isFolderCreationDisabled()}
             .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
             .createFoldersLoading=${this.createFoldersLoading}
@@ -883,6 +887,7 @@ class ArchivespaceBrowser extends LitElement {
             @per-file-mode-change=${this._handlePerFileModeChange}
             @container-type-change=${this._handleContainerTypeChange}
             @folder-name-change=${this._handleFolderNameChange}
+            @include-title-change=${this._handleIncludeTitleChange}
             @keep-active-selection=${this._handleKeepActiveSelection}
             @clear-selection=${this._handleClearSelection}
             @navigate-selection=${this._handleNavigateSelection}
@@ -900,8 +905,22 @@ class ArchivespaceBrowser extends LitElement {
             .breadcrumbs=${result.ancestors || []}
             .selectedRecordIds=${this.selectedRecordIds}
             .isSearchResult=${true}
+            .detailLevelMode=${this.detailLevelMode}
+            .perFileMode=${this.perFileMode}
+            .containerType=${this.containerType}
+            .folderName=${this.folderName}
+            .includeTitleInFolderName=${this.includeTitleInFolderName}
+            .createFoldersDisabled=${this._isFolderCreationDisabled()}
+            .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
             .createFoldersLoading=${this.createFoldersLoading}
             .createFoldersFeedback=${this.createFoldersFeedback}
+            @detail-level-change=${this._handleDetailLevelChange}
+            @per-file-mode-change=${this._handlePerFileModeChange}
+            @container-type-change=${this._handleContainerTypeChange}
+            @folder-name-change=${this._handleFolderNameChange}
+            @include-title-change=${this._handleIncludeTitleChange}
+            @keep-active-selection=${this._handleKeepActiveSelection}
+            @action-click=${this._handleActionClick}
             @clear-selection=${this._handleClearSelection}
             @navigate-selection=${this._handleNavigateSelection}
           ></as-detail-panel>
@@ -917,6 +936,7 @@ class ArchivespaceBrowser extends LitElement {
           .perFileMode=${this.perFileMode}
           .containerType=${this.containerType}
           .folderName=${this.folderName}
+          .includeTitleInFolderName=${this.includeTitleInFolderName}
           .createFoldersDisabled=${this._isFolderCreationDisabled()}
           .createFoldersDisabledReason=${this._getFolderCreationDisabledReason()}
           .createFoldersLoading=${this.createFoldersLoading}
@@ -926,6 +946,7 @@ class ArchivespaceBrowser extends LitElement {
           @per-file-mode-change=${this._handlePerFileModeChange}
           @container-type-change=${this._handleContainerTypeChange}
           @folder-name-change=${this._handleFolderNameChange}
+          @include-title-change=${this._handleIncludeTitleChange}
           @keep-active-selection=${this._handleKeepActiveSelection}
           @clear-selection=${this._handleClearSelection}
           @navigate-selection=${this._handleNavigateSelection}
@@ -1333,6 +1354,10 @@ class ArchivespaceBrowser extends LitElement {
     this.folderName = e.detail?.value ?? "";
   }
 
+  _handleIncludeTitleChange(e) {
+    this.includeTitleInFolderName = Boolean(e.detail?.value);
+  }
+
   _handleKeepActiveSelection() {
     const selected = Array.isArray(this.selectedRecordIds) ? this.selectedRecordIds : [];
     if (selected.length <= 1) return;
@@ -1441,8 +1466,9 @@ class ArchivespaceBrowser extends LitElement {
           ? this.searchResults.find((res) => res?.uri === id)
           : null;
         const uri = node?.uri || id;
-        const fallbackName = node?.title || searchHit?.title || "(Untitled)";
-        const name = useCustomName ? customFolderName : fallbackName;
+        const name = useCustomName
+          ? customFolderName
+          : node?.title || searchHit?.title || "(Untitled)";
         if (!uri) return null;
         const folder = {
           name,
@@ -1464,9 +1490,25 @@ class ArchivespaceBrowser extends LitElement {
 
     this.createFoldersLoading = true;
     this._setCreateFoldersFeedback(null, null);
+    const includeTitle = this.includeTitleInFolderName;
 
     (async () => {
       try {
+        // Resolve every target before creating anything; lookup failures must not silently
+        // produce title-named folders that may collide with an existing linked folder.
+        if (!useCustomName) {
+          await Promise.all(
+            folders.map(async (folder) => {
+              const identity = await fetchRecordIdentity(this.apiHost, folder.uri);
+              const title = identity.title || folder.name;
+              const cuid = identity.cuid?.trim();
+              // Curate requires one path segment; CUIDs and titles may contain slashes.
+              folder.name = (cuid ? (includeTitle ? `${cuid} - ${title}` : cuid) : title)
+                .replace(/[/\0]/g, "-")
+                .trim();
+            }),
+          );
+        }
         const res = await createCurateFolders(
           this.apiHost,
           this.curateBasePath,

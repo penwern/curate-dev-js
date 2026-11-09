@@ -59,6 +59,15 @@ export async function fetchRepositories(apiHost) {
   return res.json();
 }
 
+export async function fetchRecordIdentity(apiHost, uri) {
+  const params = new URLSearchParams({ uri });
+  const res = await authedFetch(buildApiUrl(apiHost, `/record-identity?${params}`));
+  if (!res.ok) {
+    throw new Error(`Failed to load ArchivesSpace record identifier: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function createCurateFolders(apiHost, curateBasePath, parentPath, folders) {
   const res = await authedFetch(buildCurateUrl(apiHost, curateBasePath, "/folders"), {
     method: "POST",

@@ -55,6 +55,18 @@ This creates:
 
 The library automatically exposes a global `Curate` object with all functionality.
 
+### ArchivesSpace linked folder names
+
+New linked folders use the target record's CUID by default. Enable **Include title
+in folder name** in the linking options to use `CUID - Title`. A record without a
+CUID uses its title. An explicit folder name in Archival Object mode takes
+precedence, and existing folders are not renamed. Slashes in generated names
+become hyphens so each name stays within a single folder.
+
+This requires the ArchivesSpace integration backend's `GET /record-identity`
+endpoint. Deploy that backend change before this frontend; a failed identifier
+lookup prevents the batch from being created.
+
 ### Custom Page Router
 
 The Curate Router allows you to create full-page custom UIs that integrate seamlessly with Pydio Cells.
