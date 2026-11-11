@@ -63,7 +63,16 @@ export async function fetchRecordIdentity(apiHost, uri) {
   const params = new URLSearchParams({ uri });
   const res = await authedFetch(buildApiUrl(apiHost, `/record-identity?${params}`));
   if (!res.ok) {
-    throw new Error(`Failed to load ArchivesSpace record identifier: ${res.status}`);
+    let detail = "";
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // A proxy may return a non-JSON error response.
+    }
+    throw new Error(
+      `Failed to load ArchivesSpace record identifier for ${uri}: ${res.status}${detail ? ` - ${detail}` : ""}`,
+    );
   }
   return res.json();
 }

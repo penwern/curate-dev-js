@@ -1476,6 +1476,7 @@ class ArchivespaceBrowser extends LitElement {
           detail_level: detailLevel,
           container_type: containerType,
         };
+        if (useCustomName) folder.description_title = customFolderName;
         if (perFileMode) {
           folder.per_file_mode = perFileMode;
         }
@@ -1497,17 +1498,27 @@ class ArchivespaceBrowser extends LitElement {
         // Resolve every target before creating anything; lookup failures must not silently
         // produce title-named folders that may collide with an existing linked folder.
         if (!useCustomName) {
-          await Promise.all(
-            folders.map(async (folder) => {
-              const identity = await fetchRecordIdentity(this.apiHost, folder.uri);
-              const title = identity.title || folder.name;
-              const cuid = identity.cuid?.trim();
-              // Curate requires one path segment; CUIDs and titles may contain slashes.
-              folder.name = (cuid ? (includeTitle ? `${cuid} - ${title}` : cuid) : title)
-                .replace(/[/\0]/g, "-")
-                .trim();
-            }),
-          );
+          let nextIndex = 0;
+          let lookupError = null;
+          const resolveNext = async () => {
+            while (nextIndex < folders.length && !lookupError) {
+              const folder = folders[nextIndex++];
+              try {
+                const identity = await fetchRecordIdentity(this.apiHost, folder.uri);
+                const title = identity.title || folder.name;
+                const cuid = identity.cuid?.trim();
+                folder.description_title = title;
+                // Curate requires one path segment; CUIDs and titles may contain slashes.
+                folder.name = (cuid ? (includeTitle ? `${cuid} - ${title}` : cuid) : title)
+                  .replace(/[/\0]/g, "-")
+                  .trim();
+              } catch (error) {
+                lookupError = error;
+              }
+            }
+          };
+          await Promise.all(Array.from({ length: Math.min(5, folders.length) }, resolveNext));
+          if (lookupError) throw lookupError;
         }
         const res = await createCurateFolders(
           this.apiHost,

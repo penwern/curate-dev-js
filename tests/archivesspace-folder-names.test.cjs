@@ -12,7 +12,7 @@ const source = fs
   .replace(/^import[\s\S]*?;\r?\n/gm, "")
   .replace("export { ArchivespaceBrowser };", "globalThis.Browser = ArchivespaceBrowser;");
 
-function setup({ identities = {}, failUri } = {}) {
+function setup({ identities = {}, failUri, lookup } = {}) {
   const requests = [];
   const lookups = [];
   const ctx = {
@@ -27,6 +27,7 @@ function setup({ identities = {}, failUri } = {}) {
     findNodeByLogicalId: () => null,
     fetchRecordIdentity: async (_host, uri) => {
       lookups.push(uri);
+      if (lookup) return lookup(uri);
       if (uri === failUri) throw new Error("Identifier lookup failed");
       return identities[uri] || { title: "Letters", cuid: "MS-123-4" };
     },
@@ -57,6 +58,7 @@ test("linked folders use the target CUID by default", async () => {
   assert.equal(t.browser.includeTitleInFolderName, false);
   await t.create();
   assert.equal(t.requests[0].folders[0].name, "MS-123-4");
+  assert.equal(t.requests[0].folders[0].description_title, "Letters");
   assert.equal(t.requests[0].folders[0].uri, t.browser.selectedRecordIds[0]);
   assert.equal(t.requests[0].folders[0].detail_level, "per_file");
   assert.equal(t.requests[0].folders[0].per_file_mode, "as_components");
@@ -67,6 +69,7 @@ test("the toggle includes CUID and the current record title", async () => {
   t.browser._handleIncludeTitleChange({ detail: { value: true } });
   await t.create();
   assert.equal(t.requests[0].folders[0].name, "MS-123-4 - Letters");
+  assert.equal(t.requests[0].folders[0].description_title, "Letters");
 });
 
 test("each selected search-only record uses its own CUID", async () => {
@@ -111,6 +114,7 @@ test("an explicit archival object folder name takes precedence", async () => {
   t.browser.includeTitleInFolderName = true;
   await t.create();
   assert.equal(t.requests[0].folders[0].name, "Custom folder");
+  assert.equal(t.requests[0].folders[0].description_title, "Custom folder");
   assert.equal(t.lookups.length, 0);
 });
 
@@ -137,4 +141,72 @@ test("slashes in CUIDs and titles remain within a single folder name", async () 
   t.browser.includeTitleInFolderName = true;
   await t.create();
   assert.equal(t.requests[0].folders[0].name, "MS-123-4 - Letters - papers");
+});
+
+test("missing record title falls back to the tree's date-only display title", async () => {
+  const uri = "/repositories/2/archival_objects/9";
+  const t = setup({ identities: { [uri]: { title: null, cuid: null } } });
+  t.browser.archiveData[0].title = "1900-1910";
+  await t.create();
+  assert.equal(t.requests[0].folders[0].name, "1900-1910");
+  assert.equal(t.requests[0].folders[0].description_title, "1900-1910");
+});
+
+test("identifier lookups have at most five concurrent requests", async () => {
+  let active = 0;
+  let peak = 0;
+  const t = setup({
+    lookup: async (uri) => {
+      peak = Math.max(peak, ++active);
+      await new Promise((resolve) => setImmediate(resolve));
+      active--;
+      return { title: "Letters", cuid: uri.split("/").pop() };
+    },
+  });
+  t.browser.selectedRecordIds = Array.from(
+    { length: 16 },
+    (_, i) => `/repositories/2/archival_objects/${i + 1}`,
+  );
+  await t.create();
+  assert.equal(peak, 5);
+  assert.equal(active, 0);
+  assert.equal(t.requests[0].folders.length, 16);
+});
+
+test("lookup failure drains in-flight requests without starting the remaining queue", async () => {
+  const t = setup({
+    lookup: async () => {
+      throw new Error("Lookup failed");
+    },
+  });
+  t.browser.selectedRecordIds = Array.from(
+    { length: 20 },
+    (_, i) => `/repositories/2/archival_objects/${i + 1}`,
+  );
+  await t.create();
+  assert.equal(t.lookups.length, 5);
+  assert.equal(t.requests.length, 0);
+});
+
+test("identifier errors include target URI and backend detail", async () => {
+  const apiSource = fs
+    .readFileSync(
+      path.join(__dirname, "../src/js/web-components/archivesspace-browser/api-client.js"),
+      "utf8",
+    )
+    .replace(/export /g, "");
+  const ctx = {
+    window: { CURATE_API_TOKEN: "token" },
+    URLSearchParams,
+    fetch: async () => ({
+      ok: false,
+      status: 503,
+      json: async () => ({ detail: "ArchivesSpace unavailable" }),
+    }),
+  };
+  vm.runInNewContext(apiSource, ctx);
+  await assert.rejects(
+    ctx.fetchRecordIdentity("/api/archivesspace", "/repositories/2/archival_objects/9"),
+    /\/repositories\/2\/archival_objects\/9: 503 - ArchivesSpace unavailable/,
+  );
 });

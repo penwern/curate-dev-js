@@ -67,6 +67,14 @@ This requires the ArchivesSpace integration backend's `GET /record-identity`
 endpoint. Deploy that backend change before this frontend; a failed identifier
 lookup prevents the batch from being created.
 
+Generated names are independent of descriptive titles: the target title is sent
+separately for preservation, and an existing descriptive metadata override is
+retained. Identifier lookups are limited to five concurrent requests. A conflicting
+folder link or duplicate generated name is rejected by the backend with 409,
+without overwriting the existing link. Linking the same record with a different
+name creates a separate submission folder; existing title-named folders are not
+automatically reused under the new naming scheme.
+
 ### Custom Page Router
 
 The Curate Router allows you to create full-page custom UIs that integrate seamlessly with Pydio Cells.

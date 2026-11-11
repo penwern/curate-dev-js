@@ -626,12 +626,16 @@ class AsDetailPanel extends LitElement {
             <label class="radio-option">
               <md-switch
                 aria-label="Include title in folder name"
-                .selected=${this.includeTitleInFolderName}
+                .selected=${this.includeTitleInFolderName && !(showFolderName && (this.folderName || "").trim())}
                 ?disabled=${Boolean((this.folderName || "").trim()) && showFolderName}
                 @change=${this._handleIncludeTitleChange}
               ></md-switch>
               <span>Include title in folder name</span>
             </label>
+            <div class="multi-action-note">
+              Existing folders keep their names. Linking the same record with a different folder
+              name creates a separate submission folder.
+            </div>
             <div class="radio-group">
               <div class="radio-group-label">File Detail Level</div>
               <div class="radio-options">
