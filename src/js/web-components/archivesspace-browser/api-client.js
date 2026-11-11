@@ -59,6 +59,24 @@ export async function fetchRepositories(apiHost) {
   return res.json();
 }
 
+export async function fetchRecordIdentity(apiHost, uri) {
+  const params = new URLSearchParams({ uri });
+  const res = await authedFetch(buildApiUrl(apiHost, `/record-identity?${params}`));
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // A proxy may return a non-JSON error response.
+    }
+    throw new Error(
+      `Failed to load ArchivesSpace record identifier for ${uri}: ${res.status}${detail ? ` - ${detail}` : ""}`,
+    );
+  }
+  return res.json();
+}
+
 export async function createCurateFolders(apiHost, curateBasePath, parentPath, folders) {
   const res = await authedFetch(buildCurateUrl(apiHost, curateBasePath, "/folders"), {
     method: "POST",
@@ -75,6 +93,12 @@ export async function createCurateFolders(apiHost, curateBasePath, parentPath, f
     let detail = "";
     try {
       detail = await res.text();
+      try {
+        const body = JSON.parse(detail);
+        detail = typeof body.detail === "string" ? body.detail : "";
+      } catch {
+        // Preserve plain-text errors from a proxy.
+      }
     } catch {
       // ignore
     }
