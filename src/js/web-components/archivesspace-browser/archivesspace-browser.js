@@ -48,6 +48,23 @@ import {
 // Import icons
 import { alertCircleIcon, databaseIcon, layersIcon, pinIcon } from "../utils/icons.js";
 
+function formatGeneratedFolderName(name) {
+  const normalized = name
+    .replace(/[/\\]/g, "-")
+    .replace(/[\s\p{Cc}]+/gu, " ")
+    .trim();
+  const encoder = new TextEncoder();
+  let result = "";
+  let bytes = 0;
+  for (const character of normalized) {
+    const size = encoder.encode(character).length;
+    if (bytes + size > 255) break;
+    result += character;
+    bytes += size;
+  }
+  return result.trim();
+}
+
 /**
  * Main ArchivesSpace Browser component.
  * Orchestrates all child components and manages application state.
@@ -1508,10 +1525,9 @@ class ArchivespaceBrowser extends LitElement {
                 const title = identity.title || folder.name;
                 const cuid = identity.cuid?.trim();
                 folder.description_title = title;
-                // Curate requires one path segment; CUIDs and titles may contain slashes.
-                folder.name = (cuid ? (includeTitle ? `${cuid} - ${title}` : cuid) : title)
-                  .replace(/[/\0]/g, "-")
-                  .trim();
+                folder.name = formatGeneratedFolderName(
+                  cuid ? (includeTitle ? `${cuid} - ${title}` : cuid) : title,
+                );
               } catch (error) {
                 lookupError = error;
               }

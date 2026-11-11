@@ -93,6 +93,12 @@ export async function createCurateFolders(apiHost, curateBasePath, parentPath, f
     let detail = "";
     try {
       detail = await res.text();
+      try {
+        const body = JSON.parse(detail);
+        detail = typeof body.detail === "string" ? body.detail : "";
+      } catch {
+        // Preserve plain-text errors from a proxy.
+      }
     } catch {
       // ignore
     }

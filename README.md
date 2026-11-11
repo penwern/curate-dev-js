@@ -75,6 +75,12 @@ without overwriting the existing link. Linking the same record with a different
 name creates a separate submission folder; existing title-named folders are not
 automatically reused under the new naming scheme.
 
+Generated names replace both kinds of slash with hyphens, collapse whitespace
+and control characters, and fit within 255 UTF-8 bytes without splitting a
+character. Descriptive titles are retained in full. Names that collide after
+cleanup or shortening are rejected by the backend's duplicate/conflict checks.
+Custom names are validated as entered rather than silently rewritten.
+
 ### Custom Page Router
 
 The Curate Router allows you to create full-page custom UIs that integrate seamlessly with Pydio Cells.

@@ -16,6 +16,7 @@ function setup({ identities = {}, failUri, lookup } = {}) {
   const requests = [];
   const lookups = [];
   const ctx = {
+    TextEncoder,
     LitElement: class {},
     css: () => "",
     customElements: { define() {} },
@@ -210,3 +211,58 @@ test("identifier errors include target URI and backend detail", async () => {
     /\/repositories\/2\/archival_objects\/9: 503 - ArchivesSpace unavailable/,
   );
 });
+
+test("generated names clean backslashes, control characters and repeated whitespace", async () => {
+  const uri = "/repositories/2/archival_objects/9";
+  const title = " Letters\\papers\n\t  1900\u0000\u007f1901 ";
+  const t = setup({ identities: { [uri]: { title, cuid: null } } });
+  await t.create();
+  assert.equal(t.requests[0].folders[0].name, "Letters-papers 1900 1901");
+  assert.equal(t.requests[0].folders[0].description_title, title);
+});
+
+test("long combined names fit 255 UTF-8 bytes without splitting a character", async () => {
+  const uri = "/repositories/2/archival_objects/9";
+  const title = "é😀".repeat(100);
+  const t = setup({ identities: { [uri]: { title, cuid: "MS-1" } } });
+  t.browser.includeTitleInFolderName = true;
+  await t.create();
+  const folder = t.requests[0].folders[0];
+  assert.ok(folder.name.startsWith("MS-1 - "));
+  assert.ok(Buffer.byteLength(folder.name, "utf8") <= 255);
+  assert.equal(Buffer.from(folder.name).toString("utf8"), folder.name);
+  assert.equal(folder.description_title, title);
+});
+
+test("ASCII titles are shortened at the byte limit", async () => {
+  const uri = "/repositories/2/archival_objects/9";
+  const t = setup({ identities: { [uri]: { title: "a".repeat(300), cuid: null } } });
+  await t.create();
+  assert.equal(t.requests[0].folders[0].name, "a".repeat(255));
+});
+
+for (const [body, expected] of [
+  [
+    JSON.stringify({ detail: "Folder 'MS-1' is already linked to another record" }),
+    "Folder 'MS-1' is already linked to another record",
+  ],
+  ["Upstream unavailable", "Upstream unavailable"],
+]) {
+  test(`folder creation errors show readable detail: ${expected}`, async () => {
+    const apiSource = fs
+      .readFileSync(
+        path.join(__dirname, "../src/js/web-components/archivesspace-browser/api-client.js"),
+        "utf8",
+      )
+      .replace(/export /g, "");
+    const ctx = {
+      window: { CURATE_API_TOKEN: "token" },
+      fetch: async () => ({ ok: false, status: 409, text: async () => body }),
+    };
+    vm.runInNewContext(apiSource, ctx);
+    await assert.rejects(ctx.createCurateFolders("", "/curate", "/archive", []), (error) => {
+      assert.equal(error.message, `Failed to create folders: 409 - ${expected}`);
+      return true;
+    });
+  });
+}
