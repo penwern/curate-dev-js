@@ -1,5 +1,6 @@
 // IMPORTANT: RouteProtection must be imported FIRST to intercept Pydio redirects
 import "../js/core/RouteProtection.js";
+import "../js/core/BlockAllScopeSearch.js";
 import "../js/core/CurateFunctions/CurateFunctions.js";
 import "../js/core/validation/index.js";
 
