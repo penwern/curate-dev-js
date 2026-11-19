@@ -1,6 +1,7 @@
 // A search with no path scope makes the Cells search child hold GBs of memory, so on hosts that
 // set window.curateBlockAllScopeSearch the browser never sends it. fetch is left alone on purpose.
-const NOTICE = "Searching all workspaces is turned off on this site. Open a workspace and search within it.";
+const NOTICE =
+  "Searching all workspaces is turned off on this site. Open a workspace and search within it.";
 const NOTICE_INTERVAL_MS = 30000;
 
 const empty = (v) => !Array.isArray(v) || v.length === 0;
@@ -45,13 +46,15 @@ function install() {
         responseText: "{}",
         response: "{}",
         getAllResponseHeaders: () => "content-type: application/json\r\n",
-        getResponseHeader: (h) => (String(h).toLowerCase() === "content-type" ? "application/json" : null),
+        getResponseHeader: (h) =>
+          String(h).toLowerCase() === "content-type" ? "application/json" : null,
       };
       for (const [k, value] of Object.entries(fake)) {
         Object.defineProperty(this, k, { value, configurable: true });
       }
       setTimeout(() => {
-        for (const type of ["readystatechange", "load", "loadend"]) this.dispatchEvent(new Event(type));
+        for (const type of ["readystatechange", "load", "loadend"])
+          this.dispatchEvent(new Event(type));
       }, 0);
       return;
     }
