@@ -1,205 +1,282 @@
 import { LitElement } from "lit";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
+import "@material/web/button/text-button.js";
 import "@material/web/textfield/outlined-text-field.js";
-import "@material/web/select/outlined-select.js";
-import "@material/web/select/select-option.js";
 import "@material/web/switch/switch.js";
-import "@material/web/slider/slider.js";
-import "@material/web/divider/divider.js";
 import "@material/web/iconbutton/icon-button.js";
 import { PreservationConfigAPI, isDefaultConfigId } from "./api-client.js";
+import {
+  FALLBACK_DEFAULTS,
+  valuesFromConfig,
+  configPayload,
+  differences,
+  validateName,
+} from "./settings.js";
 import { styles } from "./styles.js";
 import { preservationGoConfigUI } from "./ui-component.js";
 
 class PreservationGoConfigManager extends LitElement {
   static properties = {
-    configName: { state: true },
-    configDescription: { state: true },
-    AssignUuidsToDirectories: { state: true },
-    ExamineContents: { state: true },
-    GenerateTransferStructureReport: { state: true },
-    DocumentEmptyDirectories: { state: true },
-    ExtractPackages: { state: true },
-    DeletePackagesAfterExtraction: { state: true },
-    IdentifyTransfer: { state: true },
-    IdentifySubmissionAndMetadata: { state: true },
-    IdentifyBeforeNormalization: { state: true },
-    Normalize: { state: true },
-    TranscribeFiles: { state: true },
-    PerformPolicyChecksOnOriginals: { state: true },
-    PerformPolicyChecksOnPreservationDerivatives: { state: true },
-    PerformPolicyChecksOnAccessDerivatives: { state: true },
-    ThumbnailMode: { state: true },
-    CompressAip: { state: true },
-    AipCompressionLevel: { state: true },
-    AipCompressionAlgorithm: { state: true },
-    savedConfigs: { state: true },
-    isEditMode: { state: true },
-    editConfigId: { state: true },
+    configs: { state: true },
     isLoading: { state: true },
-    saveInProgress: { state: true },
     loadError: { state: true },
+    selectedId: { state: true },
+    mode: { state: true }, // "view" | "edit" | "create"
+    draft: { state: true },
+    baseName: { state: true },
+    baseValues: { state: true },
+    nameTouched: { state: true },
+    advancedOpen: { state: true },
+    saveInProgress: { state: true },
   };
 
   static styles = styles;
 
   constructor() {
     super();
-    this.configName = "";
-    this.configDescription = "";
-    this.AssignUuidsToDirectories = true;
-    this.ExamineContents = false;
-    this.GenerateTransferStructureReport = true;
-    this.DocumentEmptyDirectories = true;
-    this.ExtractPackages = true;
-    this.DeletePackagesAfterExtraction = false;
-    this.IdentifyTransfer = true;
-    this.IdentifySubmissionAndMetadata = true;
-    this.IdentifyBeforeNormalization = true;
-    this.Normalize = true;
-    this.TranscribeFiles = true;
-    this.PerformPolicyChecksOnOriginals = true;
-    this.PerformPolicyChecksOnPreservationDerivatives = true;
-    this.PerformPolicyChecksOnAccessDerivatives = true;
-    this.ThumbnailMode = 1; // GENERATE
-    this.CompressAip = false;
-    this.AipCompressionLevel = 1;
-    this.AipCompressionAlgorithm = "ZIP";
-    this.savedConfigs = [];
-    this.isEditMode = false;
-    this.editConfigId = null;
+    this.configs = [];
     this.isLoading = false;
-    this.saveInProgress = false;
     this.loadError = false;
+    this.selectedId = null;
+    this.mode = "view";
+    this.draft = null;
+    this.baseName = "";
+    this.baseValues = FALLBACK_DEFAULTS;
+    this.nameTouched = false;
+    this.advancedOpen = false;
+    this.saveInProgress = false;
+    this.initialDraft = "";
 
-    // Initialize the API client
     this.api = new PreservationConfigAPI();
 
-    // Load configs on initialization
     this.loadConfigs();
   }
 
-  async loadConfigs() {
+  // ---- Data ----
+
+  async loadConfigs(selectId) {
     this.isLoading = true;
     this.loadError = false;
     try {
       const configs = await this.api.getConfigs();
-      this.savedConfigs = configs || [];
+      this.configs = Array.isArray(configs) ? configs : [];
     } catch (error) {
       console.error("Failed to load preservation go configs:", error);
-      this.savedConfigs = [];
+      this.configs = [];
       this.loadError = true;
     } finally {
       this.isLoading = false;
     }
+
+    const wanted = selectId ?? this.selectedId;
+    const found = this.configs.find((c) => String(c.id) === String(wanted));
+    this.selectedId = (found || this.defaultConfig || this.configs[0] || {}).id ?? null;
   }
 
-  clearForm() {
-    this.configName = "";
-    this.configDescription = "";
-    this.AssignUuidsToDirectories = true;
-    this.ExamineContents = false;
-    this.GenerateTransferStructureReport = true;
-    this.DocumentEmptyDirectories = true;
-    this.ExtractPackages = true;
-    this.DeletePackagesAfterExtraction = false;
-    this.IdentifyTransfer = true;
-    this.IdentifySubmissionAndMetadata = true;
-    this.IdentifyBeforeNormalization = true;
-    this.Normalize = true;
-    this.TranscribeFiles = true;
-    this.PerformPolicyChecksOnOriginals = true;
-    this.PerformPolicyChecksOnPreservationDerivatives = true;
-    this.PerformPolicyChecksOnAccessDerivatives = true;
-    this.ThumbnailMode = 1;
-    this.CompressAip = false;
-    this.AipCompressionLevel = 1;
-    this.AipCompressionAlgorithm = "ZIP";
-    this.isEditMode = false;
-    this.editConfigId = null;
+  get defaultConfig() {
+    return this.configs.find((c) => isDefaultConfigId(c.id)) || null;
   }
+
+  get defaultValues() {
+    return this.defaultConfig ? valuesFromConfig(this.defaultConfig) : FALLBACK_DEFAULTS;
+  }
+
+  get defaultName() {
+    return this.defaultConfig?.name || "the default settings";
+  }
+
+  // The default config first, then the rest alphabetically
+  get otherConfigs() {
+    return this.configs
+      .filter((c) => !isDefaultConfigId(c.id))
+      .sort((a, b) => (a.name || "").localeCompare(b.name || "", "en-GB", { sensitivity: "base" }));
+  }
+
+  get selectedConfig() {
+    return this.configs.find((c) => String(c.id) === String(this.selectedId)) || null;
+  }
+
+  // ---- Pins (stored per config id, shared with the right-click menu) ----
+
+  isPinned(configId) {
+    // The default config is always in the right-click menu, as "Preserve"
+    if (isDefaultConfigId(configId)) return false;
+    try {
+      return !!JSON.parse(localStorage.getItem(String(configId)) || "{}").bookmarked;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  togglePin(config) {
+    try {
+      const key = String(config.id);
+      const stored = JSON.parse(localStorage.getItem(key) || "{}");
+      localStorage.setItem(
+        key,
+        JSON.stringify({ ...stored, name: config.name, bookmarked: !stored.bookmarked }),
+      );
+    } catch (error) {
+      console.error("Could not update the right-click menu pin:", error);
+    }
+    this.requestUpdate();
+  }
+
+  clearPin(configId) {
+    try {
+      localStorage.removeItem(String(configId));
+    } catch (_error) {
+      // Storage unavailable: nothing to clear
+    }
+  }
+
+  // ---- Editing state ----
+
+  get isEditing() {
+    return this.mode === "edit" || this.mode === "create";
+  }
+
+  get isDirty() {
+    return this.isEditing && JSON.stringify(this.draft) !== this.initialDraft;
+  }
+
+  get changeCount() {
+    return this.draft ? differences(this.draft.values, this.baseValues).length : 0;
+  }
+
+  get nameError() {
+    if (!this.draft) return "";
+    return validateName(
+      this.draft.name,
+      this.configs,
+      this.mode === "edit" ? this.selectedId : null,
+    );
+  }
+
+  get canSave() {
+    if (!this.isEditing || this.saveInProgress || this.nameError) return false;
+    return this.mode === "create" || this.isDirty;
+  }
+
+  beginEditing(mode, draft, baseName, baseValues) {
+    this.mode = mode;
+    this.draft = draft;
+    this.initialDraft = JSON.stringify(draft);
+    this.baseName = baseName;
+    this.baseValues = baseValues;
+    this.nameTouched = false;
+    this.advancedOpen = false;
+  }
+
+  startEdit() {
+    const config = this.selectedConfig;
+    if (!config || isDefaultConfigId(config.id)) return;
+    this.beginEditing(
+      "edit",
+      {
+        name: config.name || "",
+        description: config.description || "",
+        values: valuesFromConfig(config),
+      },
+      this.defaultName,
+      this.defaultValues,
+    );
+  }
+
+  // Start a new config from the default's values, or from the selected config when duplicating
+  startCreate(duplicate = false) {
+    this.confirmDiscard(() => {
+      const source = duplicate ? this.selectedConfig : this.defaultConfig;
+      this.beginEditing(
+        "create",
+        {
+          name: duplicate && source ? `Copy of ${source.name}` : "",
+          description: "",
+          values: source ? valuesFromConfig(source) : { ...FALLBACK_DEFAULTS },
+        },
+        source?.name || this.defaultName,
+        source ? valuesFromConfig(source) : FALLBACK_DEFAULTS,
+      );
+    });
+  }
+
+  leaveEditing() {
+    this.mode = "view";
+    this.draft = null;
+    this.initialDraft = "";
+  }
+
+  cancelEditing() {
+    this.confirmDiscard(() => this.leaveEditing());
+  }
+
+  selectConfig(configId) {
+    if (String(configId) === String(this.selectedId) && this.mode !== "create") return;
+    this.confirmDiscard(() => {
+      this.leaveEditing();
+      this.selectedId = configId;
+    });
+  }
+
+  confirmDiscard(proceed) {
+    if (!this.isDirty) {
+      proceed();
+      return;
+    }
+    Curate.ui.modals
+      .curatePopup(
+        {
+          title: "Discard your changes?",
+          message: "You have unsaved changes to this config. They will be lost if you continue.",
+          type: "warning",
+          buttonType: "okCancel",
+        },
+        { onOk: proceed },
+      )
+      .fire();
+  }
+
+  setDetail(field, value) {
+    this.draft = { ...this.draft, [field]: value };
+  }
+
+  setValue(key, value) {
+    this.draft = { ...this.draft, values: { ...this.draft.values, [key]: value } };
+  }
+
+  resetValue(key) {
+    this.setValue(key, this.defaultValues[key]);
+  }
+
+  toggleAdvanced() {
+    this.advancedOpen = !this.advancedOpen;
+  }
+
+  // ---- Save and delete ----
 
   async saveConfig() {
-    // Never send an update for the default config, even if the UI guard is bypassed
-    if (this.isDefaultConfig) {
-      Curate.ui.modals
-        .curatePopup({
-          title: "Cannot Edit Default Config",
-          message:
-            "The default config is read-only. Press Clear Form to create a new config instead.",
-          type: "warning",
-        })
-        .fire();
-      return;
-    }
-
-    if (!this.configName || this.configName.trim().length < 3) {
-      Curate.ui.modals
-        .curatePopup({
-          title: "Invalid Configuration",
-          message: "Please enter a config name with at least 3 characters",
-          type: "warning",
-        })
-        .fire();
-      return;
-    }
-
+    if (!this.canSave) return;
     this.saveInProgress = true;
 
     try {
-      if (window.curateDebug) {
-        console.log("Save requested with values:", {
-          configName: this.configName,
-          configDescription: this.configDescription,
-          CompressAip: this.CompressAip,
-          Normalize: this.Normalize,
-        });
+      const payload = configPayload(this.draft.values, this.draft);
+      let savedId = this.selectedId;
+
+      if (this.mode === "edit") {
+        await this.api.saveConfig({ ...payload, id: this.selectedId });
+      } else {
+        const created = await this.api.saveConfig(payload);
+        savedId = created?.id;
       }
 
-      const config = {
-        name: this.configName,
-        description: this.configDescription,
-        compress_aip: this.CompressAip,
-        aip_compression_level: this.AipCompressionLevel,
-        aip_compression_algorithm: this.AipCompressionAlgorithm,
-        a3m_config: {
-          assign_uuids_to_directories: this.AssignUuidsToDirectories,
-          examine_contents: this.ExamineContents,
-          generate_transfer_structure_report: this.GenerateTransferStructureReport,
-          document_empty_directories: this.DocumentEmptyDirectories,
-          extract_packages: this.ExtractPackages,
-          delete_packages_after_extraction: this.DeletePackagesAfterExtraction,
-          identify_transfer: this.IdentifyTransfer,
-          identify_submission_and_metadata: this.IdentifySubmissionAndMetadata,
-          identify_before_normalization: this.IdentifyBeforeNormalization,
-          normalize: this.Normalize,
-          transcribe_files: this.TranscribeFiles,
-          perform_policy_checks_on_originals: this.PerformPolicyChecksOnOriginals,
-          perform_policy_checks_on_preservation_derivatives:
-            this.PerformPolicyChecksOnPreservationDerivatives,
-          perform_policy_checks_on_access_derivatives: this.PerformPolicyChecksOnAccessDerivatives,
-          thumbnail_mode: this.ThumbnailMode,
-        },
-      };
-
-      // Add ID if editing existing config
-      if (this.isEditMode && this.editConfigId) {
-        config.id = this.editConfigId;
+      this.leaveEditing();
+      await this.loadConfigs(savedId);
+      if (savedId === undefined) {
+        // The create response carried no id, so look the new config up by name
+        const match = this.configs.find((c) => c.name === payload.name);
+        if (match) this.selectedId = match.id;
       }
-
-      if (window.curateDebug) {
-        console.log("Saving config:", config);
-      }
-
-      // Save using API
-      await this.api.saveConfig(config);
-
-      // Reload configs to get the updated list
-      await this.loadConfigs();
-
-      // Clear the form
-      this.clearForm();
     } catch (error) {
       console.error("Failed to save preservation go config:", error);
       // Error modal is already shown by the API client
@@ -208,105 +285,8 @@ class PreservationGoConfigManager extends LitElement {
     }
   }
 
-  loadConfig(config) {
-    if (window.curateDebug) {
-      console.log("Load requested with values:", config);
-    }
-
-    this.configName = config.name || "";
-    this.configDescription = config.description || "";
-
-    // Handle a3m - support both camelCase and snake_case property names
-    const a3mConfig = config.a3m_config || {};
-
-    // Helper function to get value from either camelCase or snake_case
-    const getValue = (camelCase, snakeCase, defaultValue) => {
-      if (a3mConfig[camelCase] !== undefined) return !!a3mConfig[camelCase];
-      if (a3mConfig[snakeCase] !== undefined) return !!a3mConfig[snakeCase];
-      return defaultValue;
-    };
-
-    this.AssignUuidsToDirectories = getValue(
-      "assignUuidsToDirectories",
-      "assign_uuids_to_directories",
-      true,
-    );
-    this.ExamineContents = getValue("examineContents", "examine_contents", false);
-    this.GenerateTransferStructureReport = getValue(
-      "generateTransferStructureReport",
-      "generate_transfer_structure_report",
-      true,
-    );
-    this.DocumentEmptyDirectories = getValue(
-      "documentEmptyDirectories",
-      "document_empty_directories",
-      true,
-    );
-    this.ExtractPackages = getValue("extractPackages", "extract_packages", true);
-    this.DeletePackagesAfterExtraction = getValue(
-      "deletePackagesAfterExtraction",
-      "delete_packages_after_extraction",
-      false,
-    );
-    this.IdentifyTransfer = getValue("identifyTransfer", "identify_transfer", true);
-    this.IdentifySubmissionAndMetadata = getValue(
-      "identifySubmissionAndMetadata",
-      "identify_submission_and_metadata",
-      true,
-    );
-    this.IdentifyBeforeNormalization = getValue(
-      "identifyBeforeNormalization",
-      "identify_before_normalization",
-      true,
-    );
-    this.Normalize = getValue("normalize", "normalize", true);
-    this.TranscribeFiles = getValue("transcribeFiles", "transcribe_files", true);
-    this.PerformPolicyChecksOnOriginals = getValue(
-      "performPolicyChecksOnOriginals",
-      "perform_policy_checks_on_originals",
-      true,
-    );
-    this.PerformPolicyChecksOnPreservationDerivatives = getValue(
-      "performPolicyChecksOnPreservationDerivatives",
-      "perform_policy_checks_on_preservation_derivatives",
-      true,
-    );
-    this.PerformPolicyChecksOnAccessDerivatives = getValue(
-      "performPolicyChecksOnAccessDerivatives",
-      "perform_policy_checks_on_access_derivatives",
-      true,
-    );
-
-    // Handle thumbnail mode - support both camelCase and snake_case
-    this.ThumbnailMode =
-      a3mConfig.thumbnailMode !== undefined
-        ? a3mConfig.thumbnailMode
-        : a3mConfig.thumbnail_mode !== undefined
-          ? a3mConfig.thumbnail_mode
-          : 1;
-
-    // Handle root-level properties
-    this.CompressAip = config.compress_aip !== undefined ? !!config.compress_aip : false;
-    this.AipCompressionLevel =
-      config.aip_compression_level !== undefined ? config.aip_compression_level : 1;
-    this.AipCompressionAlgorithm = config.aip_compression_algorithm || "ZIP";
-
-    this.isEditMode = true;
-    this.editConfigId = config.id;
-
-    if (window.curateDebug) {
-      console.log("Config loaded with values:", {
-        configName: this.configName,
-        configDescription: this.configDescription,
-        CompressAip: this.CompressAip,
-        Normalize: this.Normalize,
-      });
-    }
-  }
-
-  async deleteConfig(configId) {
-    // Prevent deletion of the default config (id: 1)
-    if (isDefaultConfigId(configId)) {
+  deleteConfig(config) {
+    if (isDefaultConfigId(config.id)) {
       Curate.ui.modals
         .curatePopup({
           title: "Cannot Delete Default Config",
@@ -330,103 +310,22 @@ class PreservationGoConfigManager extends LitElement {
         {
           onOk: async () => {
             try {
-              await this.api.deleteConfig(configId);
-              // Reload configs after successful deletion
+              await this.api.deleteConfig(config.id);
+              // A later config could be given the same id, so do not leave its pin behind
+              this.clearPin(config.id);
+              this.selectedId = this.defaultConfig?.id ?? null;
               await this.loadConfigs();
             } catch (error) {
               console.error("Failed to delete preservation go config:", error);
               // Error modal is already shown by the API client
             }
           },
-          onCancel: () => {
-            // User cancelled - no action needed
-          },
         },
       )
       .fire();
   }
 
-  toggleBookmark(configId) {
-    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
-    const newBookmarkState = !bookmarkData.bookmarked;
-
-    localStorage.setItem(
-      configId.toString(),
-      JSON.stringify({
-        bookmarked: newBookmarkState,
-      }),
-    );
-
-    this.requestUpdate();
-  }
-
-  isBookmarked(configId) {
-    const bookmarkData = JSON.parse(localStorage.getItem(configId.toString()) || "{}");
-    return bookmarkData.bookmarked || false;
-  }
-
-  openAtomConfig() {
-    if (window.curateAtomReadonly === true) {
-      Curate.ui.modals
-        .curatePopup(
-          { title: "AtoM Configuration" },
-          {
-            afterLoaded: (c) => {
-              const el = document.createElement("atom-config-readonly");
-              c.querySelector(".config-main-options-container").appendChild(el);
-            },
-          },
-        )
-        .fire();
-      return;
-    }
-    Curate.ui.modals
-      .curatePopup({
-        title: "AtoM Configuration",
-        message: "AtoM Configuration would open here",
-        type: "info",
-      })
-      .fire();
-  }
-
-  get isDefaultConfig() {
-    return this.isEditMode && isDefaultConfigId(this.editConfigId);
-  }
-
-  get canSave() {
-    return (
-      this.configName &&
-      this.configName.trim().length >= 3 &&
-      !this.saveInProgress &&
-      !this.isDefaultConfig
-    );
-  }
-
-  get saveButtonText() {
-    if (this.saveInProgress) return "Saving...";
-    if (this.isDefaultConfig) return "Default config is read-only";
-    if (!this.configName) return "Save Config";
-    if (this.configName.trim().length < 3) return "Add a name 3 characters or longer";
-    return this.isEditMode ? "Update Config" : "Save Config";
-  }
-
-  getThumbnailModeText(mode) {
-    switch (mode) {
-      case 1:
-        return "Generate";
-      case 2:
-        return "Generate (Non-default)";
-      case 3:
-        return "Do Not Generate";
-      default:
-        return "Generate";
-    }
-  }
-
   render() {
-    if (window.curateDebug) {
-      console.log("Rendering Preservation Go Configs Menu");
-    }
     return preservationGoConfigUI(this);
   }
 }
