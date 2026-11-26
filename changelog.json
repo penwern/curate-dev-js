@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "id": "2026-06-16-changelog-notice",
+      "date": "2026-06-16",
+      "title": "What's new in Curate",
+      "changes": {
+        "Added": [
+          "This “What’s new” notice, so you are told about platform updates the next time you sign in.",
+          "A workspace dashboard surfacing storage and file-format trends for administrators."
+        ],
+        "Improved": [
+          "Faster, more reliable uploads for large multi-gigabyte transfers.",
+          "Clearer preservation status labels while packages are being characterised."
+        ],
+        "Fixed": ["Occasional metadata save errors when editing PREMIS records have been resolved."]
+      }
+    },
+    {
+      "id": "2026-06-02-email-rendering",
+      "date": "2026-06-02",
+      "title": "Email archive rendering",
+      "changes": {
+        "Added": [
+          "Open and read ingested MBOX and PST messages directly in Curate, without downloading them."
+        ],
+        "Improved": ["Accessibility refinements across the file browser and information panels."]
+      }
+    }
+  ]
+}
