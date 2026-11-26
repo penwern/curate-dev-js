@@ -119,6 +119,10 @@ function ensureValidationStyles() {
       display: inline-flex;
       align-items: center;
     }
+    .curate-validation-save-blocked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .curate-validation-save-indicator:focus {
       outline: none;
       box-shadow: 0 0 0 2px var(--md-sys-color-outline);
@@ -166,6 +170,7 @@ class MetadataValidationManager {
     this._saveIndicatorEl = null;
     this._saveButtonEl = null;
     this._lastSaveButtonSearchAt = 0;
+    this._saveClickHandler = null;
   }
 
   clearValidationErrors() {
@@ -235,6 +240,28 @@ class MetadataValidationManager {
     ensureValidationStyles();
     this._updateSaveIndicator();
 
+    if (!this._saveClickHandler) {
+      // Capture phase on document runs before React's handlers, so a re-render cannot undo the block.
+      this._saveClickHandler = (event) => {
+        // Resolve the clicked button directly: React may have replaced the cached button.
+        const button = event.target?.closest?.("button");
+        const saveText = this._getSaveButtonText()?.trim();
+        if (!button || !saveText || (button.textContent || "").trim() !== saveText) return;
+
+        // Save must use current values, even before the debounced validation runs.
+        if (this._timer) {
+          clearTimeout(this._timer);
+          this._timer = null;
+        }
+        this.validateAll();
+        if (!this.hasErrors()) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.showValidationErrorsModal();
+      };
+      document.addEventListener("click", this._saveClickHandler, true);
+    }
+
     const handler = (event) => {
       this._ensureContext();
 
@@ -298,6 +325,10 @@ class MetadataValidationManager {
     this.clearValidationErrors();
     this._handlerIds.forEach((id) => this._delegator.removeEventListener(id));
     this._handlerIds = [];
+    if (this._saveClickHandler) {
+      document.removeEventListener("click", this._saveClickHandler, true);
+      this._saveClickHandler = null;
+    }
     if (this._timer) {
       clearTimeout(this._timer);
       this._timer = null;
@@ -310,6 +341,7 @@ class MetadataValidationManager {
       this._saveIndicatorEl.remove();
       this._saveIndicatorEl = null;
     }
+    this._setSaveBlocked(this._saveButtonEl, false);
     this._saveButtonEl = null;
     this._lastSaveButtonSearchAt = 0;
     this._lastObservedValues.clear();
@@ -522,6 +554,7 @@ class MetadataValidationManager {
 
     const indicator = this._ensureSaveIndicatorElement(button);
     const errorCount = this.getErrors().length;
+    this._setSaveBlocked(button, errorCount > 0);
     if (errorCount > 0) {
       indicator.textContent =
         errorCount === 1 ? "Validation error" : `Validation errors (${errorCount})`;
@@ -530,6 +563,13 @@ class MetadataValidationManager {
       indicator.textContent = "";
       indicator.style.display = "none";
     }
+  }
+
+  _setSaveBlocked(button, blocked) {
+    if (!button) return;
+    if (blocked) button.setAttribute("aria-disabled", "true");
+    else button.removeAttribute("aria-disabled");
+    button.classList.toggle("curate-validation-save-blocked", blocked);
   }
 
   showValidationErrorsModal() {

@@ -13,7 +13,26 @@ const EVENT_CFG = {
   Ingest: { icon: "mdi-database-arrow-down", color: "#AB47BC", short: "Ingested" },
   "Fixity Check": { icon: "mdi-fingerprint", color: "#26C6DA", short: "Fixity" },
   Migration: { icon: "mdi-swap-horizontal", color: "#EF5350", short: "Migrated" },
+  Unquarantine: { icon: "mdi-shield-lock-open-outline", color: "#9CCC65", short: "Unquarantine" },
+  Appraisal: { icon: "mdi-clipboard-check-outline", color: "#5C6BC0", short: "Appraisal" },
+  "Format Identification": {
+    icon: "mdi-file-find-outline",
+    color: "#26A69A",
+    short: "Format Identification",
+  },
+  "Metadata Extraction": {
+    icon: "mdi-text-box-search-outline",
+    color: "#8D6E63",
+    short: "Metadata Extraction",
+  },
+  Validation: { icon: "mdi-file-check-outline", color: "#D4E157", short: "Validation" },
+  "Filename Change": { icon: "mdi-rename-outline", color: "#A1887F", short: "Renamed" },
+  Modification: { icon: "mdi-file-edit-outline", color: "#EC407A", short: "Modified" },
+  Compression: { icon: "mdi-zip-box-outline", color: "#FF7043", short: "Compressed" },
+  Decompression: { icon: "mdi-package-variant", color: "#FF7043", short: "Decompressed" },
 };
+// curate-manager writes the legacy name "Virus Scan" for the same event.
+EVENT_CFG["Virus Scan"] = EVENT_CFG["Virus Check"];
 
 function cfg(type) {
   return EVENT_CFG[type] || { icon: "mdi-clock-outline", color: "#90A4AE", short: type };

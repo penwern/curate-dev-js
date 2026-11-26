@@ -93,7 +93,7 @@ const archivesspaceValidator = {
 
     return Array.from(validatedFields).some((fieldName) => isFilled(values?.[fieldName]));
   },
-  validate: (data) => suite(data),
+  validate: (data) => suite.run(data),
   getFirstError: (fieldName, result) => {
     if (!result?.hasErrors?.(fieldName)) return null;
     const errors = result.getErrors?.(fieldName) ?? [];

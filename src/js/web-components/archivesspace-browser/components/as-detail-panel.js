@@ -5,6 +5,7 @@ import "@material/web/button/outlined-button.js";
 import "@material/web/button/text-button.js";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/radio/radio.js";
+import "@material/web/switch/switch.js";
 import "@material/web/icon/icon.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "../../utils/penwern-spinner.js";
@@ -31,6 +32,7 @@ class AsDetailPanel extends LitElement {
     perFileMode: { type: String },
     containerType: { type: String },
     folderName: { type: String },
+    includeTitleInFolderName: { type: Boolean },
     createFoldersDisabled: { type: Boolean },
     createFoldersDisabledReason: { type: String },
     createFoldersLoading: { type: Boolean },
@@ -436,6 +438,7 @@ class AsDetailPanel extends LitElement {
     this.perFileMode = "components";
     this.containerType = "digital_object";
     this.folderName = "";
+    this.includeTitleInFolderName = false;
     this.createFoldersDisabled = false;
     this.createFoldersDisabledReason = "";
     this.createFoldersLoading = false;
@@ -612,7 +615,7 @@ class AsDetailPanel extends LitElement {
                       <md-outlined-text-field
                         class="folder-name-field"
                         label="Folder name"
-                        placeholder="Title"
+                        placeholder="CUID (or title when unavailable)"
                         .value=${this.folderName || ""}
                         @input=${this._handleFolderNameInput}
                       ></md-outlined-text-field>
@@ -620,6 +623,19 @@ class AsDetailPanel extends LitElement {
                   `
                 : nothing
             }
+            <label class="radio-option">
+              <md-switch
+                aria-label="Include title in folder name"
+                .selected=${this.includeTitleInFolderName && !(showFolderName && (this.folderName || "").trim())}
+                ?disabled=${Boolean((this.folderName || "").trim()) && showFolderName}
+                @change=${this._handleIncludeTitleChange}
+              ></md-switch>
+              <span>Include title in folder name</span>
+            </label>
+            <div class="multi-action-note">
+              Existing folders keep their names. Linking the same record with a different folder
+              name creates a separate submission folder.
+            </div>
             <div class="radio-group">
               <div class="radio-group-label">File Detail Level</div>
               <div class="radio-options">
@@ -893,6 +909,16 @@ class AsDetailPanel extends LitElement {
     this.dispatchEvent(
       new CustomEvent("folder-name-change", {
         detail: { value },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  _handleIncludeTitleChange(e) {
+    this.dispatchEvent(
+      new CustomEvent("include-title-change", {
+        detail: { value: Boolean(e.target?.selected) },
         bubbles: true,
         composed: true,
       }),
