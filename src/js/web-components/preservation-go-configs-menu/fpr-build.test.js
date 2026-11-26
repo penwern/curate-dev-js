@@ -22,3 +22,9 @@ test("snapshot mode requires an explicit development flag and omits scripts", ()
   assert.ok(registry.commands.every((command) => command.command === ""));
   assert.deepEqual(JSON.parse(previewValue({ fprPreview: "true" }, "development")), registry);
 });
+
+test("an omitted mode cannot embed the FPR snapshot", () => {
+  // webpack treats a missing --mode as production
+  for (const flag of [true, "true"])
+    assert.equal(previewValue({ fprPreview: flag }, undefined), "null");
+});

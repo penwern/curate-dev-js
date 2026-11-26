@@ -45,6 +45,7 @@ export const fprStyles = css`
   .filters {
     flex: none;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin: 12px 0 16px;
@@ -290,9 +291,6 @@ export const fprStyles = css`
     padding: 8px 16px 16px;
   }
   @media (max-width: 750px) {
-    .filters {
-      flex-wrap: wrap;
-    }
     .search {
       flex-basis: 100%;
     }

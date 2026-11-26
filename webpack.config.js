@@ -6,7 +6,9 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
-  const fprPreview = !isProduction && (env?.fprPreview === true || env?.fprPreview === "true");
+  // webpack builds for production when --mode is omitted, so require development explicitly.
+  const fprPreview =
+    argv.mode === "development" && (env?.fprPreview === true || env?.fprPreview === "true");
 
   return {
     entry: "./src/js/index.js",
