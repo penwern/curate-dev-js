@@ -14,7 +14,13 @@ import "./panels/storage-panel.js";
 import "./panels/deletions-panel.js";
 import "./panels/activity-panel.js";
 import "./panels/formats-panel.js";
-import { getWorkspaces, invalidateCache, currentUserCanViewDashboard } from "./client.js";
+import "./panels/reports-panel.js";
+import {
+  getWorkspaces,
+  invalidateCache,
+  currentUserCanViewDashboard,
+  currentUserIsAdmin,
+} from "./client.js";
 import {
   refreshIcon,
   fileMultipleIcon,
@@ -23,6 +29,7 @@ import {
   deleteClockIcon,
   eyeIcon,
   chartDonutIcon,
+  documentIcon,
 } from "../utils/icons.js";
 import "../utils/penwern-spinner.js";
 import { exportToCsv, exportToXlsx, exportToJson, buildFilename } from "./utils/export-utils.js";
@@ -43,6 +50,8 @@ const TABS = [
   { id: "deletions", label: "Deletions", icon: "deleteClockIcon" },
   { id: "activity", label: "Activity", icon: "eyeIcon" },
   { id: "formats", label: "Formats", icon: "chartDonutIcon" },
+  // The monthly client reports; Cells admins only (see _visibleTabs).
+  { id: "reports", label: "Reports", icon: "documentIcon", adminOnly: true },
 ];
 
 const TAB_ICONS = {
@@ -52,6 +61,7 @@ const TAB_ICONS = {
   deleteClockIcon,
   eyeIcon,
   chartDonutIcon,
+  documentIcon,
 };
 
 const WS_FILTER_TABS = new Set(["ingestion", "deletions", "activity"]);
@@ -66,6 +76,7 @@ class Dashboard extends LitElement {
     _mounted: { state: true },
     _hasPermission: { state: true },
     _exportLoading: { state: true },
+    _isAdmin: { state: true },
   };
 
   static styles = css`
@@ -306,11 +317,13 @@ class Dashboard extends LitElement {
     this._mounted = false;
     this._hasPermission = false;
     this._exportLoading = false;
+    this._isAdmin = false;
   }
 
   connectedCallback() {
     super.connectedCallback();
     this._hasPermission = currentUserCanViewDashboard();
+    this._isAdmin = currentUserIsAdmin();
     if (this._hasPermission) this._loadWorkspaces();
     requestAnimationFrame(() => {
       this._mounted = true;
@@ -328,6 +341,10 @@ class Dashboard extends LitElement {
     } finally {
       this._wsLoading = false;
     }
+  }
+
+  get _visibleTabs() {
+    return TABS.filter((tab) => !tab.adminOnly || this._isAdmin);
   }
 
   _onTabClick(tabId) {
@@ -600,6 +617,10 @@ class Dashboard extends LitElement {
         `;
       case "formats":
         return html` <formats-panel .formatReportingUrl=${FORMAT_REPORTING_URL}></formats-panel> `;
+      case "reports":
+        return this._isAdmin
+          ? html`<reports-panel .storageReportingUrl=${STORAGE_REPORTING_URL}></reports-panel>`
+          : html``;
       default:
         return html``;
     }
@@ -610,7 +631,7 @@ class Dashboard extends LitElement {
       <nav class="tab-bar">
         <div class="tab-bar-inner">
           <div class="tab-scroll">
-            ${TABS.map(
+            ${this._visibleTabs.map(
               (tab) => html`
                 <button
                   class="tab ${this._activeTab === tab.id ? "active" : ""}"

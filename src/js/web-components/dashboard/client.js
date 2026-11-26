@@ -454,6 +454,46 @@ export async function getStorageHistory(baseUrl, { bucket = "day", from, to, dat
   return storageApiCall(baseUrl, `/history?${params}`);
 }
 
+// ─── Client reports (storage reporting service, admins only) ─────────────────
+// The monthly client reports sent to the client. The service returns 404 when
+// it has no REPORTS_DIR (reports not set up on this host).
+
+async function storageAuthHeaders(accept) {
+  const token = await getToken();
+  const headers = { Accept: accept };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
+/**
+ * The sent months, newest first, or `{ reports: [], notSetUp: true }` when the
+ * host has no reports.
+ */
+export async function getStorageReports(baseUrl) {
+  const res = await fetch(`${baseUrl}/reports`, {
+    headers: await storageAuthHeaders("application/json"),
+  });
+  if (res.status === 404) return { reports: [], notSetUp: true };
+  if (!res.ok) throw new Error(`Storage API ${res.status}: ${res.statusText} — /reports`);
+  return res.json();
+}
+
+const REPORT_PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/;
+const REPORT_TYPES = { pdf: "application/pdf", html: "text/html", json: "application/json" };
+
+/** One sent month's report file as a Blob. `ext` is "pdf", "html" or "json". */
+export async function fetchStorageReportBlob(baseUrl, period, ext) {
+  if (!REPORT_PERIOD.test(period) || !REPORT_TYPES[ext]) {
+    throw new Error(`Not a report: ${period}.${ext}`);
+  }
+  const path = `/reports/${period}.${ext}`;
+  const res = await fetch(`${baseUrl}${path}`, {
+    headers: await storageAuthHeaders(REPORT_TYPES[ext]),
+  });
+  if (!res.ok) throw new Error(`Storage API ${res.status}: ${res.statusText} — ${path}`);
+  return res.blob();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function configure({ basePath, token } = {}) {
@@ -470,6 +510,11 @@ export function currentUserCanViewDashboard() {
   const user = window.pydio?.user;
   if (!user) return false;
   return user.isAdmin || user.idmUser?.Roles?.some((r) => r.Label === "SuperUser");
+}
+
+/** Cells admins only (the admin profile), narrower than currentUserCanViewDashboard. */
+export function currentUserIsAdmin() {
+  return window.pydio?.user?.isAdmin === true;
 }
 
 export function formatBytes(bytes) {
