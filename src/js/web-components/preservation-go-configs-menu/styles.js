@@ -291,7 +291,7 @@ export const styles = css`
 
   .tile.differs,
   .card.differs,
-  .adv-row.differs {
+  .extra-row.differs {
     border-color: var(--md-sys-color-tertiary, #7d5260);
     background: var(--md-sys-color-tertiary-container, #ffd8e4);
     background: color-mix(
@@ -316,7 +316,7 @@ export const styles = css`
     color: var(--md-sys-color-on-surface-variant, #49454f);
   }
 
-  .adv-summary {
+  .extra-summary {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -326,11 +326,11 @@ export const styles = css`
     font-size: 14px;
   }
 
-  .adv-summary-title {
+  .extra-summary-title {
     font-weight: 500;
   }
 
-  .adv-summary-list {
+  .extra-summary-list {
     margin: 0;
     padding-left: 18px;
     display: flex;
@@ -340,7 +340,7 @@ export const styles = css`
     color: var(--md-sys-color-on-surface-variant, #49454f);
   }
 
-  .adv-summary-list strong {
+  .extra-summary-list strong {
     color: var(--md-sys-color-on-surface, #1d1b20);
     font-weight: 500;
   }
@@ -502,7 +502,7 @@ export const styles = css`
     color: var(--md-sys-color-on-error-container, #410e0b);
   }
 
-  .adv-toggle {
+  .extra-toggle {
     all: unset;
     box-sizing: border-box;
     width: 100%;
@@ -515,33 +515,33 @@ export const styles = css`
     cursor: pointer;
   }
 
-  .adv-toggle:hover {
+  .extra-toggle:hover {
     background: color-mix(in srgb, var(--md-sys-color-on-surface, #1d1b20) 6%, transparent);
   }
 
-  .adv-toggle:focus-visible {
+  .extra-toggle:focus-visible {
     outline: 2px solid var(--md-sys-color-primary, #6750a4);
     outline-offset: 2px;
   }
 
-  .adv-title {
+  .extra-title {
     font-size: 15px;
     font-weight: 500;
   }
 
-  .adv-count {
+  .extra-count {
     margin-left: auto;
     font-size: 12px;
     color: var(--md-sys-color-on-surface-variant, #49454f);
   }
 
-  .adv-list {
+  .extra-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
 
-  .adv-row {
+  .extra-row {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -550,11 +550,11 @@ export const styles = css`
     border: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
   }
 
-  .adv-row.disabled .adv-text {
+  .extra-row.disabled .extra-text {
     opacity: 0.6;
   }
 
-  .adv-text {
+  .extra-text {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -563,24 +563,24 @@ export const styles = css`
     gap: 2px;
   }
 
-  .adv-label {
+  .extra-label {
     font-size: 14px;
     font-weight: 500;
   }
 
-  .adv-desc {
+  .extra-desc {
     font-size: 12px;
     line-height: 1.45;
     color: var(--md-sys-color-on-surface-variant, #49454f);
   }
 
-  .adv-note {
+  .extra-note {
     font-size: 12px;
     font-style: italic;
     color: var(--md-sys-color-on-surface-variant, #49454f);
   }
 
-  .adv-text .link {
+  .extra-text .link {
     margin-top: 2px;
   }
 

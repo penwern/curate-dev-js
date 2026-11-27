@@ -176,11 +176,11 @@ const advancedRow = (component, setting) => {
   const differs = !disabled && values[setting.key] !== component.defaultValues[setting.key];
 
   return html`
-    <div class="adv-row ${differs ? "differs" : ""} ${disabled ? "disabled" : ""}">
-      <div class="adv-text">
-        <span class="adv-label">${setting.label}</span>
-        <span class="adv-desc">${setting.description}</span>
-        ${disabled ? html`<span class="adv-note">Only applies when Normalise is on</span>` : nothing}
+    <div class="extra-row ${differs ? "differs" : ""} ${disabled ? "disabled" : ""}">
+      <div class="extra-text">
+        <span class="extra-label">${setting.label}</span>
+        <span class="extra-desc">${setting.description}</span>
+        ${disabled ? html`<span class="extra-note">Only applies when Normalise is on</span>` : nothing}
         ${differs ? resetLink(component, setting.key) : nothing}
       </div>
       <md-switch
@@ -243,20 +243,20 @@ const editor = (component) => {
 
       <button
         type="button"
-        class="adv-toggle"
+        class="extra-toggle"
         aria-expanded=${component.advancedOpen ? "true" : "false"}
         @click=${() => component.toggleAdvanced()}
       >
         ${icon(component.advancedOpen ? mdiChevronDown : mdiChevronRight)}
-        <span class="adv-title">Advanced A3M settings</span>
-        <span class="adv-count">
+        <span class="extra-title">Advanced A3M settings</span>
+        <span class="extra-count">
           ${ADVANCED.length} settings,
           ${advancedChanged ? `${advancedChanged} changed` : "all as default"}
         </span>
       </button>
       ${
         component.advancedOpen
-          ? html`<div class="adv-list">
+          ? html`<div class="extra-list">
               ${ADVANCED.map((setting) => advancedRow(component, setting))}
             </div>`
           : nothing
@@ -292,9 +292,9 @@ const summaryTile = (setting, values, defaults, isDefault) => {
 const advancedSummary = (values, defaults, isDefault) => {
   if (isDefault) {
     return html`
-      <div class="adv-summary">
-        <span class="adv-summary-title">Advanced settings</span>
-        <ul class="adv-summary-list">
+      <div class="extra-summary">
+        <span class="extra-summary-title">Advanced settings</span>
+        <ul class="extra-summary-list">
           ${ADVANCED.map(
             (s) => html`<li>${s.label}: <strong>${summaryText(s.key, values)}</strong></li>`,
           )}
@@ -306,13 +306,13 @@ const advancedSummary = (values, defaults, isDefault) => {
     (key) => getSetting(key).group === "advanced",
   );
   return html`
-    <div class="adv-summary">
-      <span class="adv-summary-title">
+    <div class="extra-summary">
+      <span class="extra-summary-title">
         Advanced settings: ${changed.length ? `${changed.length} changed` : "all as default"}
       </span>
       ${
         changed.length
-          ? html`<ul class="adv-summary-list">
+          ? html`<ul class="extra-summary-list">
               ${changed.map(
                 (key) =>
                   html`<li>
