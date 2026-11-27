@@ -5,6 +5,8 @@ src/js/custom-pages/routes/_route-template.js
 dist/
 node_modules/
 package-lock.json
+# FPR snapshot written minified by `npm run fixture:fpr`
+preview/fpr-registry.json
 
 # Infrastructure / CI configs — out of lint-adoption scope
 *.yml

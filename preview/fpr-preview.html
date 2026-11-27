@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preservation Configs — FPR preview</title>
+    <link rel="stylesheet" href="/styles/vanitizer-css.css" />
+    <style>
+      :root {
+        --md-sys-color-surface-4: #fffbfe;
+        --md-sys-color-inverse-surface: #1d1b20;
+        --md-sys-color-on-background: #1d1b20;
+        --md-sys-color-outline: #79747e;
+        --md-sys-color-outline-variant: #cac4d0;
+      }
+      body {
+        margin: 24px;
+        font:
+          14px Roboto,
+          system-ui,
+          sans-serif;
+        color: #1d1b20;
+        background: #f5f5f5;
+      }
+      header {
+        max-width: 1200px;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 500;
+        margin: 0;
+      }
+      header p {
+        margin: 0;
+      }
+      #preview {
+        max-width: 1240px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border: 1px solid #cac4d0;
+      }
+      preservation-go-config-manager {
+        width: 100%;
+      }
+      select {
+        font: inherit;
+        padding: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Preservation Configs</h1>
+      <label
+        >FPR response
+        <select id="response">
+          <option value="">Available</option>
+          <option value="fpr_not_configured">Not configured</option>
+          <option value="fpr_not_supported">Older engine</option>
+          <option value="fpr_unavailable">Unavailable</option>
+          <option value="fpr_timeout">Timeout</option>
+          <option value="unauthorized">Unauthorized</option>
+        </select></label
+      >
+    </header>
+    <main id="preview"></main>
+  </body>
+</html>

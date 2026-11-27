@@ -1,0 +1,2 @@
+# A format-version UUID from the public FPR dataset; its "eaaa" group matches the Square token pattern. Not a secret.
+preview/fpr-registry.json:square-access-token:1

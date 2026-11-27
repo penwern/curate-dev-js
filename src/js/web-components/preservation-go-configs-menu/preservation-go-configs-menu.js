@@ -1,10 +1,12 @@
-import { LitElement } from "lit";
+import { LitElement, html, css } from "lit";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
 import "@material/web/button/text-button.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/switch/switch.js";
 import "@material/web/iconbutton/icon-button.js";
+import "@material/web/tabs/tabs.js";
+import "@material/web/tabs/secondary-tab.js";
 import { PreservationConfigAPI, isDefaultConfigId } from "./api-client.js";
 import {
   FALLBACK_DEFAULTS,
@@ -15,9 +17,11 @@ import {
 } from "./settings.js";
 import { styles } from "./styles.js";
 import { preservationGoConfigUI } from "./ui-component.js";
+import "./fpr-viewer.js";
 
 class PreservationGoConfigManager extends LitElement {
   static properties = {
+    section: { state: true },
     configs: { state: true },
     isLoading: { state: true },
     loadError: { state: true },
@@ -31,10 +35,32 @@ class PreservationGoConfigManager extends LitElement {
     saveInProgress: { state: true },
   };
 
-  static styles = styles;
+  static styles = [
+    styles,
+    css`
+      .section-nav {
+        flex: none;
+        margin-bottom: 8px;
+        --md-tabs-container-color: var(--md-sys-color-surface, #fffbfe);
+        --md-secondary-tab-container-height: 36px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .config-section,
+      curate-fpr-viewer {
+        flex: 1 1 0;
+        min-height: 0;
+      }
+      .config-section {
+        overflow: hidden;
+      }
+    `,
+  ];
 
   constructor() {
     super();
+    this.section = "configs";
     this.configs = [];
     this.isLoading = false;
     this.loadError = false;
@@ -326,7 +352,27 @@ class PreservationGoConfigManager extends LitElement {
   }
 
   render() {
-    return preservationGoConfigUI(this);
+    return html`
+      <md-tabs
+        class="section-nav"
+        aria-label="Preservation settings sections"
+        .activeTabIndex=${this.section === "configs" ? 0 : 1}
+        @change=${(e) => {
+          this.section = e.target.activeTabIndex === 0 ? "configs" : "fpr";
+        }}
+      >
+        <md-secondary-tab>Configurations</md-secondary-tab>
+        <md-secondary-tab>Format policy registry</md-secondary-tab>
+      </md-tabs>
+      <div class="config-section" ?hidden=${this.section !== "configs"}>
+        ${preservationGoConfigUI(this)}
+      </div>
+      <curate-fpr-viewer
+        ?hidden=${this.section !== "fpr"}
+        .active=${this.section === "fpr"}
+        .api=${this.api}
+      ></curate-fpr-viewer>
+    `;
   }
 }
 
